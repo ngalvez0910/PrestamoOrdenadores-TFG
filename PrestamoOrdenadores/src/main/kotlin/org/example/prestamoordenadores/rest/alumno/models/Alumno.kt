@@ -1,5 +1,6 @@
 package org.example.prestamoordenadores.rest.alumno.models
 
+import org.example.prestamoordenadores.rest.users.models.User
 import java.time.LocalDateTime
 
 class Alumno {
@@ -11,6 +12,7 @@ class Alumno {
     var email: String = ""
     var curso: String = ""
     var fotoCarnet: String = ""
+    var user : User = User()
     var enabled: Boolean = false
     var createdDate: LocalDateTime = LocalDateTime.now()
     var updatedDate: LocalDateTime = LocalDateTime.now()
