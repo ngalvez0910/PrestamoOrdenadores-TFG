@@ -9,4 +9,6 @@ interface AlumnoRepository : JpaRepository<Alumno, Long> {
     fun findByCurso(curso: String): List<Alumno?>
     fun findByNombre(nombre: String): Alumno?
     fun findByEmail(email: String): Alumno?
+    fun findByGuid(guid: String): Alumno?
+    fun deleteByGuid(guid: String): Alumno?
 }

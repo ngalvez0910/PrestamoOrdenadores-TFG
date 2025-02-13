@@ -42,6 +42,13 @@ dependencies {
 
     // Mordant
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta9")
+
+    // Result
+    implementation("com.michael-bull.kotlin-result:kotlin-result:2.0.0")
+
+    // Logger
+    implementation("org.lighthousegames:logging:1.3.0")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
 }
 
 kotlin {
