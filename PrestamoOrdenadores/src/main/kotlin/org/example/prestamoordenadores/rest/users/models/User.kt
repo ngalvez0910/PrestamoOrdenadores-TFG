@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.example.prestamoordenadores.utils.generators.generateGuid
 import org.jetbrains.annotations.NotNull
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -16,7 +17,7 @@ class User (
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long = 0L,
-    var guid : String = "",
+    var guid : String = generateGuid(),
 
     @NotNull("Username no puede estar vacío")
     var username : String = "",
