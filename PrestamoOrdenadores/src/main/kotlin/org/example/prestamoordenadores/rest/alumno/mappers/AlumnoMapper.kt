@@ -1,6 +1,7 @@
 package org.example.prestamoordenadores.rest.alumno.mappers
 
 import org.example.prestamoordenadores.rest.alumno.dto.AlumnoCreateRequest
+import org.example.prestamoordenadores.rest.alumno.dto.AlumnoResponse
 import org.example.prestamoordenadores.rest.alumno.dto.AlumnoUpdateRequest
 import org.example.prestamoordenadores.rest.alumno.models.Alumno
 import org.example.prestamoordenadores.rest.users.models.User
@@ -36,5 +37,21 @@ class AlumnoMapper {
             fotoCarnet = alumnoCreate.fotoCarnet,
             user = user
         )
+    }
+
+    fun toAlumnoResponse(alumno: Alumno): AlumnoResponse{
+        return AlumnoResponse(
+            guid = alumno.guid,
+            nombre = alumno.nombre,
+            apellidos = alumno.apellidos,
+            email = alumno.email,
+            curso = alumno.curso,
+            createdDate = alumno.createdDate.toString(),
+            updatedDate = alumno.updatedDate.toString()
+        )
+    }
+
+    fun toAlumnoResponseList(alumnos: List<Alumno?>): List<AlumnoResponse> {
+        return alumnos.map { toAlumnoResponse(it!!) }
     }
 }
