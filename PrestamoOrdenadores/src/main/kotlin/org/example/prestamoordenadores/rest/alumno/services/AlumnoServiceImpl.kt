@@ -3,15 +3,19 @@ package org.example.prestamoordenadores.rest.alumno.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.alumno.dto.AlumnoCreateRequest
 import org.example.prestamoordenadores.rest.alumno.dto.AlumnoUpdateRequest
 import org.example.prestamoordenadores.rest.alumno.errors.AlumnoError
-import org.example.prestamoordenadores.rest.alumno.mappers.toAlumno
+import org.example.prestamoordenadores.rest.alumno.mappers.AlumnoMapper
 import org.example.prestamoordenadores.rest.alumno.models.Alumno
 import org.example.prestamoordenadores.rest.alumno.repositories.AlumnoRepository
 import org.lighthousegames.logging.logging
+import org.springframework.stereotype.Service
 
+@Service
 class AlumnoServiceImpl(
-    private var repository : AlumnoRepository
+    private var repository : AlumnoRepository,
+    private var mapper: AlumnoMapper
 ) : AlumnoService {
     override fun getAllAlumnos(): Result<List<Alumno>, AlumnoError> {
         logging("Buscando todos los alumnos de la base de datos...")
@@ -23,9 +27,9 @@ class AlumnoServiceImpl(
         return Ok(repository.findByGuid(guid))
     }
 
-    override fun createAlumno(alumno: Alumno): Result<Alumno, AlumnoError> {
+    override fun createAlumno(alumno: AlumnoCreateRequest): Result<Alumno, AlumnoError> {
         logging("Creando alumno en la base de datos...")
-        return Ok(repository.save(alumno))
+        return Ok(repository.save(mapper.toAlumnoFromCreate(alumno)))
     }
 
     override fun updateAlumno(guid: String, alumno: AlumnoUpdateRequest): Result<Alumno?, AlumnoError> {
@@ -40,7 +44,7 @@ class AlumnoServiceImpl(
         alumnoEncontrado.curso = alumno.curso
 
         logging("Actualizando alumno con guid $guid de la base de datos...")
-        return Ok(repository.save(alumno.toAlumno()))
+        return Ok(repository.save(mapper.toAlumnoFromUpdate(alumnoEncontrado, alumno)))
     }
 
     override fun deleteAlumnoByGuid(guid: String): Result<Alumno?, AlumnoError> {
