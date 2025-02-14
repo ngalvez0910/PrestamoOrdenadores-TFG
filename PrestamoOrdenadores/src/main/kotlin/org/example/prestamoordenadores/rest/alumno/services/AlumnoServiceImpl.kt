@@ -9,13 +9,15 @@ import org.example.prestamoordenadores.rest.alumno.errors.AlumnoError
 import org.example.prestamoordenadores.rest.alumno.mappers.AlumnoMapper
 import org.example.prestamoordenadores.rest.alumno.models.Alumno
 import org.example.prestamoordenadores.rest.alumno.repositories.AlumnoRepository
+import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.lighthousegames.logging.logging
 import org.springframework.stereotype.Service
 
 @Service
 class AlumnoServiceImpl(
-    private var repository : AlumnoRepository,
-    private var mapper: AlumnoMapper
+    private val repository : AlumnoRepository,
+    private val mapper: AlumnoMapper,
+    private val userRepository : UserRepository
 ) : AlumnoService {
     override fun getAllAlumnos(): Result<List<Alumno>, AlumnoError> {
         logging("Buscando todos los alumnos de la base de datos...")
@@ -28,8 +30,14 @@ class AlumnoServiceImpl(
     }
 
     override fun createAlumno(alumno: AlumnoCreateRequest): Result<Alumno, AlumnoError> {
+        logging("Buscando usuario en la base de datos...")
+        val user = userRepository.findByUsername(alumno.username)
+        if (user == null){
+            return Err(AlumnoError.UserNotFound("No se ha encontrado el usuario con username: ${alumno.username}"))
+        }
+
         logging("Creando alumno en la base de datos...")
-        return Ok(repository.save(mapper.toAlumnoFromCreate(alumno)))
+        return Ok(repository.save(mapper.toAlumnoFromCreate(alumno, user)))
     }
 
     override fun updateAlumno(guid: String, alumno: AlumnoUpdateRequest): Result<Alumno?, AlumnoError> {
