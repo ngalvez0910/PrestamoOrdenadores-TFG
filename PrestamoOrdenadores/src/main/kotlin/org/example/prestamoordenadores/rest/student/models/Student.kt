@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import org.example.prestamoordenadores.rest.users.models.User
+import org.example.prestamoordenadores.utils.generators.generateGuid
 import org.jetbrains.annotations.NotNull
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -19,7 +20,7 @@ class Student(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long = 0L,
-    var guid : String = "",
+    var guid : String = generateGuid(),
 
     @NotNull("Student Number cannot be null")
     var studentNumber : String = "",
