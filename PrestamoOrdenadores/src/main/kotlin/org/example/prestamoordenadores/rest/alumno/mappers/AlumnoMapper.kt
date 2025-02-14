@@ -26,20 +26,15 @@ class AlumnoMapper {
         )
     }
 
-    fun toAlumnoFromCreate(alumno: Alumno, alumnoCreate: AlumnoCreateRequest, user: User): Alumno {
+    fun toAlumnoFromCreate(alumnoCreate: AlumnoCreateRequest, user: User): Alumno {
         return Alumno(
-            id = alumno.id,
-            guid = alumno.guid,
             numeroEstudiante = alumnoCreate.numeroEstudiante,
             nombre = alumnoCreate.nombre,
             apellidos = alumnoCreate.apellidos,
             email = alumnoCreate.email,
             curso = alumnoCreate.curso,
             fotoCarnet = alumnoCreate.fotoCarnet,
-            user = user,
-            enabled = alumno.enabled,
-            createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            user = user
         )
     }
 }
