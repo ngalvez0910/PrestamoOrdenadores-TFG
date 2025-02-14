@@ -18,37 +18,37 @@ import java.time.LocalDateTime
 class Alumno(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Long,
-    var guid : String,
+    val id: Long = 0L,
+    var guid : String = "",
 
     @NotNull("Numero de Estudiante no puede estar vacío")
-    var numeroEstudiante : String,
+    var numeroEstudiante : String = "",
 
     @NotNull("Nombre no puede estar vacío")
-    var nombre: String,
+    var nombre: String = "",
 
     @NotNull("Apellidos no puede estar vacío")
-    var apellidos: String,
+    var apellidos: String = "",
 
     @NotNull("Email no puede estar vacío")
-    var email: String,
+    var email: String = "",
 
     @NotNull("Curso no puede estar vacío")
-    var curso: String,
+    var curso: String = "",
 
     @NotNull("Foto del carnet no puede estar vacío")
-    var fotoCarnet: String,
+    var fotoCarnet: String = "",
 
     @OneToOne
     @JoinColumn(name = "user_guid")
-    var user: User,
-    var enabled: Boolean,
+    var user: User = User(),
+    var enabled: Boolean = true,
 
     @CreatedDate
-    var createdDate: LocalDateTime,
+    var createdDate: LocalDateTime = LocalDateTime.now(),
 
     @LastModifiedDate
-    var updatedDate: LocalDateTime
+    var updatedDate: LocalDateTime = LocalDateTime.now()
 ){
     constructor(guid: String, numeroEstudiante: String, nombre: String, apellidos: String, email: String, curso: String, fotoCarnet: String, user: User, enabled: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
             this(0, guid, numeroEstudiante, nombre, apellidos, email, curso, fotoCarnet, user, true, LocalDateTime.now(),
