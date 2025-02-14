@@ -1,6 +1,8 @@
 package org.example.prestamoordenadores.rest.alumno.controller
 
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.alumno.dto.AlumnoCreateRequest
+import org.example.prestamoordenadores.rest.alumno.dto.AlumnoResponse
 import org.example.prestamoordenadores.rest.alumno.dto.AlumnoUpdateRequest
 import org.example.prestamoordenadores.rest.alumno.errors.AlumnoError
 import org.example.prestamoordenadores.rest.alumno.models.Alumno
@@ -25,23 +27,23 @@ class AlumnoController
     fun getAlumnos() : Result<List<Alumno>, AlumnoError> = alumnoService.getAllAlumnos()
 
     @GetMapping("/{guid}")
-    fun getAlumnoByGuid(@PathVariable guid: String) : Result<Alumno?, AlumnoError> = alumnoService.getAlumnoByGuid(guid)
+    fun getAlumnoByGuid(@PathVariable guid: String) : Result<AlumnoResponse?, AlumnoError> = alumnoService.getAlumnoByGuid(guid)
 
     @GetMapping("/nombre/{nombre}")
-    fun getAlumnoByNombre(@PathVariable nombre: String) : Result<Alumno?, AlumnoError> = alumnoService.getByNombre(nombre)
+    fun getAlumnoByNombre(@PathVariable nombre: String) : Result<AlumnoResponse?, AlumnoError> = alumnoService.getByNombre(nombre)
 
     @GetMapping("/curso/{curso}")
-    fun getAlumnosByCurso(@PathVariable curso: String) : Result<List<Alumno?>, AlumnoError> = alumnoService.getByCurso(curso)
+    fun getAlumnosByCurso(@PathVariable curso: String) : Result<List<AlumnoResponse?>, AlumnoError> = alumnoService.getByCurso(curso)
 
     @GetMapping("/email/{email}")
-    fun getAlumnoByEmail(@PathVariable email: String) : Result<Alumno?, AlumnoError> = alumnoService.getByEmail(email)
+    fun getAlumnoByEmail(@PathVariable email: String) : Result<AlumnoResponse?, AlumnoError> = alumnoService.getByEmail(email)
 
     @PostMapping
-    fun createAlumno(@RequestBody alumno: Alumno) : Result<Alumno?, AlumnoError> = alumnoService.createAlumno(alumno)
+    fun createAlumno(@RequestBody alumno: AlumnoCreateRequest) : Result<AlumnoResponse?, AlumnoError> = alumnoService.createAlumno(alumno)
 
     @PutMapping("/{guid}")
-    fun updateAlumno(@PathVariable guid: String, @RequestBody alumno: AlumnoUpdateRequest) : Result<Alumno?, AlumnoError> = alumnoService.updateAlumno(guid, alumno)
+    fun updateAlumno(@PathVariable guid: String, @RequestBody alumno: AlumnoUpdateRequest) : Result<AlumnoResponse?, AlumnoError> = alumnoService.updateAlumno(guid, alumno)
 
     @DeleteMapping("/{guid}")
-    fun deleteAlumno(@PathVariable guid: String) : Result<Alumno?, AlumnoError> = alumnoService.deleteAlumnoByGuid(guid)
+    fun deleteAlumno(@PathVariable guid: String) : Result<AlumnoResponse?, AlumnoError> = alumnoService.deleteAlumnoByGuid(guid)
 }
