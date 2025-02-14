@@ -1,4 +1,4 @@
-package org.example.prestamoordenadores.rest.alumno.models
+package org.example.prestamoordenadores.rest.student.models
 
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -14,30 +14,30 @@ import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "alumnos")
-class Alumno(
+@Table(name = "students")
+class Student(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long = 0L,
     var guid : String = "",
 
-    @NotNull("Numero de Estudiante no puede estar vacío")
-    var numeroEstudiante : String = "",
+    @NotNull("Student Number cannot be null")
+    var studentNumber : String = "",
 
-    @NotNull("Nombre no puede estar vacío")
-    var nombre: String = "",
+    @NotNull("Name cannot be null")
+    var name: String = "",
 
-    @NotNull("Apellidos no puede estar vacío")
-    var apellidos: String = "",
+    @NotNull("Surname cannot be null")
+    var surName: String = "",
 
-    @NotNull("Email no puede estar vacío")
+    @NotNull("Email cannot be null")
     var email: String = "",
 
-    @NotNull("Curso no puede estar vacío")
-    var curso: String = "",
+    @NotNull("Grade cannot be null")
+    var grade: String = "",
 
-    @NotNull("Foto del carnet no puede estar vacío")
-    var fotoCarnet: String = "",
+    @NotNull("Image cannot be null")
+    var image: String = "",
 
     @OneToOne
     @JoinColumn(name = "user_guid")
@@ -50,8 +50,7 @@ class Alumno(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now()
 ){
-    constructor(guid: String, numeroEstudiante: String, nombre: String, apellidos: String, email: String, curso: String, fotoCarnet: String, user: User, enabled: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, numeroEstudiante, nombre, apellidos, email, curso, fotoCarnet, user, true, LocalDateTime.now(),
-                LocalDateTime.now()
+    constructor(guid: String, studentNumber: String, name: String, surName: String, email: String, grade: String, image: String, user: User, enabled: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, studentNumber, name, surName, email, grade, image, user, enabled, createdDate, updatedDate
             )
 }
