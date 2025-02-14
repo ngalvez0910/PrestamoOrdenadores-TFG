@@ -7,7 +7,5 @@ data class AlumnoCreateRequest (
     var email: String,
     var curso: String,
     var fotoCarnet: String,
-    var username: String,
-    var password: String,
-    var confirmedPassword: String
+    var username: String
 )
