@@ -12,6 +12,7 @@ import java.time.LocalDateTime
 class UserMapper {
     fun toUserResponse(user: User): UserResponse{
         return UserResponse(
+            guid = user.guid,
             username = user.username,
             password = user.password,
             lastPasswordResetDate = user.lastPasswordResetDate.toString()
