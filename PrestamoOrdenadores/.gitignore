@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/intellij,kotlin,gradle
-# Edit at https://www.toptal.com/developers/gitignore?templates=intellij,kotlin,gradle
+# Created by https://www.toptal.com/developers/gitignore/api/intellij,kotlin,gradle,vue
+# Edit at https://www.toptal.com/developers/gitignore?templates=intellij,kotlin,gradle,vue
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -140,6 +140,17 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
+### Vue ###
+# gitignore template for Vue.js projects
+#
+# Recommended template: Node.gitignore
+
+# TODO: where does this rule come from?
+docs/_book
+
+# TODO: where does this rule come from?
+test/
+
 ### Gradle ###
 .gradle
 **/build/
@@ -167,4 +178,4 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
-# End of https://www.toptal.com/developers/gitignore/api/intellij,kotlin,gradle
+# End of https://www.toptal.com/developers/gitignore/api/intellij,kotlin,gradle,vue
