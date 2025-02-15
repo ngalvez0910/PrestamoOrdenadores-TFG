@@ -12,6 +12,7 @@ import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.lighthousegames.logging.logging
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 private val logger = logging()
 
@@ -42,12 +43,21 @@ class UserServiceImpl(
         if (existingUser!= null) {
             return Err(UserError.UserAlreadyExists("Username ${user.username} already exists"))
         }
-        val savedUser = repository.save(mapper.toUserFromCreate(user))
+        val savedUser = mapper.toUserFromCreate(user)
+        repository.save(savedUser)
         return Ok(mapper.toUserResponse(savedUser))
     }
 
     override fun deleteUserByGuid(guid: String): Result<UserResponse?, UserError> {
-        TODO("Not yet implemented")
+        logger.debug { "Deleting user by GUID: $guid" }
+        var user = repository.findByGuid(guid)
+        if (user == null) {
+            return Err(UserError.UserNotFound("User with GUID $guid not found"))
+        }
+        user.enabled = false
+        user.updatedDate = LocalDateTime.now()
+        repository.save(user)
+        return Ok(mapper.toUserResponse(user))
     }
 
     override fun getByUsername(username: String): Result<UserResponse?, UserError> {
@@ -69,6 +79,8 @@ class UserServiceImpl(
             return Err(UserError.UserNotFound("User with GUID $guid not found"))
         }
         existingUser.password = user.newPassword
+        existingUser.updatedDate = LocalDateTime.now()
+        existingUser.lastPasswordResetDate = LocalDateTime.now()
         val savedUser = repository.save(existingUser)
         return Ok(mapper.toUserResponse(savedUser))
     }

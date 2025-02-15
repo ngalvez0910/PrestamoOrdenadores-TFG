@@ -1,6 +1,7 @@
 package org.example.prestamoordenadores.rest.users.controller
 
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserRequest
@@ -28,7 +29,12 @@ class UserController
     private val userService: UserService
 ) {
     @GetMapping
-    fun getAllUsers() : Result<List<User>, UserError> = userService.getAllUsers()
+    fun getAllUsers() : ResponseEntity<List<User>> {
+        return userService.getAllUsers().mapBoth(
+            success = { ResponseEntity.ok(it) },
+            failure = { ResponseEntity.status(422).body(null) }
+        )
+    }
 
     @GetMapping("/{guid}")
     fun getUserByGuid(@PathVariable guid: String) : ResponseEntity<UserResponse?> {
@@ -43,7 +49,7 @@ class UserController
         )
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/username/{username}")
     fun getUserByUsername(@PathVariable username: String) : ResponseEntity<UserResponse?> {
         return userService.getByUsername(username).mapBoth(
             success = { ResponseEntity.ok(it) },
@@ -70,8 +76,28 @@ class UserController
     }
     
     @PatchMapping("/{guid}")
-    fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : Result<UserResponse?, UserError> = userService.resetPassword(guid, user)
+    fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<UserResponse?> {
+        return userService.resetPassword(guid, user).mapBoth(
+            success = { ResponseEntity.status(200).body(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.notFound().build()
+                    else -> ResponseEntity.status(422).body(null)
+                }
+            }
+        )
+    }
 
     @DeleteMapping("/{guid}")
-    fun deleteUserByGuid(@PathVariable guid: String) : Result<UserResponse?, UserError> = userService.deleteUserByGuid(guid)
+    fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<UserResponse?> {
+        return userService.deleteUserByGuid(guid).mapBoth(
+            success = { ResponseEntity.status(200).build() },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.notFound().build()
+                    else -> ResponseEntity.status(422).body(null)
+                }
+            }
+        )
+    }
 }

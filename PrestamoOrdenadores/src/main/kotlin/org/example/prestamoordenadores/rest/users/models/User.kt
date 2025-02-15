@@ -37,8 +37,6 @@ class User (
     var lastLoginDate: LocalDateTime = LocalDateTime.now(),
     var lastPasswordResetDate: LocalDateTime = LocalDateTime.now()
 ){
-    constructor(guid: String, username: String, password: String, roles: Role, enabled: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, username, password, roles, true, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(),
-                LocalDateTime.now()
-            )
+    constructor(guid: String, username: String, password: String, roles: Role, enabled: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime, lastLoginDate: LocalDateTime, lastPasswordResetDate: LocalDateTime) :
+            this(0, guid, username, password, roles, enabled, createdDate, updatedDate, lastLoginDate, lastPasswordResetDate)
 }
