@@ -13,6 +13,7 @@ import org.example.prestamoordenadores.rest.student.repositories.StudentReposito
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.lighthousegames.logging.logging
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 private val logger = logging()
 
@@ -29,12 +30,12 @@ class StudentServiceImpl(
 
     override fun getStudentByGuid(guid: String): Result<StudentResponse?, StudentError>{
         logger.debug { "Getting student by GUID: $guid" }
-        var alumno = repository.findByGuid(guid)
+        var student = repository.findByGuid(guid)
 
-        return if (alumno == null) {
+        return if (student == null) {
             Err(StudentError.StudentNotFound("Student with GUID $guid not found"))
         } else {
-            Ok(mapper.toStudentResponse(alumno))
+            Ok(mapper.toStudentResponse(student))
         }
     }
 
@@ -45,70 +46,80 @@ class StudentServiceImpl(
             return Err(StudentError.UserNotFound("User with username ${student.username} not found"))
         }
 
-        var alumnoModel = mapper.toStudentFromCreate(student, user)
+        if (repository.existsStudentByNameAndSurNameAndGrade(student.name, student.surname, student.grade)) {
+            return Err(StudentError.StudentAlreadyExists("Student with name ${student.name} ${student.surname} and grade ${student.grade} already exists"))
+        }
 
-        repository.save(alumnoModel)
-        return Ok(mapper.toStudentResponse(alumnoModel))
+        logger.debug { "Creating student: $student" }
+        var studentModel = mapper.toStudentFromCreate(student, user)
+
+        repository.save(studentModel)
+        return Ok(mapper.toStudentResponse(studentModel))
     }
 
     override fun updateStudent(guid: String, student: StudentUpdateRequest): Result<StudentResponse?, StudentError> {
         logger.debug { "Getting student by GUID: $guid" }
-        var alumnoEncontrado = repository.findByGuid(guid)
+        var studentFound = repository.findByGuid(guid)
 
-        if (alumnoEncontrado == null){
+        if (studentFound == null){
             return Err(StudentError.StudentNotFound("Student with GUID $guid not found"))
         }
 
-        alumnoEncontrado.email = student.email
-        alumnoEncontrado.grade = student.grade
+        studentFound.email = student.email
+        studentFound.grade = student.grade
 
         logger.debug { "Updating student with GUID: $guid" }
-        repository.save(mapper.toStudentFromUpdate(alumnoEncontrado, student))
+        repository.save(mapper.toStudentFromUpdate(studentFound, student))
 
-        return Ok(mapper.toStudentResponse(alumnoEncontrado))
+        return Ok(mapper.toStudentResponse(studentFound))
     }
 
     override fun deleteStudentByGuid(guid: String): Result<StudentResponse?, StudentError> {
         logger.debug { "Deleting student with GUID: $guid" }
-        var alumno = repository.deleteByGuid(guid)
-
-        return if (alumno == null) {
-            Err(StudentError.StudentNotFound("Student with GUID $guid not found"))
-        } else {
-            Ok(mapper.toStudentResponse(alumno))
+        var student = repository.findByGuid(guid)
+        if (student == null){
+            return Err(StudentError.StudentNotFound("Student with GUID $guid not found"))
         }
+
+        student.enabled = false
+        student.updatedDate = LocalDateTime.now()
+        student.user.enabled = false
+        student.user.updatedDate = LocalDateTime.now()
+
+        repository.save(student)
+        return Ok(mapper.toStudentResponse(student))
     }
 
     override fun getByGrade(grade: String): Result<List<StudentResponse?>, StudentError> {
         logger.debug { "Getting students from grade: $grade" }
-        var alumno = repository.findByGrade(grade)
+        var student = repository.findByGrade(grade)
 
-        return if (alumno.isEmpty()) {
+        return if (student.isEmpty()) {
             Err(StudentError.StudentNotFound("Students from grade $grade not found"))
         } else {
-            Ok(mapper.toStudentResponseList(alumno))
+            Ok(mapper.toStudentResponseList(student))
         }
     }
 
     override fun getByName(name: String): Result<StudentResponse?, StudentError> {
         logger.debug { "Getting student with name: $name" }
-        var alumno = repository.findByName(name)
+        var student = repository.findByName(name)
 
-        return if (alumno == null) {
+        return if (student == null) {
             Err(StudentError.StudentNotFound("Student with name $name not found"))
         } else {
-            Ok(mapper.toStudentResponse(alumno))
+            Ok(mapper.toStudentResponse(student))
         }
     }
 
     override fun getByEmail(email: String): Result<StudentResponse?, StudentError> {
         logger.debug { "Getting student with email: $email" }
-        var alumno = repository.findByEmail(email)
+        var student = repository.findByEmail(email)
 
-        return if (alumno == null) {
+        return if (student == null) {
             Err(StudentError.StudentNotFound("Student with email $email not found"))
         } else {
-            Ok(mapper.toStudentResponse(alumno))
+            Ok(mapper.toStudentResponse(student))
         }
     }
 }
