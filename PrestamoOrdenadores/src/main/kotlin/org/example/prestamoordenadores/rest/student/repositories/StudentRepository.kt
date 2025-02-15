@@ -10,5 +10,5 @@ interface StudentRepository : JpaRepository<Student, Long> {
     fun findByName(name: String): Student?
     fun findByEmail(email: String): Student?
     fun findByGuid(guid: String): Student?
-    fun deleteByGuid(guid: String): Student?
+    fun existsStudentByNameAndSurNameAndGrade(name: String, surname:String, grade: String): Boolean
 }
