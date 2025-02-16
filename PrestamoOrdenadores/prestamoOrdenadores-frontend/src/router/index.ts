@@ -13,14 +13,11 @@ const router = createRouter({
     {
       path: '/registro',
       name: 'registro',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import('../views/Registro.vue'),
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
+      path: '/admin/dashboard',
+      name: 'adminDashboard',
       component: Dashboard,
     },
   ],
