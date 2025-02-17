@@ -6,10 +6,10 @@
       <p>Ver dispositivos</p>
     </router-link>
 
-    <div class="dashboard-box">
+    <router-link to="/admin/dashboard/usuarios" class="dashboard-box">
       <i class="pi pi-users" style="font-size: 5rem"></i>
       <p>Ver usuarios</p>
-    </div>
+    </router-link>
 
     <div class="dashboard-box">
       <i class="pi pi-exclamation-triangle" style="font-size: 5rem"></i>
