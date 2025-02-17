@@ -48,4 +48,9 @@ h1, p {
 a{
   color: white;
 }
+
+a:hover{
+  color: inherit !important;
+  background-color: inherit !important;
+}
 </style>
