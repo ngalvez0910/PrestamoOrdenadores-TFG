@@ -94,4 +94,13 @@ button {
 button:hover {
   background-color: #a14916;
 }
+
+a{
+  color: #14124f;
+}
+
+a:hover{
+  color: inherit !important;
+  background-color: inherit !important;
+}
 </style>
