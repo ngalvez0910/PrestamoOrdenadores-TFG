@@ -1,18 +1,23 @@
 <template>
   <MenuBar />
-  <p class="nameFilter">
-    Nombre:
-    <input
-        type="text"
-        v-model="search"
-        placeholder="Buscar pokemon..."
-    />
-    &nbsp;
-  </p>
+  <div class="filters">
+    <p class="filter">
+      Nombre:
+      <input type="text" v-model="search" placeholder="Buscar por nombre..." />
+    </p>
+    <p class="filter">
+      Estado:
+      <input type="text" v-model="search" placeholder="Buscar por estado..." />
+    </p>
+    <p class="filter">
+      Usuario:
+      <input type="text" v-model="search" placeholder="Buscar por usuario..." />
+    </p>
+  </div>
   <br>
   <div class="table">
     <DataTable stripedRows tableStyle="min-width: 50rem">
-      <Column field="id" header="ID"></Column>
+      <Column field="number" header="Nº"></Column>
       <Column field="guid" header="GUID"></Column>
       <Column field="serialNumber" header="Número de serie"></Column>
       <Column field="name" header="Nombre"></Column>
@@ -29,31 +34,40 @@ import MenuBar from "@/components/AdminMenuBar.vue";
 
 export default {
   name: 'DispositivosDashboard',
-  components: {MenuBar},
+  components: { MenuBar },
   data() {
     return {
       search: '',
-    }
+    };
   },
 };
 </script>
 
 <style>
-.nameFilter {
+.filters {
   display: flex;
-  margin-left: -30%;
-  margin-top: -30%;
+  gap: 1rem;
+  align-items: center;
   padding: 1rem;
+  margin-left: -20%;
+  margin-top: -25%;
 }
 
-.nameFilter input{
-  width: 20%;
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter input {
+  width: 200px;
+  padding: 0.75rem;
+  border: 1px solid #d6621e;
+  border-radius: 25px;
 }
 
 .table {
-  display: flex;
-  margin-left: -15%;
-  margin-top: -5%;
-  padding: 1rem;
+  margin-left: -37%;
+  margin-top: 1%;
 }
 </style>
