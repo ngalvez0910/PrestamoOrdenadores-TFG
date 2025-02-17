@@ -1,10 +1,10 @@
 <template>
   <MenuBar />
   <div class="dashboard">
-    <div class="dashboard-box">
+    <router-link to="/admin/dashboard/dispositivos" class="dashboard-box">
       <i class="pi pi-desktop" style="font-size: 5rem"></i>
       <p>Ver dispositivos</p>
-    </div>
+    </router-link>
 
     <div class="dashboard-box">
       <i class="pi pi-users" style="font-size: 5rem"></i>
@@ -56,6 +56,8 @@ export default {
   box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
   width: 200px;
   box-sizing: border-box;
+  color: inherit;
+  text-decoration: none;
 }
 
 .dashboard-box:nth-child(4),
@@ -63,6 +65,11 @@ export default {
   grid-column: span 1;
   justify-self: center;
   margin-left: 100%
+}
+
+.dashboard-box:hover {
+  color: inherit !important;
+  background-color: inherit !important;
 }
 
 </style>
