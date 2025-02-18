@@ -10,12 +10,12 @@
       <input type="text" v-model="search" placeholder="Buscar por curso..." />
     </p>
     <p class="filter">
-      Rol:
+      Tipo:
       <select>
         <option value="">Todos</option>
-        <option value="Admin">Admin</option>
-        <option value="Profesor">Profesor</option>
-        <option value="Estudiante">Estudiante</option>
+        <option value="Advertencia">Advertencia</option>
+        <option value="Temporal">Bloqueo Temporal</option>
+        <option value="Indefinido">Bloqueo Indefinido</option>
       </select>
     </p>
   </div>
@@ -26,9 +26,9 @@
       <Column field="guid" header="GUID"></Column>
       <Column field="username" header="Nombre de usuario"></Column>
       <Column field="grade" header="Curso"></Column>
-      <Column field="role" header="Rol"></Column>
-      <Column field="date" header="Fecha de alta"></Column>
-      <Column field="incident" header="Incidencias"></Column>
+      <Column field="type" header="Tipo"></Column>
+      <Column field="date" header="Fecha de incidencia"></Column>
+      <Column field="state" header="Estado"></Column>
       <Column field="edit"></Column>
     </DataTable>
   </div>
@@ -38,7 +38,7 @@
 import MenuBar from "@/components/AdminMenuBar.vue";
 
 export default {
-  name: 'UsuariosDashboard',
+  name: 'IncidenciasDashboard',
   components: { MenuBar },
   data() {
     return {
