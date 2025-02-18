@@ -3,7 +3,7 @@
   <div class="filters">
     <p class="filter">
       Nombre de usuario:
-      <input type="text" v-model="search" placeholder="Buscar por nombre de usuario..." />
+      <input type="text" v-model="search" placeholder="Buscar por usuario..." />
     </p>
     <p class="filter">
       Curso:
@@ -27,7 +27,7 @@
       <Column field="username" header="Nombre de usuario"></Column>
       <Column field="grade" header="Curso"></Column>
       <Column field="role" header="Rol"></Column>
-      <Column field="date" header="Fecha de creación"></Column>
+      <Column field="date" header="Fecha de alta"></Column>
       <Column field="incident" header="Incidencias"></Column>
       <Column field="edit"></Column>
     </DataTable>
