@@ -11,10 +11,10 @@
       <p>Ver usuarios</p>
     </router-link>
 
-    <div class="dashboard-box">
+    <router-link to="/admin/dashboard/incidencias" class="dashboard-box">
       <i class="pi pi-exclamation-triangle" style="font-size: 5rem"></i>
       <p>Ver incidencias</p>
-    </div>
+    </router-link>
 
     <div class="dashboard-box">
       <i class="pi pi-file" style="font-size: 5rem"></i>
