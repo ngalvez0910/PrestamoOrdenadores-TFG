@@ -3,15 +3,15 @@
     <div class="login-box">
       <h1>Login</h1>
 
-      <h3>Nombre de usuario</h3>
-      <input class="username" type="text" name="username" placeholder="Nombre de usuario">
+      <label for="username" class="input-label">Nombre de usuario</label>
+      <input type="text" class="input-field" name="username" placeholder="Nombre de usuario">
 
-      <h3>Contraseña</h3>
-      <input type="password" name="password" placeholder="Contraseña">
+      <label for="password" class="input-label">Contraseña</label>
+      <input type="password" name="password" class="input-field" placeholder="Contraseña">
 
       <button label="Login">Login</button>
 
-      <p><a href="/registro">Registrarse</a></p>
+      <p class="register-link"><a href="/registro">Registrarse</a></p>
     </div>
   </div>
 </template>
@@ -50,40 +50,56 @@ body {
   width: 500px;
 }
 
-h1, h3{
+h1{
   margin: 10px 0;
 }
 
-input {
-  border-radius: 10px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  height: 35px;
+.input-label {
+  font-size: 1rem;
+  color: #14124f;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.input-field {
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid #d1d3e2;
   width: 100%;
+  font-size: 1rem;
+  margin-bottom: 18px;
+  transition: border 0.3s ease;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #d6621e;
 }
 
 button {
   background-color: #d6621e;
   color: white;
-  margin-top: 10%;
-  margin-bottom: 10%;
   border: none;
-  border-radius: 7px;
-  height: 35px;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 1.1rem;
   width: 100%;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 20px;
 }
 
 button:hover {
   background-color: #a14916;
 }
 
-a{
+.register-link a {
   color: #14124f;
+  text-decoration: none;
 }
 
-a:hover{
-  color: inherit !important;
+.register-link a:hover {
   background-color: inherit !important;
 }
+
 </style>
