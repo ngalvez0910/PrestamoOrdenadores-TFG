@@ -65,12 +65,18 @@ export default {
   max-width: 220px;
   text-decoration: none;
   color: #14124f;
+  transition-duration: 0.3s;
 }
 
 .dashboard-box:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 24px rgba(20, 18, 79, 0.25);
+  transform: translateY(-10px);
+  box-shadow: 0 16px 30px rgba(20, 18, 79, 0.2);
   background-color: #f8f9fa;
+}
+
+.dashboard-box:hover .icon, .dashboard-box:hover p {
+  color: #a14916;
+  transition: color 0.3s ease;
 }
 
 .icon {

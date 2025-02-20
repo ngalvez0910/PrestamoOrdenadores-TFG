@@ -55,7 +55,7 @@ export default {
   align-items: center;
   padding: 1rem;
   margin-left: -25%;
-  margin-top: -10%;
+  margin-top: -20%;
 }
 
 .filter {
