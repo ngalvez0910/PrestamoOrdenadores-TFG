@@ -1,25 +1,25 @@
 <template>
   <MenuBar />
   <div class="filters">
-    <div class="filter">
-      <label for="username">Usuario:</label>
-      <input id="username" type="text" v-model="searchUsername" placeholder="Buscar por usuario..." />
-    </div>
-    <div class="filter">
-      <label for="grade">Curso:</label>
-      <input id="grade" type="text" v-model="searchGrade" placeholder="Buscar por curso..." />
-    </div>
-    <div class="filter">
-      <label for="role">Rol:</label>
-      <select id="role" type="text" v-model="searchRole">
+    <p class="filter">
+      Nombre de usuario:
+      <input type="text" v-model="search" placeholder="Buscar por usuario..." />
+    </p>
+    <p class="filter">
+      Curso:
+      <input type="text" v-model="search" placeholder="Buscar por curso..." />
+    </p>
+    <p class="filter">
+      Rol:
+      <select>
         <option value="">Todos</option>
-        <option value="Admin">Administrador</option>
+        <option value="Admin">Admin</option>
         <option value="Profesor">Profesor</option>
-        <option value="Alumno">Alumno</option>
+        <option value="Estudiante">Estudiante</option>
       </select>
-    </div>
+    </p>
   </div>
-
+  <br>
   <div class="table">
     <DataTable stripedRows tableStyle="min-width: 50rem">
       <Column field="number" header="Nº"></Column>
@@ -42,95 +42,37 @@ export default {
   components: { MenuBar },
   data() {
     return {
-      searchUsername: '',
-      searchGrade: '',
-      searchRole: '',
+      search: '',
     };
   },
 };
 </script>
 
-<style scoped>
+<style>
 .filters {
   display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 1.5rem 1rem;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  margin-left: -25%;
+  margin-top: -10%;
 }
 
 .filter {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
-  max-width: 250px;
-  width: 100%;
 }
 
-.filter label {
-  font-weight: 600;
-  color: #14124f;
-  font-size: 0.95rem;
-}
-
-.filter input {
+.filter input, select {
+  width: 200px;
   padding: 0.75rem;
   border: 1px solid #d6621e;
   border-radius: 25px;
-  font-size: 1rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.filter input::placeholder {
-  color: #aaa;
 }
 
 .table {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-}
-
-.p-datatable {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.p-datatable th, .p-datatable td {
-  text-align: center;
-  padding: 1rem 1.5rem;
-}
-
-.p-datatable th {
-  background-color: #14124f;
-  color: white;
-  font-weight: bold;
-}
-
-.p-datatable td {
-  background-color: #f8f9fa;
-}
-
-.p-datatable td:hover {
-  background-color: #e8e8e8;
-}
-
-@media (max-width: 768px) {
-  .filters {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .filter input {
-    width: 100%;
-  }
-
-  .table {
-    margin-top: 1rem;
-    margin-left: 0;
-  }
+  margin-left: -37%;
+  margin-top: 1%;
 }
 </style>

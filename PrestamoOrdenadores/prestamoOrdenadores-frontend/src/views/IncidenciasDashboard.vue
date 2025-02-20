@@ -1,17 +1,21 @@
 <template>
   <MenuBar />
   <div class="filters">
+    <div class="filter">
+      <label for="username">Usuario:</label>
+      <input id="username" type="text" v-model="searchUsername" placeholder="Buscar por usuario..." />
+    </div>
+    <div class="filter">
+      <label for="grade">Curso:</label>
+      <input id="grade" type="text" v-model="searchGrade" placeholder="Buscar por curso..." />
+    </div>
     <p class="filter">
-      Nombre de usuario:
-      <input type="text" v-model="search" placeholder="Buscar por usuario..." />
+      Fecha:
+      <input type="date" v-model="searchDate" />
     </p>
     <p class="filter">
-      Curso:
-      <input type="text" v-model="search" placeholder="Buscar por curso..." />
-    </p>
-    <p class="filter">
-      Tipo:
-      <select>
+      <label for="type">Tipo:</label>
+      <select id="type" type="text" v-model="searchType">
         <option value="">Todos</option>
         <option value="Advertencia">Advertencia</option>
         <option value="Temporal">Bloqueo Temporal</option>
@@ -42,20 +46,27 @@ export default {
   components: { MenuBar },
   data() {
     return {
-      search: '',
+      searchUsername: '',
+      searchGrade: '',
+      searchDate: '',
+      searchType: '',
     };
   },
 };
 </script>
 
 <style>
+body{
+  overflow-x: hidden;
+}
+
 .filters {
   display: flex;
   gap: 1rem;
   align-items: center;
   padding: 1rem;
   margin-left: -25%;
-  margin-top: -25%;
+  margin-top: -15%;
 }
 
 .filter {
@@ -72,7 +83,8 @@ export default {
 }
 
 .table {
-  margin-left: -37%;
+  margin-left: -25%;
   margin-top: 1%;
+  width: 100%;
 }
 </style>
