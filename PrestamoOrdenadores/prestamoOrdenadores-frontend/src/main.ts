@@ -15,6 +15,8 @@ import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import router from './router'
+import Menu from 'primevue/menu'
+import Badge from 'primevue/badge';
 
 const app = createApp(App)
 
@@ -26,5 +28,7 @@ app.component('Button', Button)
 app.component('AdminMenuBar', AdminMenuBar)
 app.component('DataTable', DataTable)
 app.component('Column', Column)
+app.component('Menu', Menu)
+app.component('Badge', Badge)
 
 app.mount('#app')
