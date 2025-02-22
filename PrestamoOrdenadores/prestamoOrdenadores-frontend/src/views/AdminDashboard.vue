@@ -59,14 +59,13 @@ export default {
   border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 6px 12px rgba(20, 18, 79, 0.15);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-align: center;
   cursor: pointer;
   width: 100%;
   max-width: 220px;
   text-decoration: none;
   color: #14124f;
-  transition-duration: 0.3s;
+  transition: transform 0.2s ease, color 0.3s ease;
 }
 
 .dashboard-box:hover {
@@ -77,6 +76,9 @@ export default {
 
 .dashboard-box:hover .icon, .dashboard-box:hover p {
   color: #a14916;
+}
+
+.dashboard-box .icon, .dashboard-box p {
   transition: color 0.3s ease;
 }
 
