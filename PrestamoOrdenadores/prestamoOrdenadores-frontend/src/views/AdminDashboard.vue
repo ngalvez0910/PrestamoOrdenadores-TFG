@@ -44,9 +44,10 @@ export default {
   gap: 20px;
   justify-content: center;
   align-items: center;
-  margin: 20px auto;
+  margin-top: 20px;
   max-width: 900px;
   padding: 20px;
+  margin-left: -25%;
 }
 
 .dashboard-box {
@@ -70,8 +71,8 @@ export default {
 
 .dashboard-box:hover {
   transform: translateY(-10px);
-  box-shadow: 0 16px 30px rgba(20, 18, 79, 0.2);
   background-color: #f8f9fa;
+  box-shadow: 0 4px 6px rgba(239, 139, 85, 0.19);
 }
 
 .dashboard-box:hover .icon, .dashboard-box:hover p {
@@ -89,6 +90,11 @@ export default {
   font-size: 1.1rem;
   font-weight: bold;
   margin: 0;
+}
+
+.dashboard .dashboard-box:nth-last-child(2),
+.dashboard .dashboard-box:nth-last-child(1) {
+  margin-left: 55%;
 }
 
 @media (max-width: 768px) {
