@@ -1,6 +1,8 @@
 package org.example.prestamoordenadores.rest.users.models
 
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -25,8 +27,10 @@ class User (
     @NotNull("Password no puede estar vacío")
     var password: String = "",
 
+    @Enumerated(EnumType.STRING)
     @NotNull("Rol no puede estar vacío")
     var roles: Role = Role.ALUMNO,
+
     var enabled: Boolean = false,
 
     @CreatedDate
