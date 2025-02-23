@@ -4,7 +4,6 @@ import org.example.prestamoordenadores.rest.users.dto.UserRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
-import org.springframework.cglib.core.Local
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -23,8 +22,8 @@ class UserMapper {
         return User(
             username = user.username,
             password = user.password,
-            roles = Role.ALUMNO,
-            enabled = true,
+            rol = Role.ALUMNO,
+            isActivo = true,
             createdDate = LocalDateTime.now(),
             updatedDate = LocalDateTime.now(),
             lastLoginDate = LocalDateTime.now(),

@@ -54,7 +54,7 @@ class UserServiceImpl(
         if (user == null) {
             return Err(UserError.UserNotFound("User with GUID $guid not found"))
         }
-        user.enabled = false
+        user.isActivo = false
         user.updatedDate = LocalDateTime.now()
         repository.save(user)
         return Ok(mapper.toUserResponse(user))
