@@ -13,7 +13,6 @@ interface UserService {
     fun getUserByGuid(guid: String) : Result<UserResponse?, UserError>
     fun createUser(user: UserCreateRequest) : Result<UserResponse, UserError>
     fun deleteUserByGuid(guid: String) : Result<UserResponse?, UserError>
-    fun getByUsername(username: String): Result<UserResponse?, UserError>
     fun resetPassword(guid: String, user: UserPasswordResetRequest) : Result<UserResponse?, UserError>
     fun getByCurso(curso: String): Result<List<UserResponse?>, UserError>
     fun getByNombre(nombre: String): Result<UserResponse?, UserError>

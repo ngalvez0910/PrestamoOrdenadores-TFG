@@ -1,15 +1,11 @@
 package org.example.prestamoordenadores.rest.users.controller
 
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapBoth
+import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
-import org.example.prestamoordenadores.rest.users.dto.UserRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
-import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserAlreadyExists
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserNotFound
-import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.services.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -29,7 +25,7 @@ class UserController
     private val userService: UserService
 ) {
     @GetMapping
-    fun getAllUsers() : ResponseEntity<List<User>> {
+    fun getAllUsers() : ResponseEntity<List<UserResponse>> {
         return userService.getAllUsers().mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body(null) }
@@ -49,9 +45,35 @@ class UserController
         )
     }
 
-    @GetMapping("/username/{username}")
-    fun getUserByUsername(@PathVariable username: String) : ResponseEntity<UserResponse?> {
-        return userService.getByUsername(username).mapBoth(
+    @GetMapping("/nombre/{nombre}")
+    fun getStudentByNombre(@PathVariable nombre: String) : ResponseEntity<UserResponse?> {
+        return userService.getByNombre(nombre).mapBoth(
+            success = { ResponseEntity.ok(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.notFound().build()
+                    else -> ResponseEntity.status(422).body(null)
+                }
+            }
+        )
+    }
+
+    @GetMapping("/curso/{curso}")
+    fun getStudentsByGrade(@PathVariable curso: String) : ResponseEntity<List<UserResponse?>> {
+        return userService.getByCurso(curso).mapBoth(
+            success = { ResponseEntity.ok(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.notFound().build()
+                    else -> ResponseEntity.status(422).body(null)
+                }
+            }
+        )
+    }
+
+    @GetMapping("/email/{email}")
+    fun getStudentByEmail(@PathVariable email: String) : ResponseEntity<UserResponse?> {
+        return userService.getByEmail(email).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
                 when (error) {
@@ -63,7 +85,7 @@ class UserController
     }
 
     @PostMapping
-    fun createUser(@RequestBody user: UserRequest): ResponseEntity<UserResponse> {
+    fun createUser(@RequestBody user: UserCreateRequest): ResponseEntity<UserResponse> {
         return userService.createUser(user).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->

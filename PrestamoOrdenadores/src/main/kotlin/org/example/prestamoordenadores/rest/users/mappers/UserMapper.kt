@@ -12,7 +12,6 @@ class UserMapper {
     fun toUserResponse(user: User): UserResponse{
         return UserResponse(
             guid = user.guid,
-            username = user.username,
             email = user.email,
             nombre = user.nombre,
             apellidos = user.apellidos,
@@ -30,7 +29,6 @@ class UserMapper {
             curso = user.curso,
             tutor = user.tutor,
             fotoCarnet = user.fotoCarnet,
-            username = user.username,
             password = user.password,
             rol = Role.ALUMNO,
             isActivo = true,
@@ -39,5 +37,9 @@ class UserMapper {
             lastLoginDate = LocalDateTime.now(),
             lastPasswordResetDate = LocalDateTime.now()
         )
+    }
+
+    fun toUserResponseList(users: List<User?>): List<UserResponse> {
+        return users.map { toUserResponse(it!!) }
     }
 }

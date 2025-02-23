@@ -8,7 +8,6 @@ data class UserCreateRequest (
     var curso: String,
     var tutor: String,
     var fotoCarnet: String,
-    var username : String,
     var password : String,
     var confirmPassword : String
 )
