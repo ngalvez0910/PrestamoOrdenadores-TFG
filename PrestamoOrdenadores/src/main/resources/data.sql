@@ -12,10 +12,6 @@ BEGIN
 END;
 ' LANGUAGE plpgsql;
 
-
--- Eliminar la tabla si existe
-DROP TABLE IF EXISTS usuarios CASCADE;
-
 -- Crear tabla usuarios
 CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
@@ -36,9 +32,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
     last_login_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_password_reset_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-SELECT setval('usuarios_id_seq', (SELECT MAX(id) FROM usuarios));
-
 
 -- Insertar usuarios de prueba
 INSERT INTO usuarios (guid, email, password, rol, numero_identificacion, nombre, apellidos, curso, tutor, foto_carnet, avatar, is_activo, created_date, updated_date, last_login_date, last_password_reset_date)
