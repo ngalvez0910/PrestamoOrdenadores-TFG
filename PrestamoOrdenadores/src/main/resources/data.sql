@@ -1,6 +1,9 @@
+DROP TABLE IF EXISTS students
+DROP TABLE IF EXISTS users
+
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
-    guid UUID NOT NULL DEFAULT gen_random_uuid(),
+    guid VARCHAR(11) NOT NULL DEFAULT,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     roles VARCHAR(8) NOT NULL,

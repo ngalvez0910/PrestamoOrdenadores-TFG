@@ -8,12 +8,12 @@
       </div>
       <div class="user-details">
         <div>
-          <label for="username">Nombre</label>
+          <label for="name">Nombre</label>
           <input
               readonly
               type="text"
-              id="username"
-              v-model="username"
+              id="name"
+              v-model="name"
           />
         </div>
         <div>
@@ -50,7 +50,7 @@ export default defineComponent({
   components: { AdminMenuBar },
   data() {
     return {
-      username: '',
+      name: '',
       email: '',
       avatar: 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
     };
@@ -61,8 +61,8 @@ export default defineComponent({
   methods: {
     async fetchUserData() {
       try {
-        const response = await axios.get('/users');
-        this.username = response.data.username;
+        const response = await axios.get('/students/2f935f49-4088-4d35-8b5f-246e27ccd12e');
+        this.name = response.data.name;
         this.email = response.data.email;
         this.avatar = response.data.avatar;
       } catch (error) {
@@ -73,11 +73,11 @@ export default defineComponent({
     async saveProfile() {
       try {
         const updatedUser = {
-          username: this.username,
+          name: this.name,
           email: this.email,
         };
 
-        const response = await axios.put('/users', updatedUser);
+        const response = await axios.put('/students/2f935f49-4088-4d35-8b5f-246e27ccd12e', updatedUser);
         console.log('Perfil actualizado con éxito:', response.data);
       } catch (error) {
         console.error('Error al guardar el perfil:', error);

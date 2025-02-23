@@ -1,6 +1,6 @@
-package org.example.prestamoordenadores.rest.student.dto
+package org.example.prestamoordenadores.rest.alumnos.dto
 
-data class StudentCreateRequest (
+data class AlumnoCreateRequest (
     var studentNumber: String,
     var name: String,
     var surname: String,

@@ -1,6 +1,6 @@
-package org.example.prestamoordenadores.rest.student.dto
+package org.example.prestamoordenadores.rest.alumnos.dto
 
-data class StudentResponse (
+data class AlumnoResponse (
     var guid : String,
     var name : String,
     var surname : String,
