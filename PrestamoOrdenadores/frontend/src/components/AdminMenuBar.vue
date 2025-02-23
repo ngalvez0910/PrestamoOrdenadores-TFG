@@ -66,6 +66,7 @@ export default {
 
     const logout = () => {
       console.log("Cerrando sesión...");
+      router.push("/");
     };
 
     return { menu, toggleMenu, goToProfile, logout };

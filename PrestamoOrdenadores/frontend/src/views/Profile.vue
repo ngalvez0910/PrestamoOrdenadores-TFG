@@ -1,0 +1,190 @@
+<template>
+  <AdminMenuBar/>
+  <div class="profile-container">
+    <div class="profile-info">
+      <div class="avatar">
+        <img :src="avatar" alt="Avatar" />
+        <button @click="changeAvatar">Cambiar Avatar</button>
+      </div>
+      <div class="user-details">
+        <div>
+          <label for="username">Nombre</label>
+          <input
+              readonly
+              type="text"
+              id="username"
+              v-model="username"
+          />
+        </div>
+        <div>
+          <label for="email">Correo electrónico</label>
+          <input
+              readonly
+              type="email"
+              id="email"
+              v-model="email"
+          />
+        </div>
+        <button @click="saveProfile">Guardar Información</button>
+      </div>
+    </div>
+
+    <div class="side-menu">
+      <ul>
+        <li><a href="#">Cambiar contraseña</a></li>
+        <li><a href="#">Notificaciones</a></li>
+        <li><a @click="logout">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+import AdminMenuBar from "@/components/AdminMenuBar.vue";
+import axios from 'axios';
+import router from "@/router";
+
+export default defineComponent({
+  name: "Profile",
+  components: { AdminMenuBar },
+  data() {
+    return {
+      username: '',
+      email: '',
+      avatar: 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
+    };
+  },
+  mounted() {
+    this.fetchUserData();
+  },
+  methods: {
+    async fetchUserData() {
+      try {
+        const response = await axios.get('/users');
+        this.username = response.data.username;
+        this.email = response.data.email;
+        this.avatar = response.data.avatar;
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario:', error);
+      }
+    },
+
+    async saveProfile() {
+      try {
+        const updatedUser = {
+          username: this.username,
+          email: this.email,
+        };
+
+        const response = await axios.put('/users', updatedUser);
+        console.log('Perfil actualizado con éxito:', response.data);
+      } catch (error) {
+        console.error('Error al guardar el perfil:', error);
+      }
+    },
+
+    changeAvatar() {
+      console.log('Cambiar avatar');
+    },
+
+    logout() {
+      console.log("Cerrando sesión...");
+      router.push("/");
+    },
+  },
+});
+</script>
+
+<style scoped>
+.profile-container {
+  display: flex;
+  padding: 20px;
+}
+
+.profile-info {
+  flex: 2;
+  padding-right: 20px;
+}
+
+.avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar img {
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.avatar button {
+  background-color: #d6621e;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.avatar button:hover {
+  background-color: #a14916;
+}
+
+.user-details {
+  padding-top: 10px;
+}
+
+.user-details label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.user-details input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.user-details button {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.user-details button:hover {
+  background-color: #1b82c7;
+}
+
+.side-menu {
+  flex: 1;
+  border-left: 2px solid #ddd;
+  padding-left: 20px;
+}
+
+.side-menu ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.side-menu ul li {
+  margin: 15px 0;
+}
+
+.side-menu ul li a {
+  text-decoration: none;
+  color: #14124f;
+}
+
+.side-menu ul li a:hover {
+  color: inherit !important;
+  background-color: inherit !important;
+  cursor: pointer;
+}
+</style>

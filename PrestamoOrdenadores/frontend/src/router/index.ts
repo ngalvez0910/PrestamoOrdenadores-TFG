@@ -4,6 +4,7 @@ import AdminDashboard from '../views/AdminDashboard.vue';
 import DispositivosDashboard from "@/views/DispositivosDashboard.vue";
 import UsuariosDashboard from "@/views/UsuariosDashboard.vue";
 import IncidenciasDashboard from "@/views/IncidenciasDashboard.vue";
+import Profile from "@/views/Profile.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,6 +39,11 @@ const router = createRouter({
       name: 'adminDashboardIncidencias',
       component: IncidenciasDashboard,
     },
+    {
+      path: '/admin/profile',
+      name: 'Profile',
+      component: Profile,
+    }
   ],
 })
 
