@@ -1,6 +1,6 @@
 package org.example.prestamoordenadores.rest.users.mappers
 
-import org.example.prestamoordenadores.rest.users.dto.UserRequest
+import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
@@ -13,13 +13,23 @@ class UserMapper {
         return UserResponse(
             guid = user.guid,
             username = user.username,
-            password = user.password,
-            lastPasswordResetDate = user.lastPasswordResetDate.toString()
+            email = user.email,
+            nombre = user.nombre,
+            apellidos = user.apellidos,
+            curso = user.curso,
+            tutor = user.tutor
         )
     }
 
-    fun toUserFromCreate(user: UserRequest): User {
+    fun toUserFromCreate(user: UserCreateRequest): User {
         return User(
+            numeroIdentificacion = user.numeroIdentificacion,
+            nombre = user.nombre,
+            apellidos = user.apellidos,
+            email = user.email,
+            curso = user.curso,
+            tutor = user.tutor,
+            fotoCarnet = user.fotoCarnet,
             username = user.username,
             password = user.password,
             rol = Role.ALUMNO,
