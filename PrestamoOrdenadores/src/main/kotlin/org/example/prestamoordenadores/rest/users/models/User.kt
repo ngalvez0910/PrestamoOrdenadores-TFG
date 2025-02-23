@@ -41,13 +41,13 @@ class User (
     var apellidos: String = "",
 
     @NotNull("Curso no puede ser null")
-    var curso: String = "",
+    var curso: String? = "",
 
     @NotNull("Tutor no puede ser null")
-    var tutor: String = "",
+    var tutor: String?= "",
 
     @NotNull("Foto carnet no puede ser null")
-    var fotoCarnet: String = "",
+    var fotoCarnet: String?= "",
 
     @NotNull("Avatar no puede ser null")
     var avatar: String = "",
