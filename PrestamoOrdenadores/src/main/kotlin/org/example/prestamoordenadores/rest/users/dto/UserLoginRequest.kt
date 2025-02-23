@@ -1,6 +1,6 @@
 package org.example.prestamoordenadores.rest.users.dto
 
 data class UserLoginRequest (
-    val username: String,
+    val email: String,
     val password: String
 )

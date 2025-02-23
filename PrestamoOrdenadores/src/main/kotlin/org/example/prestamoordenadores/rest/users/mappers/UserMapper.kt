@@ -1,6 +1,6 @@
 package org.example.prestamoordenadores.rest.users.mappers
 
-import org.example.prestamoordenadores.rest.users.dto.UserRequest
+import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
@@ -12,15 +12,23 @@ class UserMapper {
     fun toUserResponse(user: User): UserResponse{
         return UserResponse(
             guid = user.guid,
-            username = user.username,
-            password = user.password,
-            lastPasswordResetDate = user.lastPasswordResetDate.toString()
+            email = user.email,
+            nombre = user.nombre,
+            apellidos = user.apellidos,
+            curso = user.curso.toString(),
+            tutor = user.tutor.toString()
         )
     }
 
-    fun toUserFromCreate(user: UserRequest): User {
+    fun toUserFromCreate(user: UserCreateRequest): User {
         return User(
-            username = user.username,
+            numeroIdentificacion = user.numeroIdentificacion,
+            nombre = user.nombre,
+            apellidos = user.apellidos,
+            email = user.email,
+            curso = user.curso,
+            tutor = user.tutor,
+            fotoCarnet = user.fotoCarnet,
             password = user.password,
             rol = Role.ALUMNO,
             isActivo = true,
@@ -29,5 +37,9 @@ class UserMapper {
             lastLoginDate = LocalDateTime.now(),
             lastPasswordResetDate = LocalDateTime.now()
         )
+    }
+
+    fun toUserResponseList(users: List<User?>): List<UserResponse> {
+        return users.map { toUserResponse(it!!) }
     }
 }
