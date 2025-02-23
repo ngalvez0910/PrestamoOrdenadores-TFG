@@ -1,6 +1,6 @@
 package org.example.prestamoordenadores.rest.alumnos.mappers
 
-import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoCreateRequest
+import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoResponse
 import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoUpdateRequest
 import org.example.prestamoordenadores.rest.alumnos.models.Alumno
@@ -27,14 +27,14 @@ class AlumnoMapper {
         )
     }
 
-    fun toStudentFromCreate(studentCreate: AlumnoCreateRequest, user: User): Alumno {
+    fun toStudentFromCreate(studentCreate: UserCreateRequest, user: User): Alumno {
         return Alumno(
-            numeroEstudiante = studentCreate.studentNumber,
-            nombre = studentCreate.name,
-            apellidos = studentCreate.surname,
+            numeroEstudiante = studentCreate.numeroIdentificacion,
+            nombre = studentCreate.nombre,
+            apellidos = studentCreate.apellidos,
             email = studentCreate.email,
-            curso = studentCreate.grade,
-            fotoCarnet = studentCreate.image,
+            curso = studentCreate.curso,
+            fotoCarnet = studentCreate.fotoCarnet,
             user = user
         )
     }

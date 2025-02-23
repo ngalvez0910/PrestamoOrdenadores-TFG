@@ -1,7 +1,7 @@
 package org.example.prestamoordenadores.rest.alumnos.controller
 
 import com.github.michaelbull.result.mapBoth
-import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoCreateRequest
+import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoResponse
 import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoUpdateRequest
 import org.example.prestamoordenadores.rest.alumnos.errors.AlumnoError
@@ -85,7 +85,7 @@ class AlumnoController
     }
 
     @PostMapping
-    fun createStudent(@RequestBody student: AlumnoCreateRequest) : ResponseEntity<AlumnoResponse?> {
+    fun createStudent(@RequestBody student: UserCreateRequest) : ResponseEntity<AlumnoResponse?> {
         return alumnoService.createStudent(student).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->

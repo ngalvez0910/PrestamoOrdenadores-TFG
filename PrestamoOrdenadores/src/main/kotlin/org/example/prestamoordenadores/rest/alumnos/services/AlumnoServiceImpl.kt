@@ -3,7 +3,7 @@ package org.example.prestamoordenadores.rest.alumnos.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoCreateRequest
+import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoResponse
 import org.example.prestamoordenadores.rest.alumnos.dto.AlumnoUpdateRequest
 import org.example.prestamoordenadores.rest.alumnos.errors.AlumnoError
@@ -39,15 +39,15 @@ class AlumnoServiceImpl(
         }
     }
 
-    override fun createStudent(student: AlumnoCreateRequest): Result<AlumnoResponse, AlumnoError> {
+    override fun createStudent(student: UserCreateRequest): Result<AlumnoResponse, AlumnoError> {
         logger.debug { "Creating student: $student" }
         val user = userRepository.findByUsername(student.username)
         if (user == null){
             return Err(AlumnoError.UserNotFound("User with username ${student.username} not found"))
         }
 
-        if (repository.existsStudentByNameAndSurNameAndGrade(student.name, student.surname, student.grade)) {
-            return Err(AlumnoError.AlumnoAlreadyExists("Student with name ${student.name} ${student.surname} and grade ${student.grade} already exists"))
+        if (repository.existsStudentByNameAndSurNameAndGrade(student.nombre, student.apellidos, student.curso)) {
+            return Err(AlumnoError.AlumnoAlreadyExists("Student with name ${student.nombre} ${student.apellidos} and grade ${student.curso} already exists"))
         }
 
         logger.debug { "Creating student: $student" }
