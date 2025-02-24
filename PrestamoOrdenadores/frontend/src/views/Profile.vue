@@ -1,41 +1,33 @@
 <template>
   <AdminMenuBar/>
   <div class="profile-container">
-    <div class="profile-info">
-      <div class="avatar">
-        <img :src="avatar" alt="Avatar" />
-        <button @click="changeAvatar">Cambiar Avatar</button>
+    <div class="avatar">
+      <img :src="avatar" alt="Avatar" />
+      <button @click="changeAvatar">Cambiar Avatar</button>
+    </div>
+    <div class="user-details">
+      <div>
+        <label for="nombre">Nombre</label>
+        <input readonly type="text" id="nombre" v-model="nombre"/>
       </div>
-      <div class="user-details">
-        <div>
-          <label for="name">Nombre</label>
-          <input
-              readonly
-              type="text"
-              id="name"
-              v-model="name"
-          />
-        </div>
-        <div>
-          <label for="email">Correo electrónico</label>
-          <input
-              readonly
-              type="email"
-              id="email"
-              v-model="email"
-          />
-        </div>
-        <button @click="saveProfile">Guardar Información</button>
+      <div>
+        <label for="email">Correo electrónico</label>
+        <input readonly type="email" id="email" v-model="email"/>
+      </div>
+      <div>
+        <label for="curso">Curso</label>
+        <input readonly type="text" id="curso" v-model="curso"/>
       </div>
     </div>
-
-    <div class="side-menu">
-      <ul>
-        <li><a href="#">Cambiar contraseña</a></li>
-        <li><a href="#">Notificaciones</a></li>
-        <li><a @click="logout">Cerrar sesión</a></li>
-      </ul>
-    </div>
+  </div>
+  <div class="side-menu">
+    <ul>
+      <li><a href="#">Mis préstamos</a></li>
+      <li><a href="#">Mis incidencias</a></li>
+      <li><a href="#">Notificaciones</a></li>
+      <li><a href="#">Cambiar contraseña</a></li>
+      <li><a @click="logout">Cerrar sesión</a></li>
+    </ul>
   </div>
 </template>
 
@@ -46,12 +38,13 @@ import axios from 'axios';
 import router from "@/router";
 
 export default defineComponent({
-  name: "Profile",
+  nombre: "Profile",
   components: { AdminMenuBar },
   data() {
     return {
-      name: '',
+      nombre: '',
       email: '',
+      curso: '',
       avatar: 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
     };
   },
@@ -62,7 +55,7 @@ export default defineComponent({
     async fetchUserData() {
       try {
         const response = await axios.get('/students/2f935f49-4088-4d35-8b5f-246e27ccd12e');
-        this.name = response.data.name;
+        this.nombre = response.data.nombre;
         this.email = response.data.email;
         this.avatar = response.data.avatar;
       } catch (error) {
@@ -73,7 +66,7 @@ export default defineComponent({
     async saveProfile() {
       try {
         const updatedUser = {
-          name: this.name,
+          nombre: this.nombre,
           email: this.email,
         };
 
@@ -99,18 +92,23 @@ export default defineComponent({
 <style scoped>
 .profile-container {
   display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 20px;
   padding: 20px;
-}
-
-.profile-info {
-  flex: 2;
-  padding-right: 20px;
+  margin-top: 30%;
+  width: 100%;
 }
 
 .avatar {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-right: 20px;
+  margin-left: -50%;
+  margin-top: -50%;
+  width: 200px;
 }
 
 .avatar img {
@@ -118,7 +116,7 @@ export default defineComponent({
   width: 150px;
   height: 150px;
   object-fit: cover;
-  margin-bottom: 10px;
+  margin-bottom: 40px;
 }
 
 .avatar button {
@@ -134,7 +132,9 @@ export default defineComponent({
 }
 
 .user-details {
-  padding-top: 10px;
+  padding-left: 20px;
+  margin-left: 40%;
+  margin-top: -50%;
 }
 
 .user-details label {
@@ -163,9 +163,15 @@ export default defineComponent({
 }
 
 .side-menu {
-  flex: 1;
-  border-left: 2px solid #ddd;
-  padding-left: 20px;
+  width: 250px;
+  position: fixed;
+  right: 5%;
+  top: 20%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  z-index: 10;
 }
 
 .side-menu ul {
@@ -180,11 +186,13 @@ export default defineComponent({
 .side-menu ul li a {
   text-decoration: none;
   color: #14124f;
+  display: block;
+  padding: 10px;
+  border-radius: 4px;
 }
 
 .side-menu ul li a:hover {
-  color: inherit !important;
-  background-color: inherit !important;
+  background-color: #f0f0f0;
   cursor: pointer;
 }
 </style>
