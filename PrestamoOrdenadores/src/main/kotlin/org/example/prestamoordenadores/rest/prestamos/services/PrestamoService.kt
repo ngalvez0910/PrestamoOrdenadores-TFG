@@ -1,6 +1,8 @@
 package org.example.prestamoordenadores.rest.prestamos.services
 
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -12,6 +14,6 @@ interface PrestamoService {
     fun updatePrestamo(prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>
     fun deletePrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
     fun getByFechaPrestamo(fecha: LocalDate): Result<List<PrestamoResponse?>, PrestamoError>
-    fun getByFechaLimite(fecha: LocalDate): Result<List<PrestamoResponse?>, PrestamoError>
+    fun getByFechaDevolucion(fecha: LocalDate): Result<List<PrestamoResponse?>, PrestamoError>
     fun getPrestamoByUserGuid(userGuid: String) : Result<List<PrestamoResponse?>, PrestamoError>
 }
