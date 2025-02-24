@@ -1,4 +1,4 @@
-package org.example.prestamoordenadores.rest.prestamos
+package org.example.prestamoordenadores.rest.prestamos.models
 
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -23,6 +23,8 @@ class Prestamo(
 
     var dispositivoGuid : String = "",
 
+    var fechaPrestamo : LocalDate = LocalDate.now(),
+
     var fechaLimite : LocalDate = LocalDate.now(),
 
     @CreatedDate
@@ -31,6 +33,6 @@ class Prestamo(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor(guid: String, userGuid: String, dispositivoGuid: String, fechaLimite: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-        this(0, guid, userGuid, dispositivoGuid, fechaLimite, createdDate, updatedDate)
+    constructor(guid: String, userGuid: String, dispositivoGuid: String, fechaPrestamo: LocalDate, fechaLimite: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+        this(0, guid, userGuid, dispositivoGuid, fechaPrestamo, fechaLimite, createdDate, updatedDate)
 }
