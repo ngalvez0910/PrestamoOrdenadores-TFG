@@ -3,6 +3,8 @@ package org.example.prestamoordenadores.rest.prestamos.services
 import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
+import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
