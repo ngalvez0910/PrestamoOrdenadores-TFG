@@ -13,7 +13,7 @@ interface PrestamoService {
     fun getAllPrestamos(): Result<List<PrestamoResponse>, PrestamoError>
     fun getPrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
     fun createPrestamo(prestamo: PrestamoCreateRequest) : Result<PrestamoResponse, PrestamoError>
-    fun updatePrestamo(prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>
+    fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>
     fun deletePrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
     fun getByFechaPrestamo(fecha: LocalDate): Result<List<PrestamoResponse?>, PrestamoError>
     fun getByFechaDevolucion(fecha: LocalDate): Result<List<PrestamoResponse?>, PrestamoError>
