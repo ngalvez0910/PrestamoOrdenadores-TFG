@@ -46,7 +46,7 @@ class UserController
     }
 
     @GetMapping("/nombre/{nombre}")
-    fun getStudentByNombre(@PathVariable nombre: String) : ResponseEntity<UserResponse?> {
+    fun getUserByNombre(@PathVariable nombre: String) : ResponseEntity<UserResponse?> {
         return userService.getByNombre(nombre).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -59,7 +59,7 @@ class UserController
     }
 
     @GetMapping("/curso/{curso}")
-    fun getStudentsByGrade(@PathVariable curso: String) : ResponseEntity<List<UserResponse?>> {
+    fun getUsersByGrade(@PathVariable curso: String) : ResponseEntity<List<UserResponse?>> {
         return userService.getByCurso(curso).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -72,7 +72,7 @@ class UserController
     }
 
     @GetMapping("/email/{email}")
-    fun getStudentByEmail(@PathVariable email: String) : ResponseEntity<UserResponse?> {
+    fun getUserByEmail(@PathVariable email: String) : ResponseEntity<UserResponse?> {
         return userService.getByEmail(email).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
