@@ -9,7 +9,7 @@ import java.time.LocalDate
 interface PrestamoRepository : JpaRepository<Prestamo, Long> {
     fun findByGuid(guid: String): Prestamo?
     fun save(prestamoRequest: Prestamo): Prestamo?
-    fun findByFechaPrestamo(fecha: LocalDate): List<Prestamo?>
-    fun findByFechaDevolucion(fecha: LocalDate): List<Prestamo?>
-    fun findByUserGuid(userGuid: String): List<Prestamo?>
+    fun findByFechaPrestamo(fecha: LocalDate): List<Prestamo>
+    fun findByFechaDevolucion(fecha: LocalDate): List<Prestamo>
+    fun findByUserGuid(userGuid: String): List<Prestamo>
 }
