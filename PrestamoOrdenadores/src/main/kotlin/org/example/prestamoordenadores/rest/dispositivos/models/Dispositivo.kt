@@ -7,12 +7,10 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.example.prestamoordenadores.utils.generators.generateGuid
 import org.jetbrains.annotations.NotNull
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -33,10 +31,13 @@ class Dispositivo(
     @NotNull("Estado no puede ser null")
     var estado : Estado = Estado.NUEVO,
 
-    var incidencia : String = "",
+    var incidenciaGuid : String = "",
 
     @NotNull("Stock no puede ser null")
     var stock: Int = 0,
+
+    @NotNull("Activo no puede ser null")
+    var isActive: Boolean = true,
 
     @CreatedDate
     var createdDate: LocalDateTime = LocalDateTime.now(),
@@ -44,6 +45,6 @@ class Dispositivo(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor(guid: String, numeroSerie: String, componentes: String, estado: Estado, incidencia: String, stock: Int, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, numeroSerie, componentes, estado, incidencia, stock, createdDate, updatedDate)
+    constructor(guid: String, numeroSerie: String, componentes: String, estado: Estado, incidenciaGuid: String, stock: Int, isActive: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, numeroSerie, componentes, estado, incidenciaGuid, stock, isActive, createdDate, updatedDate)
 }

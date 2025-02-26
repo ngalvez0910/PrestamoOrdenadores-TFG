@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface DispositivoRepository : JpaRepository<Dispositivo, Long> {
     fun findByNumeroSerie(numeroSerie: String): Dispositivo
-    fun findByEstado(estado: String): Dispositivo
+    fun findByEstado(estado: String): List<Dispositivo>
+    fun findDispositivoByGuid(guid: String): Dispositivo
 }
