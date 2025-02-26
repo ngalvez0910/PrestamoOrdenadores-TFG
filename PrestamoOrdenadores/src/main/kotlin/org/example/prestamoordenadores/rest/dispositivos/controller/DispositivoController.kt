@@ -44,7 +44,7 @@ class DispositivoController
         )
     }
 
-    @GetMapping("/{numeroSerie}")
+    @GetMapping("/numeroSerie/{numeroSerie}")
     fun getDispositivoByNumeroSerie(@PathVariable numeroSerie: String): ResponseEntity<DispositivoResponse?>{
         return dispositivoService.getDispositivoByNumeroSerie(numeroSerie).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
@@ -57,7 +57,7 @@ class DispositivoController
         )
     }
 
-    @GetMapping("/{estado}")
+    @GetMapping("/estado/{estado}")
     fun getDispositivoByEstado(@PathVariable estado: String): ResponseEntity<List<DispositivoResponse>>{
         return dispositivoService.getDispositivoByEstado(estado).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
@@ -71,8 +71,8 @@ class DispositivoController
     }
 
     @PostMapping
-    fun createDispositivo(@RequestBody user: DispositivoCreateRequest): ResponseEntity<DispositivoResponse> {
-        return dispositivoService.createDispositivo(user).mapBoth(
+    fun createDispositivo(@RequestBody dispositivo: DispositivoCreateRequest): ResponseEntity<DispositivoResponse> {
+        return dispositivoService.createDispositivo(dispositivo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
                 when (error) {
@@ -85,8 +85,8 @@ class DispositivoController
     }
 
     @PatchMapping("/{guid}")
-    fun updateDispositivo(@PathVariable guid: String, @RequestBody prestamo : DispositivoUpdateRequest): ResponseEntity<DispositivoResponse?>{
-        return dispositivoService.updateDispositivo(guid, prestamo).mapBoth(
+    fun updateDispositivo(@PathVariable guid: String, @RequestBody dispositivo : DispositivoUpdateRequest): ResponseEntity<DispositivoResponse?>{
+        return dispositivoService.updateDispositivo(guid, dispositivo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
                 when(error) {

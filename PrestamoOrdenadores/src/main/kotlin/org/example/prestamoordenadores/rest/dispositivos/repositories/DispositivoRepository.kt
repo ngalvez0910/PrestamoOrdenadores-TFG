@@ -10,5 +10,4 @@ interface DispositivoRepository : JpaRepository<Dispositivo, Long> {
     fun findByNumeroSerie(numeroSerie: String): Dispositivo
     fun findByEstado(estado: String): List<Dispositivo>
     fun findDispositivoByGuid(guid: String): Dispositivo
-    fun save (dispositivo: DispositivoCreateRequest): Dispositivo
 }

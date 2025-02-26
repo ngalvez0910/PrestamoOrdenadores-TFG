@@ -39,7 +39,8 @@ class DispositivoServiceImpl(
 
     override fun createDispositivo(dispositivo: DispositivoCreateRequest): Result<DispositivoResponse, DispositivoError> {
         logger.debug { "Guardando un nuevo dispositivo" }
-        var newDispositivo = dispositivoRepository.save(dispositivo)
+        var newDispositivo = mapper.toDispositivoFromCreate(dispositivo)
+        dispositivoRepository.save(newDispositivo)
         return Ok(mapper.toDispositivoResponse(newDispositivo))
     }
 
@@ -65,7 +66,7 @@ class DispositivoServiceImpl(
             return Err(DispositivoError.DispositivoNotFound("Dispositivo con GUID: $guid no encontrado"))
         }
         dispositivo.estado = Estado.NO_DISPONIBLE
-        dispositivo.isActive = false
+        dispositivo.isActivo = false
         dispositivo.updatedDate = LocalDateTime.now()
         dispositivoRepository.save(dispositivo)
         return Ok(mapper.toDispositivoResponse(dispositivo))

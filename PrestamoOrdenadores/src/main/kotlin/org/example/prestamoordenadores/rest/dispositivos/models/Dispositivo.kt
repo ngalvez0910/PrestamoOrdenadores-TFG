@@ -37,7 +37,7 @@ class Dispositivo(
     var stock: Int = 0,
 
     @NotNull("Activo no puede ser null")
-    var isActive: Boolean = true,
+    var isActivo: Boolean = true,
 
     @CreatedDate
     var createdDate: LocalDateTime = LocalDateTime.now(),
@@ -45,6 +45,6 @@ class Dispositivo(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor(guid: String, numeroSerie: String, componentes: String, estado: Estado, incidenciaGuid: String, stock: Int, isActive: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, numeroSerie, componentes, estado, incidenciaGuid, stock, isActive, createdDate, updatedDate)
+    constructor(guid: String, numeroSerie: String, componentes: String, estado: Estado, incidenciaGuid: String, stock: Int, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, numeroSerie, componentes, estado, incidenciaGuid, stock, isActivo, createdDate, updatedDate)
 }
