@@ -12,7 +12,7 @@ interface UserService {
     fun getAllUsers(): Result<List<UserResponse>, UserError>
     fun getUserByGuid(guid: String) : Result<UserResponse?, UserError>
     fun createUser(user: UserCreateRequest) : Result<UserResponse, UserError>
-    //fun updateAvatar(guid: String, avatar: String) : Result<UserResponse?, UserError>
+    fun updateAvatar(guid: String, avatar: String) : Result<UserResponse?, UserError>
     fun deleteUserByGuid(guid: String) : Result<UserResponse?, UserError>
     fun resetPassword(guid: String, user: UserPasswordResetRequest) : Result<UserResponse?, UserError>
     fun getByCurso(curso: String): Result<List<UserResponse?>, UserError>

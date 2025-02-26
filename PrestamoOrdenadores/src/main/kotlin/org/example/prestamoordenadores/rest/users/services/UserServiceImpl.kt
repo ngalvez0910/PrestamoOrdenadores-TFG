@@ -57,6 +57,18 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponse(savedUser))
     }
 
+    override fun updateAvatar(guid: String, avatar: String): Result<UserResponse?, UserError> {
+        logger.debug { "Actualizando avatar del user con GUID: $guid" }
+        var user = repository.findByGuid(guid)
+        if (user == null) {
+            return Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+        }
+        user.avatar = avatar
+        user.updatedDate = LocalDateTime.now()
+        repository.save(user)
+        return Ok(mapper.toUserResponse(user))
+    }
+
     override fun deleteUserByGuid(guid: String): Result<UserResponse?, UserError> {
         logger.debug { "Eliminando usuario con GUID: $guid" }
         var user = repository.findByGuid(guid)
