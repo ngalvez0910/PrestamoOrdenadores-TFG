@@ -3,6 +3,7 @@ package org.example.prestamoordenadores.rest.prestamos.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
@@ -22,7 +23,8 @@ private val logger = logging()
 class PrestamoServiceImpl(
     private val prestamoRepository: PrestamoRepository,
     private val mapper: PrestamoMapper,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val dispositivoRepository: DispositivoRepository
 ): PrestamoService {
     override fun getAllPrestamos(): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo todos los prestamos" }
@@ -42,7 +44,20 @@ class PrestamoServiceImpl(
     }
 
     override fun createPrestamo(prestamo: PrestamoCreateRequest): Result<PrestamoResponse, PrestamoError> {
-        TODO("Not yet implemented")
+        logger.debug { "Creando nuevo prestamo" }
+        val user = userRepository.findByGuid(prestamo.userGuid)
+        if (user == null) {
+            return Err(PrestamoError.UserNotFound("Usuario con GUID: ${prestamo.userGuid} no encontrado"))
+        }
+
+        val dispositivo = dispositivoRepository.findDispositivoByGuid(prestamo.dispositivoGuid)
+        if (dispositivo == null) {
+            return Err(PrestamoError.DispositivoNotFound("Dispositivo con GUID: ${prestamo.dispositivoGuid} no encontrado"))
+        }
+
+        var prestamoCreado = mapper.toPrestamoFromCreate(prestamo)
+
+        return Ok(mapper.toPrestamoResponse(prestamoCreado))
     }
 
     override fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest): Result<PrestamoResponse?, PrestamoError> {
