@@ -3,7 +3,6 @@ package org.example.prestamoordenadores.rest.dispositivos.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.valuesOf
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
@@ -39,7 +38,9 @@ class DispositivoServiceImpl(
     }
 
     override fun createDispositivo(dispositivo: DispositivoCreateRequest): Result<DispositivoResponse, DispositivoError> {
-        TODO("Not yet implemented")
+        logger.debug { "Guardando un nuevo dispositivo" }
+        var newDispositivo = dispositivoRepository.save(dispositivo)
+        return Ok(mapper.toDispositivoResponse(newDispositivo))
     }
 
     override fun updateDispositivo(guid: String, dispositivo: DispositivoUpdateRequest): Result<DispositivoResponse, DispositivoError> {
