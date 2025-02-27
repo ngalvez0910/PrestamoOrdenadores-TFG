@@ -9,14 +9,14 @@
       <label for="surname" class="input-label">Apellidos</label>
       <input type="text" class="input-field" name="surname" placeholder="Apellidos">
 
-      <label for="username" class="input-label">Nombre de usuario</label>
-      <input type="text" class="input-field" name="username" placeholder="Nombre de usuario">
+      <label for="email" class="input-label">Correo electrónico</label>
+      <input class="input-field" type="email" name="email" placeholder="Correo electrónico">
 
       <label for="password" class="input-label">Contraseña</label>
       <input type="password" name="password" class="input-field" placeholder="Contraseña">
 
-      <label for="email" class="input-label">Correo electrónico</label>
-      <input class="input-field" type="email" name="email" placeholder="Correo electrónico">
+      <label for="passwordConfirm" class="input-label">Confirmar contraseña</label>
+      <input type="password" name="passwordConfirm" class="input-field" placeholder="Confirmar contraseña">
 
       <label for="grade" class="input-label">Curso</label>
       <input class="input-field" type="text" name="grade" placeholder="Curso">
