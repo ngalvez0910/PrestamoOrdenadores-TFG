@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import org.example.prestamoordenadores.utils.generators.generateGuid
+import org.example.prestamoordenadores.utils.generators.generateNumeroSerie
 import org.jetbrains.annotations.NotNull
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -22,7 +23,7 @@ class Dispositivo(
     var guid : String = generateGuid(),
 
     @NotNull("Numero de serie no puede ser null")
-    var numeroSerie : String = "",
+    var numeroSerie : String = generateNumeroSerie(),
 
     @NotNull("Componentes no puede ser null")
     var componentes :  String = "",

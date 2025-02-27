@@ -74,13 +74,7 @@ class DispositivoController
     fun createDispositivo(@RequestBody dispositivo: DispositivoCreateRequest): ResponseEntity<DispositivoResponse> {
         return dispositivoService.createDispositivo(dispositivo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
-            failure = { error ->
-                when (error) {
-                    is DispositivoNotFound -> ResponseEntity.notFound().build()
-                    //is DispositivoAlreadyExists -> ResponseEntity.badRequest().build()
-                    else -> ResponseEntity.status(422).body(null)
-                }
-            }
+            failure = { ResponseEntity.status(422).body(null) }
         )
     }
 
