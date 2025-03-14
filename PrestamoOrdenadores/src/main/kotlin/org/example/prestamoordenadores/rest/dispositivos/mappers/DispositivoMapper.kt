@@ -31,6 +31,8 @@ class DispositivoMapper {
 
     fun toDispositivoFromUpdate(dispositivo: Dispositivo, request: DispositivoUpdateRequest): Dispositivo {
         return Dispositivo(
+            guid = dispositivo.guid,
+            numeroSerie = dispositivo.numeroSerie,
             componentes = request.componentes ?: dispositivo.componentes,
             estado = request.estado?.let { Estado.valueOf(it) } ?: dispositivo.estado,
             incidenciaGuid = request.incidenciaGuid ?: dispositivo.incidenciaGuid,
