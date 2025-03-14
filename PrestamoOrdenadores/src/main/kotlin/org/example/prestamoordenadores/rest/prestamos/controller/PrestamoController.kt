@@ -46,7 +46,7 @@ class PrestamoController
         )
     }
 
-    @GetMapping("/{fecha}")
+    @GetMapping("/fecha/{fecha}")
     fun getPrestamoByFechaPrestamo(@PathVariable fecha: LocalDate) : ResponseEntity<List<PrestamoResponse>>{
         return prestamoService.getByFechaPrestamo(fecha).mapBoth(
             success = { ResponseEntity.ok(it) },
