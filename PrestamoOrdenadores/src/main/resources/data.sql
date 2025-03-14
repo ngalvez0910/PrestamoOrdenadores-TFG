@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS dispositivos (
     numero_serie VARCHAR(255) NOT NULL UNIQUE,
     componentes VARCHAR(255) NOT NULL,
     estado VARCHAR(13) NOT NULL,
-    incidencia_guid VARCHAR(11) UNIQUE,
+    incidencia_guid VARCHAR(11) ,
     stock INTEGER NOT NULL,
     is_activo BOOLEAN DEFAULT true,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
