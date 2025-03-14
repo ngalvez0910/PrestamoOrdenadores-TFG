@@ -1,12 +1,12 @@
 <template>
   <div class="app">
-    <router-view />  <!-- Aquí se cargan las vistas (Home, Dashboard, etc.) -->
+    <router-view />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Login from './views/Login.vue';  // Componente de login
+import Login from './views/Login.vue';
 
 export default defineComponent({
   name: 'App',

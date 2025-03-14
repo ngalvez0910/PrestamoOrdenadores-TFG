@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 @Table(name = "incidencias")
 class Incidencia(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0L,
     var guid : String = generateGuid(),
 

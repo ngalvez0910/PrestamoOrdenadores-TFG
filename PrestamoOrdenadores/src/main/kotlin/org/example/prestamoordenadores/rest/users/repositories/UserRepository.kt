@@ -1,6 +1,5 @@
 package org.example.prestamoordenadores.rest.users.repositories
 
-import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.models.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
@@ -8,7 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface UserRepository: JpaRepository<User, Long> {
     fun findByGuid(guid: String): User?
-    fun save(userRequest: UserCreateRequest): User?
     fun findByCurso(curso: String): List<User?>
     fun findByNombre(nombre: String): User?
     fun findByEmail(email: String): User?

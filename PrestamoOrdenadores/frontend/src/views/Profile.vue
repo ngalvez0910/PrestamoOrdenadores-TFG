@@ -46,20 +46,21 @@ export default defineComponent({
       email: '',
       curso: '',
       avatar: 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
+      datos: null
     };
   },
   mounted() {
-    this.fetchUserData();
+    this.obtenerDatos();
   },
   methods: {
-    async fetchUserData() {
+    async obtenerDatos() {
       try {
-        const response = await axios.get('/students/2f935f49-4088-4d35-8b5f-246e27ccd12e');
+        const response = await axios.get("http://localhost:8080/users/{id}");
         this.nombre = response.data.nombre;
         this.email = response.data.email;
         this.avatar = response.data.avatar;
       } catch (error) {
-        console.error('Error al obtener los datos del usuario:', error);
+        console.error("Error obteniendo datos:", error);
       }
     },
 

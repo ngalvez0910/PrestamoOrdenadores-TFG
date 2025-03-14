@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -79,7 +78,7 @@ class DispositivoController
         )
     }
 
-    @PutMapping("/{guid}")
+    @PatchMapping("/{guid}")
     fun updateDispositivo(@PathVariable guid: String, @RequestBody dispositivo : DispositivoUpdateRequest): ResponseEntity<DispositivoResponse?>{
         return dispositivoService.updateDispositivo(guid, dispositivo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },

@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS dispositivos (
     numero_serie VARCHAR(255) NOT NULL UNIQUE,
     componentes VARCHAR(255) NOT NULL,
     estado VARCHAR(13) NOT NULL,
-    incidencia_guid VARCHAR(11) ,
+    incidencia_guid VARCHAR(11) UNIQUE,
     stock INTEGER NOT NULL,
     is_activo BOOLEAN DEFAULT true,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -71,4 +71,3 @@ VALUES
     ('v2w3x4y5z6a', '4PQ234MNBV', 'CPU, RAM', 'PRESTADO', null, 1, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('c6b5a4z3y2x', '6RS567QAZX', 'CPU, RAM, SSD, GPU', 'NUEVO', null, 4, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('n0m9l8k7j6i', '0TU890WSXC', 'CPU, RAM, HDD', 'NO_DISPONIBLE', 'INC000010', 0, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
->>>>>>> Stashed changes

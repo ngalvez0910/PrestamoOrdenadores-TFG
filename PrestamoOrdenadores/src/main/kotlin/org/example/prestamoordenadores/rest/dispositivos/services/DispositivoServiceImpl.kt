@@ -50,9 +50,13 @@ class DispositivoServiceImpl(
         if (existingDispositivo == null) {
             return Err(DispositivoError.DispositivoNotFound("Dispositivo con GUID: $guid no encontrado"))
         }
-        val updatedDispositivo = mapper.toDispositivoFromUpdate(existingDispositivo, dispositivo)
-        dispositivoRepository.save(updatedDispositivo)
-        return Ok(mapper.toDispositivoResponse(updatedDispositivo))
+        existingDispositivo.componentes = dispositivo.componentes
+        existingDispositivo.estado = Estado.valueOf(dispositivo.estado)
+        existingDispositivo.incidenciaGuid = dispositivo.incidenciaGuid
+        existingDispositivo.stock = dispositivo.stock
+        existingDispositivo.updatedDate = LocalDateTime.now()
+        dispositivoRepository.save(existingDispositivo)
+        return Ok(mapper.toDispositivoResponse(existingDispositivo))
     }
 
     override fun deleteDispositivoByGuid(guid: String): Result<DispositivoResponse, DispositivoError> {
