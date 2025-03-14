@@ -28,7 +28,7 @@ class Dispositivo(
     @Enumerated(EnumType.STRING)
     var estado : Estado = Estado.NUEVO,
 
-    var incidenciaGuid : String = "",
+    var incidenciaGuid : String? = "",
 
     var stock: Int = 0,
 
