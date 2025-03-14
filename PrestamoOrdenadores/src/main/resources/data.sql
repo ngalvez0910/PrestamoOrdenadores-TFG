@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION generate_guid() RETURNS VARCHAR(11) AS '
+/* CREATE OR REPLACE FUNCTION generate_guid() RETURNS VARCHAR(11) AS '
 DECLARE
     chars TEXT := ''ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'';
     result TEXT := '''';
@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     last_login_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_password_reset_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ */
 
 -- Insertar usuarios de prueba
 INSERT INTO usuarios (guid, email, password, rol, numero_identificacion, nombre, apellidos, curso, tutor, foto_carnet, avatar, is_activo, created_date, updated_date, last_login_date, last_password_reset_date)
@@ -41,6 +42,7 @@ VALUES
     ('0d6d031ad0a', 'admin@admin.colegio.com', 'adminpassword', 'ADMIN', '00000000X', 'Admin', 'User', NULL, NULL, 'foto3.jpg', 'avatar3.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
+/*
 -- Crear tabla dispositivos
 CREATE TABLE IF NOT EXISTS dispositivos (
     id SERIAL PRIMARY KEY,
@@ -54,6 +56,7 @@ CREATE TABLE IF NOT EXISTS dispositivos (
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ */
 
 
 -- Insertar dispositivos de prueba
