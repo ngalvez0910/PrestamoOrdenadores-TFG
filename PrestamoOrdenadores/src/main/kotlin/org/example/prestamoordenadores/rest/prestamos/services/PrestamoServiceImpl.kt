@@ -56,6 +56,7 @@ class PrestamoServiceImpl(
         }
 
         var prestamoCreado = mapper.toPrestamoFromCreate(prestamo)
+        prestamoRepository.save(prestamoCreado)
 
         return Ok(mapper.toPrestamoResponse(prestamoCreado))
     }
@@ -67,7 +68,7 @@ class PrestamoServiceImpl(
         return if (prestamoEncontrado == null) {
             Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
         } else {
-            prestamoEncontrado.estado = prestamo.estado
+            prestamoEncontrado.estado = Estado.valueOf(prestamo.estado.uppercase())
             prestamoEncontrado.updatedDate = LocalDateTime.now()
 
             prestamoRepository.save(prestamoEncontrado)
