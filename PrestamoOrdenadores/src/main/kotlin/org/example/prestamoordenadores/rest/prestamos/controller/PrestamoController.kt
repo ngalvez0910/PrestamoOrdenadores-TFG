@@ -1,6 +1,7 @@
 package org.example.prestamoordenadores.rest.prestamos.controller
 
 import com.github.michaelbull.result.mapBoth
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoNotFound
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -70,6 +72,14 @@ class PrestamoController
                     else -> ResponseEntity.status(422).body(null)
                 }
             }
+        )
+    }
+
+    @PostMapping
+    fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<PrestamoResponse>{
+        return prestamoService.createPrestamo(prestamo).mapBoth(
+            success = { ResponseEntity.status(201).body(it) },
+            failure = { ResponseEntity.status(422).body(null) }
         )
     }
 
