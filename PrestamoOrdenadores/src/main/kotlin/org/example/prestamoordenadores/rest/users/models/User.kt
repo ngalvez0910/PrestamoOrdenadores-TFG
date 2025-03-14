@@ -47,7 +47,7 @@ class User (
     var tutor: String?= "",
 
     @NotNull("Foto carnet no puede ser null")
-    var fotoCarnet: String?= "",
+    var fotoCarnet: String= "",
 
     @NotNull("Avatar no puede ser null")
     var avatar: String = "",
