@@ -30,7 +30,7 @@ class DispositivoServiceImpl(
         return Ok(mapper.toDispositivoResponseList(dispositivos))
     }
 
-    override fun getDispositivoByGuid(guid: String): Result<DispositivoResponse, DispositivoError> {
+    override fun getDispositivoByGuid(guid: String): Result<DispositivoResponse?, DispositivoError> {
         logger.debug { "Obteniendo dispositivo con GUID: $guid" }
         val dispositivo = dispositivoRepository.findDispositivoByGuid(guid)
 
