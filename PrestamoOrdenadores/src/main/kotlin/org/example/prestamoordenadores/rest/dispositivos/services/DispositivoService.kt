@@ -13,7 +13,7 @@ interface DispositivoService {
     fun getAllDispositivos(): Result<List<DispositivoResponse>, DispositivoError>
     fun getDispositivoByGuid(guid: String) : Result<DispositivoResponse?, DispositivoError>
     fun createDispositivo(dispositivo: DispositivoCreateRequest) : Result<DispositivoResponse, DispositivoError>
-    fun updateDispositivo(guid: String, dispositivo: DispositivoUpdateRequest) : Result<DispositivoResponse?, DispositivoError>
+    fun updateDispositivo(guid: String, dispositivo: DispositivoUpdateRequest) : Result<DispositivoResponseAdmin?, DispositivoError>
     fun deleteDispositivoByGuid(guid: String) : Result<DispositivoResponse?, DispositivoError>
     fun getDispositivoByNumeroSerie(numeroSerie: String) : Result<DispositivoResponseAdmin?, DispositivoError>
     fun getDispositivoByEstado(estado: String): Result<List<DispositivoResponseAdmin>, DispositivoError>

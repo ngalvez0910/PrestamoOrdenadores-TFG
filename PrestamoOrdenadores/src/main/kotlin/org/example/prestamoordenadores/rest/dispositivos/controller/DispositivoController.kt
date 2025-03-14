@@ -82,7 +82,7 @@ class DispositivoController
         )
     }
 
-    @PutMapping("/{guid}")
+    @PatchMapping("/{guid}")
     fun updateDispositivo(@PathVariable guid: String, @RequestBody dispositivo : DispositivoUpdateRequest): ResponseEntity<Any>{
         return dispositivoService.updateDispositivo(guid, dispositivo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
