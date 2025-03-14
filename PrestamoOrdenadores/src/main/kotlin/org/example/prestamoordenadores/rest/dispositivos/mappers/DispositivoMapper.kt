@@ -2,6 +2,7 @@ package org.example.prestamoordenadores.rest.dispositivos.mappers
 
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
+import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.Estado
@@ -38,7 +39,23 @@ class DispositivoMapper {
         )
     }
 
+    fun toDispositivoResponseAdmin(dispositivo: Dispositivo): DispositivoResponseAdmin{
+        return DispositivoResponseAdmin(
+            guid = dispositivo.guid,
+            numeroSerie = dispositivo.numeroSerie,
+            componentes = dispositivo.componentes,
+            estado = dispositivo.estado.toString(),
+            incidenciaGuid = dispositivo.incidenciaGuid,
+            stock = dispositivo.stock,
+            isActivo = dispositivo.isActivo
+        )
+    }
+
     fun toDispositivoResponseList(dispositivos: List<Dispositivo?>): List<DispositivoResponse> {
         return dispositivos.map { toDispositivoResponse(it!!) }
+    }
+
+    fun toDispositivoResponseListAdmin(dispositivos: List<Dispositivo?>): List<DispositivoResponseAdmin> {
+        return dispositivos.map { toDispositivoResponseAdmin(it!!) }
     }
 }

@@ -3,6 +3,7 @@ package org.example.prestamoordenadores.rest.dispositivos.controller
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
+import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoNotFound
 import org.example.prestamoordenadores.rest.dispositivos.services.DispositivoService
@@ -46,7 +47,7 @@ class DispositivoController
     }
 
     @GetMapping("/numeroSerie/{numeroSerie}")
-    fun getDispositivoByNumeroSerie(@PathVariable numeroSerie: String): ResponseEntity<DispositivoResponse?>{
+    fun getDispositivoByNumeroSerie(@PathVariable numeroSerie: String): ResponseEntity<DispositivoResponseAdmin?>{
         return dispositivoService.getDispositivoByNumeroSerie(numeroSerie).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -59,7 +60,7 @@ class DispositivoController
     }
 
     @GetMapping("/estado/{estado}")
-    fun getDispositivoByEstado(@PathVariable estado: String): ResponseEntity<List<DispositivoResponse>>{
+    fun getDispositivoByEstado(@PathVariable estado: String): ResponseEntity<List<DispositivoResponseAdmin>>{
         return dispositivoService.getDispositivoByEstado(estado).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->

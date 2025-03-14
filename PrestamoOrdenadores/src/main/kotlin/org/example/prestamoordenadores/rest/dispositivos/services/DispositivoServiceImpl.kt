@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
+import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
 import org.example.prestamoordenadores.rest.dispositivos.mappers.DispositivoMapper
@@ -68,19 +69,19 @@ class DispositivoServiceImpl(
         return Ok(mapper.toDispositivoResponse(dispositivo))
     }
 
-    override fun getDispositivoByNumeroSerie(numeroSerie: String): Result<DispositivoResponse, DispositivoError> {
+    override fun getDispositivoByNumeroSerie(numeroSerie: String): Result<DispositivoResponseAdmin, DispositivoError> {
         logger.debug { "Obteniendo dispositivo con numero de serie: $numeroSerie" }
         val dispositivo = dispositivoRepository.findByNumeroSerie(numeroSerie)
         return if (dispositivo == null) {
             Err(DispositivoError.DispositivoNotFound("Dispositivo con numero de serie: $numeroSerie no encontrado"))
         } else {
-            Ok(mapper.toDispositivoResponse(dispositivo))
+            Ok(mapper.toDispositivoResponseAdmin(dispositivo))
         }
     }
 
-    override fun getDispositivoByEstado(estado: String): Result<List<DispositivoResponse>, DispositivoError> {
+    override fun getDispositivoByEstado(estado: String): Result<List<DispositivoResponseAdmin>, DispositivoError> {
         logger.debug{ "Obteniendo dispositivo con estado: $estado" }
-        val dispositivos = dispositivoRepository.findByEstado(estado)
-        return Ok(mapper.toDispositivoResponseList(dispositivos))
+        val dispositivos = dispositivoRepository.findByEstado(Estado.valueOf(estado.uppercase()))
+        return Ok(mapper.toDispositivoResponseListAdmin(dispositivos))
     }
 }
