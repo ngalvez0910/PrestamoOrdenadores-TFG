@@ -1,5 +1,5 @@
 package org.example.prestamoordenadores.rest.prestamos.models
 
-enum class Estado {
+enum class EstadoPrestamo {
     VENCIDO, EN_CURSO, CANCELADO
 }

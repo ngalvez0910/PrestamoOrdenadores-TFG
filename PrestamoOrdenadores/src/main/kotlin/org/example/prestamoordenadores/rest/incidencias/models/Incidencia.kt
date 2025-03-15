@@ -23,7 +23,7 @@ class Incidencia(
 
     @Enumerated(EnumType.STRING)
     @NotNull("Estado no puede estar vacío")
-    var estado : Estado = Estado.RESUELTO,
+    var estadoIncidencia : EstadoIncidencia = EstadoIncidencia.RESUELTO,
 
     var userGuid: String = "",
 
@@ -33,6 +33,6 @@ class Incidencia(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now()
 ) {
-    constructor(guid: String, estado: Estado, userGuid: String, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, estado, userGuid, createdDate, updatedDate)
+    constructor(guid: String, estadoIncidencia: EstadoIncidencia, userGuid: String, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, estadoIncidencia, userGuid, createdDate, updatedDate)
 }

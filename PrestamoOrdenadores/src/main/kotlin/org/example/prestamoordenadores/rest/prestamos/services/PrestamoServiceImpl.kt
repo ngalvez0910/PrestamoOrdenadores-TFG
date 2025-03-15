@@ -3,13 +3,14 @@ package org.example.prestamoordenadores.rest.prestamos.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.example.prestamoordenadores.rest.prestamos.mappers.PrestamoMapper
-import org.example.prestamoordenadores.rest.prestamos.models.Estado
+import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.lighthousegames.logging.logging
@@ -50,13 +51,18 @@ class PrestamoServiceImpl(
             return Err(PrestamoError.UserNotFound("Usuario con GUID: ${prestamo.userGuid} no encontrado"))
         }
 
-        val dispositivo = dispositivoRepository.findDispositivoByGuid(prestamo.dispositivoGuid)
-        if (dispositivo == null) {
-            return Err(PrestamoError.DispositivoNotFound("Dispositivo con GUID: ${prestamo.dispositivoGuid} no encontrado"))
+        val dispositivosDisponibles = dispositivoRepository.findByEstadoDispositivo(EstadoDispositivo.NUEVO)
+        if (dispositivosDisponibles.isEmpty()) {
+            return Err(PrestamoError.DispositivoNotFound("No hay dispositivos disponibles actualmente"))
         }
 
-        var prestamoCreado = mapper.toPrestamoFromCreate(prestamo)
+        val dispositivoSeleccionado = dispositivosDisponibles.random()
+
+        var prestamoCreado = mapper.toPrestamoFromCreate(prestamo, dispositivoSeleccionado)
         prestamoRepository.save(prestamoCreado)
+
+        dispositivoSeleccionado.estadoDispositivo = EstadoDispositivo.PRESTADO
+        dispositivoRepository.save(dispositivoSeleccionado)
 
         return Ok(mapper.toPrestamoResponse(prestamoCreado))
     }
@@ -68,7 +74,7 @@ class PrestamoServiceImpl(
         return if (prestamoEncontrado == null) {
             Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
         } else {
-            prestamoEncontrado.estado = Estado.valueOf(prestamo.estado.uppercase())
+            prestamoEncontrado.estadoPrestamo = EstadoPrestamo.valueOf(prestamo.estado.uppercase())
             prestamoEncontrado.updatedDate = LocalDateTime.now()
 
             prestamoRepository.save(prestamoEncontrado)
@@ -83,7 +89,7 @@ class PrestamoServiceImpl(
         return if (prestamoEncontrado == null) {
             Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
         } else {
-            prestamoEncontrado.estado = Estado.CANCELADO
+            prestamoEncontrado.estadoPrestamo = EstadoPrestamo.CANCELADO
 
             prestamoRepository.save(prestamoEncontrado)
             Ok(mapper.toPrestamoResponse(prestamoEncontrado))

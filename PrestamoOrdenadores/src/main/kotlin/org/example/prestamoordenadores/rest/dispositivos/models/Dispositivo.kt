@@ -26,7 +26,7 @@ class Dispositivo(
     var componentes :  String = "",
 
     @Enumerated(EnumType.STRING)
-    var estado : Estado = Estado.NUEVO,
+    var estadoDispositivo : EstadoDispositivo = EstadoDispositivo.NUEVO,
 
     var incidenciaGuid : String? = "",
 
@@ -40,6 +40,6 @@ class Dispositivo(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor(guid: String, numeroSerie: String, componentes: String, estado: Estado, incidenciaGuid: String, stock: Int, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, numeroSerie, componentes, estado, incidenciaGuid, stock, isActivo, createdDate, updatedDate)
+    constructor(guid: String, numeroSerie: String, componentes: String, estadoDispositivo: EstadoDispositivo, incidenciaGuid: String, stock: Int, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, numeroSerie, componentes, estadoDispositivo, incidenciaGuid, stock, isActivo, createdDate, updatedDate)
 }

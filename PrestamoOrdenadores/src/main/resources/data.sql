@@ -1,4 +1,4 @@
-/* CREATE OR REPLACE FUNCTION generate_guid() RETURNS VARCHAR(11) AS '
+/*CREATE OR REPLACE FUNCTION generate_guid() RETURNS VARCHAR(11) AS '
 DECLARE
     chars TEXT := ''ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'';
     result TEXT := '''';
@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     last_login_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_password_reset_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
  */
 
 -- Insertar usuarios de prueba
@@ -41,7 +42,6 @@ VALUES
     ('c1f40bb1900', 'maria@profesor.colegio.com', 'password456', 'PROFESOR', '87654321B', 'María', 'Gómez', '1º Bachillerato', NULL, 'foto2.jpg', 'avatar2.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('0d6d031ad0a', 'admin@admin.colegio.com', 'adminpassword', 'ADMIN', '00000000X', 'Admin', 'User', NULL, NULL, 'foto3.jpg', 'avatar3.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-
 /*
 -- Crear tabla dispositivos
 CREATE TABLE IF NOT EXISTS dispositivos (
@@ -49,18 +49,19 @@ CREATE TABLE IF NOT EXISTS dispositivos (
     guid VARCHAR(11) NOT NULL UNIQUE DEFAULT generate_guid(),
     numero_serie VARCHAR(255) NOT NULL UNIQUE,
     componentes VARCHAR(255) NOT NULL,
-    estado VARCHAR(13) NOT NULL,
+    estado_dispositivo VARCHAR(13) NOT NULL,
     incidencia_guid VARCHAR(11) NULL DEFAULT NULL,
     stock INTEGER NOT NULL,
     is_activo BOOLEAN DEFAULT true,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
  */
 
 
 -- Insertar dispositivos de prueba
-INSERT INTO dispositivos (guid, numero_serie, componentes, estado, incidencia_guid, stock, is_activo, created_date, updated_date)
+INSERT INTO dispositivos (guid, numero_serie, componentes, estado_dispositivo, incidencia_guid, stock, is_activo, created_date, updated_date)
 VALUES
     ('ed472271676', '1AB123WXYZ', 'CPU, RAM, SSD', 'NUEVO', null, 10, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('a1b2c3d4e5f', '5CD456QWER', 'CPU, RAM, HDD', 'PRESTADO', null, 5, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
