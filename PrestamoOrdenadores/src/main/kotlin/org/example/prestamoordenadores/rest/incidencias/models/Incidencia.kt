@@ -22,8 +22,11 @@ class Incidencia(
     val id: Long = 0L,
     var guid : String = generateIncidenciaGuid(),
 
+    var asunto : String = "",
+
+    var descripcion : String = "",
+
     @Enumerated(EnumType.STRING)
-    @NotNull("Estado no puede estar vacío")
     var estadoIncidencia : EstadoIncidencia = EstadoIncidencia.PENDIENTE,
 
     var userGuid: String = "",
@@ -34,6 +37,6 @@ class Incidencia(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now()
 ) {
-    constructor(guid: String, estadoIncidencia: EstadoIncidencia, userGuid: String, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, estadoIncidencia, userGuid, createdDate, updatedDate)
+    constructor(guid: String, asunto: String, descripcion: String, estadoIncidencia: EstadoIncidencia, userGuid: String, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, asunto, descripcion, estadoIncidencia, userGuid, createdDate, updatedDate)
 }
