@@ -3,6 +3,8 @@ package org.example.prestamoordenadores.rest.incidencias.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
+import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
@@ -55,8 +57,9 @@ class IncidenciaServiceImpl(
         if (existingIncidencia == null) {
             return Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
         }
+        val estadoNormalizado = incidencia.estadoIncidencia.replace(" ", "_").uppercase()
 
-        existingIncidencia.estadoIncidencia = EstadoIncidencia.valueOf(incidencia.estadoIncidencia)
+        existingIncidencia.estadoIncidencia = EstadoIncidencia.valueOf(estadoNormalizado)
         existingIncidencia.updatedDate = LocalDateTime.now()
 
         repository.save(existingIncidencia)
@@ -77,7 +80,14 @@ class IncidenciaServiceImpl(
 
     override fun getIncidenciaByEstado(estado: String): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo incidencias en estado: $estado" }
-        val incidencias = repository.findIncidenciasByEstadoIncidencia(EstadoIncidencia.valueOf(estado))
+        val estadoNormalizado = estado.replace(" ", "_").uppercase()
+
+        val estadoEnum = EstadoIncidencia.entries.find { it.name == estadoNormalizado }
+        if (estadoEnum == null) {
+            return Err(IncidenciaError.IncidenciaNotFound("Incidencia con estado '$estado' no encontrada"))
+        }
+
+        val incidencias = repository.findIncidenciasByEstadoIncidencia(estadoEnum)
 
         return Ok(mapper.toIncidenciaResponseList(incidencias))
     }
