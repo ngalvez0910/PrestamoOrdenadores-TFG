@@ -22,20 +22,15 @@ class Prestamo(
     val id: Long = 0L,
     var guid : String = generateGuid(),
 
-    @NotNull("User Guid no puede ser null")
     var userGuid : String = "",
 
-    @NotNull("Dispositivo Guid no puede ser null")
     var dispositivoGuid : String = "",
 
     @Enumerated(EnumType.STRING)
-    @NotNull("Estado no puede ser null")
     var estadoPrestamo : EstadoPrestamo = EstadoPrestamo.EN_CURSO,
 
-    @NotNull("Fecha Prestamo no puede ser null")
     var fechaPrestamo : LocalDate = LocalDate.now(),
 
-    @NotNull("Fecha Devolucion no puede ser null")
     var fechaDevolucion : LocalDate = LocalDate.now(),
 
     @CreatedDate
