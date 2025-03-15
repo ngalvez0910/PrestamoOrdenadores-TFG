@@ -1,6 +1,8 @@
 package org.example.prestamoordenadores.rest.prestamos.dto
 
+import org.jetbrains.annotations.NotNull
+
 data class PrestamoCreateRequest(
-    var userGuid: String,
-    var dispositivoGuid: String
+    @NotNull("User Guid no puede ser null")
+    var userGuid: String
 )

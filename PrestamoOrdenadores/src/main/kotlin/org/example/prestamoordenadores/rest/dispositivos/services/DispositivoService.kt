@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service
 
 @Service
 interface DispositivoService {
-    fun getAllDispositivos(): Result<List<DispositivoResponse>, DispositivoError>
-    fun getDispositivoByGuid(guid: String) : Result<DispositivoResponse?, DispositivoError>
+    fun getAllDispositivos(): Result<List<DispositivoResponseAdmin>, DispositivoError>
+    fun getDispositivoByGuid(guid: String) : Result<DispositivoResponseAdmin?, DispositivoError>
     fun createDispositivo(dispositivo: DispositivoCreateRequest) : Result<DispositivoResponse, DispositivoError>
     fun updateDispositivo(guid: String, dispositivo: DispositivoUpdateRequest) : Result<DispositivoResponseAdmin?, DispositivoError>
     fun deleteDispositivoByGuid(guid: String) : Result<DispositivoResponse?, DispositivoError>

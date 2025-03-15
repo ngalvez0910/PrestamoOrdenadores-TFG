@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import org.example.prestamoordenadores.utils.generators.generateGuid
+import org.example.prestamoordenadores.utils.generators.generateIncidenciaGuid
 import org.jetbrains.annotations.NotNull
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -19,11 +20,14 @@ class Incidencia(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0L,
-    var guid : String = generateGuid(),
+    var guid : String = generateIncidenciaGuid(),
+
+    var asunto : String = "",
+
+    var descripcion : String = "",
 
     @Enumerated(EnumType.STRING)
-    @NotNull("Estado no puede estar vacío")
-    var estado : Estado = Estado.RESUELTO,
+    var estadoIncidencia : EstadoIncidencia = EstadoIncidencia.PENDIENTE,
 
     var userGuid: String = "",
 
@@ -33,6 +37,6 @@ class Incidencia(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now()
 ) {
-    constructor(guid: String, estado: Estado, userGuid: String, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, estado, userGuid, createdDate, updatedDate)
+    constructor(guid: String, asunto: String, descripcion: String, estadoIncidencia: EstadoIncidencia, userGuid: String, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, asunto, descripcion, estadoIncidencia, userGuid, createdDate, updatedDate)
 }

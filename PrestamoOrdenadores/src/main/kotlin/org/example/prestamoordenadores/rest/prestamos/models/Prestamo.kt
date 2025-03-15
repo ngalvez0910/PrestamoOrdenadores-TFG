@@ -22,20 +22,15 @@ class Prestamo(
     val id: Long = 0L,
     var guid : String = generateGuid(),
 
-    @NotNull("User Guid no puede ser null")
     var userGuid : String = "",
 
-    @NotNull("Dispositivo Guid no puede ser null")
     var dispositivoGuid : String = "",
 
     @Enumerated(EnumType.STRING)
-    @NotNull("Estado no puede ser null")
-    var estado : Estado = Estado.EN_CURSO,
+    var estadoPrestamo : EstadoPrestamo = EstadoPrestamo.EN_CURSO,
 
-    @NotNull("Fecha Prestamo no puede ser null")
     var fechaPrestamo : LocalDate = LocalDate.now(),
 
-    @NotNull("Fecha Devolucion no puede ser null")
     var fechaDevolucion : LocalDate = LocalDate.now(),
 
     @CreatedDate
@@ -44,6 +39,6 @@ class Prestamo(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor(guid: String, userGuid: String, dispositivoGuid: String, estado: Estado, fechaPrestamo: LocalDate, fechaDevolucion: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-        this(0, guid, userGuid, dispositivoGuid, estado, fechaPrestamo, fechaDevolucion, createdDate, updatedDate)
+    constructor(guid: String, userGuid: String, dispositivoGuid: String, estadoPrestamo: EstadoPrestamo, fechaPrestamo: LocalDate, fechaDevolucion: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+        this(0, guid, userGuid, dispositivoGuid, estadoPrestamo, fechaPrestamo, fechaDevolucion, createdDate, updatedDate)
 }

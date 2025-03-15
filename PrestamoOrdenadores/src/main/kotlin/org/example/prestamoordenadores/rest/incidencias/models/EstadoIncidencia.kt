@@ -1,5 +1,5 @@
 package org.example.prestamoordenadores.rest.incidencias.models
 
-enum class Estado {
+enum class EstadoIncidencia {
     RESUELTO, PENDIENTE
 }

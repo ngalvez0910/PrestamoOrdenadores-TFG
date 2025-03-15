@@ -2,6 +2,7 @@ package org.example.prestamoordenadores.rest.users.mappers
 
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
+import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
 import org.springframework.stereotype.Component
@@ -15,8 +16,25 @@ class UserMapper {
             email = user.email,
             nombre = user.nombre,
             apellidos = user.apellidos,
-            curso = user.curso.toString(),
-            tutor = user.tutor.toString()
+            curso = user.curso ?:"",
+            tutor = user.tutor ?:""
+        )
+    }
+
+    fun toUserResponseAdmin(user: User): UserResponseAdmin{
+        return UserResponseAdmin(
+            guid = user.guid,
+            email = user.email,
+            nombre = user.nombre,
+            apellidos = user.apellidos,
+            curso = user.curso ?:"",
+            tutor = user.tutor ?:"",
+            rol = user.rol,
+            isActivo = user.isActivo,
+            createdDate = user.createdDate.toString(),
+            updatedDate = user.updatedDate.toString(),
+            lastLoginDate = user.lastLoginDate.toString(),
+            lastPasswordResetDate = user.lastPasswordResetDate.toString(),
         )
     }
 
@@ -41,5 +59,9 @@ class UserMapper {
 
     fun toUserResponseList(users: List<User?>): List<UserResponse> {
         return users.map { toUserResponse(it!!) }
+    }
+
+    fun toUserResponseListAdmin(users: List<User?>): List<UserResponseAdmin> {
+        return users.map { toUserResponseAdmin(it!!) }
     }
 }

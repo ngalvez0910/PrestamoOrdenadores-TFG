@@ -1,8 +1,9 @@
 package org.example.prestamoordenadores.rest.prestamos.mappers
 
+import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
-import org.example.prestamoordenadores.rest.prestamos.models.Estado
+import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -20,11 +21,11 @@ class PrestamoMapper {
         )
     }
 
-    fun toPrestamoFromCreate(prestamo: PrestamoCreateRequest): Prestamo {
+    fun toPrestamoFromCreate(prestamo: PrestamoCreateRequest, dispositivo: Dispositivo): Prestamo {
         return Prestamo(
             userGuid = prestamo.userGuid,
-            dispositivoGuid = prestamo.dispositivoGuid,
-            estado = Estado.EN_CURSO,
+            dispositivoGuid = dispositivo.guid,
+            estadoPrestamo = EstadoPrestamo.EN_CURSO,
             fechaPrestamo = LocalDate.now(),
             createdDate = LocalDateTime.now(),
             updatedDate = LocalDateTime.now()

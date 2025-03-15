@@ -21,35 +21,25 @@ class User (
     val id: Long = 0L,
     var guid : String = generateGuid(),
 
-    @NotNull("Email no puede ser null")
     var email: String = "",
 
-    @NotNull("Password no puede estar vacío")
     var password: String = "",
 
     @Enumerated(EnumType.STRING)
-    @NotNull("Rol no puede estar vacío")
     var rol: Role = Role.ALUMNO,
 
-    @NotNull("Numero identificacion no puede ser null")
     var numeroIdentificacion : String = "",
 
-    @NotNull("Nombre no puede ser null")
     var nombre: String = "",
 
-    @NotNull("Apellidos no puede ser null")
     var apellidos: String = "",
 
-    @NotNull("Curso no puede ser null")
     var curso: String? = "",
 
-    @NotNull("Tutor no puede ser null")
     var tutor: String?= "",
 
-    @NotNull("Foto carnet no puede ser null")
     var fotoCarnet: String= "",
 
-    @NotNull("Avatar no puede ser null")
     var avatar: String = "",
 
     var isActivo: Boolean = false,
