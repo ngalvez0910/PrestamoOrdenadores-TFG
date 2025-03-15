@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
+import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
@@ -20,10 +21,10 @@ class UserServiceImpl(
     private val repository : UserRepository,
     private val mapper: UserMapper
 ): UserService {
-    override fun getAllUsers(): Result<List<UserResponse>, UserError> {
+    override fun getAllUsers(): Result<List<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
         var usuarios=repository.findAll()
-        return Ok(mapper.toUserResponseList(usuarios))
+        return Ok(mapper.toUserResponseListAdmin(usuarios))
     }
 
     override fun getUserByGuid(guid: String): Result<UserResponse?, UserError> {
