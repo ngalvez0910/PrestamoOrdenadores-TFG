@@ -22,11 +22,11 @@ class DispositivoServiceImpl(
     private val dispositivoRepository: DispositivoRepository,
     private val mapper: DispositivoMapper
 ) : DispositivoService {
-    override fun getAllDispositivos(): Result<List<DispositivoResponse>, DispositivoError> {
+    override fun getAllDispositivos(): Result<List<DispositivoResponseAdmin>, DispositivoError> {
         logger.debug { "Obteniendo todos los dispositivos" }
         var dispositivos = dispositivoRepository.findAll()
 
-        return Ok(mapper.toDispositivoResponseList(dispositivos))
+        return Ok(mapper.toDispositivoResponseListAdmin(dispositivos))
     }
 
     override fun getDispositivoByGuid(guid: String): Result<DispositivoResponseAdmin?, DispositivoError> {

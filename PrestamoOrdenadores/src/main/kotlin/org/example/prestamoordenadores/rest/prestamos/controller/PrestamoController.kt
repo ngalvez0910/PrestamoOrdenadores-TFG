@@ -4,6 +4,8 @@ import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
+import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
+import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.DispositivoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.UserNotFound
 import org.example.prestamoordenadores.rest.prestamos.services.PrestamoService
@@ -79,7 +81,13 @@ class PrestamoController
     fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<Any>{
         return prestamoService.createPrestamo(prestamo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
-            failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
+            failure = { error ->
+                when(error) {
+                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    is DispositivoNotFound -> ResponseEntity.status(404).body("No hay dispositivos disponibles actualmente")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
         )
     }
 
