@@ -26,84 +26,84 @@ class PrestamoController
     private val prestamoService: PrestamoService
 ) {
     @GetMapping
-    fun getAllPrestamos() : ResponseEntity<List<PrestamoResponse>>{
+    fun getAllPrestamos() : ResponseEntity<Any>{
         return prestamoService.getAllPrestamos().mapBoth(
             success = { ResponseEntity.ok(it) },
-            failure = { ResponseEntity.status(422).body(null) }
+            failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
         )
     }
 
     @GetMapping("/{guid}")
-    fun getPrestamoByGuid(@PathVariable guid: String) : ResponseEntity<PrestamoResponse?>{
+    fun getPrestamoByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return prestamoService.getPrestamoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
                 when(error) {
-                    is PrestamoNotFound -> ResponseEntity.notFound().build()
-                    else -> ResponseEntity.status(422).body(null)
+                    is PrestamoNotFound -> ResponseEntity.status(404).body("Préstamo no encontrado")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
         )
     }
 
     @GetMapping("/fecha/{fecha}")
-    fun getPrestamoByFechaPrestamo(@PathVariable fecha: LocalDate) : ResponseEntity<List<PrestamoResponse>>{
+    fun getPrestamoByFechaPrestamo(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
         return prestamoService.getByFechaPrestamo(fecha).mapBoth(
             success = { ResponseEntity.ok(it) },
-            failure = { ResponseEntity.status(422).body(null) }
+            failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
         )
     }
 
     @GetMapping("/devoluciones/{fecha}")
-    fun getPrestamoByFechaDevolucion(@PathVariable fecha: LocalDate) : ResponseEntity<List<PrestamoResponse>>{
+    fun getPrestamoByFechaDevolucion(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
         return prestamoService.getByFechaDevolucion(fecha).mapBoth(
             success = { ResponseEntity.ok(it) },
-            failure = { ResponseEntity.status(422).body(null) }
+            failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
         )
     }
 
     @GetMapping("/user/{guid}")
-    fun getPrestamosByUserGuid(@PathVariable guid: String) : ResponseEntity<List<PrestamoResponse>>{
+    fun getPrestamosByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return prestamoService.getPrestamoByUserGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
                 when(error) {
-                    is UserNotFound -> ResponseEntity.notFound().build()
-                    else -> ResponseEntity.status(422).body(null)
+                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
         )
     }
 
     @PostMapping
-    fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<PrestamoResponse>{
+    fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<Any>{
         return prestamoService.createPrestamo(prestamo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
-            failure = { ResponseEntity.status(422).body(null) }
+            failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
         )
     }
 
     @PatchMapping("/{guid}")
-    fun updatePrestamo(@PathVariable guid: String, @RequestBody prestamo : PrestamoUpdateRequest): ResponseEntity<PrestamoResponse?>{
+    fun updatePrestamo(@PathVariable guid: String, @RequestBody prestamo : PrestamoUpdateRequest): ResponseEntity<Any>{
         return prestamoService.updatePrestamo(guid, prestamo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
                 when(error) {
-                    is PrestamoNotFound -> ResponseEntity.notFound().build()
-                    else -> ResponseEntity.status(422).body(null)
+                    is PrestamoNotFound -> ResponseEntity.status(404).body("Préstamo no encontrado")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
         )
     }
 
     @DeleteMapping("/{guid}")
-    fun deletePrestamo(@PathVariable guid: String): ResponseEntity<PrestamoResponse?>{
+    fun deletePrestamo(@PathVariable guid: String): ResponseEntity<Any>{
         return prestamoService.deletePrestamoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
                 when(error) {
-                    is PrestamoNotFound -> ResponseEntity.notFound().build()
-                    else -> ResponseEntity.status(422).body(null)
+                    is PrestamoNotFound -> ResponseEntity.status(404).body("Préstamo no encontrado")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
         )
