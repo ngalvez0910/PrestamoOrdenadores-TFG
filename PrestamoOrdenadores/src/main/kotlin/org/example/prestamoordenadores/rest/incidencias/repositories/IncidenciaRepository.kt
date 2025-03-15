@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface IncidenciaRepository : JpaRepository<Incidencia, Long> {
-    fun findIncidenciasByGuid(guid: String) : Incidencia
+    fun findIncidenciaByGuid(guid: String) : Incidencia
     fun findIncidenciasByEstadoIncidencia(estadoIncidencia: EstadoIncidencia) : List<Incidencia>
+    fun findIncidenciasByUserGuid(userGuid: String) : List<Incidencia>
 }
