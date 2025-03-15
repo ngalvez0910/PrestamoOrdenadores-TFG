@@ -97,7 +97,8 @@ class DispositivoServiceImpl(
 
     override fun getDispositivoByEstado(estado: String): Result<List<DispositivoResponseAdmin>, DispositivoError> {
         logger.debug{ "Obteniendo dispositivo con estado: $estado" }
-        val dispositivos = dispositivoRepository.findByEstado(Estado.valueOf(estado.uppercase()))
+        val estadoNormalizado = estado.replace(" ", "_").uppercase()
+        val dispositivos = dispositivoRepository.findByEstado(Estado.valueOf(estadoNormalizado))
 
         return Ok(mapper.toDispositivoResponseListAdmin(dispositivos))
     }

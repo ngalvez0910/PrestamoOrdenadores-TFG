@@ -16,8 +16,8 @@ class UserMapper {
             email = user.email,
             nombre = user.nombre,
             apellidos = user.apellidos,
-            curso = user.curso.toString(),
-            tutor = user.tutor.toString()
+            curso = user.curso ?:"",
+            tutor = user.tutor ?:""
         )
     }
 
