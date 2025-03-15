@@ -19,4 +19,5 @@ interface UserService {
     fun getByCurso(curso: String): Result<List<UserResponse?>, UserError>
     fun getByNombre(nombre: String): Result<UserResponse?, UserError>
     fun getByEmail(email: String): Result<UserResponse?, UserError>
+    fun getByTutor(tutor: String) : Result<List<UserResponse?>, UserError>
 }

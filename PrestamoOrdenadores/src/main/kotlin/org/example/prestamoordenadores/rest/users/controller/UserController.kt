@@ -84,6 +84,19 @@ class UserController
         )
     }
 
+    @GetMapping("/tutor/{tutor}")
+    fun getUsersByTutor(@PathVariable tutor: String) : ResponseEntity<Any> {
+        return userService.getByTutor(tutor).mapBoth(
+            success = { ResponseEntity.ok(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.status(404).body("Usuarios no encontrados")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
+
     @PostMapping
     fun createUser(@RequestBody user: UserCreateRequest): ResponseEntity<Any> {
         return userService.createUser(user).mapBoth(

@@ -130,4 +130,15 @@ class UserServiceImpl(
             Ok(mapper.toUserResponse(user))
         }
     }
+
+    override fun getByTutor(tutor: String): Result<List<UserResponse?>, UserError> {
+        logger.debug { "Obteniendo usuarios con tutor: $tutor" }
+        var users = repository.findByTutor(tutor)
+
+        return if (users.isEmpty()) {
+            Err(UserError.UserNotFound("Usuarios con tutor $tutor no encontrados"))
+        } else {
+            Ok(mapper.toUserResponseList(users))
+        }
+    }
 }
