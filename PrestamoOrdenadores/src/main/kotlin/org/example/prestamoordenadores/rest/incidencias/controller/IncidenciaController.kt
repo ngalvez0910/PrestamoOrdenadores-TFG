@@ -24,7 +24,7 @@ class IncidenciaController
     private val incidenciaService: IncidenciaService
 )  {
     @GetMapping
-    fun getAllIncidencias() : ResponseEntity<Any>{
+    suspend fun getAllIncidencias() : ResponseEntity<Any>{
         return incidenciaService.getAllIncidencias().mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -32,7 +32,7 @@ class IncidenciaController
     }
 
     @GetMapping("/{guid}")
-    fun getIncidenciaByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    suspend fun getIncidenciaByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return incidenciaService.getIncidenciaByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -45,7 +45,7 @@ class IncidenciaController
     }
 
     @GetMapping("/estado/{estado}")
-    fun getIncidenciaByEstado(@PathVariable estado: String): ResponseEntity<Any>{
+    suspend fun getIncidenciaByEstado(@PathVariable estado: String): ResponseEntity<Any>{
         return incidenciaService.getIncidenciaByEstado(estado).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -58,7 +58,7 @@ class IncidenciaController
     }
 
     @GetMapping("/user/{guid}")
-    fun getIncidenciasByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    suspend fun getIncidenciasByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return incidenciaService.getIncidenciasByUserGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -71,7 +71,7 @@ class IncidenciaController
     }
 
     @PostMapping
-    fun createIncidencia(@RequestBody incidencia: IncidenciaCreateRequest): ResponseEntity<Any> {
+    suspend fun createIncidencia(@RequestBody incidencia: IncidenciaCreateRequest): ResponseEntity<Any> {
         return incidenciaService.createIncidencia(incidencia).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -79,7 +79,7 @@ class IncidenciaController
     }
 
     @PatchMapping("/{guid}")
-    fun updateIncidencia(@PathVariable guid: String, @RequestBody incidencia : IncidenciaUpdateRequest): ResponseEntity<Any>{
+    suspend fun updateIncidencia(@PathVariable guid: String, @RequestBody incidencia : IncidenciaUpdateRequest): ResponseEntity<Any>{
         return incidenciaService.updateIncidencia(guid, incidencia).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -92,7 +92,7 @@ class IncidenciaController
     }
 
     @DeleteMapping("/{guid}")
-    fun deleteIncidencia(@PathVariable guid: String): ResponseEntity<Any>{
+    suspend fun deleteIncidencia(@PathVariable guid: String): ResponseEntity<Any>{
         return incidenciaService.deleteIncidenciaByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->

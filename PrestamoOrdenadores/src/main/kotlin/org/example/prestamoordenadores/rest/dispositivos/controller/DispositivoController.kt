@@ -28,7 +28,7 @@ class DispositivoController
     private val dispositivoService: DispositivoService
 )  {
     @GetMapping
-    fun getAllDispositivos(): ResponseEntity<Any>{
+    suspend fun getAllDispositivos(): ResponseEntity<Any>{
         return dispositivoService.getAllDispositivos().mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -36,7 +36,7 @@ class DispositivoController
     }
 
     @GetMapping("/{guid}")
-    fun getDispositivoByGuid(@PathVariable guid: String): ResponseEntity<Any>{
+    suspend fun getDispositivoByGuid(@PathVariable guid: String): ResponseEntity<Any>{
         return dispositivoService.getDispositivoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -49,7 +49,7 @@ class DispositivoController
     }
 
     @GetMapping("/numeroSerie/{numeroSerie}")
-    fun getDispositivoByNumeroSerie(@PathVariable numeroSerie: String): ResponseEntity<Any>{
+    suspend fun getDispositivoByNumeroSerie(@PathVariable numeroSerie: String): ResponseEntity<Any>{
         return dispositivoService.getDispositivoByNumeroSerie(numeroSerie).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -62,7 +62,7 @@ class DispositivoController
     }
 
     @GetMapping("/estado/{estado}")
-    fun getDispositivoByEstado(@PathVariable estado: String): ResponseEntity<Any>{
+    suspend fun getDispositivoByEstado(@PathVariable estado: String): ResponseEntity<Any>{
         return dispositivoService.getDispositivoByEstado(estado).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -75,7 +75,7 @@ class DispositivoController
     }
 
     @PostMapping
-    fun createDispositivo(@RequestBody dispositivo: DispositivoCreateRequest): ResponseEntity<Any> {
+    suspend fun createDispositivo(@RequestBody dispositivo: DispositivoCreateRequest): ResponseEntity<Any> {
         return dispositivoService.createDispositivo(dispositivo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -83,7 +83,7 @@ class DispositivoController
     }
 
     @PatchMapping("/{guid}")
-    fun updateDispositivo(@PathVariable guid: String, @RequestBody dispositivo : DispositivoUpdateRequest): ResponseEntity<Any>{
+    suspend fun updateDispositivo(@PathVariable guid: String, @RequestBody dispositivo : DispositivoUpdateRequest): ResponseEntity<Any>{
         return dispositivoService.updateDispositivo(guid, dispositivo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -97,7 +97,7 @@ class DispositivoController
     }
 
     @DeleteMapping("/{guid}")
-    fun deleteDispositivo(@PathVariable guid: String): ResponseEntity<Any>{
+    suspend fun deleteDispositivo(@PathVariable guid: String): ResponseEntity<Any>{
         return dispositivoService.deleteDispositivoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="prestamosDB@localhost" uuid="9d6ae5e1-0c49-4a68-ab6a-f1c318286064">
+    <data-source source="LOCAL" name="prestamosDB@localhost" uuid="7bdb1c7c-8789-4ef5-8398-c7ea94c2ccc6">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>

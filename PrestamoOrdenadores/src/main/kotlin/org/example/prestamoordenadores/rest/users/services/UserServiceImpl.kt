@@ -3,6 +3,8 @@ package org.example.prestamoordenadores.rest.users.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
@@ -21,123 +23,144 @@ class UserServiceImpl(
     private val repository : UserRepository,
     private val mapper: UserMapper
 ): UserService {
-    override fun getAllUsers(): Result<List<UserResponseAdmin>, UserError> {
+    override suspend fun getAllUsers(): Result<List<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
-        var usuarios=repository.findAll()
-        return Ok(mapper.toUserResponseListAdmin(usuarios))
+
+        return withContext(Dispatchers.IO) {
+            val usuarios = repository.findAll()
+            Ok(mapper.toUserResponseListAdmin(usuarios))
+        }
     }
 
-    override fun getUserByGuid(guid: String): Result<UserResponse?, UserError> {
+    override suspend fun getUserByGuid(guid: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con GUID: $guid" }
-        var user = repository.findByGuid(guid)
 
-        return if (user == null) {
-            Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
-        } else {
+        return withContext(Dispatchers.IO) {
+            val user = repository.findByGuid(guid)
+            if (user == null) {
+                Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+            } else {
+                Ok(mapper.toUserResponse(user))
+            }
+        }
+    }
+
+    override suspend fun createUser(user: UserCreateRequest): Result<UserResponse, UserError> {
+        logger.debug { "Creando usuario: $user" }
+
+        return withContext(Dispatchers.IO) {
+            if (repository.existsUserByNumeroIdentificacion(user.numeroIdentificacion)) {
+                return@withContext Err(UserError.UserAlreadyExists("Usuario con numero de identificacion ${user.numeroIdentificacion} ya existe"))
+            }
+
+            val existingUser = repository.findByEmail(user.email)
+            if (existingUser != null) {
+                return@withContext Err(UserError.UserAlreadyExists("Usuario con email ${user.email} ya existe"))
+            }
+
+            if (repository.existsUserByNombreAndApellidosAndCurso(user.nombre, user.apellidos, user.curso)) {
+                return@withContext Err(UserError.UserAlreadyExists("Usuario con nombre ${user.nombre}, apellidos ${user.apellidos} y curso ${user.curso} ya existe"))
+            }
+
+            val savedUser = repository.save(mapper.toUserFromCreate(user))
+            Ok(mapper.toUserResponse(savedUser))
+        }
+    }
+
+
+    override suspend fun updateAvatar(guid: String, avatar: String): Result<UserResponse?, UserError> {
+        logger.debug { "Actualizando avatar del usuario con GUID: $guid" }
+
+        return withContext(Dispatchers.IO) {
+            var user = repository.findByGuid(guid)
+            if (user == null) {
+                return@withContext Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+            }
+            user.avatar = avatar
+            user.updatedDate = LocalDateTime.now()
+            repository.save(user)
             Ok(mapper.toUserResponse(user))
         }
     }
 
-    override fun createUser(user: UserCreateRequest): Result<UserResponse, UserError> {
-        logger.debug { "Creando usuario: $user" }
-        if(repository.existsUserByNumeroIdentificacion(user.numeroIdentificacion)){
-            return Err(UserError.UserAlreadyExists("Usuario con numero de identificacion ${user.numeroIdentificacion} ya existe"))
-        }
-
-        val existingUser = repository.findByEmail(user.email)
-        if (existingUser!= null) {
-            return Err(UserError.UserAlreadyExists("Usuario con email ${user.email} ya existe"))
-        }
-
-        if (repository.existsUserByNombreAndApellidosAndCurso(user.nombre, user.apellidos, user.curso)){
-            return Err(UserError.UserAlreadyExists("Usuario con nombre ${user.nombre}, apellidos ${user.apellidos} y curso ${user.curso} ya existe"))
-        }
-
-        val savedUser = mapper.toUserFromCreate(user)
-        repository.save(savedUser)
-        return Ok(mapper.toUserResponse(savedUser))
-    }
-
-    override fun updateAvatar(guid: String, avatar: String): Result<UserResponse?, UserError> {
-        logger.debug { "Actualizando avatar del user con GUID: $guid" }
-        var user = repository.findByGuid(guid)
-        if (user == null) {
-            return Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
-        }
-        user.avatar = avatar
-        user.updatedDate = LocalDateTime.now()
-        repository.save(user)
-        return Ok(mapper.toUserResponse(user))
-    }
-
-    override fun deleteUserByGuid(guid: String): Result<UserResponse?, UserError> {
+    override suspend fun deleteUserByGuid(guid: String): Result<UserResponse?, UserError> {
         logger.debug { "Eliminando usuario con GUID: $guid" }
-        var user = repository.findByGuid(guid)
-        if (user == null) {
-            return Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+
+        return withContext(Dispatchers.IO) {
+            var user = repository.findByGuid(guid)
+            if (user == null) {
+                return@withContext Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+            }
+            user.isActivo = false
+            user.updatedDate = LocalDateTime.now()
+            repository.save(user)
+            Ok(mapper.toUserResponse(user))
         }
-        user.isActivo = false
-        user.updatedDate = LocalDateTime.now()
-        repository.save(user)
-        return Ok(mapper.toUserResponse(user))
     }
 
-    override fun resetPassword(
+    override suspend fun resetPassword(
         guid: String,
         user: UserPasswordResetRequest
     ): Result<UserResponse?, UserError> {
         logger.debug { "Cambiando contraseña de usuario con GUID: $guid" }
-        val existingUser = repository.findByGuid(guid)
-        if (existingUser == null) {
-            return Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+
+        return withContext(Dispatchers.IO) {
+            val existingUser = repository.findByGuid(guid)
+            if (existingUser == null) {
+                return@withContext Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+            }
+            existingUser.password = user.newPassword
+            existingUser.updatedDate = LocalDateTime.now()
+            existingUser.lastPasswordResetDate = LocalDateTime.now()
+            val savedUser = repository.save(existingUser)
+            Ok(mapper.toUserResponse(savedUser))
         }
-        existingUser.password = user.newPassword
-        existingUser.updatedDate = LocalDateTime.now()
-        existingUser.lastPasswordResetDate = LocalDateTime.now()
-        val savedUser = repository.save(existingUser)
-        return Ok(mapper.toUserResponse(savedUser))
     }
 
-    override fun getByCurso(curso: String): Result<List<UserResponse?>, UserError> {
-        logger.debug { "Obteniendo usuario del curso: $curso" }
-        var user = repository.findByCurso(curso)
+    override suspend fun getByCurso(curso: String): Result<List<UserResponse?>, UserError> {
+        logger.debug { "Obteniendo usuarios del curso: $curso" }
 
-        return if (user.isEmpty()) {
-            Err(UserError.UserNotFound("Usuario del curso $curso no encontrado"))
-        } else {
+        return withContext(Dispatchers.IO) {
+            var user = repository.findByCurso(curso)
+            if (user.isEmpty()) {
+                return@withContext Err(UserError.UserNotFound("Usuario del curso $curso no encontrado"))
+            }
             Ok(mapper.toUserResponseList(user))
         }
     }
 
-    override fun getByNombre(nombre: String): Result<UserResponse?, UserError> {
+    override suspend fun getByNombre(nombre: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con el nombre: $nombre" }
-        var user = repository.findByNombre(nombre)
 
-        return if (user == null) {
-            Err(UserError.UserNotFound("Usuario con nombre $nombre no encontrado"))
-        } else {
+        return withContext(Dispatchers.IO) {
+            var user = repository.findByNombre(nombre)
+            if (user == null) {
+                return@withContext Err(UserError.UserNotFound("Usuario con nombre $nombre no encontrado"))
+            }
             Ok(mapper.toUserResponse(user))
         }
     }
 
-    override fun getByEmail(email: String): Result<UserResponse?, UserError> {
+    override suspend fun getByEmail(email: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con email: $email" }
-        var user = repository.findByEmail(email)
 
-        return if (user == null) {
-            Err(UserError.UserNotFound("Usuario con email $email no encontrado"))
-        } else {
+        return withContext(Dispatchers.IO) {
+            var user = repository.findByEmail(email)
+            if (user == null) {
+                return@withContext Err(UserError.UserNotFound("Usuario con email $email no encontrado"))
+            }
             Ok(mapper.toUserResponse(user))
         }
     }
 
-    override fun getByTutor(tutor: String): Result<List<UserResponse?>, UserError> {
+    override suspend fun getByTutor(tutor: String): Result<List<UserResponse?>, UserError> {
         logger.debug { "Obteniendo usuarios con tutor: $tutor" }
-        var users = repository.findByTutor(tutor)
 
-        return if (users.isEmpty()) {
-            Err(UserError.UserNotFound("Usuarios con tutor $tutor no encontrados"))
-        } else {
+        return withContext(Dispatchers.IO) {
+            var users = repository.findByTutor(tutor)
+            if (users.isEmpty()) {
+                return@withContext Err(UserError.UserNotFound("Usuarios con tutor $tutor no encontrados"))
+            }
             Ok(mapper.toUserResponseList(users))
         }
     }
