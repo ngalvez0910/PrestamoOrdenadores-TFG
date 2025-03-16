@@ -28,7 +28,7 @@ class PrestamoController
     private val prestamoService: PrestamoService
 ) {
     @GetMapping
-    fun getAllPrestamos() : ResponseEntity<Any>{
+    suspend fun getAllPrestamos() : ResponseEntity<Any>{
         return prestamoService.getAllPrestamos().mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -36,7 +36,7 @@ class PrestamoController
     }
 
     @GetMapping("/{guid}")
-    fun getPrestamoByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    suspend fun getPrestamoByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return prestamoService.getPrestamoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -49,7 +49,7 @@ class PrestamoController
     }
 
     @GetMapping("/fecha/{fecha}")
-    fun getPrestamoByFechaPrestamo(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
+    suspend fun getPrestamoByFechaPrestamo(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
         return prestamoService.getByFechaPrestamo(fecha).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -57,7 +57,7 @@ class PrestamoController
     }
 
     @GetMapping("/devoluciones/{fecha}")
-    fun getPrestamoByFechaDevolucion(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
+    suspend fun getPrestamoByFechaDevolucion(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
         return prestamoService.getByFechaDevolucion(fecha).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -65,7 +65,7 @@ class PrestamoController
     }
 
     @GetMapping("/user/{guid}")
-    fun getPrestamosByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    suspend fun getPrestamosByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return prestamoService.getPrestamoByUserGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -78,7 +78,7 @@ class PrestamoController
     }
 
     @PostMapping
-    fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<Any>{
+    suspend fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<Any>{
         return prestamoService.createPrestamo(prestamo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
@@ -92,7 +92,7 @@ class PrestamoController
     }
 
     @PatchMapping("/{guid}")
-    fun updatePrestamo(@PathVariable guid: String, @RequestBody prestamo : PrestamoUpdateRequest): ResponseEntity<Any>{
+    suspend fun updatePrestamo(@PathVariable guid: String, @RequestBody prestamo : PrestamoUpdateRequest): ResponseEntity<Any>{
         return prestamoService.updatePrestamo(guid, prestamo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -105,7 +105,7 @@ class PrestamoController
     }
 
     @DeleteMapping("/{guid}")
-    fun deletePrestamo(@PathVariable guid: String): ResponseEntity<Any>{
+    suspend fun deletePrestamo(@PathVariable guid: String): ResponseEntity<Any>{
         return prestamoService.deletePrestamoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->

@@ -10,12 +10,12 @@ import java.time.LocalDate
 
 @Service
 interface PrestamoService {
-    fun getAllPrestamos(): Result<List<PrestamoResponse>, PrestamoError>
-    fun getPrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
-    fun createPrestamo(prestamo: PrestamoCreateRequest) : Result<PrestamoResponse, PrestamoError>
-    fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>
-    fun deletePrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
-    fun getByFechaPrestamo(fecha: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
-    fun getByFechaDevolucion(fecha: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
-    fun getPrestamoByUserGuid(userGuid: String) : Result<List<PrestamoResponse>, PrestamoError>
+    suspend fun getAllPrestamos(): Result<List<PrestamoResponse>, PrestamoError>
+    suspend fun getPrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
+    suspend fun createPrestamo(prestamo: PrestamoCreateRequest) : Result<PrestamoResponse, PrestamoError>
+    suspend fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>
+    suspend fun deletePrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
+    suspend fun getByFechaPrestamo(fecha: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
+    suspend fun getByFechaDevolucion(fecha: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
+    suspend fun getPrestamoByUserGuid(userGuid: String) : Result<List<PrestamoResponse>, PrestamoError>
 }
