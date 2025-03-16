@@ -49,6 +49,9 @@ class SancionServiceImpl(
             return Err(SancionError.UserNotFound("Usuario con GUID: ${sancion.userGuid} no encontrado"))
         }
 
+        val tipoNormalizado = sancion.tipoSancion.replace(" ", "_").uppercase()
+        sancion.tipoSancion = tipoNormalizado
+
         val sancionCreada = mapper.toSancionFromRequest(sancion)
         repository.save(sancionCreada)
 

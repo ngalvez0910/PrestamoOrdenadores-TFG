@@ -5,7 +5,6 @@ import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError
-import org.example.prestamoordenadores.rest.sanciones.models.TipoSancion
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
