@@ -59,7 +59,7 @@ class PrestamoServiceImpl(
         val dispositivoSeleccionado = dispositivosDisponibles.random()
 
         var prestamoCreado = mapper.toPrestamoFromCreate(prestamo, dispositivoSeleccionado)
-        prestamoCreado.fechaDevolucion = LocalDate.now().plusMonths(1)
+        prestamoCreado.fechaDevolucion = LocalDate.now().plusWeeks(3)
         prestamoRepository.save(prestamoCreado)
 
         dispositivoSeleccionado.estadoDispositivo = EstadoDispositivo.PRESTADO
