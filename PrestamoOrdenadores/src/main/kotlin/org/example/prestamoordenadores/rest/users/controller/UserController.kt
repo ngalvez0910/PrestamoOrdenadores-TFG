@@ -25,7 +25,7 @@ class UserController
     private val userService: UserService
 ) {
     @GetMapping
-    fun getAllUsers() : ResponseEntity<Any> {
+    suspend fun getAllUsers() : ResponseEntity<Any> {
         return userService.getAllUsers().mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -33,7 +33,7 @@ class UserController
     }
 
     @GetMapping("/{guid}")
-    fun getUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
+    suspend fun getUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.getUserByGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -46,7 +46,7 @@ class UserController
     }
 
     @GetMapping("/nombre/{nombre}")
-    fun getUserByNombre(@PathVariable nombre: String) : ResponseEntity<Any> {
+    suspend fun getUserByNombre(@PathVariable nombre: String) : ResponseEntity<Any> {
         return userService.getByNombre(nombre).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -59,7 +59,7 @@ class UserController
     }
 
     @GetMapping("/curso/{curso}")
-    fun getUsersByGrade(@PathVariable curso: String) : ResponseEntity<Any> {
+    suspend fun getUsersByGrade(@PathVariable curso: String) : ResponseEntity<Any> {
         return userService.getByCurso(curso).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -72,7 +72,7 @@ class UserController
     }
 
     @GetMapping("/email/{email}")
-    fun getUserByEmail(@PathVariable email: String) : ResponseEntity<Any> {
+    suspend fun getUserByEmail(@PathVariable email: String) : ResponseEntity<Any> {
         return userService.getByEmail(email).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -85,7 +85,7 @@ class UserController
     }
 
     @GetMapping("/tutor/{tutor}")
-    fun getUsersByTutor(@PathVariable tutor: String) : ResponseEntity<Any> {
+    suspend fun getUsersByTutor(@PathVariable tutor: String) : ResponseEntity<Any> {
         return userService.getByTutor(tutor).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -98,7 +98,7 @@ class UserController
     }
 
     @PostMapping
-    fun createUser(@RequestBody user: UserCreateRequest): ResponseEntity<Any> {
+    suspend fun createUser(@RequestBody user: UserCreateRequest): ResponseEntity<Any> {
         return userService.createUser(user).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
@@ -111,7 +111,7 @@ class UserController
     }
     
     @PatchMapping("/{guid}")
-    fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<Any> {
+    suspend fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<Any> {
         return userService.resetPassword(guid, user).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -124,7 +124,7 @@ class UserController
     }
 
     @DeleteMapping("/{guid}")
-    fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
+    suspend fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.deleteUserByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).build() },
             failure = { error ->
