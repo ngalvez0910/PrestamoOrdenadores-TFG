@@ -25,7 +25,7 @@ class SancionController
     private val sancionService: SancionService
 ) {
     @GetMapping
-    fun getAllSanciones() : ResponseEntity<Any>{
+    suspend fun getAllSanciones() : ResponseEntity<Any>{
         return sancionService.getAllSanciones().mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -33,7 +33,7 @@ class SancionController
     }
 
     @GetMapping("/{guid}")
-    fun getSancionByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    suspend fun getSancionByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return sancionService.getSancionByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -46,7 +46,7 @@ class SancionController
     }
 
     @GetMapping("/fecha/{fecha}")
-    fun getSancionByFechaSancion(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
+    suspend fun getSancionByFechaSancion(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
         return sancionService.getByFecha(fecha).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -54,7 +54,7 @@ class SancionController
     }
 
     @GetMapping("/user/{guid}")
-    fun getSancionesByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    suspend fun getSancionesByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return sancionService.getSancionByUserGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -67,7 +67,7 @@ class SancionController
     }
 
     @GetMapping("/tipo/{tipo}")
-    fun getSancionesByTipo(@PathVariable tipo: String): ResponseEntity<Any>{
+    suspend fun getSancionesByTipo(@PathVariable tipo: String): ResponseEntity<Any>{
         return sancionService.getByTipo(tipo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -80,7 +80,7 @@ class SancionController
     }
 
     @PostMapping
-    fun createSancion(@RequestBody sancion : SancionRequest): ResponseEntity<Any>{
+    suspend fun createSancion(@RequestBody sancion : SancionRequest): ResponseEntity<Any>{
         return sancionService.createSancion(sancion).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
@@ -93,7 +93,7 @@ class SancionController
     }
 
     @PatchMapping("/{guid}")
-    fun updateSancion(@PathVariable guid: String, @RequestBody sancion : SancionUpdateRequest): ResponseEntity<Any>{
+    suspend fun updateSancion(@PathVariable guid: String, @RequestBody sancion : SancionUpdateRequest): ResponseEntity<Any>{
         return sancionService.updateSancion(guid, sancion).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -106,7 +106,7 @@ class SancionController
     }
 
     @DeleteMapping("/{guid}")
-    fun deleteSancion(@PathVariable guid: String): ResponseEntity<Any>{
+    suspend fun deleteSancion(@PathVariable guid: String): ResponseEntity<Any>{
         return sancionService.deleteSancionByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->

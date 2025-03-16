@@ -3,6 +3,8 @@ package org.example.prestamoordenadores.rest.sanciones.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
@@ -24,101 +26,123 @@ class SancionServiceImpl(
     private val mapper: SancionMapper,
     private val userRepository: UserRepository
 ) : SancionService {
-    override fun getAllSanciones(): Result<List<SancionResponse>, SancionError> {
+    override suspend fun getAllSanciones(): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo todas las sanciones" }
-        var sanciones = repository.findAll()
 
-        return Ok(mapper.toSancionResponseList(sanciones))
+        return withContext(Dispatchers.IO) {
+            val sanciones = repository.findAll()
+            Ok(mapper.toSancionResponseList(sanciones))
+        }
     }
 
-    override fun getSancionByGuid(guid: String): Result<SancionResponse?, SancionError> {
+    override suspend fun getSancionByGuid(guid: String): Result<SancionResponse?, SancionError> {
         logger.debug { "Obteniendo sancion con GUID: $guid" }
-        val sancion = repository.findByGuid(guid)
 
-        return if (sancion == null) {
-            Err(SancionError.SancionNotFound(guid))
-        } else {
-            Ok(mapper.toSancionResponse(sancion))
+        return withContext(Dispatchers.IO) {
+            val sancion = repository.findByGuid(guid)
+
+            if (sancion == null) {
+                Err(SancionError.SancionNotFound(guid))
+            } else {
+                Ok(mapper.toSancionResponse(sancion))
+            }
         }
     }
 
-    override fun createSancion(sancion: SancionRequest): Result<SancionResponse, SancionError> {
+    override suspend fun createSancion(sancion: SancionRequest): Result<SancionResponse, SancionError> {
         logger.debug { "Creando nueva sancion" }
-        val user = userRepository.findByGuid(sancion.userGuid)
-        if (user == null) {
-            return Err(SancionError.UserNotFound("Usuario con GUID: ${sancion.userGuid} no encontrado"))
+
+        return withContext(Dispatchers.IO) {
+            val user = userRepository.findByGuid(sancion.userGuid)
+            if (user == null) {
+                return@withContext Err(SancionError.UserNotFound("Usuario con GUID: ${sancion.userGuid} no encontrado"))
+            }
+
+            val tipoNormalizado = sancion.tipoSancion.replace(" ", "_").uppercase()
+            sancion.tipoSancion = tipoNormalizado
+
+            val sancionCreada = mapper.toSancionFromRequest(sancion)
+            repository.save(sancionCreada)
+
+            Ok(mapper.toSancionResponse(sancionCreada))
         }
-
-        val tipoNormalizado = sancion.tipoSancion.replace(" ", "_").uppercase()
-        sancion.tipoSancion = tipoNormalizado
-
-        val sancionCreada = mapper.toSancionFromRequest(sancion)
-        repository.save(sancionCreada)
-
-        return Ok(mapper.toSancionResponse(sancionCreada))
     }
 
-    override fun updateSancion(guid: String, sancion: SancionUpdateRequest): Result<SancionResponse?, SancionError> {
+    override suspend fun updateSancion(guid: String, sancion: SancionUpdateRequest): Result<SancionResponse?, SancionError> {
         logger.debug { "Buscando sancion" }
-        val existingSancion = repository.findByGuid(guid)
-        if (existingSancion == null) {
-            return Err(SancionError.SancionNotFound("Sancion no encontrada"))
+
+        return withContext(Dispatchers.IO) {
+            val existingSancion = repository.findByGuid(guid)
+            if (existingSancion == null) {
+                return@withContext Err(SancionError.SancionNotFound("Sancion no encontrada"))
+            }
+
+            logger.debug { "Actualizando sancion" }
+            val tipoNormalizado = sancion.tipo.replace(" ", "_").uppercase()
+
+            existingSancion.tipoSancion = TipoSancion.valueOf(tipoNormalizado)
+            existingSancion.updatedDate = LocalDateTime.now()
+
+            repository.save(existingSancion)
+
+            Ok(mapper.toSancionResponse(existingSancion))
         }
-
-        logger.debug { "Actualizando sancion" }
-        val tipoNormalizado = sancion.tipo.replace(" ", "_").uppercase()
-
-        existingSancion.tipoSancion = TipoSancion.valueOf(tipoNormalizado)
-        existingSancion.updatedDate = LocalDateTime.now()
-
-        repository.save(existingSancion)
-
-        return Ok(mapper.toSancionResponse(existingSancion))
     }
 
-    override fun deleteSancionByGuid(guid: String): Result<SancionResponse?, SancionError> {
+    override suspend fun deleteSancionByGuid(guid: String): Result<SancionResponse?, SancionError> {
         logger.debug { "Buscando sancion" }
-        val existingSancion = repository.findByGuid(guid)
-        if (existingSancion == null) {
-            return Err(SancionError.SancionNotFound("Sancion no encontrada"))
+
+        return withContext(Dispatchers.IO) {
+            val existingSancion = repository.findByGuid(guid)
+            if (existingSancion == null) {
+                return@withContext Err(SancionError.SancionNotFound("Sancion no encontrada"))
+            }
+
+            logger.debug { "Eliminando sancion" }
+            repository.delete(existingSancion)
+
+            Ok(mapper.toSancionResponse(existingSancion))
         }
-
-        logger.debug { "Eliminando sancion" }
-        repository.delete(existingSancion)
-
-        return Ok(mapper.toSancionResponse(existingSancion))
     }
 
-    override fun getByFecha(fecha: LocalDate): Result<List<SancionResponse>, SancionError> {
+    override suspend fun getByFecha(fecha: LocalDate): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones con fecha: $fecha" }
 
-        val sanciones = repository.findSancionByFechaSancion(fecha)
-        return Ok(mapper.toSancionResponseList(sanciones))
+        return withContext(Dispatchers.IO) {
+            val sanciones = repository.findSancionByFechaSancion(fecha)
+            Ok(mapper.toSancionResponseList(sanciones))
+        }
     }
 
-    override fun getByTipo(tipo: String): Result<List<SancionResponse>, SancionError> {
+    override suspend fun getByTipo(tipo: String): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones de tipo: $tipo" }
-        val tipoNormalizado = tipo.replace(" ", "_").uppercase()
 
-        val tipoEnum = TipoSancion.entries.find { it.name == tipoNormalizado }
-        if (tipoEnum == null) {
-            return Err(SancionError.SancionNotFound("Sancion de tipo '$tipo' no encontrada"))
+        return withContext(Dispatchers.IO) {
+            val tipoNormalizado = tipo.replace(" ", "_").uppercase()
+
+            val tipoEnum = TipoSancion.entries.find { it.name == tipoNormalizado }
+            if (tipoEnum == null) {
+                return@withContext Err(SancionError.SancionNotFound("Sancion de tipo '$tipo' no encontrada"))
+            }
+
+            val sanciones = repository.findSancionByTipoSancion(tipoEnum)
+
+            Ok(mapper.toSancionResponseList(sanciones))
         }
-
-        val sanciones = repository.findSancionByTipoSancion(tipoEnum)
-
-        return Ok(mapper.toSancionResponseList(sanciones))
     }
 
-    override fun getSancionByUserGuid(userGuid: String): Result<List<SancionResponse>, SancionError> {
+    override suspend fun getSancionByUserGuid(userGuid: String): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones de user con GUID: $userGuid" }
-        val user = userRepository.findByGuid(userGuid)
-        if (user == null) {
-            return Err(SancionError.UserNotFound("Usuario no encontrado"))
+
+        return withContext(Dispatchers.IO) {
+            val user = userRepository.findByGuid(userGuid)
+            if (user == null) {
+                return@withContext Err(SancionError.UserNotFound("Usuario no encontrado"))
+            }
+
+            val sanciones = repository.findByUserGuid(userGuid)
+
+            Ok(mapper.toSancionResponseList(sanciones))
         }
-
-        val sanciones = repository.findByUserGuid(userGuid)
-
-        return Ok(mapper.toSancionResponseList(sanciones))
     }
 }
