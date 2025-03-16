@@ -10,6 +10,7 @@ import jakarta.persistence.Table
 import org.example.prestamoordenadores.utils.generators.generateSancionGuid
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -25,12 +26,14 @@ class Sancion (
     @Enumerated(EnumType.STRING)
     var tipoSancion : TipoSancion = TipoSancion.ADVERTENCIA,
 
+    var fechaSancion : LocalDate = LocalDate.now(),
+
     @CreatedDate
     var createdDate: LocalDateTime = LocalDateTime.now(),
 
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ){
-    constructor(guid: String, userGuid: String, tipoSancion: TipoSancion, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, userGuid, tipoSancion, createdDate, updatedDate)
+    constructor(guid: String, userGuid: String, tipoSancion: TipoSancion, fechaSancion: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, userGuid, tipoSancion, fechaSancion, createdDate, updatedDate)
 }

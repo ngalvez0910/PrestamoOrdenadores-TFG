@@ -2,7 +2,7 @@ package org.example.prestamoordenadores.rest.sanciones.mappers
 
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.models.Sancion
-import org.example.prestamoordenadores.utils.locale.toDefaultDateTimeString
+import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.stereotype.Component
 
 @Component
@@ -12,7 +12,7 @@ class SancionMapper {
             guid = sancion.guid,
             userGuid = sancion.userGuid,
             tipoSancion = sancion.tipoSancion.toString(),
-            createdDate = sancion.createdDate.toDefaultDateTimeString()
+            fechaSancion = sancion.fechaSancion.toDefaultDateString()
         )
     }
 
