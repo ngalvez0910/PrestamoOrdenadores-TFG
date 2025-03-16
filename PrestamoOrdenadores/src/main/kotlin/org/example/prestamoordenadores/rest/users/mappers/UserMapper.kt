@@ -5,6 +5,7 @@ import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
+import org.example.prestamoordenadores.utils.locale.toDefaultDateTimeString
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -31,10 +32,10 @@ class UserMapper {
             tutor = user.tutor ?:"",
             rol = user.rol,
             isActivo = user.isActivo,
-            createdDate = user.createdDate.toString(),
-            updatedDate = user.updatedDate.toString(),
-            lastLoginDate = user.lastLoginDate.toString(),
-            lastPasswordResetDate = user.lastPasswordResetDate.toString(),
+            createdDate = user.createdDate.toDefaultDateTimeString(),
+            updatedDate = user.updatedDate.toDefaultDateTimeString(),
+            lastLoginDate = user.lastLoginDate.toDefaultDateTimeString(),
+            lastPasswordResetDate = user.lastPasswordResetDate.toDefaultDateTimeString(),
         )
     }
 

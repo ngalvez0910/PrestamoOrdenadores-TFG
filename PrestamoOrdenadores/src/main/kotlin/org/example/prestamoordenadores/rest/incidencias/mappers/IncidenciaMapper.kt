@@ -4,6 +4,8 @@ import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequ
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
+import org.example.prestamoordenadores.utils.locale.toDefaultDateString
+import org.example.prestamoordenadores.utils.locale.toDefaultDateTimeString
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -16,7 +18,7 @@ class IncidenciaMapper {
             descripcion = incidencia.descripcion,
             estadoIncidencia = incidencia.estadoIncidencia.toString(),
             userGuid = incidencia.userGuid,
-            createdDate = incidencia.createdDate.toString()
+            createdDate = incidencia.createdDate.toDefaultDateTimeString()
         )
     }
 

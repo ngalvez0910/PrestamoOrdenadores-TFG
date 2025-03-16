@@ -5,6 +5,7 @@ import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
+import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,8 +17,8 @@ class PrestamoMapper {
             guid = prestamo.guid,
             userGuid = prestamo.userGuid,
             dispositivoGuid = prestamo.dispositivoGuid,
-            fechaPrestamo = prestamo.fechaPrestamo.toString(),
-            fechaDevolucion = prestamo.fechaDevolucion.toString()
+            fechaPrestamo = prestamo.fechaPrestamo.toDefaultDateString(),
+            fechaDevolucion = prestamo.fechaDevolucion.toDefaultDateString()
         )
     }
 
