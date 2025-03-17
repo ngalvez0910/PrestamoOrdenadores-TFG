@@ -15,7 +15,7 @@ interface PrestamoService {
     suspend fun createPrestamo(prestamo: PrestamoCreateRequest) : Result<PrestamoResponse, PrestamoError>
     suspend fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>
     suspend fun deletePrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
-    suspend fun getByFechaPrestamo(fecha: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
-    suspend fun getByFechaDevolucion(fecha: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
+    suspend fun getByFechaPrestamo(fechaPrestamo: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
+    suspend fun getByFechaDevolucion(fechaDevolucion: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
     suspend fun getPrestamoByUserGuid(userGuid: String) : Result<List<PrestamoResponse>, PrestamoError>
 }

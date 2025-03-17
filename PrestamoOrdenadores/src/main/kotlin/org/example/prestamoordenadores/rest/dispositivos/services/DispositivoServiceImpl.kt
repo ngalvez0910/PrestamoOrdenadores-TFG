@@ -14,12 +14,16 @@ import org.example.prestamoordenadores.rest.dispositivos.mappers.DispositivoMapp
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.lighthousegames.logging.logging
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 private val logger = logging()
 
 @Service
+@CacheConfig(cacheNames = ["dispositivos"])
 class DispositivoServiceImpl(
     private val dispositivoRepository: DispositivoRepository,
     private val mapper: DispositivoMapper
@@ -33,6 +37,7 @@ class DispositivoServiceImpl(
         }
     }
 
+    @Cacheable(key = "#guid")
     override suspend fun getDispositivoByGuid(guid: String): Result<DispositivoResponseAdmin?, DispositivoError> {
         logger.debug { "Obteniendo dispositivo con GUID: $guid" }
 
@@ -47,6 +52,7 @@ class DispositivoServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun createDispositivo(dispositivo: DispositivoCreateRequest): Result<DispositivoResponse, DispositivoError> {
         logger.debug { "Guardando un nuevo dispositivo" }
 
@@ -58,6 +64,7 @@ class DispositivoServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun updateDispositivo(guid: String, dispositivo: DispositivoUpdateRequest): Result<DispositivoResponseAdmin, DispositivoError> {
         logger.debug { "Actualizando dispositivo con GUID: $guid" }
 
@@ -79,6 +86,7 @@ class DispositivoServiceImpl(
         }
     }
 
+    @CachePut(key = "#guid")
     override suspend fun deleteDispositivoByGuid(guid: String): Result<DispositivoResponse, DispositivoError> {
         logger.debug { "Eliminando dispositivo con GUID: $guid" }
 
@@ -98,6 +106,7 @@ class DispositivoServiceImpl(
         }
     }
 
+    @Cacheable(key = "#numeroSerie")
     override suspend fun getDispositivoByNumeroSerie(numeroSerie: String): Result<DispositivoResponseAdmin, DispositivoError> {
         logger.debug { "Obteniendo dispositivo con numero de serie: $numeroSerie" }
 
@@ -112,6 +121,7 @@ class DispositivoServiceImpl(
         }
     }
 
+    @Cacheable(key = "#estado")
     override suspend fun getDispositivoByEstado(estado: String): Result<List<DispositivoResponseAdmin>, DispositivoError> {
         logger.debug { "Obteniendo dispositivo con estado: $estado" }
 

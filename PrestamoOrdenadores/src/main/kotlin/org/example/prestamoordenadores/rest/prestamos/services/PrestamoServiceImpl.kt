@@ -16,6 +16,9 @@ import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.lighthousegames.logging.logging
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,6 +26,7 @@ import java.time.LocalDateTime
 private val logger = logging()
 
 @Service
+@CacheConfig(cacheNames = ["prestamos"])
 class PrestamoServiceImpl(
     private val prestamoRepository: PrestamoRepository,
     private val mapper: PrestamoMapper,
@@ -38,6 +42,7 @@ class PrestamoServiceImpl(
         }
     }
 
+    @Cacheable(key = "#guid")
     override suspend fun getPrestamoByGuid(guid: String): Result<PrestamoResponse?, PrestamoError> {
         logger.debug { "Obteniendo prestamo con GUID: $guid" }
 
@@ -52,6 +57,7 @@ class PrestamoServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun createPrestamo(prestamo: PrestamoCreateRequest): Result<PrestamoResponse, PrestamoError> {
         logger.debug { "Creando nuevo prestamo" }
 
@@ -79,6 +85,7 @@ class PrestamoServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest): Result<PrestamoResponse?, PrestamoError> {
         logger.debug { "Actualizando prestamo con GUID: $guid" }
 
@@ -97,6 +104,7 @@ class PrestamoServiceImpl(
         }
     }
 
+    @CachePut(key = "#guid")
     override suspend fun deletePrestamoByGuid(guid: String): Result<PrestamoResponse, PrestamoError> {
         logger.debug { "Cancelando prestamo con GUID: $guid" }
 
@@ -113,24 +121,27 @@ class PrestamoServiceImpl(
         }
     }
 
-    override suspend fun getByFechaPrestamo(fecha: LocalDate): Result<List<PrestamoResponse>, PrestamoError> {
-        logger.debug { "Obteniendo prestamos con fecha de prestamo: $fecha" }
+    @Cacheable(key = "#fechaPrestamo")
+    override suspend fun getByFechaPrestamo(fechaPrestamo: LocalDate): Result<List<PrestamoResponse>, PrestamoError> {
+        logger.debug { "Obteniendo prestamos con fecha de prestamo: $fechaPrestamo" }
 
         return withContext(Dispatchers.IO) {
-            val prestamos = prestamoRepository.findByFechaPrestamo(fecha)
+            val prestamos = prestamoRepository.findByFechaPrestamo(fechaPrestamo)
             Ok(mapper.toPrestamoResponseList(prestamos))
         }
     }
 
-    override suspend fun getByFechaDevolucion(fecha: LocalDate): Result<List<PrestamoResponse>, PrestamoError> {
-        logger.debug { "Obteniendo prestamos con fecha de devolucion: $fecha" }
+    @Cacheable(key = "#fechaDevolucion")
+    override suspend fun getByFechaDevolucion(fechaDevolucion: LocalDate): Result<List<PrestamoResponse>, PrestamoError> {
+        logger.debug { "Obteniendo prestamos con fecha de devolucion: $fechaDevolucion" }
 
         return withContext(Dispatchers.IO) {
-            val prestamos = prestamoRepository.findByFechaDevolucion(fecha)
+            val prestamos = prestamoRepository.findByFechaDevolucion(fechaDevolucion)
             Ok(mapper.toPrestamoResponseList(prestamos))
         }
     }
 
+    @Cacheable(key = "#userGuid")
     override suspend fun getPrestamoByUserGuid(userGuid: String): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo prestamos del usuario con GUID: $userGuid" }
 
