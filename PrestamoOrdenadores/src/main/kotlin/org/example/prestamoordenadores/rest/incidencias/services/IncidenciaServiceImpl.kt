@@ -14,12 +14,16 @@ import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.lighthousegames.logging.logging
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 private val logger = logging()
 
 @Service
+@CacheConfig(cacheNames = ["incidencias"])
 class IncidenciaServiceImpl(
     private val repository: IncidenciaRepository,
     private val mapper: IncidenciaMapper,
@@ -34,6 +38,7 @@ class IncidenciaServiceImpl(
         }
     }
 
+    @Cacheable(key = "#guid")
     override suspend fun getIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
         logger.debug { "Obteniendo incidencia con GUID: $guid" }
 
@@ -48,6 +53,7 @@ class IncidenciaServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun createIncidencia(incidencia: IncidenciaCreateRequest): Result<IncidenciaResponse, IncidenciaError> {
         logger.debug { "Creando incidencia" }
 
@@ -59,6 +65,7 @@ class IncidenciaServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun updateIncidencia(guid: String, incidencia: IncidenciaUpdateRequest): Result<IncidenciaResponse?, IncidenciaError> {
         return withContext(Dispatchers.IO) {
             val existingIncidencia = repository.findIncidenciaByGuid(guid)
@@ -77,6 +84,7 @@ class IncidenciaServiceImpl(
         }
     }
 
+    @CachePut(key = "#guid")
     override suspend fun deleteIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
         logger.debug { "Eliminando incidencia con GUID: $guid" }
 
@@ -92,6 +100,7 @@ class IncidenciaServiceImpl(
         }
     }
 
+    @Cacheable(key = "#estado")
     override suspend fun getIncidenciaByEstado(estado: String): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo incidencias en estado: $estado" }
 
@@ -109,6 +118,7 @@ class IncidenciaServiceImpl(
         }
     }
 
+    @Cacheable(key = "#userGuid")
     override suspend fun getIncidenciasByUserGuid(userGuid: String): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo incidencias de user con GUID: $userGuid" }
 
