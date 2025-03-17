@@ -13,12 +13,16 @@ import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.lighthousegames.logging.logging
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 private val logger = logging()
 
 @Service
+@CacheConfig(cacheNames = ["users"])
 class UserServiceImpl(
     private val repository : UserRepository,
     private val mapper: UserMapper
@@ -32,6 +36,7 @@ class UserServiceImpl(
         }
     }
 
+    @Cacheable(key = "#guid")
     override suspend fun getUserByGuid(guid: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con GUID: $guid" }
 
@@ -45,6 +50,7 @@ class UserServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun createUser(user: UserCreateRequest): Result<UserResponse, UserError> {
         logger.debug { "Creando usuario: $user" }
 
@@ -67,7 +73,7 @@ class UserServiceImpl(
         }
     }
 
-
+    @CachePut(key = "#result.guid")
     override suspend fun updateAvatar(guid: String, avatar: String): Result<UserResponse?, UserError> {
         logger.debug { "Actualizando avatar del usuario con GUID: $guid" }
 
@@ -83,6 +89,7 @@ class UserServiceImpl(
         }
     }
 
+    @CachePut(key = "#guid")
     override suspend fun deleteUserByGuid(guid: String): Result<UserResponse?, UserError> {
         logger.debug { "Eliminando usuario con GUID: $guid" }
 
@@ -98,6 +105,7 @@ class UserServiceImpl(
         }
     }
 
+    @CachePut(key = "#guid")
     override suspend fun resetPassword(
         guid: String,
         user: UserPasswordResetRequest
@@ -117,6 +125,7 @@ class UserServiceImpl(
         }
     }
 
+    @Cacheable(key = "#curso")
     override suspend fun getByCurso(curso: String): Result<List<UserResponse?>, UserError> {
         logger.debug { "Obteniendo usuarios del curso: $curso" }
 
@@ -129,6 +138,7 @@ class UserServiceImpl(
         }
     }
 
+    @Cacheable(key = "#nombre")
     override suspend fun getByNombre(nombre: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con el nombre: $nombre" }
 
@@ -141,6 +151,7 @@ class UserServiceImpl(
         }
     }
 
+    @Cacheable(key = "#email")
     override suspend fun getByEmail(email: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con email: $email" }
 
@@ -153,6 +164,7 @@ class UserServiceImpl(
         }
     }
 
+    @Cacheable(key = "#tutor")
     override suspend fun getByTutor(tutor: String): Result<List<UserResponse?>, UserError> {
         logger.debug { "Obteniendo usuarios con tutor: $tutor" }
 
