@@ -12,33 +12,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class IncidenciaMapperTest {
-    private val user = User(
-        1,
-        "userTest123",
-        "email@example.com",
-        "password",
-        Role.ALUMNO,
-        "numIdent",
-        "Nombre",
-        "Apellido",
-        "2DAW",
-        "tutor",
-        "fotocarnet",
-        "avatar",
-        true,
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-        LocalDateTime.now()
-    )
-
     private val incidencia = Incidencia(
         1,
         "guidTest123",
         "Asunto",
         "Descripcion",
         EstadoIncidencia.PENDIENTE,
-        user.guid,
+        "userGuid",
         LocalDateTime.now(),
         LocalDateTime.now()
     )
@@ -52,7 +32,7 @@ class IncidenciaMapperTest {
             "Asunto",
             "Descripcion",
             EstadoIncidencia.PENDIENTE.toString(),
-            user.guid,
+            "userGuid",
             LocalDate.now().toString()
         )
 
@@ -91,7 +71,7 @@ class IncidenciaMapperTest {
                 "Asunto2",
                 "Descripcion2",
                 EstadoIncidencia.PENDIENTE,
-                user.guid,
+                "userGuid",
                 LocalDateTime.now(),
                 LocalDateTime.now()
             ),
@@ -101,7 +81,7 @@ class IncidenciaMapperTest {
                 "Asunto2",
                 "Descripcion2",
                 EstadoIncidencia.PENDIENTE,
-                user.guid,
+                "userGuid",
                 LocalDateTime.now(),
                 LocalDateTime.now()
             )
