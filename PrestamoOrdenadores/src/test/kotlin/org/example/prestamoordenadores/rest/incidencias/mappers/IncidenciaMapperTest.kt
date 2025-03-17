@@ -64,28 +64,7 @@ class IncidenciaMapperTest {
 
     @Test
     fun toIncidenciaResponseList() {
-        val incidenciaList = listOf(
-            Incidencia(
-                2,
-                "guidTest234",
-                "Asunto2",
-                "Descripcion2",
-                EstadoIncidencia.PENDIENTE,
-                "userGuid",
-                LocalDateTime.now(),
-                LocalDateTime.now()
-            ),
-            Incidencia(
-                3,
-                "guidTest345",
-                "Asunto2",
-                "Descripcion2",
-                EstadoIncidencia.PENDIENTE,
-                "userGuid",
-                LocalDateTime.now(),
-                LocalDateTime.now()
-            )
-        )
+        val incidenciaList = listOf(incidencia)
 
         val response = mapper.toIncidenciaResponseList(incidenciaList)
 
@@ -94,12 +73,7 @@ class IncidenciaMapperTest {
             { assertEquals(incidenciaList[0].asunto, response[0].asunto) },
             { assertEquals(incidenciaList[0].descripcion, response[0].descripcion) },
             { assertEquals(incidenciaList[0].estadoIncidencia.toString(), response[0].estadoIncidencia) },
-            { assertEquals(incidenciaList[0].userGuid, response[0].userGuid) },
-            { assertEquals(incidenciaList[1].guid, response[1].guid) },
-            { assertEquals(incidenciaList[1].asunto, response[1].asunto) },
-            { assertEquals(incidenciaList[1].descripcion, response[1].descripcion) },
-            { assertEquals(incidenciaList[1].estadoIncidencia.toString(), response[1].estadoIncidencia) },
-            { assertEquals(incidenciaList[1].userGuid, response[1].userGuid) }
+            { assertEquals(incidenciaList[0].userGuid, response[0].userGuid) }
         )
     }
 

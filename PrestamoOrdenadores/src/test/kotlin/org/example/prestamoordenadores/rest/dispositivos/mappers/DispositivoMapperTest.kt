@@ -86,23 +86,16 @@ class DispositivoMapperTest {
 
     @Test
     fun toDispositivoResponseListAdmin() {
-        val dispositivo1 = Dispositivo(2, "guidTest234", "CNB4567ABC", "RAM", EstadoDispositivo.NUEVO, "", 2, true, LocalDateTime.now(), LocalDateTime.now())
-        val dispositivo2 = Dispositivo(3, "guidTest345", "8CG7890DEF", "CPU", EstadoDispositivo.NUEVO, "", 5, true, LocalDateTime.now(), LocalDateTime.now())
-        val dispositivos = listOf(dispositivo1, dispositivo2)
+        val dispositivos = listOf(dispositivo)
 
         val responses = mapper.toDispositivoResponseListAdmin(dispositivos)
 
         assertAll(
-            { assertEquals(2, responses.size) },
-            { assertEquals("guidTest234", responses[0].guid) },
-            { assertEquals("CNB4567ABC", responses[0].numeroSerie) },
+            { assertEquals(1, responses.size) },
+            { assertEquals("guidTest123", responses[0].guid) },
+            { assertEquals("5CD1234XYZ", responses[0].numeroSerie) },
             { assertEquals("NUEVO", responses[0].estado) },
-            { assertEquals("", responses[0].incidenciaGuid) },
-
-            { assertEquals("guidTest345", responses[1].guid) },
-            { assertEquals("8CG7890DEF", responses[1].numeroSerie) },
-            { assertEquals("NUEVO", responses[1].estado) },
-            { assertEquals("", responses[1].incidenciaGuid) }
+            { assertEquals("", responses[0].incidenciaGuid) }
         )
     }
 

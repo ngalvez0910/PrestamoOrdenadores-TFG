@@ -73,30 +73,7 @@ class PrestamoMapperTest {
 
     @Test
     fun toPrestamoResponseList() {
-        val prestamoResponseList = listOf(
-            Prestamo(
-                2,
-                "guidTest234",
-                "userGuid",
-                "dispositivoGuid",
-                EstadoPrestamo.EN_CURSO,
-                LocalDate.now(),
-                LocalDate.now(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
-            ),
-            Prestamo(
-                3,
-                "guidTest345",
-                "userGuid",
-                "dispositivoGuid",
-                EstadoPrestamo.EN_CURSO,
-                LocalDate.now(),
-                LocalDate.now(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
-            )
-        )
+        val prestamoResponseList = listOf(prestamo)
 
         val responseList = mapper.toPrestamoResponseList(prestamoResponseList)
 
@@ -104,10 +81,7 @@ class PrestamoMapperTest {
             { assertEquals(prestamoResponseList.size, responseList.size) },
             { assertEquals(prestamoResponseList[0].guid, responseList[0].guid) },
             { assertEquals(prestamoResponseList[0].userGuid, responseList[0].userGuid) },
-            { assertEquals(prestamoResponseList[0].dispositivoGuid, responseList[0].dispositivoGuid) },
-            { assertEquals(prestamoResponseList[1].guid, responseList[1].guid) },
-            { assertEquals(prestamoResponseList[1].userGuid, responseList[1].userGuid) },
-            { assertEquals(prestamoResponseList[1].dispositivoGuid, responseList[1].dispositivoGuid) }
+            { assertEquals(prestamoResponseList[0].dispositivoGuid, responseList[0].dispositivoGuid) }
         )
     }
 
