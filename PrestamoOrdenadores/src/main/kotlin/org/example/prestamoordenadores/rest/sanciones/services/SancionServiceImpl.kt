@@ -14,6 +14,9 @@ import org.example.prestamoordenadores.rest.sanciones.models.TipoSancion
 import org.example.prestamoordenadores.rest.sanciones.repositories.SancionRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.lighthousegames.logging.logging
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -21,6 +24,7 @@ import java.time.LocalDateTime
 private val logger = logging()
 
 @Service
+@CacheConfig(cacheNames = ["sanciones"])
 class SancionServiceImpl(
     private val repository : SancionRepository,
     private val mapper: SancionMapper,
@@ -35,6 +39,7 @@ class SancionServiceImpl(
         }
     }
 
+    @Cacheable(key = "#guid")
     override suspend fun getSancionByGuid(guid: String): Result<SancionResponse?, SancionError> {
         logger.debug { "Obteniendo sancion con GUID: $guid" }
 
@@ -49,6 +54,7 @@ class SancionServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun createSancion(sancion: SancionRequest): Result<SancionResponse, SancionError> {
         logger.debug { "Creando nueva sancion" }
 
@@ -68,6 +74,7 @@ class SancionServiceImpl(
         }
     }
 
+    @CachePut(key = "#result.guid")
     override suspend fun updateSancion(guid: String, sancion: SancionUpdateRequest): Result<SancionResponse?, SancionError> {
         logger.debug { "Buscando sancion" }
 
@@ -89,6 +96,7 @@ class SancionServiceImpl(
         }
     }
 
+    @CachePut(key = "#guid")
     override suspend fun deleteSancionByGuid(guid: String): Result<SancionResponse?, SancionError> {
         logger.debug { "Buscando sancion" }
 
@@ -105,6 +113,7 @@ class SancionServiceImpl(
         }
     }
 
+    @Cacheable(key = "#fecha")
     override suspend fun getByFecha(fecha: LocalDate): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones con fecha: $fecha" }
 
@@ -114,6 +123,7 @@ class SancionServiceImpl(
         }
     }
 
+    @Cacheable(key = "#tipo")
     override suspend fun getByTipo(tipo: String): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones de tipo: $tipo" }
 
@@ -131,6 +141,7 @@ class SancionServiceImpl(
         }
     }
 
+    @Cacheable(key = "#userGuid")
     override suspend fun getSancionByUserGuid(userGuid: String): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones de user con GUID: $userGuid" }
 
