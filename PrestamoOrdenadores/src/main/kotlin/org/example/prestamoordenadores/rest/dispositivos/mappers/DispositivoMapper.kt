@@ -39,11 +39,7 @@ class DispositivoMapper {
         )
     }
 
-    fun toDispositivoResponseList(dispositivos: List<Dispositivo?>): List<DispositivoResponse> {
-        return dispositivos.map { toDispositivoResponse(it!!) }
-    }
-
-    fun toDispositivoResponseListAdmin(dispositivos: List<Dispositivo?>): List<DispositivoResponseAdmin> {
-        return dispositivos.map { toDispositivoResponseAdmin(it!!) }
+    fun toDispositivoResponseListAdmin(dispositivos: List<Dispositivo>): List<DispositivoResponseAdmin> {
+        return dispositivos.map { toDispositivoResponseAdmin(it) }
     }
 }
