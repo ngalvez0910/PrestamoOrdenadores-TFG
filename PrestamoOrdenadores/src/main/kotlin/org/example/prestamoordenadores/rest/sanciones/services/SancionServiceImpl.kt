@@ -17,6 +17,7 @@ import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -30,12 +31,15 @@ class SancionServiceImpl(
     private val mapper: SancionMapper,
     private val userRepository: UserRepository
 ) : SancionService {
-    override suspend fun getAllSanciones(): Result<List<SancionResponse>, SancionError> {
+    override suspend fun getAllSanciones(page: Int, size: Int): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo todas las sanciones" }
 
         return withContext(Dispatchers.IO) {
-            val sanciones = repository.findAll()
-            Ok(mapper.toSancionResponseList(sanciones))
+            val pageRequest = PageRequest.of(page, size)
+            val pageSanciones = repository.findAll(pageRequest)
+            val sancionResponses = mapper.toSancionResponseList(pageSanciones.content)
+
+            Ok(sancionResponses)
         }
     }
 

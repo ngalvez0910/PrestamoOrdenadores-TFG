@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 @Service
 interface SancionService {
-    suspend fun getAllSanciones(): Result<List<SancionResponse>, SancionError>
+    suspend fun getAllSanciones(page: Int, size: Int): Result<List<SancionResponse>, SancionError>
     suspend fun getSancionByGuid(guid: String) : Result<SancionResponse?, SancionError>
     suspend fun createSancion(sancion: SancionRequest) : Result<SancionResponse, SancionError>
     suspend fun updateSancion(guid: String, sancion: SancionUpdateRequest) : Result<SancionResponse?, SancionError>
