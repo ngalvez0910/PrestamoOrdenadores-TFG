@@ -71,7 +71,7 @@ class PrestamoServiceImpl(
                 return@withContext Err(PrestamoError.UserNotFound("Usuario con GUID: ${prestamo.userGuid} no encontrado"))
             }
 
-            val dispositivosDisponibles = dispositivoRepository.findByEstadoDispositivo(EstadoDispositivo.NUEVO)
+            val dispositivosDisponibles = dispositivoRepository.findByEstadoDispositivo(EstadoDispositivo.DISPONIBLE)
             if (dispositivosDisponibles.isEmpty()) {
                 return@withContext Err(PrestamoError.DispositivoNotFound("No hay dispositivos disponibles actualmente"))
             }

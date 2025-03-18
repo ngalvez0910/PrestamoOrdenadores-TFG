@@ -39,6 +39,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation("com.itextpdf:itext7-core:7.1.9")
 
     // Mordant
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta9")

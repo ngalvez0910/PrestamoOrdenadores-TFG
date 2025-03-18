@@ -26,7 +26,7 @@ class Dispositivo(
     var componentes :  String = "",
 
     @Enumerated(EnumType.STRING)
-    var estadoDispositivo : EstadoDispositivo = EstadoDispositivo.NUEVO,
+    var estadoDispositivo : EstadoDispositivo = EstadoDispositivo.DISPONIBLE,
 
     var incidenciaGuid : String? = "",
 

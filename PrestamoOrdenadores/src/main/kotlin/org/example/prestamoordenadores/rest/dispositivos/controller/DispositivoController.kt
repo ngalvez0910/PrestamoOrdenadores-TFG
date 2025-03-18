@@ -5,7 +5,12 @@ import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRe
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoAlreadyExists
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoNotFound
+import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
+import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.services.DispositivoService
+import org.example.prestamoordenadores.storage.DispositivoPdfStorage
+import org.example.prestamoordenadores.utils.locale.toDefaultDateString
+import org.example.prestamoordenadores.utils.locale.toDefaultDateTimeString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -17,12 +22,15 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/dispositivos")
 class DispositivoController
 @Autowired constructor(
-    private val dispositivoService: DispositivoService
+    private val dispositivoService: DispositivoService,
+    private val dispositivoPdfStorage: DispositivoPdfStorage
 )  {
     @GetMapping
     suspend fun getAllDispositivos(
@@ -107,5 +115,15 @@ class DispositivoController
                 }
             }
         )
+    }
+
+    @GetMapping("/pdf")
+    fun generateAndSavePdf(): ResponseEntity<String> {
+        val pdfData = dispositivoPdfStorage.generatePdf()
+
+        val fileName = "dispositivos_" + LocalDate.now().toDefaultDateString() + ".pdf"
+        dispositivoPdfStorage.savePdfToFile(pdfData, fileName)
+
+        return ResponseEntity.ok("El PDF ha sido guardado exitosamente en la carpeta 'data' con el nombre $fileName")
     }
 }
