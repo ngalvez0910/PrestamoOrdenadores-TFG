@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -24,8 +25,11 @@ class IncidenciaController
     private val incidenciaService: IncidenciaService
 )  {
     @GetMapping
-    suspend fun getAllIncidencias() : ResponseEntity<Any>{
-        return incidenciaService.getAllIncidencias().mapBoth(
+    suspend fun getAllIncidencias(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "5") size: Int
+    ): ResponseEntity<Any> {
+        return incidenciaService.getAllIncidencias(page, size).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
         )

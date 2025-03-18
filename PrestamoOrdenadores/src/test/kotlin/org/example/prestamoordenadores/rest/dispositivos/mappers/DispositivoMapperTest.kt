@@ -15,7 +15,7 @@ class DispositivoMapperTest {
         "guidTest123",
         "5CD1234XYZ",
         "raton, cargador",
-        EstadoDispositivo.NUEVO,
+        EstadoDispositivo.DISPONIBLE,
         "",
         20,
         true,
@@ -65,7 +65,7 @@ class DispositivoMapperTest {
             "guidTest123",
             "5CD1234XYZ",
             "raton, cargador",
-            EstadoDispositivo.NUEVO.toString(),
+            EstadoDispositivo.DISPONIBLE.toString(),
             "",
             20,
             true

@@ -52,7 +52,7 @@ class PrestamoMapperTest {
             "guidTest123",
             "5CD1234XYZ",
             "raton, cargador",
-            EstadoDispositivo.NUEVO,
+            EstadoDispositivo.DISPONIBLE,
             "",
             20,
             true,

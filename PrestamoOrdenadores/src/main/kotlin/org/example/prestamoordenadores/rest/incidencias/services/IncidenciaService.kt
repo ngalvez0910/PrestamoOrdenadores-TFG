@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 
 @Service
 interface IncidenciaService {
-    suspend fun getAllIncidencias(): Result<List<IncidenciaResponse>, IncidenciaError>
+    suspend fun getAllIncidencias(page: Int, size: Int): Result<List<IncidenciaResponse>, IncidenciaError>
     suspend fun getIncidenciaByGuid(guid: String) : Result<IncidenciaResponse?, IncidenciaError>
     suspend fun createIncidencia(incidencia: IncidenciaCreateRequest) : Result<IncidenciaResponse, IncidenciaError>
     suspend fun updateIncidencia(guid: String, incidencia: IncidenciaUpdateRequest) : Result<IncidenciaResponse?, IncidenciaError>
