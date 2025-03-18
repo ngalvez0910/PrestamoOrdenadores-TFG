@@ -17,6 +17,7 @@ import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -28,12 +29,15 @@ class DispositivoServiceImpl(
     private val dispositivoRepository: DispositivoRepository,
     private val mapper: DispositivoMapper
 ) : DispositivoService {
-    override suspend fun getAllDispositivos(): Result<List<DispositivoResponseAdmin>, DispositivoError> {
+    override suspend fun getAllDispositivos(page: Int, size: Int): Result<List<DispositivoResponseAdmin>, DispositivoError> {
         logger.debug { "Obteniendo todos los dispositivos" }
 
         return withContext(Dispatchers.IO) {
-            val dispositivos = dispositivoRepository.findAll()
-            Ok(mapper.toDispositivoResponseListAdmin(dispositivos))
+            val pageRequest = PageRequest.of(page, size)
+            val pageDispositivos = dispositivoRepository.findAll(pageRequest)
+            val dispositivoResponses = mapper.toDispositivoResponseListAdmin(pageDispositivos.content)
+
+            Ok(dispositivoResponses)
         }
     }
 
