@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 @Service
 interface PrestamoService {
-    suspend fun getAllPrestamos(): Result<List<PrestamoResponse>, PrestamoError>
+    suspend fun getAllPrestamos(page: Int, size: Int): Result<List<PrestamoResponse>, PrestamoError>
     suspend fun getPrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
     suspend fun createPrestamo(prestamo: PrestamoCreateRequest) : Result<PrestamoResponse, PrestamoError>
     suspend fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>

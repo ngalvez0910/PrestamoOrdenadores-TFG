@@ -19,6 +19,7 @@ import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -33,12 +34,15 @@ class PrestamoServiceImpl(
     private val userRepository: UserRepository,
     private val dispositivoRepository: DispositivoRepository
 ): PrestamoService {
-    override suspend fun getAllPrestamos(): Result<List<PrestamoResponse>, PrestamoError> {
+    override suspend fun getAllPrestamos(page: Int, size: Int): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo todos los prestamos" }
 
         return withContext(Dispatchers.IO) {
-            val prestamos = prestamoRepository.findAll()
-            Ok(mapper.toPrestamoResponseList(prestamos))
+            val pageRequest = PageRequest.of(page, size)
+            val pagePrestamos = prestamoRepository.findAll(pageRequest)
+            val prestamoResponses = mapper.toPrestamoResponseList(pagePrestamos.content)
+
+            Ok(prestamoResponses)
         }
     }
 
