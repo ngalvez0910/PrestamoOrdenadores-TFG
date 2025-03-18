@@ -32,7 +32,7 @@ class IncidenciaMapper {
         )
     }
 
-    fun toIncidenciaResponseList(incidencias: List<Incidencia?>): List<IncidenciaResponse> {
-        return incidencias.map { toIncidenciaResponse(it!!) }
+    fun toIncidenciaResponseList(incidencias: List<Incidencia>): List<IncidenciaResponse> {
+        return incidencias.map { toIncidenciaResponse(it) }
     }
 }

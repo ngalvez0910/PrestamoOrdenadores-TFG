@@ -7,9 +7,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import org.example.prestamoordenadores.utils.generators.generateGuid
 import org.example.prestamoordenadores.utils.generators.generateIncidenciaGuid
-import org.jetbrains.annotations.NotNull
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDateTime

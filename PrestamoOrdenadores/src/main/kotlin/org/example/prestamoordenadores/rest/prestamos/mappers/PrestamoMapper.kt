@@ -33,7 +33,7 @@ class PrestamoMapper {
         )
     }
 
-    fun toPrestamoResponseList(prestamos: List<Prestamo?>): List<PrestamoResponse> {
-        return prestamos.map { toPrestamoResponse(it!!) }
+    fun toPrestamoResponseList(prestamos: List<Prestamo>): List<PrestamoResponse> {
+        return prestamos.map { toPrestamoResponse(it) }
     }
 }

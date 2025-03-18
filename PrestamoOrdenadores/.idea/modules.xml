@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PrestamoOrdenadores.main.iml" filepath="$PROJECT_DIR$/.idea/modules/PrestamoOrdenadores.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PrestamoOrdenadores.test.iml" filepath="$PROJECT_DIR$/.idea/modules/PrestamoOrdenadores.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.example.PrestamoOrdenadores.test.iml" filepath="$PROJECT_DIR$/.idea/modules/org.example.PrestamoOrdenadores.test.iml" />
     </modules>
   </component>
 </project>
