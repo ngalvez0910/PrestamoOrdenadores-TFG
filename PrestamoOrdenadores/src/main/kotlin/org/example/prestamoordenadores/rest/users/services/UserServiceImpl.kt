@@ -16,6 +16,7 @@ import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -27,12 +28,15 @@ class UserServiceImpl(
     private val repository : UserRepository,
     private val mapper: UserMapper
 ): UserService {
-    override suspend fun getAllUsers(): Result<List<UserResponseAdmin>, UserError> {
+    override suspend fun getAllUsers(page: Int, size: Int): Result<List<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
 
         return withContext(Dispatchers.IO) {
-            val usuarios = repository.findAll()
-            Ok(mapper.toUserResponseListAdmin(usuarios))
+            val pageRequest = PageRequest.of(page, size)
+            val pageUsers = repository.findAll(pageRequest)
+            val usersResponses = mapper.toUserResponseListAdmin(pageUsers.content)
+
+            Ok(usersResponses)
         }
     }
 

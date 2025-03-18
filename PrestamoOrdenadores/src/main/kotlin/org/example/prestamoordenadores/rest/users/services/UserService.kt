@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 interface UserService {
-    suspend fun getAllUsers(): Result<List<UserResponseAdmin>, UserError>
+    suspend fun getAllUsers(page: Int, size: Int): Result<List<UserResponseAdmin>, UserError>
     suspend fun getUserByGuid(guid: String) : Result<UserResponse?, UserError>
     suspend fun createUser(user: UserCreateRequest) : Result<UserResponse, UserError>
     suspend fun updateAvatar(guid: String, avatar: String) : Result<UserResponse?, UserError>

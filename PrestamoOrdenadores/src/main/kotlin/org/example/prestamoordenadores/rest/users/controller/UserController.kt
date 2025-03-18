@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -25,8 +26,11 @@ class UserController
     private val userService: UserService
 ) {
     @GetMapping
-    suspend fun getAllUsers() : ResponseEntity<Any> {
-        return userService.getAllUsers().mapBoth(
+    suspend fun getAllUsers(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "5") size: Int
+    ): ResponseEntity<Any> {
+        return userService.getAllUsers(page, size).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
         )
