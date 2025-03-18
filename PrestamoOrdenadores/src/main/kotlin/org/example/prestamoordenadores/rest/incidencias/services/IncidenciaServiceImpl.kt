@@ -17,6 +17,7 @@ import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -29,12 +30,15 @@ class IncidenciaServiceImpl(
     private val mapper: IncidenciaMapper,
     private val userRepository: UserRepository
 ) : IncidenciaService {
-    override suspend fun getAllIncidencias(): Result<List<IncidenciaResponse>, IncidenciaError> {
+    override suspend fun getAllIncidencias(page: Int, size: Int): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo todas las incidencias" }
 
         return withContext(Dispatchers.IO) {
-            val incidencias = repository.findAll()
-            Ok(mapper.toIncidenciaResponseList(incidencias))
+            val pageRequest = PageRequest.of(page, size)
+            val pagesIncidencias = repository.findAll(pageRequest)
+            val incidenciaResponses = mapper.toIncidenciaResponseList(pagesIncidencias.content)
+
+            Ok(incidenciaResponses)
         }
     }
 
