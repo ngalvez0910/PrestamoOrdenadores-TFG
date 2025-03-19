@@ -7,6 +7,7 @@ import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError.I
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError.UserNotFound
 import org.example.prestamoordenadores.rest.incidencias.services.IncidenciaService
 import org.example.prestamoordenadores.storage.csv.IncidenciaCsvStorage
+import org.example.prestamoordenadores.storage.pdf.IncidenciaPdfStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -30,7 +31,8 @@ import java.time.LocalDate
 class IncidenciaController
 @Autowired constructor(
     private val incidenciaService: IncidenciaService,
-    private val incidenciaCsvStorage: IncidenciaCsvStorage
+    private val incidenciaCsvStorage: IncidenciaCsvStorage,
+    private val incidenciaPdfStorage: IncidenciaPdfStorage
 )  {
     @GetMapping
     suspend fun getAllIncidencias(
@@ -133,5 +135,13 @@ class IncidenciaController
         } else {
             ResponseEntity(HttpStatus.NOT_FOUND)
         }
+    }
+
+    @GetMapping("/export/pdf/{guid}")
+    fun generateAndSavePdf(@PathVariable guid: String): ResponseEntity<String> {
+        val fileName = "incidencia_${LocalDate.now().toDefaultDateString()}.pdf"
+        incidenciaPdfStorage.generateAndSavePdf(guid)
+
+        return ResponseEntity.ok("El PDF ha sido guardado exitosamente en la carpeta 'data' con el nombre $fileName")
     }
 }
