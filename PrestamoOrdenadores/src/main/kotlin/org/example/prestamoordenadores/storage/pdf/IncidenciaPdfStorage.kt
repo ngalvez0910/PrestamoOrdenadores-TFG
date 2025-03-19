@@ -19,7 +19,6 @@ import java.time.LocalDate
 @Service
 class IncidenciaPdfStorage(
     private val incidenciaRepository: IncidenciaRepository,
-    private val userRepository: UserRepository,
     private val dispositivoRepository: DispositivoRepository
 ) {
 
