@@ -2,7 +2,7 @@ package org.example.prestamoordenadores.storage.csv
 
 import com.opencsv.CSVWriterBuilder
 import com.opencsv.ICSVWriter
-import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.rest.sanciones.repositories.SancionRepository
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.stereotype.Service
 import java.io.File
@@ -12,12 +12,12 @@ import java.nio.file.Paths
 import java.time.LocalDate
 
 @Service
-class UserCsvStorage(
-    private val userRepository: UserRepository,
+class SancionCsvStorage(
+    private val sancionRepository: SancionRepository
 ) {
     fun generateCsv(): ByteArray {
-        val usuarios = userRepository.findAll()
-        val file = File.createTempFile("usuarios", ".csv")
+        val sanciones = sancionRepository.findAll()
+        val file = File.createTempFile("sanciones", ".csv")
 
         FileWriter(file, Charsets.UTF_8).use { writer ->
             val csvWriter = CSVWriterBuilder(writer)
@@ -27,20 +27,16 @@ class UserCsvStorage(
                 .withLineEnd(ICSVWriter.DEFAULT_LINE_END)
                 .build()
 
-            val header = arrayOf("Guid", "Email", "Nombre", "Apellidos", "Curso", "Tutor", "Rol", "Activo")
+            val header = arrayOf("Guid", "Usuario", "Tipo", "Fecha")
             csvWriter.writeNext(header, false)
 
-            usuarios.forEach { user ->
+            sanciones.forEach { sancion ->
                 csvWriter.writeNext(
                     arrayOf(
-                        user.guid,
-                        user.email,
-                        user.nombre,
-                        user.apellidos,
-                        user.curso ?: "",
-                        user.tutor ?: "",
-                        user.rol.name,
-                        user.isActivo.toString()
+                        sancion.guid,
+                        sancion.userGuid,
+                        sancion.tipoSancion.name,
+                        sancion.fechaSancion.toDefaultDateString()
                     ),
                     false
                 )
@@ -64,7 +60,7 @@ class UserCsvStorage(
 
     fun generateAndSaveCsv() {
         val csvData = generateCsv()
-        val fileName = "usuarios_${LocalDate.now().toDefaultDateString()}.csv"
+        val fileName = "sanciones_${LocalDate.now().toDefaultDateString()}.csv"
         saveCsvToFile(csvData, fileName)
     }
 }

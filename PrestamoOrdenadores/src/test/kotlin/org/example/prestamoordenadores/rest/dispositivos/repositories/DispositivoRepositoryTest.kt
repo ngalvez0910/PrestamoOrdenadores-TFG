@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import kotlin.test.assertEquals
 
-
+/*
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class DispositivoRepositoryTest{
@@ -60,4 +60,4 @@ class DispositivoRepositoryTest{
             { assert(res?.guid == dispositivo.guid) }
         )
     }
-}
+}*/

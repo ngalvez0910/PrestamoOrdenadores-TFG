@@ -6,7 +6,11 @@ import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.SancionNotFound
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.UserNotFound
 import org.example.prestamoordenadores.rest.sanciones.services.SancionService
+import org.example.prestamoordenadores.storage.csv.SancionCsvStorage
+import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,13 +21,16 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.LocalDate
 
 @RestController
 @RequestMapping("/sanciones")
 class SancionController
 @Autowired constructor(
-    private val sancionService: SancionService
+    private val sancionService: SancionService,
+    private val sancionCsvStorage: SancionCsvStorage
 ) {
     @GetMapping
     suspend fun getAllSanciones(
@@ -120,5 +127,24 @@ class SancionController
                 }
             }
         )
+    }
+
+    @GetMapping("/export/csv")
+    fun exportCsv(): ResponseEntity<ByteArray> {
+        sancionCsvStorage.generateAndSaveCsv()
+
+        val fileName = "sanciones_${LocalDate.now().toDefaultDateString()}.csv"
+        val filePath = Paths.get("data", fileName)
+
+        return if (Files.exists(filePath)) {
+            val fileContent = Files.readAllBytes(filePath)
+            val headers = HttpHeaders().apply {
+                add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$fileName")
+                add(HttpHeaders.CONTENT_TYPE, "text/csv")
+            }
+            ResponseEntity(fileContent, headers, HttpStatus.OK)
+        } else {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        }
     }
 }

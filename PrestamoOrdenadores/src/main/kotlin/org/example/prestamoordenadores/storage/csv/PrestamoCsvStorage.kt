@@ -2,7 +2,7 @@ package org.example.prestamoordenadores.storage.csv
 
 import com.opencsv.CSVWriterBuilder
 import com.opencsv.ICSVWriter
-import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.stereotype.Service
 import java.io.File
@@ -12,12 +12,12 @@ import java.nio.file.Paths
 import java.time.LocalDate
 
 @Service
-class UserCsvStorage(
-    private val userRepository: UserRepository,
+class PrestamoCsvStorage(
+    private val prestamoRepository: PrestamoRepository,
 ) {
     fun generateCsv(): ByteArray {
-        val usuarios = userRepository.findAll()
-        val file = File.createTempFile("usuarios", ".csv")
+        val prestamos = prestamoRepository.findAll()
+        val file = File.createTempFile("prestamos", ".csv")
 
         FileWriter(file, Charsets.UTF_8).use { writer ->
             val csvWriter = CSVWriterBuilder(writer)
@@ -27,20 +27,18 @@ class UserCsvStorage(
                 .withLineEnd(ICSVWriter.DEFAULT_LINE_END)
                 .build()
 
-            val header = arrayOf("Guid", "Email", "Nombre", "Apellidos", "Curso", "Tutor", "Rol", "Activo")
+            val header = arrayOf("Guid", "Usuario", "Dispositivo", "Estado", "Fecha Préstamo", "Fecha Devolución")
             csvWriter.writeNext(header, false)
 
-            usuarios.forEach { user ->
+            prestamos.forEach { prestamo ->
                 csvWriter.writeNext(
                     arrayOf(
-                        user.guid,
-                        user.email,
-                        user.nombre,
-                        user.apellidos,
-                        user.curso ?: "",
-                        user.tutor ?: "",
-                        user.rol.name,
-                        user.isActivo.toString()
+                        prestamo.guid,
+                        prestamo.userGuid,
+                        prestamo.dispositivoGuid,
+                        prestamo.estadoPrestamo.name,
+                        prestamo.fechaPrestamo.toDefaultDateString(),
+                        prestamo.fechaDevolucion.toDefaultDateString()
                     ),
                     false
                 )
@@ -64,7 +62,7 @@ class UserCsvStorage(
 
     fun generateAndSaveCsv() {
         val csvData = generateCsv()
-        val fileName = "usuarios_${LocalDate.now().toDefaultDateString()}.csv"
+        val fileName = "prestamos_${LocalDate.now().toDefaultDateString()}.csv"
         saveCsvToFile(csvData, fileName)
     }
 }
