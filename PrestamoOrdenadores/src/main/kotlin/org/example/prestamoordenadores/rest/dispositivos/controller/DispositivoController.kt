@@ -5,13 +5,11 @@ import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRe
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoAlreadyExists
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoNotFound
-import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
-import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.services.DispositivoService
-import org.example.prestamoordenadores.storage.DispositivoPdfStorage
+import org.example.prestamoordenadores.storage.DispositivoCsvStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
-import org.example.prestamoordenadores.utils.locale.toDefaultDateTimeString
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,15 +20,17 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpHeaders
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/dispositivos")
 class DispositivoController
 @Autowired constructor(
     private val dispositivoService: DispositivoService,
-    private val dispositivoPdfStorage: DispositivoPdfStorage
+    private val dispositivoCsvStorage: DispositivoCsvStorage
 )  {
     @GetMapping
     suspend fun getAllDispositivos(
@@ -117,13 +117,22 @@ class DispositivoController
         )
     }
 
-    @GetMapping("/pdf")
-    fun generateAndSavePdf(): ResponseEntity<String> {
-        val pdfData = dispositivoPdfStorage.generatePdf()
+    @GetMapping("/export/csv")
+    fun exportCsv(): ResponseEntity<ByteArray> {
+        dispositivoCsvStorage.generateAndSaveCsv()
 
-        val fileName = "dispositivos_" + LocalDate.now().toDefaultDateString() + ".pdf"
-        dispositivoPdfStorage.savePdfToFile(pdfData, fileName)
+        val fileName = "dispositivos_${LocalDate.now().toDefaultDateString()}.csv"
+        val filePath = Paths.get("data", fileName)
 
-        return ResponseEntity.ok("El PDF ha sido guardado exitosamente en la carpeta 'data' con el nombre $fileName")
+        return if (Files.exists(filePath)) {
+            val fileContent = Files.readAllBytes(filePath)
+            val headers = HttpHeaders().apply {
+                add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$fileName")
+                add(HttpHeaders.CONTENT_TYPE, "text/csv")
+            }
+            ResponseEntity(fileContent, headers, HttpStatus.OK)
+        } else {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        }
     }
 }
