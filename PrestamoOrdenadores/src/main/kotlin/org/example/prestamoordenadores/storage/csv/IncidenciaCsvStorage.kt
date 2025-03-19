@@ -2,8 +2,9 @@ package org.example.prestamoordenadores.storage.csv
 
 import com.opencsv.CSVWriterBuilder
 import com.opencsv.ICSVWriter
-import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
+import org.example.prestamoordenadores.utils.locale.toDefaultDateTimeString
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileWriter
@@ -12,12 +13,12 @@ import java.nio.file.Paths
 import java.time.LocalDate
 
 @Service
-class UserCsvStorage(
-    private val userRepository: UserRepository,
+class IncidenciaCsvStorage(
+    private val incidenciaRepository: IncidenciaRepository,
 ) {
     fun generateCsv(): ByteArray {
-        val usuarios = userRepository.findAll()
-        val file = File.createTempFile("usuarios", ".csv")
+        val usuarios = incidenciaRepository.findAll()
+        val file = File.createTempFile("incidencias", ".csv")
 
         FileWriter(file, Charsets.UTF_8).use { writer ->
             val csvWriter = CSVWriterBuilder(writer)
@@ -27,20 +28,17 @@ class UserCsvStorage(
                 .withLineEnd(ICSVWriter.DEFAULT_LINE_END)
                 .build()
 
-            val header = arrayOf("Guid", "Email", "Nombre", "Apellidos", "Curso", "Tutor", "Rol", "Activo")
+            val header = arrayOf("Guid", "Asunto", "Estado", "Usuario", "Fecha")
             csvWriter.writeNext(header, false)
 
-            usuarios.forEach { user ->
+            usuarios.forEach { incidencia ->
                 csvWriter.writeNext(
                     arrayOf(
-                        user.guid,
-                        user.email,
-                        user.nombre,
-                        user.apellidos,
-                        user.curso ?: "",
-                        user.tutor ?: "",
-                        user.rol.name,
-                        user.isActivo.toString()
+                        incidencia.guid,
+                        incidencia.asunto,
+                        incidencia.estadoIncidencia.name,
+                        incidencia.userGuid,
+                        incidencia.createdDate.toDefaultDateTimeString()
                     ),
                     false
                 )
@@ -64,7 +62,7 @@ class UserCsvStorage(
 
     fun generateAndSaveCsv() {
         val csvData = generateCsv()
-        val fileName = "usuarios_${LocalDate.now().toDefaultDateString()}.csv"
+        val fileName = "incidencias_${LocalDate.now().toDefaultDateString()}.csv"
         saveCsvToFile(csvData, fileName)
     }
 }
