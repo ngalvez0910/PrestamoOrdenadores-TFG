@@ -6,7 +6,7 @@ import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRe
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoAlreadyExists
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoNotFound
 import org.example.prestamoordenadores.rest.dispositivos.services.DispositivoService
-import org.example.prestamoordenadores.storage.DispositivoCsvStorage
+import org.example.prestamoordenadores.storage.csv.DispositivoCsvStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

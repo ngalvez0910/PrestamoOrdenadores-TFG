@@ -7,7 +7,7 @@ import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.Dispo
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.UserNotFound
 import org.example.prestamoordenadores.rest.prestamos.services.PrestamoService
-import org.example.prestamoordenadores.storage.PrestamoPdfStorage
+import org.example.prestamoordenadores.storage.pdf.PrestamoPdfStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity

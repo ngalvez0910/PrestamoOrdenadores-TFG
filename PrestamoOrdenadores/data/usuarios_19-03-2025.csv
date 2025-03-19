@@ -1,0 +1,4 @@
+Guid;Email;Nombre;Apellidos;Curso;Tutor;Rol;Activo
+3854b5ba26c;juan@colegio.com;Juan;Pérez;1º Bachillerato;María Gómez;ALUMNO;true
+c1f40bb1900;maria@profesor.colegio.com;María;Gómez;1º Bachillerato;;PROFESOR;true
+0d6d031ad0a;admin@admin.colegio.com;Admin;User;;;ADMIN;true

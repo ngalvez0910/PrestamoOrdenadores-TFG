@@ -15,7 +15,7 @@ import org.example.prestamoordenadores.rest.prestamos.mappers.PrestamoMapper
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
-import org.example.prestamoordenadores.storage.PrestamoPdfStorage
+import org.example.prestamoordenadores.storage.pdf.PrestamoPdfStorage
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut

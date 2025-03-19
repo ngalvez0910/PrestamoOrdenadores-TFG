@@ -1,0 +1,70 @@
+package org.example.prestamoordenadores.storage.csv
+
+import com.opencsv.CSVWriterBuilder
+import com.opencsv.ICSVWriter
+import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.locale.toDefaultDateString
+import org.springframework.stereotype.Service
+import java.io.File
+import java.io.FileWriter
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.time.LocalDate
+
+@Service
+class UserCsvStorage(
+    private val userRepository: UserRepository,
+) {
+    fun generateCsv(): ByteArray {
+        val usuarios = userRepository.findAll()
+        val file = File.createTempFile("usuarios", ".csv")
+
+        FileWriter(file, Charsets.UTF_8).use { writer ->
+            val csvWriter = CSVWriterBuilder(writer)
+                .withSeparator(';')
+                .withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER)
+                .withEscapeChar(ICSVWriter.DEFAULT_ESCAPE_CHARACTER)
+                .withLineEnd(ICSVWriter.DEFAULT_LINE_END)
+                .build()
+
+            val header = arrayOf("Guid", "Email", "Nombre", "Apellidos", "Curso", "Tutor", "Rol", "Activo")
+            csvWriter.writeNext(header, false)
+
+            usuarios.forEach { dispositivo ->
+                csvWriter.writeNext(
+                    arrayOf(
+                        dispositivo.guid,
+                        dispositivo.email,
+                        dispositivo.nombre,
+                        dispositivo.apellidos,
+                        dispositivo.curso ?: "",
+                        dispositivo.tutor ?: "",
+                        dispositivo.rol.name,
+                        dispositivo.isActivo.toString()
+                    ),
+                    false
+                )
+            }
+
+            csvWriter.close()
+        }
+
+        return file.readBytes()
+    }
+
+    fun saveCsvToFile(csvData: ByteArray, fileName: String) {
+        val dataFolderPath = Paths.get("data")
+        if (!Files.exists(dataFolderPath)) {
+            Files.createDirectories(dataFolderPath)
+        }
+
+        val filePath = dataFolderPath.resolve(fileName)
+        File(filePath.toUri()).writeBytes(csvData)
+    }
+
+    fun generateAndSaveCsv() {
+        val csvData = generateCsv()
+        val fileName = "usuarios_${LocalDate.now().toDefaultDateString()}.csv"
+        saveCsvToFile(csvData, fileName)
+    }
+}

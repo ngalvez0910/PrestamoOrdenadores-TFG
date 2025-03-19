@@ -1,4 +1,4 @@
-package org.example.prestamoordenadores.storage
+package org.example.prestamoordenadores.storage.pdf
 
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.pdf.PdfDocument
@@ -7,6 +7,7 @@ import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.property.TextAlignment
 import com.itextpdf.layout.property.UnitValue
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
@@ -37,87 +38,98 @@ class PrestamoPdfStorage(
             .setFontColor(ColorConstants.BLACK)
             .setBold()
             .setFontSize(36f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
             .setMarginBottom(10f)
 
         document.add(loanTechText)
 
-        document.add(Paragraph("Solicitud de Préstamo")
+        document.add(
+            Paragraph("Solicitud de Préstamo")
             .setFontColor(ColorConstants.BLACK)
             .setBold()
             .setFontSize(18f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.CENTER))
+            .setTextAlignment(TextAlignment.CENTER))
 
-        document.add(Paragraph("Fecha de Solicitud: ${LocalDate.now().toDefaultDateString()}")
+        document.add(
+            Paragraph("Fecha de Solicitud: ${LocalDate.now().toDefaultDateString()}")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.RIGHT)
+            .setTextAlignment(TextAlignment.RIGHT)
         )
 
         document.add(Paragraph("\n"))
 
         val user = userRepository.findByGuid(prestamo?.userGuid ?: "")
 
-        document.add(Paragraph("Datos del usuario: ")
+        document.add(
+            Paragraph("Datos del usuario: ")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
             .setBold()
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
-        document.add(Paragraph("Nº de Identificación: ${user?.numeroIdentificacion}")
+        document.add(
+            Paragraph("Nº de Identificación: ${user?.numeroIdentificacion}")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
-        document.add(Paragraph("Nombre: ${user?.nombre} ${user?.apellidos}")
+        document.add(
+            Paragraph("Nombre: ${user?.nombre} ${user?.apellidos}")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
-        document.add(Paragraph("Curso: ${user?.curso}")
+        document.add(
+            Paragraph("Curso: ${user?.curso}")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
-        document.add(Paragraph("Email: ${user?.email}")
+        document.add(
+            Paragraph("Email: ${user?.email}")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
         document.add(Paragraph("\n"))
 
         val dispositivo = dispositivoRepository.findDispositivoByGuid(prestamo?.dispositivoGuid ?: "")
 
-        document.add(Paragraph("Datos del dispositivo: ")
+        document.add(
+            Paragraph("Datos del dispositivo: ")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
             .setBold()
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
-        document.add(Paragraph("Nº de Serie: ${dispositivo?.numeroSerie}")
+        document.add(
+            Paragraph("Nº de Serie: ${dispositivo?.numeroSerie}")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
-        document.add(Paragraph("Componentes: ${dispositivo?.componentes}")
+        document.add(
+            Paragraph("Componentes: ${dispositivo?.componentes}")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(12f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
         document.add(Paragraph("\n"))
 
-        document.add(Paragraph("Para recoger su dispositivo acerquese al departamento de informática y presente este documento.")
+        document.add(
+            Paragraph("Para recoger su dispositivo acerquese al departamento de informática y presente este documento.")
             .setFontColor(ColorConstants.BLACK)
             .setFontSize(9f)
-            .setTextAlignment(com.itextpdf.layout.property.TextAlignment.LEFT)
+            .setTextAlignment(TextAlignment.LEFT)
         )
 
         document.add(Paragraph("\n"))
