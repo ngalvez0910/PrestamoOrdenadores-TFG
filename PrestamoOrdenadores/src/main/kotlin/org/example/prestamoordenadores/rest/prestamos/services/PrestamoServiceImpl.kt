@@ -15,6 +15,7 @@ import org.example.prestamoordenadores.rest.prestamos.mappers.PrestamoMapper
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.storage.PrestamoPdfStorage
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
@@ -32,7 +33,8 @@ class PrestamoServiceImpl(
     private val prestamoRepository: PrestamoRepository,
     private val mapper: PrestamoMapper,
     private val userRepository: UserRepository,
-    private val dispositivoRepository: DispositivoRepository
+    private val dispositivoRepository: DispositivoRepository,
+    private val prestamoPdfStorage: PrestamoPdfStorage
 ): PrestamoService {
     override suspend fun getAllPrestamos(page: Int, size: Int): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo todos los prestamos" }
@@ -84,6 +86,8 @@ class PrestamoServiceImpl(
 
             dispositivoSeleccionado.estadoDispositivo = EstadoDispositivo.PRESTADO
             dispositivoRepository.save(dispositivoSeleccionado)
+
+            prestamoPdfStorage.generateAndSavePdf(prestamoCreado.guid)
 
             Ok(mapper.toPrestamoResponse(prestamoCreado))
         }
