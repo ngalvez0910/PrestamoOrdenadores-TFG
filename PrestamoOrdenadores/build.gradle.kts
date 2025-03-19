@@ -39,7 +39,12 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Ficheros Pdf
     implementation("com.itextpdf:itext7-core:7.1.9")
+
+    // Ficheros Csv
+    implementation("com.opencsv:opencsv:5.8")
 
     // Mordant
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta9")

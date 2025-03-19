@@ -2,13 +2,13 @@ package org.example.prestamoordenadores.rest.prestamos.controller
 
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
-import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
-import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.DispositivoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.UserNotFound
 import org.example.prestamoordenadores.rest.prestamos.services.PrestamoService
+import org.example.prestamoordenadores.storage.PrestamoPdfStorage
+import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -26,7 +26,8 @@ import java.time.LocalDate
 @RequestMapping("/prestamos")
 class PrestamoController
 @Autowired constructor(
-    private val prestamoService: PrestamoService
+    private val prestamoService: PrestamoService,
+    private val prestamoPdfStorage: PrestamoPdfStorage
 ) {
     @GetMapping
     suspend fun getAllPrestamos(
@@ -119,5 +120,13 @@ class PrestamoController
                 }
             }
         )
+    }
+
+    @GetMapping("/export/pdf/{guid}")
+    fun generateAndSavePdf(@PathVariable guid: String): ResponseEntity<String> {
+        val fileName = "prestamo_${LocalDate.now().toDefaultDateString()}.pdf"
+        prestamoPdfStorage.generateAndSavePdf(guid)
+
+        return ResponseEntity.ok("El PDF ha sido guardado exitosamente en la carpeta 'data' con el nombre $fileName")
     }
 }
