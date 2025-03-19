@@ -1,4 +1,4 @@
-package org.example.prestamoordenadores.storage
+package org.example.prestamoordenadores.storage.csv
 
 import com.opencsv.CSVWriterBuilder
 import com.opencsv.ICSVWriter
