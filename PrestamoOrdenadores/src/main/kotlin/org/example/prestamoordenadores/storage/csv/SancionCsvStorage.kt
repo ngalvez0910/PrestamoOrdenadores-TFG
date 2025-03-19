@@ -2,7 +2,7 @@ package org.example.prestamoordenadores.storage.csv
 
 import com.opencsv.CSVWriterBuilder
 import com.opencsv.ICSVWriter
-import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
+import org.example.prestamoordenadores.rest.sanciones.repositories.SancionRepository
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.stereotype.Service
 import java.io.File
@@ -12,12 +12,12 @@ import java.nio.file.Paths
 import java.time.LocalDate
 
 @Service
-class PrestamoCsvStorage(
-    private val prestamoRepository: PrestamoRepository,
+class SancionCsvStorage(
+    private val sancionRepository: SancionRepository
 ) {
     fun generateCsv(): ByteArray {
-        val prestamos = prestamoRepository.findAll()
-        val file = File.createTempFile("prestamos", ".csv")
+        val sanciones = sancionRepository.findAll()
+        val file = File.createTempFile("sanciones", ".csv")
 
         FileWriter(file, Charsets.UTF_8).use { writer ->
             val csvWriter = CSVWriterBuilder(writer)
@@ -27,18 +27,16 @@ class PrestamoCsvStorage(
                 .withLineEnd(ICSVWriter.DEFAULT_LINE_END)
                 .build()
 
-            val header = arrayOf("Guid", "Usuario", "Dispositivo", "Estado", "Fecha Préstamo", "Fecha Devolución")
+            val header = arrayOf("Guid", "Usuario", "Tipo", "Fecha")
             csvWriter.writeNext(header, false)
 
-            prestamos.forEach { prestamo ->
+            sanciones.forEach { sancion ->
                 csvWriter.writeNext(
                     arrayOf(
-                        prestamo.guid,
-                        prestamo.userGuid,
-                        prestamo.dispositivoGuid,
-                        prestamo.estadoPrestamo.name,
-                        prestamo.fechaPrestamo.toDefaultDateString(),
-                        prestamo.fechaDevolucion.toDefaultDateString()
+                        sancion.guid,
+                        sancion.userGuid,
+                        sancion.tipoSancion.name,
+                        sancion.fechaSancion.toDefaultDateString()
                     ),
                     false
                 )
@@ -62,7 +60,7 @@ class PrestamoCsvStorage(
 
     fun generateAndSaveCsv() {
         val csvData = generateCsv()
-        val fileName = "prestamos_${LocalDate.now().toDefaultDateString()}.csv"
+        val fileName = "sanciones_${LocalDate.now().toDefaultDateString()}.csv"
         saveCsvToFile(csvData, fileName)
     }
 }
