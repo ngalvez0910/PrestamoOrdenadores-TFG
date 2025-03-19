@@ -94,7 +94,7 @@ class DispositivoMapperTest {
             { assertEquals(1, responses.size) },
             { assertEquals("guidTest123", responses[0].guid) },
             { assertEquals("5CD1234XYZ", responses[0].numeroSerie) },
-            { assertEquals("NUEVO", responses[0].estado) },
+            { assertEquals("DISPONIBLE", responses[0].estado) },
             { assertEquals("", responses[0].incidenciaGuid) }
         )
     }
