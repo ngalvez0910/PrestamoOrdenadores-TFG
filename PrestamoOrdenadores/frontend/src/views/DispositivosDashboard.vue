@@ -2,28 +2,27 @@
   <MenuBar />
   <div class="filters row-12" style="margin-left: -33%;">
     <p class="filter col-4">
-      Nombre:
-      <input type="text" v-model="searchName" placeholder="Buscar por nombre..." />
+      Nº Serie:
+      <input type="text" v-model="searchNumber" placeholder="Buscar por nº de serie..." />
     </p>
     <p class="filter col-4">
       Estado:
       <input type="text" v-model="searchEstado" placeholder="Buscar por estado..." />
     </p>
     <p class="filter col-4">
-      Usuario:
-      <input type="text" v-model="searchUser" placeholder="Buscar por usuario..." />
+      Stock:
+      <input type="text" v-model="searchStock" placeholder="Buscar por stock..." />
     </p>
   </div>
   <br>
   <div class="table row-12" style="margin-left: -20%;">
     <DataTable stripedRows tableStyle="min-width: 50rem">
-      <Column field="number" header="Nº"></Column>
       <Column field="guid" header="GUID"></Column>
       <Column field="serialNumber" header="Número de serie"></Column>
-      <Column field="name" header="Nombre"></Column>
+      <Column field="componentes" header="Componentes"></Column>
       <Column field="state" header="Estado"></Column>
-      <Column field="user" header="Usuario"></Column>
       <Column field="incident" header="Incidencias"></Column>
+      <Column field="stock" header="Stock"></Column>
       <Column field="edit"></Column>
     </DataTable>
   </div>
@@ -37,9 +36,9 @@ export default {
   components: { MenuBar },
   data() {
     return {
-      searchName: '',
+      searchNumber: '',
       searchEstado: '',
-      searchUser: '',
+      searchStock: '',
     };
   },
 };
