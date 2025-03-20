@@ -3,15 +3,15 @@
   <div class="filters row-12" style="margin-left: -40%;">
     <p class="filter col-5">
       Nombre de usuario:
-      <input type="text" v-model="search" placeholder="Buscar por usuario..." />
+      <input type="text" v-model="searchName" placeholder="Buscar por usuario..." />
     </p>
     <p class="filter col-4">
       Curso:
-      <input type="text" v-model="search" placeholder="Buscar por curso..." />
+      <input type="text" v-model="searchCurso" placeholder="Buscar por curso..." />
     </p>
     <p class="filter col-3">
       Rol:
-      <select>
+      <select v-model="searchRol">
         <option value="">Todos</option>
         <option value="Admin">Admin</option>
         <option value="Profesor">Profesor</option>
@@ -42,7 +42,9 @@ export default {
   components: { MenuBar },
   data() {
     return {
-      search: '',
+      searchName: '',
+      searchCurso: '',
+      searchRol: '',
     };
   },
 };

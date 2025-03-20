@@ -1,17 +1,17 @@
 <template>
   <MenuBar />
-  <div class="filters row-12">
+  <div class="filters row-12" style="margin-left: -33%;">
     <p class="filter col-4">
       Nombre:
-      <input type="text" v-model="search" placeholder="Buscar por nombre..." />
+      <input type="text" v-model="searchName" placeholder="Buscar por nombre..." />
     </p>
     <p class="filter col-4">
       Estado:
-      <input type="text" v-model="search" placeholder="Buscar por estado..." />
+      <input type="text" v-model="searchEstado" placeholder="Buscar por estado..." />
     </p>
     <p class="filter col-4">
       Usuario:
-      <input type="text" v-model="search" placeholder="Buscar por usuario..." />
+      <input type="text" v-model="searchUser" placeholder="Buscar por usuario..." />
     </p>
   </div>
   <br>
@@ -37,7 +37,9 @@ export default {
   components: { MenuBar },
   data() {
     return {
-      search: '',
+      searchName: '',
+      searchEstado: '',
+      searchUser: '',
     };
   },
 };

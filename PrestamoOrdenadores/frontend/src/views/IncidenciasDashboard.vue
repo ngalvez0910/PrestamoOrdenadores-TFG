@@ -1,19 +1,19 @@
 <template>
   <MenuBar />
-  <div class="filters">
-    <div class="filter">
+  <div class="filters row-12" style="margin-left: -33%;">
+    <div class="filter col-3" style="margin-left: 2%;">
       <label for="username">Usuario:</label>
       <input id="username" type="text" v-model="searchUsername" placeholder="Buscar por usuario..." />
     </div>
-    <div class="filter">
+    <div class="filter col-3" style="margin-left: -5%;">
       <label for="grade">Curso:</label>
       <input id="grade" type="text" v-model="searchGrade" placeholder="Buscar por curso..." />
     </div>
-    <p class="filter">
+    <p class="filter col-3" style="margin-left: -5%; margin-top: 1%">
       Fecha:
       <input type="date" v-model="searchDate" />
     </p>
-    <p class="filter">
+    <p class="filter col-3" style="margin-left: -5%; margin-top: 1%">
       <label for="type">Tipo:</label>
       <select id="type" type="text" v-model="searchType">
         <option value="">Todos</option>
@@ -24,7 +24,7 @@
     </p>
   </div>
   <br>
-  <div class="table">
+  <div class="table row-12" style="margin-left: -25%;">
     <DataTable stripedRows tableStyle="min-width: 50rem">
       <Column field="number" header="Nº"></Column>
       <Column field="guid" header="GUID"></Column>
@@ -62,17 +62,13 @@ body{
 
 .filters {
   display: flex;
-  gap: 1rem;
   align-items: center;
-  padding: 1rem;
-  margin-left: -25%;
   margin-top: -15%;
 }
 
 .filter {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
 .filter input, select {
@@ -83,7 +79,6 @@ body{
 }
 
 .table {
-  margin-left: -25%;
   margin-top: 1%;
   width: 100%;
 }
