@@ -9,7 +9,7 @@ import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 
 fun PrestamoCreateRequest.validate(): Result<PrestamoCreateRequest, PrestamoError> {
     if (this.userGuid.isBlank()) {
-        return Err(PrestamoError.PrestamoValidationError("El guid del usuario es inválido"))
+        return Err(PrestamoError.PrestamoValidationError("El guid del usuario no puede estar vacío"))
     }
 
     return Ok(this)

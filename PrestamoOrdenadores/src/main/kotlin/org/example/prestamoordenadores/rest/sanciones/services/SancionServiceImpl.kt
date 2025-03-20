@@ -5,14 +5,17 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError
 import org.example.prestamoordenadores.rest.sanciones.mappers.SancionMapper
+import org.example.prestamoordenadores.rest.sanciones.models.Sancion
 import org.example.prestamoordenadores.rest.sanciones.models.TipoSancion
 import org.example.prestamoordenadores.rest.sanciones.repositories.SancionRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
@@ -63,6 +66,11 @@ class SancionServiceImpl(
         logger.debug { "Creando nueva sancion" }
 
         return withContext(Dispatchers.IO) {
+            val sancionValidada = sancion.validate()
+            if (sancionValidada.isErr) {
+                return@withContext Err(SancionError.SancionValidationError("Sanción inválida"))
+            }
+
             val user = userRepository.findByGuid(sancion.userGuid)
             if (user == null) {
                 return@withContext Err(SancionError.UserNotFound("Usuario con GUID: ${sancion.userGuid} no encontrado"))
@@ -83,6 +91,11 @@ class SancionServiceImpl(
         logger.debug { "Buscando sancion" }
 
         return withContext(Dispatchers.IO) {
+            val sancionValidada = sancion.validate()
+            if (sancionValidada.isErr) {
+                return@withContext Err(SancionError.SancionValidationError("Sanción inválida"))
+            }
+
             val existingSancion = repository.findByGuid(guid)
             if (existingSancion == null) {
                 return@withContext Err(SancionError.SancionNotFound("Sancion no encontrada"))

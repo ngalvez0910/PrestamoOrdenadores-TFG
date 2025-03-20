@@ -4,6 +4,7 @@ import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.SancionNotFound
+import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.SancionValidationError
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.UserNotFound
 import org.example.prestamoordenadores.rest.sanciones.services.SancionService
 import org.example.prestamoordenadores.storage.csv.SancionCsvStorage
@@ -97,6 +98,7 @@ class SancionController
             failure = { error ->
                 when(error) {
                     is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    is SancionValidationError -> ResponseEntity.status(403).body("Sanción inválida")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
@@ -110,6 +112,7 @@ class SancionController
             failure = { error ->
                 when(error) {
                     is SancionNotFound -> ResponseEntity.status(404).body("Sanción no encontrada")
+                    is SancionValidationError -> ResponseEntity.status(403).body("Sanción inválida")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
