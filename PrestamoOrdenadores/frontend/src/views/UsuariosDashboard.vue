@@ -1,15 +1,15 @@
 <template>
   <MenuBar />
-  <div class="filters row-12" style="margin-left: -40%;">
-    <p class="filter col-5">
-      Nombre de usuario:
-      <input type="text" v-model="searchName" placeholder="Buscar por usuario..." />
+  <div class="filters row-12" style="margin-left: -30%;">
+    <p class="filter col-5" style="margin-left: 2%;">
+      Nombre:
+      <input type="text" v-model="searchName" placeholder="Buscar por nombre..." />
     </p>
-    <p class="filter col-4">
+    <p class="filter col-4" style="margin-left: -8%;">
       Curso:
       <input type="text" v-model="searchCurso" placeholder="Buscar por curso..." />
     </p>
-    <p class="filter col-3">
+    <p class="filter col-3" style="margin-left: -2%;">
       Rol:
       <select v-model="searchRol">
         <option value="">Todos</option>
@@ -22,13 +22,12 @@
   <br>
   <div class="table row-12" style="margin-left: -20%;">
     <DataTable stripedRows tableStyle="min-width: 50rem">
-      <Column field="number" header="Nº"></Column>
       <Column field="guid" header="GUID"></Column>
-      <Column field="username" header="Nombre de usuario"></Column>
+      <Column field="email" header="Email"></Column>
+      <Column field="name" header="Nombre"></Column>
       <Column field="grade" header="Curso"></Column>
+      <Column field="tutor" header="Tutor"></Column>
       <Column field="role" header="Rol"></Column>
-      <Column field="date" header="Fecha de alta"></Column>
-      <Column field="incident" header="Incidencias"></Column>
       <Column field="edit"></Column>
     </DataTable>
   </div>
