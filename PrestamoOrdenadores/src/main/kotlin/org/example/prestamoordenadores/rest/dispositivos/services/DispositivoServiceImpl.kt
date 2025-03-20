@@ -66,7 +66,7 @@ class DispositivoServiceImpl(
             if (dispositivoValidado.isErr) {
                 return@withContext Err(DispositivoError.DispositivoValidationError("Dispositivo inválido"))
             }
-            
+
             val newDispositivo = mapper.toDispositivoFromCreate(dispositivo)
             dispositivoRepository.save(newDispositivo)
 

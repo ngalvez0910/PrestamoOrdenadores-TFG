@@ -16,6 +16,7 @@ import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.storage.pdf.PrestamoPdfStorage
+import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
@@ -68,6 +69,11 @@ class PrestamoServiceImpl(
         logger.debug { "Creando nuevo prestamo" }
 
         return withContext(Dispatchers.IO) {
+            val prestamoValidado = prestamo.validate()
+            if (prestamoValidado.isErr) {
+                return@withContext Err(PrestamoError.PrestamoValidationError("Préstamo inválido"))
+            }
+
             val user = userRepository.findByGuid(prestamo.userGuid)
             if (user == null) {
                 return@withContext Err(PrestamoError.UserNotFound("Usuario con GUID: ${prestamo.userGuid} no encontrado"))
@@ -98,6 +104,11 @@ class PrestamoServiceImpl(
         logger.debug { "Actualizando prestamo con GUID: $guid" }
 
         return withContext(Dispatchers.IO) {
+            val prestamoValidado = prestamo.validate()
+            if (prestamoValidado.isErr) {
+                return@withContext Err(PrestamoError.PrestamoValidationError("Préstamo inválido"))
+            }
+
             val prestamoEncontrado = prestamoRepository.findByGuid(guid)
 
             if (prestamoEncontrado == null) {
