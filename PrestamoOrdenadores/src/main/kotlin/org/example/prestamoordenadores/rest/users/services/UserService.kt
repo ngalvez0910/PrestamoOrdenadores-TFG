@@ -1,6 +1,7 @@
 package org.example.prestamoordenadores.rest.users.services
 
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
@@ -13,7 +14,7 @@ interface UserService {
     suspend fun getAllUsers(page: Int, size: Int): Result<List<UserResponseAdmin>, UserError>
     suspend fun getUserByGuid(guid: String) : Result<UserResponse?, UserError>
     suspend fun createUser(user: UserCreateRequest) : Result<UserResponse, UserError>
-    suspend fun updateAvatar(guid: String, avatar: String) : Result<UserResponse?, UserError>
+    suspend fun updateAvatar(guid: String, user: UserAvatarUpdateRequest) : Result<UserResponse?, UserError>
     suspend fun deleteUserByGuid(guid: String) : Result<UserResponse?, UserError>
     suspend fun resetPassword(guid: String, user: UserPasswordResetRequest) : Result<UserResponse?, UserError>
     suspend fun getByCurso(curso: String): Result<List<UserResponse?>, UserError>

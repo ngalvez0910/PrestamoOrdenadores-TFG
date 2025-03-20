@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
@@ -12,6 +13,7 @@ import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
@@ -59,6 +61,11 @@ class UserServiceImpl(
         logger.debug { "Creando usuario: $user" }
 
         return withContext(Dispatchers.IO) {
+            val userValidado = user.validate()
+            if (userValidado.isErr) {
+                return@withContext Err(UserError.UserValidationError("Usuario inválido"))
+            }
+
             if (repository.existsUserByNumeroIdentificacion(user.numeroIdentificacion)) {
                 return@withContext Err(UserError.UserAlreadyExists("Usuario con numero de identificacion ${user.numeroIdentificacion} ya existe"))
             }
@@ -78,18 +85,24 @@ class UserServiceImpl(
     }
 
     @CachePut(key = "#result.guid")
-    override suspend fun updateAvatar(guid: String, avatar: String): Result<UserResponse?, UserError> {
+    override suspend fun updateAvatar(guid: String, user: UserAvatarUpdateRequest): Result<UserResponse?, UserError> {
         logger.debug { "Actualizando avatar del usuario con GUID: $guid" }
 
         return withContext(Dispatchers.IO) {
-            var user = repository.findByGuid(guid)
-            if (user == null) {
+            val userValidado = user.validate()
+            if (userValidado.isErr) {
+                return@withContext Err(UserError.UserValidationError("Usuario inválido"))
+            }
+
+            var userEncontrado = repository.findByGuid(guid)
+            if (userEncontrado == null) {
                 return@withContext Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
             }
-            user.avatar = avatar
-            user.updatedDate = LocalDateTime.now()
-            repository.save(user)
-            Ok(mapper.toUserResponse(user))
+
+            userEncontrado.avatar = user.avatar
+            userEncontrado.updatedDate = LocalDateTime.now()
+            repository.save(userEncontrado)
+            Ok(mapper.toUserResponse(userEncontrado))
         }
     }
 
@@ -117,6 +130,11 @@ class UserServiceImpl(
         logger.debug { "Cambiando contraseña de usuario con GUID: $guid" }
 
         return withContext(Dispatchers.IO) {
+            val userValidado = user.validate()
+            if (userValidado.isErr) {
+                return@withContext Err(UserError.UserValidationError("Usuario inválido"))
+            }
+
             val existingUser = repository.findByGuid(guid)
             if (existingUser == null) {
                 return@withContext Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))

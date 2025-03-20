@@ -1,10 +1,13 @@
 package org.example.prestamoordenadores.rest.users.controller
 
 import com.github.michaelbull.result.mapBoth
+import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.SancionValidationError
+import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserAlreadyExists
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserNotFound
+import org.example.prestamoordenadores.rest.users.errors.UserError.UserValidationError
 import org.example.prestamoordenadores.rest.users.services.UserService
 import org.example.prestamoordenadores.storage.csv.UserCsvStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
@@ -116,6 +119,22 @@ class UserController
                 when (error) {
                     is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
                     is UserAlreadyExists -> ResponseEntity.badRequest().build()
+                    is UserValidationError -> ResponseEntity.status(403).body("Usuario inválido")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
+
+    @PatchMapping("/avatar/{guid}")
+    suspend fun updateAvatar(@PathVariable guid: String, @RequestBody user: UserAvatarUpdateRequest) : ResponseEntity<Any> {
+        return userService.updateAvatar(guid, user).mapBoth(
+            success = { ResponseEntity.status(200).body(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    is UserValidationError -> ResponseEntity.status(403).body("Usuario inválido")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
         )
@@ -128,6 +147,7 @@ class UserController
             failure = { error ->
                 when (error) {
                     is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    is UserValidationError -> ResponseEntity.status(403).body("Usuario inválido")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
