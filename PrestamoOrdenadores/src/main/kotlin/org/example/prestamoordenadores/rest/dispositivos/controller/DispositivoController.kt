@@ -3,8 +3,10 @@ package org.example.prestamoordenadores.rest.dispositivos.controller
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
+import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoAlreadyExists
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoNotFound
+import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoValidationError
 import org.example.prestamoordenadores.rest.dispositivos.services.DispositivoService
 import org.example.prestamoordenadores.storage.csv.DispositivoCsvStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
@@ -86,7 +88,12 @@ class DispositivoController
     suspend fun createDispositivo(@RequestBody dispositivo: DispositivoCreateRequest): ResponseEntity<Any> {
         return dispositivoService.createDispositivo(dispositivo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
-            failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
+            failure = { error ->
+                when(error) {
+                    is DispositivoValidationError -> ResponseEntity.status(403).body("Dispositivo inválido")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
         )
     }
 

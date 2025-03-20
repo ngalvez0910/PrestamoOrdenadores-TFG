@@ -13,6 +13,7 @@ import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
 import org.example.prestamoordenadores.rest.dispositivos.mappers.DispositivoMapper
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
+import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
@@ -61,6 +62,11 @@ class DispositivoServiceImpl(
         logger.debug { "Guardando un nuevo dispositivo" }
 
         return withContext(Dispatchers.IO) {
+            val dispositivoValidado = dispositivo.validate()
+            if (dispositivoValidado.isErr) {
+                return@withContext Err(DispositivoError.DispositivoValidationError("Dispositivo inválido"))
+            }
+
             val newDispositivo = mapper.toDispositivoFromCreate(dispositivo)
             dispositivoRepository.save(newDispositivo)
 

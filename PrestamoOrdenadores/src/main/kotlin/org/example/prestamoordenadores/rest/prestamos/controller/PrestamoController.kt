@@ -3,8 +3,10 @@ package org.example.prestamoordenadores.rest.prestamos.controller
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
+import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.DispositivoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoNotFound
+import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoValidationError
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.UserNotFound
 import org.example.prestamoordenadores.rest.prestamos.services.PrestamoService
 import org.example.prestamoordenadores.storage.csv.PrestamoCsvStorage
@@ -95,6 +97,7 @@ class PrestamoController
             failure = { error ->
                 when(error) {
                     is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    is PrestamoValidationError -> ResponseEntity.status(403).body("Préstamo inválido")
                     is DispositivoNotFound -> ResponseEntity.status(404).body("No hay dispositivos disponibles actualmente")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
@@ -109,6 +112,7 @@ class PrestamoController
             failure = { error ->
                 when(error) {
                     is PrestamoNotFound -> ResponseEntity.status(404).body("Préstamo no encontrado")
+                    is PrestamoValidationError -> ResponseEntity.status(403).body("Préstamo inválido")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }

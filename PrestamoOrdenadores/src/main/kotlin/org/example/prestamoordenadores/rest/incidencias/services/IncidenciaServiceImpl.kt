@@ -13,6 +13,7 @@ import org.example.prestamoordenadores.rest.incidencias.mappers.IncidenciaMapper
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
@@ -62,6 +63,11 @@ class IncidenciaServiceImpl(
         logger.debug { "Creando incidencia" }
 
         return withContext(Dispatchers.IO) {
+            val incidenciaValidada = incidencia.validate()
+            if (incidenciaValidada.isErr) {
+                return@withContext Err(IncidenciaError.IncidenciaValidationError("Incidencia inválida"))
+            }
+
             val newIncidencia = mapper.toIncidenciaFromCreate(incidencia)
             repository.save(newIncidencia)
 
@@ -75,6 +81,11 @@ class IncidenciaServiceImpl(
             val existingIncidencia = repository.findIncidenciaByGuid(guid)
             if (existingIncidencia == null) {
                 return@withContext Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
+            }
+
+            val incidenciaValidada = incidencia.validate()
+            if (incidenciaValidada.isErr) {
+                return@withContext Err(IncidenciaError.IncidenciaValidationError("Incidencia inválida"))
             }
 
             val estadoNormalizado = incidencia.estadoIncidencia.replace(" ", "_").uppercase()
