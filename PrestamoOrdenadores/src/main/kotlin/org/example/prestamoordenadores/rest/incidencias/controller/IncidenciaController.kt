@@ -3,7 +3,9 @@ package org.example.prestamoordenadores.rest.incidencias.controller
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
+import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError.IncidenciaNotFound
+import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError.IncidenciaValidationError
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError.UserNotFound
 import org.example.prestamoordenadores.rest.incidencias.services.IncidenciaService
 import org.example.prestamoordenadores.storage.csv.IncidenciaCsvStorage
@@ -88,7 +90,12 @@ class IncidenciaController
     suspend fun createIncidencia(@RequestBody incidencia: IncidenciaCreateRequest): ResponseEntity<Any> {
         return incidenciaService.createIncidencia(incidencia).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
-            failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
+            failure = { error ->
+                when(error) {
+                    is IncidenciaValidationError -> ResponseEntity.status(403).body("Incidencia inválida")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
         )
     }
 
@@ -99,6 +106,7 @@ class IncidenciaController
             failure = { error ->
                 when(error) {
                     is IncidenciaNotFound -> ResponseEntity.status(404).body("Incidencia no encontrada")
+                    is IncidenciaValidationError -> ResponseEntity.status(403).body("Incidencia inválida")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
