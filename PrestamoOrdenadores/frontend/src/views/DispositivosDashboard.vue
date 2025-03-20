@@ -1,21 +1,21 @@
 <template>
   <MenuBar />
-  <div class="filters">
-    <p class="filter">
+  <div class="filters row-12">
+    <p class="filter col-4">
       Nombre:
       <input type="text" v-model="search" placeholder="Buscar por nombre..." />
     </p>
-    <p class="filter">
+    <p class="filter col-4">
       Estado:
       <input type="text" v-model="search" placeholder="Buscar por estado..." />
     </p>
-    <p class="filter">
+    <p class="filter col-4">
       Usuario:
       <input type="text" v-model="search" placeholder="Buscar por usuario..." />
     </p>
   </div>
   <br>
-  <div class="table">
+  <div class="table row-12" style="margin-left: -20%;">
     <DataTable stripedRows tableStyle="min-width: 50rem">
       <Column field="number" header="Nº"></Column>
       <Column field="guid" header="GUID"></Column>
@@ -67,7 +67,6 @@ export default {
 }
 
 .table {
-  margin-left: -37%;
   margin-top: 1%;
 }
 </style>

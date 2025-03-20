@@ -1,5 +1,5 @@
 <template>
-  <div class="menubar">
+  <div class="menubar row-12">
     <h1><a href="/admin/dashboard">LoanTech</a></h1>
     <Button class="user-info" @click="toggleMenu($event)">
       <p class="username">Usuario</p>
