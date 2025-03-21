@@ -127,6 +127,8 @@ export default {
 .username {
   font-size: 1rem;
   font-weight: 500;
+  margin-left: 5%;
+  margin-top: 10%;
 }
 
 .avatar {
@@ -144,13 +146,13 @@ export default {
   box-shadow: 0 4px 8px rgb(236, 145, 96);
   padding: 10px 0;
   min-width: 130px;
-  overflow: visible;
+  overflow: visible !important;
 }
 
 .user-menu a i, .user-menu a {
   color: #14124f !important;
   margin-right: 8px;
-  margin-left: 4px;
+  margin-left: -5%;
 }
 
 .user-menu a i:hover, .user-menu a:hover {

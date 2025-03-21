@@ -57,7 +57,7 @@ export default {
   justify-content: center;
   padding: 25px;
   border-radius: 12px;
-  background: #ffffff;
+  background: white;
   box-shadow: 0 6px 12px rgba(20, 18, 79, 0.15);
   text-align: center;
   cursor: pointer;

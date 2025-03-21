@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
-import AdminDashboard from '../views/AdminDashboard.vue';
-import DispositivosDashboard from "@/views/DispositivosDashboard.vue";
-import UsuariosDashboard from "@/views/UsuariosDashboard.vue";
-import IncidenciasDashboard from "@/views/IncidenciasDashboard.vue";
+import AdminDashboard from '../views/admin/AdminDashboard.vue';
+import DispositivosDashboard from "@/views/admin/DispositivosDashboard.vue";
+import UsuariosDashboard from "@/views/admin/UsuariosDashboard.vue";
+import IncidenciasDashboard from "@/views/admin/IncidenciasDashboard.vue";
 import Profile from "@/views/Profile.vue";
+import DispositivoDetalle from "@/views/admin/DispositivoDetalle.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +44,11 @@ const router = createRouter({
       path: '/admin/profile',
       name: 'Profile',
       component: Profile,
+    },
+    {
+      path: '/admin/dispositivo/detalle',
+      name: 'DispositivoDetalle',
+      component: DispositivoDetalle,
     }
   ],
 })
