@@ -30,14 +30,14 @@
       <Column field="rol" header="Rol"></Column>
       <Column field="ver">
         <template #body="slotProps">
-          <button @click="verDispositivo(slotProps.data)" class="ver-button">
+          <button @click="verUsuario(slotProps.data)" class="ver-button">
             <i class="pi pi-eye"></i>
           </button>
         </template>
       </Column>
       <Column field="delete">
         <template #body="slotProps">
-          <button @click="deleteDispositivo(slotProps.data)" class="delete-button">
+          <button @click="deleteUsuario(slotProps.data)" class="delete-button">
             <i class="pi pi-ban"></i>
           </button>
         </template>
