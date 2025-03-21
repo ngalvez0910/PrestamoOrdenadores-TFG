@@ -1,7 +1,6 @@
 package org.example.prestamoordenadores.rest.users.controller
 
 import com.github.michaelbull.result.mapBoth
-import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.SancionValidationError
 import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
