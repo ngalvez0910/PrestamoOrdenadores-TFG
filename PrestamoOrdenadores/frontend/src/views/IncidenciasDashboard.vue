@@ -33,21 +33,21 @@
       <Column field="edit"></Column>
       <Column field="ver">
         <template #body="slotProps">
-          <button @click="verIncidencia(slotProps.data)" class="ver-button">
+          <button @click="verIncidencia(slotProps.data)" class="verIncidencia-button">
             <i class="pi pi-eye"></i>
           </button>
         </template>
       </Column>
       <Column field="edit">
         <template #body="slotProps">
-          <button @click="editIncidencia(slotProps.data)" class="edit-button">
+          <button @click="editIncidencia(slotProps.data)" class="editIncidencia-button">
             <i class="pi pi-pencil"></i>
           </button>
         </template>
       </Column>
       <Column field="delete">
         <template #body="slotProps">
-          <button @click="deleteIncidencia(slotProps.data)" class="delete-button">
+          <button @click="deleteIncidencia(slotProps.data)" class="deleteIncidencia-button">
             <i class="pi pi-ban"></i>
           </button>
         </template>
@@ -137,7 +137,7 @@ body{
   border-radius: 25px;
 }
 
-.edit-button, .ver-button {
+.editIncidencia-button, .verIncidencia-button {
   padding: 0.5rem 0.6rem;
   font-size: 0.875rem;
   background-color: #d6621e;
@@ -149,16 +149,16 @@ body{
   margin-top: 20%
 }
 
-.edit-button:hover, .ver-button:hover {
+.editIncidencia-button:hover, .verIncidencia-button:hover {
   background-color: #a14916;
 }
 
-.edit-button i, .ver-button i {
+.editIncidencia-button i, .verIncidencia-button i {
   pointer-events: none;
   margin-top: 30%;
 }
 
-.delete-button {
+.deleteIncidencia-button {
   padding: 0.5rem 0.6rem;
   font-size: 0.875rem;
   background-color: #d61e1e;
@@ -170,11 +170,11 @@ body{
   margin-top: 20%
 }
 
-.delete-button:hover {
+.deleteIncidencia-button:hover {
   background-color: #9b1616;
 }
 
-.delete-button i {
+.deleteIncidencia-button i {
   pointer-events: none;
   margin-top: 30%;
 }
