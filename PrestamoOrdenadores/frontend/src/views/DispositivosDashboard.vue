@@ -25,11 +25,7 @@
       <Column field="guid" header="GUID"></Column>
       <Column field="numeroSerie" header="Número de serie"></Column>
       <Column field="componentes" header="Componentes"></Column>
-      <Column field="estadoDispositivo" header="Estado">
-        <template #body="slotProps">
-          {{ getEstadoDispositivo(slotProps.data.estado) }}
-        </template>
-      </Column>
+      <Column field="estado" header="Estado"></Column>
       <Column field="incidenciaGuid" header="Incidencias"></Column>
       <Column field="stock" header="Stock"></Column>
       <Column field="edit">
@@ -93,14 +89,6 @@ export default {
       } catch (error) {
         console.error("Error obteniendo datos:", error);
       }
-    },
-    getEstadoDispositivo(estado: string): string {
-      const estadosMap: Record<string, string> = {
-        DISPONIBLE: "Disponible",
-        NO_DISPONIBLE: "No Disponible",
-        PRESTADO: "Prestado"
-      };
-      return estadosMap[estado] || estado;
     },
     filterData() {
       this.filteredDatos = this.datos.filter(dispositivo => {
