@@ -30,9 +30,11 @@
       <Column field="stock" header="Stock"></Column>
       <Column field="edit">
         <template #body="slotProps">
-          <button @click="editDispositivo(slotProps.data)" class="edit-button">
-            <i class="pi pi-pencil"></i>
-          </button>
+          <a href="/admin/dispositivo/detalle">
+            <button @click="editDispositivo(slotProps.data)" class="editDispositivo-button">
+              <i class="pi pi-pencil"></i>
+            </button>
+          </a>
         </template>
       </Column>
       <Column field="delete">
@@ -127,23 +129,27 @@ export default {
 }
 
 
-.edit-button {
-  padding: 0.5rem 0.8rem;
+.editDispositivo-button {
+  padding: 0.5rem 0.7rem;
   font-size: 0.875rem;
   background-color: #d6621e;
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 20%
+  margin-top: 20%;
+  transition: all 0.3s ease-in-out;
+  align-items: center;
+  justify-content: center;
 }
 
-.edit-button:hover {
+.editDispositivo-button:hover {
   background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
 }
 
-.edit-button i {
+.editDispositivo-button i {
   pointer-events: none;
   margin-top: 30%;
 }
@@ -167,5 +173,9 @@ export default {
 .delete-button i {
   pointer-events: none;
   margin-top: 30%;
+}
+
+a{
+  background-color: inherit !important;
 }
 </style>
