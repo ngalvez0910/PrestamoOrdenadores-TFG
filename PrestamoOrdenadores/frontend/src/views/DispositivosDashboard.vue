@@ -1,6 +1,6 @@
 <template>
   <MenuBar />
-  <div class="filters row-12" style="margin-left: -33%; margin-top: 10%">
+  <div class="filters row-12" style="margin-left: -33%; margin-top: 40%">
     <p class="filter col-4">
       Nº Serie:
       <input type="text" v-model="searchNumber" placeholder="Buscar por nº de serie..." @input="filterData" />
@@ -32,7 +32,20 @@
       </Column>
       <Column field="incidenciaGuid" header="Incidencias"></Column>
       <Column field="stock" header="Stock"></Column>
-      <Column field="edit"></Column>
+      <Column field="edit">
+        <template #body="slotProps">
+          <button @click="editDispositivo(slotProps.data)" class="edit-button">
+            <i class="pi pi-pencil"></i>
+          </button>
+        </template>
+      </Column>
+      <Column field="delete">
+        <template #body="slotProps">
+          <button @click="deleteDispositivo(slotProps.data)" class="delete-button">
+            <i class="pi pi-ban"></i>
+          </button>
+        </template>
+      </Column>
     </DataTable>
   </div>
 </template>
@@ -123,5 +136,48 @@ export default {
   padding: 0.75rem;
   border: 1px solid #d6621e;
   border-radius: 25px;
+}
+
+
+.edit-button {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.875rem;
+  background-color: #d6621e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20%
+}
+
+.edit-button:hover {
+  background-color: #a14916;
+}
+
+.edit-button i {
+  pointer-events: none;
+  margin-top: 30%;
+}
+
+.delete-button {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.875rem;
+  background-color: #d61e1e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20%
+}
+
+.delete-button:hover {
+  background-color: #9b1616;
+}
+
+.delete-button i {
+  pointer-events: none;
+  margin-top: 30%;
 }
 </style>
