@@ -24,6 +24,7 @@ class UserMapper {
 
     fun toUserResponseAdmin(user: User): UserResponseAdmin{
         return UserResponseAdmin(
+            numeroIdentificacion = user.numeroIdentificacion,
             guid = user.guid,
             email = user.email,
             nombre = user.nombre,

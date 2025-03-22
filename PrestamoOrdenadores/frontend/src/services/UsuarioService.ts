@@ -16,9 +16,9 @@ interface User {
     updatedDate: string;
 }
 
-export const getUserByGuid = async (guid: string): Promise<User | null> => {
+export const getUserByGuidAdmin = async (guid: string): Promise<User | null> => {
     try {
-        const response = await axios.get(`http://localhost:8080/users/${guid}`);
+        const response = await axios.get(`http://localhost:8080/users/admin/${guid}`);
         return response.data || null;
     } catch (error) {
         console.error('Error obteniendo usuario por GUID:', error);

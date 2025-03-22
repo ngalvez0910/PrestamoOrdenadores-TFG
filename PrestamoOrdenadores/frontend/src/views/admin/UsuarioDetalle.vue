@@ -36,9 +36,6 @@
         <h6>Rol: </h6><p>{{userData.rol}}</p>
       </div>
     </div>
-    <div class="fotoCarnet">
-      <h6>Foto Carnet: </h6><p>{{userData.fotoCarnet}}</p>
-    </div>
     <div class="row">
       <div class="login col-6">
         <h6>Último Login: </h6><p>{{userData.lastLoginDate}}</p>
@@ -61,7 +58,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import MenuBar from "@/components/AdminMenuBar.vue";
-import { getUserByGuid } from "@/services/UsuarioService";
+import {getUserByGuidAdmin} from "@/services/UsuarioService";
 
 export default defineComponent({
   name: "UsuarioDetalle",
@@ -75,8 +72,9 @@ export default defineComponent({
     try {
       const guid = this.$route.params.guid;
       const guidString = Array.isArray(guid) ? guid[0] : guid;
-      const user = await getUserByGuid(guidString);
+      const user = await getUserByGuidAdmin(guidString);
       this.userData = user;
+      console.log(user)
     } catch (error) {
       console.error("Error al obtener los detalles del usuario:", error);
     }
@@ -90,7 +88,7 @@ body{
 }
 
 .boton-atras{
-  margin-top: -2%;
+  margin-top: 3%;
   margin-left: -65%
 }
 
@@ -129,10 +127,11 @@ a{
   border-radius: 10px;
   padding: 20px;
   width: 300%;
-  max-width: 600px;
+  max-width: 650px;
   box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  margin-left: -5%;
+  margin-left: -10%;
   margin-top: -15%;
+  margin-bottom: 7%;
 }
 
 .pi-user {
