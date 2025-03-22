@@ -24,7 +24,11 @@
     <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
       <Column field="guid" header="GUID"></Column>
       <Column field="email" header="Email"></Column>
-      <Column field="nombre" header="Nombre"></Column>
+      <Column header="Nombre">
+        <template #body="slotProps">
+          <span>{{ slotProps.data.nombre }} {{ slotProps.data.apellidos }}</span>
+        </template>
+      </Column>
       <Column field="curso" header="Curso"></Column>
       <Column field="tutor" header="Tutor"></Column>
       <Column field="rol" header="Rol"></Column>
