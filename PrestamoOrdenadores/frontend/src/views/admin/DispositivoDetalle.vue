@@ -14,17 +14,19 @@
     <div class="numeroSerie">
       <h2><strong>Numero de Serie:</strong> {{numeroSerie}}</h2>
     </div>
-    <div class="componentes">
-      <h5>Componentes</h5>
-      <input type="text" id="componentes" v-model="componentes"/>
-    </div>
-    <div class="estado">
-      <h5>Estado</h5>
-      <select v-model="dispositivo.estado">
-        <option value="DISPONIBLE">Disponible</option>
-        <option value="NO_DISPONIBLE">No Disponible</option>
-        <option value="PRESTADO">Prestado</option>
-      </select>
+    <div class="row">
+      <div class="componentes col-6">
+        <h5>Componentes</h5>
+        <input type="text" id="componentes" v-model="componentes"/>
+      </div>
+      <div class="estado col-6">
+        <h5>Estado</h5>
+        <select v-model="dispositivo.estado">
+          <option value="DISPONIBLE">Disponible</option>
+          <option value="NO_DISPONIBLE">No Disponible</option>
+          <option value="PRESTADO">Prestado</option>
+        </select>
+      </div>
     </div>
     <div class="incidencias">
       <h5>Incidencias</h5>
@@ -78,7 +80,7 @@ body{
 }
 
 .boton-atras{
-  margin-top: -2%;
+  margin-top: -15%;
   margin-left: -65%
 }
 
@@ -117,7 +119,7 @@ a{
   border-radius: 10px;
   padding: 20px;
   width: 300%;
-  max-width: 600px;
+  max-width: max-content;
   box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
   margin-left: -5%;
   margin-top: -15%;
@@ -144,7 +146,8 @@ input, select{
   border-radius: 20px;
   padding: 8px;
   border: 1px solid #d1d3e2;
-  width: 40%;
+  width: 100%;
+  max-width: max-content;
   transition: border 0.3s ease;
   outline: none;
 }

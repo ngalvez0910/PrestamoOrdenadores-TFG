@@ -16,40 +16,50 @@
     </div>
     <div class="row">
       <div class="nombre col-4">
-        <h6>Nombre: </h6><p>{{userData.nombre}}</p>
+        <h6>Nombre: </h6>
+        <input readonly type="text" id="nombre" v-model="userData.nombre"/>
       </div>
       <div class="apellidos col-4">
-        <h6>Apellidos: </h6><p>{{userData.apellidos}}</p>
+        <h6>Apellidos: </h6>
+        <input readonly type="text" id="apellidos" v-model="userData.apellidos"/>
       </div>
       <div class="email col-4">
-        <h6>Email: </h6><p>{{userData.email}}</p>
+        <h6>Email: </h6>
+        <input readonly type="text" id="email" v-model="userData.email"/>
       </div>
     </div>
     <div class="row">
       <div class="curso col-4">
-        <h6>Curso: </h6><p>{{userData.curso}}</p>
+        <h6>Curso: </h6>
+        <input readonly type="text" id="curso" v-model="userData.curso"/>
       </div>
       <div class="tutor col-4">
-        <h6>Tutor: </h6><p>{{userData.tutor}}</p>
+        <h6>Tutor: </h6>
+        <input readonly type="text" id="tutor" v-model="userData.tutor"/>
       </div>
       <div class="rol col-4">
-        <h6>Rol: </h6><p>{{userData.rol}}</p>
+        <h6>Rol: </h6>
+        <input readonly type="text" id="rol" v-model="userData.rol"/>
       </div>
     </div>
     <div class="row">
       <div class="login col-6">
-        <h6>Último Login: </h6><p>{{userData.lastLoginDate}}</p>
+        <h6>Último Login: </h6>
+        <input readonly type="text" id="lastLoginDate" v-model="userData.lastLoginDate"/>
       </div>
       <div class="passReset col-6">
-        <h6>Última Modificación de Contraseña: </h6><p>{{userData.lastPasswordResetDate}}</p>
+        <h6>Última Modificación de Contraseña: </h6>
+        <input readonly type="text" id="lastPasswordResetDate" v-model="userData.lastPasswordResetDate"/>
       </div>
     </div>
     <div class="row">
       <div class="creacion col-6">
-        <h6>Fecha de Creación: </h6><p>{{userData.createdDate}}</p>
+        <h6>Fecha de Creación: </h6>
+        <input readonly type="text" id="createdDate" v-model="userData.createdDate"/>
       </div>
       <div class="actualizacion col-6">
-        <h6>Fecha de última Actualización: </h6><p>{{userData.updatedDate}}</p>
+        <h6>Fecha de última Actualización: </h6>
+        <input readonly type="text" id="updatedDate" v-model="userData.updatedDate"/>
       </div>
     </div>
   </div>
@@ -127,9 +137,9 @@ a{
   border-radius: 10px;
   padding: 20px;
   width: 300%;
-  max-width: 650px;
+  max-width: max-content;
   box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  margin-left: -10%;
+  margin-left: -20%;
   margin-top: -15%;
   margin-bottom: 7%;
 }
@@ -157,13 +167,10 @@ h6{
 input, select{
   border-radius: 20px;
   padding: 8px;
-  border: 1px solid #d1d3e2;
-  width: 40%;
+  border: 1px solid #d6621e;
+  width: 100%;
+  max-width: max-content;
   transition: border 0.3s ease;
   outline: none;
-}
-
-input:focus, select:focus {
-  border-color: #d6621e;
 }
 </style>
