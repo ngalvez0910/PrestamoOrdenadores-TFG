@@ -110,6 +110,13 @@ export default {
         );
       });
     },
+    verIncidencia(incidencia: Incidencia) {
+      console.log("Navegando a detalle de incidencia con estos datos:", incidencia);
+      this.$router.push({
+        name: 'IncidenciaDetalle',
+        params: { guid: incidencia.guid }
+      });
+    }
   },
 };
 </script>
