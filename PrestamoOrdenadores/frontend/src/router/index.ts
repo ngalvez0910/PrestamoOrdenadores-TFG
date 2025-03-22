@@ -56,6 +56,12 @@ const router = createRouter({
         estado: route.query.estado,
         incidenciaGuid: route.query.incidenciaGuid,
       })
+    },
+    {
+      path: "/admin/usuario/detalle/:guid",
+      name: "UsuarioDetalle",
+      component: () => import("@/views/admin/UsuarioDetalle.vue"),
+      props: true
     }
   ],
 })

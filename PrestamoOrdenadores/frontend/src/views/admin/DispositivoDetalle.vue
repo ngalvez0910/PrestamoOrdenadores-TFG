@@ -51,9 +51,6 @@ export default defineComponent({
     estado: String,
     incidenciaGuid: String
   },
-  mounted() {
-    console.log("Dispositivo recibido:", this.guid, this.numeroSerie, this.componentes, this.estado, this.incidenciaGuid);
-  },
   setup(props) {
     const dispositivo = reactive({
       componentes: props.componentes || '',

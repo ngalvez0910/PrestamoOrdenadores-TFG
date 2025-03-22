@@ -105,6 +105,13 @@ export default {
         );
       });
     },
+    verUsuario(usuario: User) {
+      console.log("Navegando a detalle de usuario con estos datos:", usuario);
+      this.$router.push({
+        name: 'UsuarioDetalle',
+        params: { guid: usuario.guid }
+      });
+    }
   }
 };
 </script>
