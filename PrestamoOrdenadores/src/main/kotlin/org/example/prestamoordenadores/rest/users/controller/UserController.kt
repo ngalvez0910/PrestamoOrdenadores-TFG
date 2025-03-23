@@ -4,6 +4,7 @@ import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
+import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserAlreadyExists
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserNotFound
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserValidationError
@@ -192,6 +193,20 @@ class UserController
             failure = { error ->
                 when (error) {
                     is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
+
+    @PatchMapping("/rol/{guid}")
+    suspend fun updateRol(@PathVariable guid: String, @RequestBody user: UserRoleUpdateRequest) : ResponseEntity<Any> {
+        return userService.updateRole(guid, user).mapBoth(
+            success = { ResponseEntity.status(200).body(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    is UserValidationError -> ResponseEntity.status(403).body("Usuario inválido")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
