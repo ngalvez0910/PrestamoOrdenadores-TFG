@@ -6,6 +6,7 @@ import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
+import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.springframework.stereotype.Service
 
@@ -22,4 +23,5 @@ interface UserService {
     suspend fun getByEmail(email: String): Result<UserResponse?, UserError>
     suspend fun getByTutor(tutor: String) : Result<List<UserResponse?>, UserError>
     suspend fun getUserByGuidAdmin(guid: String) : Result<UserResponseAdmin?, UserError>
+    suspend fun updateRole(guid: String, user: UserRoleUpdateRequest) : Result<UserResponseAdmin?, UserError>
 }

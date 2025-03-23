@@ -7,7 +7,9 @@ import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserLoginRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
+import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
+import org.example.prestamoordenadores.rest.users.models.Role
 
 fun UserCreateRequest.validate(): Result<UserCreateRequest, UserError> {
     if (this.numeroIdentificacion.isBlank()) {
@@ -31,6 +33,14 @@ fun UserCreateRequest.validate(): Result<UserCreateRequest, UserError> {
 fun UserAvatarUpdateRequest.validate(): Result<UserAvatarUpdateRequest, UserError> {
     if (this.avatar.isBlank()) {
         return Err(UserError.UserValidationError("El avatar no puede estar vacío"))
+    }
+
+    return Ok(this)
+}
+
+fun UserRoleUpdateRequest.validate(): Result<UserRoleUpdateRequest, UserError> {
+    if (this.rol.isBlank() || this.rol.uppercase() !in Role.entries.map { it.name }) {
+        return Err(UserError.UserValidationError("El rol no puede estar vacío o no es válido"))
     }
 
     return Ok(this)

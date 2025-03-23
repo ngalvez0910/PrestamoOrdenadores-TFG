@@ -1,12 +1,18 @@
 package org.example.prestamoordenadores.rest.users.controller
 
 import com.github.michaelbull.result.mapBoth
+import org.example.prestamoordenadores.config.auth.jwt.JwtTokenUtils
 import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
+import org.example.prestamoordenadores.rest.users.dto.UserLoginRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
+import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
+import org.example.prestamoordenadores.rest.users.dto.UserToken
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserAlreadyExists
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserNotFound
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserValidationError
+import org.example.prestamoordenadores.rest.users.mappers.UserMapper
+import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.services.UserService
 import org.example.prestamoordenadores.storage.csv.UserCsvStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
@@ -14,6 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -32,8 +44,12 @@ import java.time.LocalDate
 class UserController
 @Autowired constructor(
     private val userService: UserService,
-    private val userCsvStorage: UserCsvStorage
+    private val userCsvStorage: UserCsvStorage,
+    private val authenticationManager: AuthenticationManager,
+    private val jwtTokenUtil: JwtTokenUtils,
+    private val userMapper: UserMapper
 ) {
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     suspend fun getAllUsers(
         @RequestParam(defaultValue = "0") page: Int,
@@ -58,6 +74,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/nombre/{nombre}")
     suspend fun getUserByNombre(@PathVariable nombre: String) : ResponseEntity<Any> {
         return userService.getByNombre(nombre).mapBoth(
@@ -71,6 +88,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/curso/{curso}")
     suspend fun getUsersByGrade(@PathVariable curso: String) : ResponseEntity<Any> {
         return userService.getByCurso(curso).mapBoth(
@@ -84,6 +102,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/email/{email}")
     suspend fun getUserByEmail(@PathVariable email: String) : ResponseEntity<Any> {
         return userService.getByEmail(email).mapBoth(
@@ -97,6 +116,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/tutor/{tutor}")
     suspend fun getUsersByTutor(@PathVariable tutor: String) : ResponseEntity<Any> {
         return userService.getByTutor(tutor).mapBoth(
@@ -153,6 +173,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{guid}")
     suspend fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.deleteUserByGuid(guid).mapBoth(
@@ -166,6 +187,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/export/csv")
     fun exportCsv(): ResponseEntity<ByteArray> {
         userCsvStorage.generateAndSaveCsv()
@@ -185,6 +207,7 @@ class UserController
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/{guid}")
     suspend fun getUserByGuidAdmin(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.getUserByGuidAdmin(guid).mapBoth(
@@ -197,4 +220,53 @@ class UserController
             }
         )
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/rol/{guid}")
+    suspend fun updateRol(@PathVariable guid: String, @RequestBody user: UserRoleUpdateRequest) : ResponseEntity<Any> {
+        return userService.updateRole(guid, user).mapBoth(
+            success = { ResponseEntity.status(200).body(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    is UserValidationError -> ResponseEntity.status(403).body("Usuario inválido")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
+
+    @PostMapping("/login")
+    fun login(@Validated @RequestBody logingDto: UserLoginRequest): ResponseEntity<UserToken> {
+        val authentication: Authentication = authenticationManager.authenticate(
+            UsernamePasswordAuthenticationToken(
+                logingDto.email,
+                logingDto.password
+            )
+        )
+
+        SecurityContextHolder.getContext().authentication = authentication
+
+        val user = authentication.principal as User
+
+        val userResponse = userMapper.toUserResponseAdmin(user)
+        val jwtToken: String = jwtTokenUtil.generateToken(user)
+
+        val userWithToken = UserToken(userResponse, jwtToken)
+
+        return ResponseEntity.ok(userWithToken)
+    }
+
+
+    @PostMapping("/register")
+    suspend fun register(@Validated @RequestBody usuarioDto: UserCreateRequest): ResponseEntity<UserToken> {
+        val user = userMapper.toUserFromCreate(usuarioDto)
+
+        val userSaved = userService.createUser(usuarioDto)
+
+        val jwtToken: String = jwtTokenUtil.generateToken(user)
+
+        return ResponseEntity.ok(UserToken(userMapper.toUserResponseAdmin(user), jwtToken))
+    }
+
 }

@@ -59,6 +59,28 @@ class UserMapper {
         )
     }
 
+    fun toUserFromResponseAdmin(userResponse: UserResponseAdmin?): User {
+        return User(
+            id = 0L,
+            guid = userResponse?.guid ?: "",
+            email = userResponse?.email ?: "",
+            password = "",
+            rol = Role.valueOf((userResponse?.rol ?: "ALUMNO").toString()),
+            numeroIdentificacion = userResponse?.numeroIdentificacion ?: "",
+            nombre = userResponse?.nombre ?: "",
+            apellidos = userResponse?.apellidos ?: "",
+            curso = userResponse?.curso ?: "",
+            tutor = userResponse?.tutor ?: "",
+            fotoCarnet = "",
+            avatar = "",
+            isActivo = userResponse?.isActivo == true,
+            lastLoginDate = LocalDateTime.now(),
+            lastPasswordResetDate = LocalDateTime.now(),
+            createdDate = LocalDateTime.now(),
+            updatedDate = LocalDateTime.now()
+        )
+    }
+
     fun toUserResponseList(users: List<User?>): List<UserResponse> {
         return users.map { toUserResponse(it!!) }
     }

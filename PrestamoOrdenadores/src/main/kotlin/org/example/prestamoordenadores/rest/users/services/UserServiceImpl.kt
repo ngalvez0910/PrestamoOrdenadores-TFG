@@ -10,8 +10,10 @@ import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
+import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
+import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
@@ -210,6 +212,37 @@ class UserServiceImpl(
             } else {
                 Ok(mapper.toUserResponseAdmin(user))
             }
+        }
+    }
+
+    @CachePut(key = "#result.guid")
+    override suspend fun updateRole(guid: String, user: UserRoleUpdateRequest): Result<UserResponseAdmin?, UserError> {
+        logger.debug { "Actualizando rol del usuario con GUID: $guid" }
+
+        return withContext(Dispatchers.IO) {
+            val userValidado = user.validate()
+            if (userValidado.isErr) {
+                return@withContext Err(UserError.UserValidationError("Usuario inválido"))
+            }
+
+            var userEncontrado = repository.findByGuid(guid)
+            if (userEncontrado == null) {
+                return@withContext Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+            }
+
+            val rolNormalizado = user.rol.replace(" ", "_").uppercase()
+            userEncontrado.rol = Role.valueOf(rolNormalizado)
+
+            if (userEncontrado.rol == Role.PROFESOR){
+                userEncontrado.tutor = ""
+            } else if (userEncontrado.rol == Role.ADMIN){
+                userEncontrado.curso = ""
+                userEncontrado.tutor = ""
+            }
+
+            userEncontrado.updatedDate = LocalDateTime.now()
+            repository.save(userEncontrado)
+            Ok(mapper.toUserResponseAdmin(userEncontrado))
         }
     }
 }
