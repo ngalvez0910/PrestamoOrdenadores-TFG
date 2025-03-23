@@ -19,3 +19,16 @@ export const getIncidenciaByGuid = async (guid: string): Promise<Incidencia | nu
         return null;
     }
 };
+
+export const actualizarIncidencia = async (
+    guid: string,
+    data: { estadoIncidencia: string }
+): Promise<Incidencia | null> => {
+    try {
+        const response = await axios.patch(`http://localhost:8080/incidencias/${guid}`, data);
+        return response.data || null;
+    } catch (error) {
+        console.error('Error al actualizar la incidencia:', error);
+        return null;
+    }
+};

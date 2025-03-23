@@ -48,12 +48,17 @@
       </div>
     </div>
   </div>
+  <transition name="fade">
+    <button v-if="editable" class="update-button" @click="actualizarIncidencia">
+      Actualizar
+    </button>
+  </transition>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
 import MenuBar from "@/components/AdminMenuBar.vue";
-import {getIncidenciaByGuid} from "@/services/IncidenciaService";
+import {getIncidenciaByGuid, actualizarIncidencia} from "@/services/IncidenciaService";
 
 export default defineComponent({
   name: "IncidenciaDetalle",
@@ -61,6 +66,7 @@ export default defineComponent({
   data() {
     return {
       incidenciaData: null as any,
+      originalData: null as any,
       editable: false,
     };
   },
@@ -78,6 +84,20 @@ export default defineComponent({
   methods: {
     toggleEdit() {
       this.editable = !this.editable;
+    },
+    async actualizarIncidencia() {
+      if (JSON.stringify(this.incidenciaData) !== JSON.stringify(this.originalData)) {
+        try {
+          await actualizarIncidencia(this.incidenciaData.guid, {
+            estadoIncidencia: this.incidenciaData.estadoIncidencia,
+          });
+          this.originalData = { ...this.incidenciaData };
+          alert("Incidencia actualizada correctamente.");
+          this.editable = false;
+        } catch (error) {
+          alert("No se pudo actualizar el dispositivo.");
+        }
+      }
     }
   }
 })
@@ -128,9 +148,9 @@ a{
   border-radius: 10px;
   padding: 20px;
   width: 300%;
-  max-width: max-content;
+  max-width: 600px;
   box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  margin-left: -20%;
+  margin-left: -10%;
   margin-top: -15%;
   margin-bottom: 7%;
 }
@@ -184,8 +204,8 @@ textarea{
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: -80%;
-  margin-top: 25%
+  margin-right: -25%;
+  margin-top: 25%;
 }
 
 .editIncidencia-button:hover {
@@ -204,5 +224,33 @@ textarea{
   justify-content: space-between;
   width: 100%;
   margin-bottom: 20px;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.update-button {
+  padding: 5px 15px;
+  background-color: #d6621e;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  width: 15%;
+  transition: all 0.3s ease-in-out;
+  margin-left: 47%;
+  margin-top: -25%;
+  position: absolute;
+}
+
+.update-button:hover {
+  background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
 }
 </style>
