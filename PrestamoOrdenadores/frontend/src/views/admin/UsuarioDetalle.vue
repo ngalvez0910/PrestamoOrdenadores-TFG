@@ -1,11 +1,13 @@
 <template>
   <MenuBar />
-  <div class="boton-atras">
-    <a href="/admin/dashboard/usuarios">
-      <button class="back-button">
-        <i class="pi pi-arrow-left"></i>
-      </button>
-    </a>
+  <div class="botones-container">
+    <div class="boton-atras">
+      <a href="/admin/dashboard/usuarios">
+        <button class="back-button">
+          <i class="pi pi-arrow-left"></i>
+        </button>
+      </a>
+    </div>
   </div>
   <div class="usuario-details" v-if="userData">
     <div class="iconoUser">
@@ -97,13 +99,13 @@ body{
   overflow-y: auto;
 }
 
-.boton-atras{
-  margin-top: 3%;
-  margin-left: -65%
+.boton-atras {
+  margin-left: -70%;
+  margin-top: 40%;
 }
 
 .back-button {
-  padding: 0.7rem 1rem;
+  padding: 0.7rem 1.2rem;
   font-size: 0.875rem;
   background-color: #14124f;
   color: white;
@@ -118,7 +120,7 @@ body{
   justify-content: center;
 }
 
-.back-button:hover {
+.back-button:hover{
   background-color: #0d0c34;
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgb(72, 70, 159);
@@ -172,5 +174,13 @@ input, select{
   max-width: max-content;
   transition: border 0.3s ease;
   outline: none;
+}
+
+.botones-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
 }
 </style>
