@@ -184,4 +184,17 @@ class UserController
             ResponseEntity(HttpStatus.NOT_FOUND)
         }
     }
+
+    @GetMapping("/admin/{guid}")
+    suspend fun getUserByGuidAdmin(@PathVariable guid: String) : ResponseEntity<Any> {
+        return userService.getUserByGuidAdmin(guid).mapBoth(
+            success = { ResponseEntity.ok(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
 }

@@ -38,13 +38,6 @@
           </button>
         </template>
       </Column>
-      <Column field="edit">
-        <template #body="slotProps">
-          <button @click="editIncidencia(slotProps.data)" class="editIncidencia-button">
-            <i class="pi pi-pencil"></i>
-          </button>
-        </template>
-      </Column>
       <Column field="delete">
         <template #body="slotProps">
           <button @click="deleteIncidencia(slotProps.data)" class="deleteIncidencia-button">
@@ -110,6 +103,13 @@ export default {
         );
       });
     },
+    verIncidencia(incidencia: Incidencia) {
+      console.log("Navegando a detalle de incidencia con estos datos:", incidencia);
+      this.$router.push({
+        name: 'IncidenciaDetalle',
+        params: { guid: incidencia.guid }
+      });
+    }
   },
 };
 </script>
@@ -137,29 +137,31 @@ body{
   border-radius: 25px;
 }
 
-.editIncidencia-button, .verIncidencia-button {
-  padding: 0.5rem 0.6rem;
+.verIncidencia-button {
+  padding: 0.5rem 0.45rem;
   font-size: 0.875rem;
   background-color: #d6621e;
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 20%
+  transition: all 0.3s ease-in-out;
+  margin-top: 20%;
 }
 
-.editIncidencia-button:hover, .verIncidencia-button:hover {
+.verIncidencia-button:hover {
   background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
 }
 
-.editIncidencia-button i, .verIncidencia-button i {
+.verIncidencia-button i {
   pointer-events: none;
-  margin-top: 30%;
+  margin-top: 25%;
 }
 
 .deleteIncidencia-button {
-  padding: 0.5rem 0.6rem;
+  padding: 0.5rem 0.45rem;
   font-size: 0.875rem;
   background-color: #d61e1e;
   color: white;
@@ -176,6 +178,6 @@ body{
 
 .deleteIncidencia-button i {
   pointer-events: none;
-  margin-top: 30%;
+  margin-top: 25%;
 }
 </style>

@@ -30,11 +30,9 @@
       <Column field="stock" header="Stock"></Column>
       <Column field="edit">
         <template #body="slotProps">
-          <a href="/admin/dispositivo/detalle">
-            <button @click="editDispositivo(slotProps.data)" class="editDispositivo-button">
-              <i class="pi pi-pencil"></i>
-            </button>
-          </a>
+          <button @click="editDispositivo(slotProps.data)" class="editDispositivo-button">
+            <i class="pi pi-pencil"></i>
+          </button>
         </template>
       </Column>
       <Column field="delete">
@@ -101,6 +99,18 @@ export default {
         );
       });
     },
+    editDispositivo(dispositivo: Dispositivo) {
+      this.$router.push({
+        name: 'DispositivoDetalle',
+        params: { guid: dispositivo.guid },
+        query: {
+          numeroSerie: dispositivo.numeroSerie,
+          componentes: dispositivo.componentes,
+          estado: dispositivo.estadoDispositivo,
+          incidenciaGuid: dispositivo.incidenciaGuid
+        }
+      });
+    }
   },
 };
 </script>
@@ -130,7 +140,7 @@ export default {
 
 
 .editDispositivo-button {
-  padding: 0.5rem 0.7rem;
+  padding: 0.5rem 0.8rem;
   font-size: 0.875rem;
   background-color: #d6621e;
   color: white;

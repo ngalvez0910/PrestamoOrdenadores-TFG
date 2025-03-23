@@ -46,9 +46,28 @@ const router = createRouter({
       component: Profile,
     },
     {
-      path: '/admin/dispositivo/detalle',
-      name: 'DispositivoDetalle',
-      component: DispositivoDetalle,
+      path: "/admin/dispositivo/detalle/:guid",
+      name: "DispositivoDetalle",
+      component: () => import("@/views/admin/DispositivoDetalle.vue"),
+      props: route => ({
+        guid: route.params.guid,
+        numeroSerie: route.query.numeroSerie,
+        componentes: route.query.componentes,
+        estado: route.query.estado,
+        incidenciaGuid: route.query.incidenciaGuid,
+      })
+    },
+    {
+      path: "/admin/usuario/detalle/:guid",
+      name: "UsuarioDetalle",
+      component: () => import("@/views/admin/UsuarioDetalle.vue"),
+      props: true
+    },
+    {
+      path: "/admin/incidencia/detalle/:guid",
+      name: "IncidenciaDetalle",
+      component: () => import("@/views/admin/IncidenciaDetalle.vue"),
+      props: true
     }
   ],
 })

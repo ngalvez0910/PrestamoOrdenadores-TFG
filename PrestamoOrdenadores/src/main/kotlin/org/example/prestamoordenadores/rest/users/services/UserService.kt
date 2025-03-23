@@ -21,4 +21,5 @@ interface UserService {
     suspend fun getByNombre(nombre: String): Result<UserResponse?, UserError>
     suspend fun getByEmail(email: String): Result<UserResponse?, UserError>
     suspend fun getByTutor(tutor: String) : Result<List<UserResponse?>, UserError>
+    suspend fun getUserByGuidAdmin(guid: String) : Result<UserResponseAdmin?, UserError>
 }

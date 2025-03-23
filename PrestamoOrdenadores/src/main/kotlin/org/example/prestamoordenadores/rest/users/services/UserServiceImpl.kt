@@ -198,4 +198,18 @@ class UserServiceImpl(
             Ok(mapper.toUserResponseList(users))
         }
     }
+
+    @Cacheable(key = "#guid")
+    override suspend fun getUserByGuidAdmin(guid: String): Result<UserResponseAdmin?, UserError> {
+        logger.debug { "Obteniendo usuario con GUID: $guid" }
+
+        return withContext(Dispatchers.IO) {
+            val user = repository.findByGuid(guid)
+            if (user == null) {
+                Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+            } else {
+                Ok(mapper.toUserResponseAdmin(user))
+            }
+        }
+    }
 }
