@@ -8,6 +8,7 @@ import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
 import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
+import org.example.prestamoordenadores.rest.users.models.User
 import org.springframework.stereotype.Service
 
 @Service
@@ -24,4 +25,5 @@ interface UserService {
     suspend fun getByTutor(tutor: String) : Result<List<UserResponse?>, UserError>
     suspend fun getUserByGuidAdmin(guid: String) : Result<UserResponseAdmin?, UserError>
     suspend fun updateRole(guid: String, user: UserRoleUpdateRequest) : Result<UserResponseAdmin?, UserError>
+    suspend fun getUserById(id: Long): Result<User?, UserError>
 }
