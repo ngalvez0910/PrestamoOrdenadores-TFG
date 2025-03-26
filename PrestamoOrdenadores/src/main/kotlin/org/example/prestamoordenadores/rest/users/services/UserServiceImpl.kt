@@ -14,6 +14,7 @@ import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
 import org.example.prestamoordenadores.rest.users.models.Role
+import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
@@ -30,7 +31,7 @@ private val logger = logging()
 @CacheConfig(cacheNames = ["users"])
 class UserServiceImpl(
     private val repository : UserRepository,
-    private val mapper: UserMapper
+    private val mapper: UserMapper,
 ): UserService {
     override suspend fun getAllUsers(page: Int, size: Int): Result<List<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
@@ -81,7 +82,10 @@ class UserServiceImpl(
                 return@withContext Err(UserError.UserAlreadyExists("Usuario con nombre ${user.nombre}, apellidos ${user.apellidos} y curso ${user.curso} ya existe"))
             }
 
-            val savedUser = repository.save(mapper.toUserFromCreate(user))
+            val userEntity = mapper.toUserFromCreate(user)
+
+            val savedUser = repository.save(userEntity)
+
             Ok(mapper.toUserResponse(savedUser))
         }
     }
@@ -243,6 +247,20 @@ class UserServiceImpl(
             userEncontrado.updatedDate = LocalDateTime.now()
             repository.save(userEncontrado)
             Ok(mapper.toUserResponseAdmin(userEncontrado))
+        }
+    }
+
+    @Cacheable(key = "#id")
+    override suspend fun getUserById(id: Long): Result<User?, UserError> {
+        logger.debug { "Obteniendo usuario con ID: $id" }
+
+        return withContext(Dispatchers.IO) {
+            val user = repository.findById(id).orElse(null)
+            if (user == null) {
+                Err(UserError.UserNotFound("Usuario con ID $id no encontrado"))
+            } else {
+                Ok(user)
+            }
         }
     }
 }
