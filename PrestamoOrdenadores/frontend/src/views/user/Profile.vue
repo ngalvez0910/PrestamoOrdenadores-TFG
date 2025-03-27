@@ -22,7 +22,7 @@
   </div>
   <div class="side-menu">
     <ul>
-      <li><a href="#">Mis préstamos</a></li>
+      <li><a href="/prestamo/me">Mis préstamos</a></li>
       <li><a href="#">Mis incidencias</a></li>
       <li><a href="#">Notificaciones</a></li>
       <li><a href="/cambioContrasena">Cambiar contraseña</a></li>
@@ -33,13 +33,13 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
+import MenuBar from "@/components/MenuBar.vue";
 import axios from 'axios';
 import router from "@/router";
 
 export default defineComponent({
   nombre: "Profile",
-  components: { AdminMenuBar },
+  components: { AdminMenuBar: MenuBar },
   data() {
     return {
       nombre: '',
