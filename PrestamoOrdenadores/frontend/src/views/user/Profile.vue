@@ -33,13 +33,13 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import MenuBar from "@/components/MenuBar.vue";
+import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
 import router from "@/router";
 
 export default defineComponent({
   nombre: "Profile",
-  components: { AdminMenuBar: MenuBar },
+  components: { AdminMenuBar },
   data() {
     return {
       nombre: '',

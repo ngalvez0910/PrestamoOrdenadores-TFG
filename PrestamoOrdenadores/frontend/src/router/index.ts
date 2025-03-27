@@ -74,6 +74,11 @@ const router = createRouter({
       name: 'CambioContrasena',
       component: () => import('../views/user/CambioContrasena.vue'),
     },
+    {
+      path: '/prestamo/me',
+      name: 'PrestamoMe',
+      component: () => import('../views/user/PrestamoMe.vue'),
+    },
   ],
 })
 
