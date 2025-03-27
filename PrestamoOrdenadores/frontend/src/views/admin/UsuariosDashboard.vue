@@ -1,6 +1,6 @@
 <template>
   <MenuBar />
-  <div class="filters row-12" style="margin-left: -30%; margin-top: 25%">
+  <div class="filters row-12" style="margin-left: -30%; margin-top: 15%">
     <p class="filter col-5" style="margin-left: 2%;">
       Nombre:
       <input type="text" v-model="searchName" placeholder="Buscar por nombre..." @input="filterData"/>

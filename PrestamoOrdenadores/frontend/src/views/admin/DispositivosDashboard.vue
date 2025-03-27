@@ -31,7 +31,7 @@
       <Column field="edit">
         <template #body="slotProps">
           <button @click="editDispositivo(slotProps.data)" class="editDispositivo-button">
-            <i class="pi pi-pencil"></i>
+            <i class="pi pi-eye"></i>
           </button>
         </template>
       </Column>
