@@ -13,19 +13,12 @@
 
   <button class="buttonPrestamo" label="realizarPrestamo">Realizar Préstamo</button>
 
-  <div class="table row-12" style="margin-left: -17%">
-    <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
+  <div class="table row-12" style="margin-left: -17%; margin-top: 5%">
+    <DataTable :value="datos" stripedRows tableStyle="min-width: 50rem">
       <Column field="numeroSerie" header="Número de serie"></Column>
       <Column field="fechaPrestamo" header="Fecha Préstamo"></Column>
       <Column field="fechaDevolucion" header="Fecha Devolución"></Column>
       <Column field="estado" header="Estado"></Column>
-      <Column field="ver">
-        <template #body="slotProps">
-          <button @click="verPrestamo(slotProps.data)" class="verPrestamo-button">
-            <i class="pi pi-eye"></i>
-          </button>
-        </template>
-      </Column>
     </DataTable>
   </div>
 </template>
@@ -94,7 +87,7 @@ a{
   transition: background-color 0.3s ease;
   margin-bottom: 10px;
   margin-left: 80%;
-  margin-top: -30%;
+  margin-top: -35%;
 }
 
 .buttonPrestamo:hover {
