@@ -22,10 +22,10 @@
   </div>
   <div class="side-menu">
     <ul>
-      <li><a href="#">Mis préstamos</a></li>
+      <li><a href="/prestamo/me">Mis préstamos</a></li>
       <li><a href="#">Mis incidencias</a></li>
       <li><a href="#">Notificaciones</a></li>
-      <li><a href="#">Cambiar contraseña</a></li>
+      <li><a href="/cambioContrasena">Cambiar contraseña</a></li>
       <li><a @click="logout">Cerrar sesión</a></li>
     </ul>
   </div>

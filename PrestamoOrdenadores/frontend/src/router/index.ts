@@ -4,7 +4,7 @@ import AdminDashboard from '../views/admin/AdminDashboard.vue';
 import DispositivosDashboard from "@/views/admin/DispositivosDashboard.vue";
 import UsuariosDashboard from "@/views/admin/UsuariosDashboard.vue";
 import IncidenciasDashboard from "@/views/admin/IncidenciasDashboard.vue";
-import Profile from "@/views/Profile.vue";
+import Profile from "@/views/user/Profile.vue";
 import DispositivoDetalle from "@/views/admin/DispositivoDetalle.vue";
 
 const router = createRouter({
@@ -68,7 +68,17 @@ const router = createRouter({
       name: "IncidenciaDetalle",
       component: () => import("@/views/admin/IncidenciaDetalle.vue"),
       props: true
-    }
+    },
+    {
+      path: '/cambioContrasena',
+      name: 'CambioContrasena',
+      component: () => import('../views/user/CambioContrasena.vue'),
+    },
+    {
+      path: '/prestamo/me',
+      name: 'PrestamoMe',
+      component: () => import('../views/user/PrestamoMe.vue'),
+    },
   ],
 })
 

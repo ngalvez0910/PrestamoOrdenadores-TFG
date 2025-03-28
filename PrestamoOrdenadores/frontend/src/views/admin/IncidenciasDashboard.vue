@@ -1,6 +1,6 @@
 <template>
   <MenuBar />
-  <div class="filters row-12" style="margin-left: -35%; margin-top: 20%">
+  <div class="filters row-12" style="margin-left: -35%; margin-top: 13%">
     <div class="filter col-3" style="margin-left: 2%;">
       <label for="username">Usuario:</label>
       <input id="username" type="text" v-model="searchUser" placeholder="Buscar por usuario..." @input="filterData"/>
@@ -122,7 +122,6 @@ body{
 .filters {
   display: flex;
   align-items: center;
-  margin-top: -15%;
 }
 
 .filter {

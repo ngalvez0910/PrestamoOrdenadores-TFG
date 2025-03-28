@@ -157,7 +157,6 @@ a{
   margin-left: 80%;
   margin-bottom: 5%;
   margin-top: 2%
-
 }
 
 .numeroSerie {
