@@ -5,61 +5,160 @@
     <div class="register-box">
       <h1>Registro</h1>
 
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="name" class="input-label"><strong>Nombre</strong></label>
-          <input type="text" class="input-field" name="name" placeholder="Nombre">
+      <form @submit.prevent="validateForm">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="name" class="input-label"><strong>Nombre</strong></label>
+            <input type="text" class="input-field" name="name" placeholder="Nombre" v-model="form.name">
+            <p class="error-message" v-if="errors.name">{{ errors.name }}</p>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="surname" class="input-label"><strong>Apellidos</strong></label>
+            <input type="text" class="input-field" name="surname" placeholder="Apellidos" v-model="form.surname">
+            <p class="error-message" v-if="errors.name">{{ errors.surname }}</p>
+          </div>
         </div>
 
-        <div class="col-md-6 mb-3">
-          <label for="surname" class="input-label"><strong>Apellidos</strong></label>
-          <input type="text" class="input-field" name="surname" placeholder="Apellidos">
-        </div>
-      </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="grade" class="input-label"><strong>Curso</strong></label>
+            <input class="input-field" type="text" name="grade" placeholder="Curso"  v-model="form.grade">
+          </div>
 
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="grade" class="input-label"><strong>Curso</strong></label>
-          <input class="input-field" type="text" name="grade" placeholder="Curso">
-        </div>
-
-        <div class="col-md-6 mb-3">
-          <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
-          <input class="input-field" type="email" name="email" placeholder="Correo electrónico">
-        </div>
-      </div>
-
-      <div class="row">
-        <label for="image" class="input-label"><strong>Foto carnet de estudiante</strong></label>
-        <input class="input-field" type="file" name="image">
-      </div>
-
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="password" class="input-label"><strong>Contraseña</strong></label>
-          <input type="password" name="password" class="input-field" placeholder="Contraseña">
+          <div class="col-md-6 mb-3">
+            <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
+            <input class="input-field" type="email" name="email" placeholder="Correo electrónico"  v-model="form.email">
+            <p class="error-message" v-if="errors.name">{{ errors.email }}</p>
+          </div>
         </div>
 
-        <div class="col-md-6 mb-3">
-          <label for="passwordConfirm" class="input-label"><strong>Confirmar contraseña</strong></label>
-          <input type="password" name="passwordConfirm" class="input-field" placeholder="Confirmar contraseña">
+        <div class="row">
+          <label for="image" class="input-label"><strong>Foto carnet de estudiante</strong></label>
+          <input class="input-field" type="file" name="image" @change="handleFileUpload">
+          <p class="error-message" v-if="errors.name">{{ errors.image }}</p>
         </div>
-      </div>
 
-      <button label="Register">Registrarse</button>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="password" class="input-label"><strong>Contraseña</strong></label>
+            <input type="password" name="password" class="input-field" placeholder="Contraseña"  v-model="form.password">
+            <p class="error-message" v-if="errors.name">{{ errors.password }}</p>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="passwordConfirm" class="input-label"><strong>Confirmar contraseña</strong></label>
+            <input type="password" name="passwordConfirm" class="input-field" placeholder="Confirmar contraseña"  v-model="form.passwordConfirm">
+            <p class="error-message" v-if="errors.name">{{ errors.passwordConfirm }}</p>
+          </div>
+        </div>
+
+        <button type="submit">Registrarse</button>
+      </form>
 
       <p class="login-link"><a href="/">Login</a></p>
+
+      <Toast />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-  import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
+import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
+import Toast from 'primevue/toast';
+import Button from 'primevue/button';
+import { useToast } from 'primevue/usetoast';
 
-  export default {
-    name: 'Register',
-    components: {MenuBarNoSession},
-  };
+export default {
+  name: 'Register',
+  components: { MenuBarNoSession, Toast, Button },
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
+  data() {
+    return {
+      form: {
+        name: '',
+        surname: '',
+        grade: '',
+        email: '',
+        password: '',
+        passwordConfirm: ''
+      },
+      errors: {
+        name: '',
+        surname: '',
+        email: '',
+        password: '',
+        passwordConfirm: '',
+        image: ''
+      }
+    };
+  },
+  methods: {
+    validateForm() {
+      this.errors = {
+        name: '',
+        surname: '',
+        email: '',
+        password: '',
+        passwordConfirm: '',
+        image: ''
+      };
+
+      let formIsValid = true;
+
+      if (!this.form.name) {
+        this.errors.name = 'Campo obligatorio';
+        formIsValid = false;
+      }
+      if (!this.form.surname) {
+        this.errors.surname = 'Campo obligatorio';
+        formIsValid = false;
+      }
+      if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = 'Correo electrónico inválido';
+        formIsValid = false;
+      }
+      if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
+        this.errors.password = 'La contraseña debe tener al menos 8 caracteres';
+        formIsValid = false;
+      }
+      if (this.form.password !== this.form.passwordConfirm) {
+        this.errors.passwordConfirm = 'Las contraseñas no coinciden';
+        formIsValid = false;
+      }
+
+      if (formIsValid) {
+        this.toast.add({
+          severity: 'success',
+          summary: 'Registro Exitoso',
+          detail: 'El registro ha sido completado exitosamente.',
+          life: 3000,
+          styleClass: 'custom-toast-success'
+        });
+      } else if (!formIsValid) {
+        this.toast.add({
+          severity: 'error',
+          summary: 'Error en el Registro',
+          detail: 'Por favor, corrija los errores y vuelva a intentarlo.',
+          life: 3000,
+          styleClass: 'custom-toast-error'
+        });
+      }
+    },
+    handleFileUpload(event: Event) {
+      const inputElement = event.target as HTMLInputElement;
+      const file = inputElement.files?.[0];
+
+      if (!file) {
+        this.errors.image = 'Debe subir una imagen';
+      }
+    }
+
+  },
+};
 </script>
 
 <style>
@@ -137,5 +236,23 @@ button:hover {
 
 .login-link a:hover {
   background-color: inherit !important;
+}
+
+.error-message {
+  color: red;
+  margin-top: -10%;
+}
+
+.custom-toast-success, .custom-toast-error {
+  background-color: white !important;
+  border-radius: 10px !important;
+  padding: 10px !important;
+}
+
+.custom-toast-success button, .custom-toast-error button {
+  background-color: white !important;
+  color: #14124f !important;
+  width: 100% !important;
+  margin-top: -75%
 }
 </style>
