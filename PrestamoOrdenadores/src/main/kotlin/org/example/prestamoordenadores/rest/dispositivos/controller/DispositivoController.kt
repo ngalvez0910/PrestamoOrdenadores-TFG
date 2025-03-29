@@ -22,12 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.http.HttpHeaders
-import org.springframework.web.bind.annotation.CrossOrigin
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
 
-@CrossOrigin(origins = arrayOf("http://localhost:5173"))
 @RestController
 @RequestMapping("/dispositivos")
 class DispositivoController
