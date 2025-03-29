@@ -1,12 +1,14 @@
 <template>
+  <MenuBarNoSession />
+
   <div class="login-container">
     <div class="login-box">
       <h1>Login</h1>
 
-      <label for="username" class="input-label">Nombre de usuario</label>
+      <label for="username" class="input-label"><strong>Nombre de usuario</strong></label>
       <input type="text" class="input-field" name="username" placeholder="Nombre de usuario">
 
-      <label for="password" class="input-label">Contraseña</label>
+      <label for="password" class="input-label"><strong>Contraseña</strong></label>
       <input type="password" name="password" class="input-field" placeholder="Contraseña">
 
       <button label="Login">Login</button>
@@ -17,8 +19,11 @@
 </template>
 
 <script lang="ts">
+  import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
+
   export default {
     name: 'Login',
+    components: {MenuBarNoSession},
   };
 </script>
 
@@ -37,12 +42,12 @@ body {
   align-items: center;
   height: 100vh;
   width: 100%;
+  margin-top: 15%;
 }
 
 .login-box {
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 20px;
   background-color: white;
   border-radius: 10px;
@@ -52,21 +57,21 @@ body {
 
 h1{
   margin: 10px 0;
+  text-align: center;
 }
 
 .input-label {
   font-size: 1rem;
   color: #14124f;
-  font-weight: 500;
   margin-bottom: 8px;
+  justify-content: left;
 }
 
 .input-field {
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: 30px;
+  padding: 8px;
   border: 1px solid #d1d3e2;
   width: 100%;
-  font-size: 1rem;
   margin-bottom: 18px;
   transition: border 0.3s ease;
   outline: none;
@@ -80,13 +85,13 @@ button {
   background-color: #d6621e;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: 30px;
+  padding: 5px;
   font-size: 1.1rem;
-  width: 100%;
-  cursor: pointer;
+  width: 50%;
   transition: background-color 0.3s ease;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  margin-left: 50%;
 }
 
 button:hover {
@@ -96,6 +101,8 @@ button:hover {
 .register-link a {
   color: #14124f;
   text-decoration: none;
+  justify-content: center;
+  display: flex;
 }
 
 .register-link a:hover {
