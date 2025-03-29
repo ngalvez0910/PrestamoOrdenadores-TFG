@@ -16,7 +16,7 @@
           <div class="col-md-6 mb-3">
             <label for="surname" class="input-label"><strong>Apellidos</strong></label>
             <input type="text" class="input-field" name="surname" placeholder="Apellidos" v-model="form.surname">
-            <p class="error-message" v-if="errors.name">{{ errors.surname }}</p>
+            <p class="error-message" v-if="errors.surname">{{ errors.surname }}</p>
           </div>
         </div>
 
@@ -29,27 +29,27 @@
           <div class="col-md-6 mb-3">
             <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
             <input class="input-field" type="email" name="email" placeholder="Correo electrónico"  v-model="form.email">
-            <p class="error-message" v-if="errors.name">{{ errors.email }}</p>
+            <p class="error-message" v-if="errors.email">{{ errors.email }}</p>
           </div>
         </div>
 
         <div class="row">
           <label for="image" class="input-label"><strong>Foto carnet de estudiante</strong></label>
           <input class="input-field" type="file" name="image" @change="handleFileUpload">
-          <p class="error-message" v-if="errors.name">{{ errors.image }}</p>
+          <p class="error-message" v-if="errors.image">{{ errors.image }}</p>
         </div>
 
         <div class="row">
           <div class="col-md-6 mb-3">
             <label for="password" class="input-label"><strong>Contraseña</strong></label>
             <input type="password" name="password" class="input-field" placeholder="Contraseña"  v-model="form.password">
-            <p class="error-message" v-if="errors.name">{{ errors.password }}</p>
+            <p class="error-message" v-if="errors.password">{{ errors.password }}</p>
           </div>
 
           <div class="col-md-6 mb-3">
             <label for="passwordConfirm" class="input-label"><strong>Confirmar contraseña</strong></label>
             <input type="password" name="passwordConfirm" class="input-field" placeholder="Confirmar contraseña"  v-model="form.passwordConfirm">
-            <p class="error-message" v-if="errors.name">{{ errors.passwordConfirm }}</p>
+            <p class="error-message" v-if="errors.passwordConfirm">{{ errors.passwordConfirm }}</p>
           </div>
         </div>
 
