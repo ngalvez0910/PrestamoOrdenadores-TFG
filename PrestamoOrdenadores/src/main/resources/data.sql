@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
     guid VARCHAR(11) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    campo_password VARCHAR(255) NOT NULL,
     rol VARCHAR(8) NOT NULL,
     numero_identificacion VARCHAR(50) NOT NULL UNIQUE,
     nombre VARCHAR(100) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 
 -- Insertar usuarios de prueba
-INSERT INTO usuarios (guid, email, password, rol, numero_identificacion, nombre, apellidos, curso, tutor, foto_carnet, avatar, is_activo, created_date, updated_date, last_login_date, last_password_reset_date)
+INSERT INTO usuarios (guid, email, campo_password, rol, numero_identificacion, nombre, apellidos, curso, tutor, foto_carnet, avatar, is_activo, created_date, updated_date, last_login_date, last_password_reset_date)
 VALUES
     ('3854b5ba26c', 'juan@colegio.com', '$2a$12$UPgYQkpzWilCyxOY7Wfo9Ob/x6t12blKi4fK2jzaBeWf3rhen.L6m', 'ALUMNO', '12345678A', 'Juan', 'Pérez', '1º Bachillerato', 'María Gómez', 'foto1.jpg', 'avatar1.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('c1f40bb1900', 'maria@profesor.colegio.com', '$2a$12$UPgYQkpzWilCyxOY7Wfo9Ob/x6t12blKi4fK2jzaBeWf3rhen.L6m', 'PROFESOR', '87654321B', 'María', 'Gómez', '1º Bachillerato', NULL, 'foto2.jpg', 'avatar2.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

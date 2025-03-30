@@ -1,6 +1,6 @@
 package org.example.prestamoordenadores.rest.users.mappers
 
-import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
+import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
 import org.example.prestamoordenadores.rest.users.models.Role
@@ -49,7 +49,7 @@ class UserMapper {
             curso = user.curso,
             tutor = user.tutor,
             fotoCarnet = user.fotoCarnet,
-            password = user.password,
+            campoPassword = user.password,
             rol = Role.ALUMNO,
             isActivo = true,
             createdDate = LocalDateTime.now(),
@@ -64,7 +64,7 @@ class UserMapper {
             id = 0L,
             guid = userResponse?.guid ?: "",
             email = userResponse?.email ?: "",
-            password = "",
+            campoPassword = "",
             rol = Role.valueOf((userResponse?.rol ?: "ALUMNO").toString()),
             numeroIdentificacion = userResponse?.numeroIdentificacion ?: "",
             nombre = userResponse?.nombre ?: "",

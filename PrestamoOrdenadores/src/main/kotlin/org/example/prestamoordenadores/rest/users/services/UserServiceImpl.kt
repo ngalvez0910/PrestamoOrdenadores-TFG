@@ -5,12 +5,9 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
-import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
-import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
-import org.example.prestamoordenadores.rest.users.dto.UserResponse
-import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
-import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
+import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
+import org.example.prestamoordenadores.rest.auth.exceptions.UserNotFoundException
+import org.example.prestamoordenadores.rest.users.dto.*
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
 import org.example.prestamoordenadores.rest.users.models.Role
@@ -22,8 +19,10 @@ import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+
 
 private val logger = logging()
 
@@ -145,7 +144,7 @@ class UserServiceImpl(
             if (existingUser == null) {
                 return@withContext Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
             }
-            existingUser.password = user.newPassword
+            existingUser.campoPassword = user.newPassword
             existingUser.updatedDate = LocalDateTime.now()
             existingUser.lastPasswordResetDate = LocalDateTime.now()
             val savedUser = repository.save(existingUser)

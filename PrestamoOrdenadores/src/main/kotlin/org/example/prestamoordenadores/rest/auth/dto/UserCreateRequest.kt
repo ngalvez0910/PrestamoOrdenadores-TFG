@@ -1,4 +1,4 @@
-package org.example.prestamoordenadores.rest.users.dto
+package org.example.prestamoordenadores.rest.auth.dto
 
 import org.jetbrains.annotations.NotNull
 

@@ -39,13 +39,13 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Spring Security
-    //implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-security")
 
     // JWT (Json Web Token)
-    //implementation("com.auth0:java-jwt:4.5.0")
+    implementation("com.auth0:java-jwt:4.5.0")
 
     // Test Spring Security
-    //testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.security:spring-security-test")
 
     // Ficheros Pdf
     implementation("com.itextpdf:itext7-core:7.1.9")
@@ -62,6 +62,9 @@ dependencies {
     // Logger
     implementation("org.lighthousegames:logging:1.3.0")
     implementation("ch.qos.logback:logback-classic:1.4.14")
+
+    // Validaciones
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
 kotlin {
