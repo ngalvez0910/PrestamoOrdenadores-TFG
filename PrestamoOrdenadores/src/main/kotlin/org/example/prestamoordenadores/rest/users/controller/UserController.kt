@@ -28,12 +28,12 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/users")
-@PreAuthorize("hasRole('ADMIN')")
 class UserController
 @Autowired constructor(
     private val userService: UserService,
     private val userCsvStorage: UserCsvStorage,
 ) {
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     suspend fun getAllUsers(
         @RequestParam(defaultValue = "0") page: Int,
@@ -59,6 +59,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/nombre/{nombre}")
     suspend fun getUserByNombre(@PathVariable nombre: String) : ResponseEntity<Any> {
         return userService.getByNombre(nombre).mapBoth(
@@ -72,6 +73,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/curso/{curso}")
     suspend fun getUsersByGrade(@PathVariable curso: String) : ResponseEntity<Any> {
         return userService.getByCurso(curso).mapBoth(
@@ -85,6 +87,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/email/{email}")
     suspend fun getUserByEmail(@PathVariable email: String) : ResponseEntity<Any> {
         return userService.getByEmail(email).mapBoth(
@@ -98,6 +101,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/tutor/{tutor}")
     suspend fun getUsersByTutor(@PathVariable tutor: String) : ResponseEntity<Any> {
         return userService.getByTutor(tutor).mapBoth(
@@ -141,6 +145,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{guid}")
     suspend fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.deleteUserByGuid(guid).mapBoth(
@@ -154,6 +159,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/export/csv")
     fun exportCsv(): ResponseEntity<ByteArray> {
         userCsvStorage.generateAndSaveCsv()
@@ -173,6 +179,7 @@ class UserController
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/{guid}")
     suspend fun getUserByGuidAdmin(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.getUserByGuidAdmin(guid).mapBoth(
@@ -186,6 +193,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/rol/{guid}")
     suspend fun updateRol(@PathVariable guid: String, @RequestBody user: UserRoleUpdateRequest) : ResponseEntity<Any> {
         return userService.updateRole(guid, user).mapBoth(

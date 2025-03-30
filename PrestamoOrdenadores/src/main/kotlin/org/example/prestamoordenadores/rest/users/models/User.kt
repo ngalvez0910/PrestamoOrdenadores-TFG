@@ -56,7 +56,7 @@ class User (
 
     @JsonIgnore
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return mutableListOf(SimpleGrantedAuthority("ROLE_${rol.name}"))
+        return mutableListOf(SimpleGrantedAuthority(rol.name))
     }
 
     @JsonIgnore

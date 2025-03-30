@@ -16,7 +16,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
@@ -42,17 +41,15 @@ class SecurityConfig
             .authorizeHttpRequests(Customizer { request ->
                 request
                     .requestMatchers("/auth/signin", "/auth/signup").permitAll()
-//                    .requestMatchers("/error/**").permitAll()
-//                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
-//                    .permitAll()
-//                    .requestMatchers("/static/**").permitAll()
-//                    .requestMatchers("/ws/**").permitAll()
-//                    .requestMatchers("/" + "/**").permitAll()
+                    .requestMatchers("/error/**").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/static/**").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
+                    .requestMatchers("/" + "/**").permitAll()
                     .anyRequest().authenticated()
             })
-            .authenticationProvider(authenticationProvider()).addFilterBefore(
-                jwtAuthenticationFilter as Filter?, UsernamePasswordAuthenticationFilter::class.java
-            )
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
     }
@@ -64,10 +61,10 @@ class SecurityConfig
 
     @Bean
     fun authenticationProvider(): AuthenticationProvider {
-        val authProvider = DaoAuthenticationProvider()
-        authProvider.setUserDetailsService(userService)
-        authProvider.setPasswordEncoder(passwordEncoder())
-        return authProvider
+        return DaoAuthenticationProvider().apply {
+            setUserDetailsService(userService)
+            setPasswordEncoder(passwordEncoder())
+        }
     }
 
     @Bean

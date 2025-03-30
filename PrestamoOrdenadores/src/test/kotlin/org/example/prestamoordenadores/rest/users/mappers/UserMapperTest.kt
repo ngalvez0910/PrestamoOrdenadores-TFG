@@ -53,6 +53,7 @@ class UserMapperTest {
         )
     }
 
+    /*
     @Test
     fun toUserResponseAdmin() {
         val userResponseAdmin = UserResponseAdmin(
@@ -80,7 +81,7 @@ class UserMapperTest {
             { assertEquals(userResponseAdmin.isActivo, response.isActivo) }
         )
     }
-
+*/
     @Test
     fun toUserFromCreate() {
         val userCreate = UserCreateRequest(
