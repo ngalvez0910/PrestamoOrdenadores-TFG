@@ -17,12 +17,15 @@ import Column from 'primevue/column'
 import router from './router'
 import Menu from 'primevue/menu'
 import Badge from 'primevue/badge';
+import Toast from 'primevue/toast';
+import ToastService from 'primevue/toastservice';
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
 app.use(PrimeVue)
+app.use(ToastService)
 app.component('Menubar', Menubar)
 app.component('Button', Button)
 app.component('AdminMenuBar', AdminMenuBar)
@@ -30,5 +33,7 @@ app.component('DataTable', DataTable)
 app.component('Column', Column)
 app.component('Menu', Menu)
 app.component('Badge', Badge)
+app.component('Toast', Toast)
+
 
 app.mount('#app')
