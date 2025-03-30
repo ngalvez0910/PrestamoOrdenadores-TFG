@@ -1,7 +1,6 @@
 package org.example.prestamoordenadores.rest.users.mappers
 
-import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
-import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
+import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
 import org.example.prestamoordenadores.rest.users.models.Role
@@ -103,7 +102,7 @@ class UserMapperTest {
             { assertEquals(userCreate.nombre, response.nombre) },
             { assertEquals(userCreate.email, response.email) },
             { assertEquals(userCreate.fotoCarnet, response.fotoCarnet) },
-            { assertEquals(userCreate.password, response.password) }
+            { assertEquals(userCreate.password, response.campoPassword) }
         )
     }
 

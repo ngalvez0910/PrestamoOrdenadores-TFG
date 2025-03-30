@@ -1,14 +1,11 @@
 package org.example.prestamoordenadores.rest.users.services
 
 import com.github.michaelbull.result.Result
-import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
-import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
-import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
-import org.example.prestamoordenadores.rest.users.dto.UserResponse
-import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
-import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
+import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
+import org.example.prestamoordenadores.rest.users.dto.*
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.models.User
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 
 @Service

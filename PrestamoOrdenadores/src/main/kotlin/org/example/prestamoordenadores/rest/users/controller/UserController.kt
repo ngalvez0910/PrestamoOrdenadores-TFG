@@ -2,10 +2,8 @@ package org.example.prestamoordenadores.rest.users.controller
 
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
-import org.example.prestamoordenadores.rest.users.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
-import org.example.prestamoordenadores.rest.users.errors.UserError.UserAlreadyExists
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserNotFound
 import org.example.prestamoordenadores.rest.users.errors.UserError.UserValidationError
 import org.example.prestamoordenadores.rest.users.services.UserService
@@ -15,11 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -30,6 +28,7 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/users")
+@PreAuthorize("hasRole('ADMIN')")
 class UserController
 @Autowired constructor(
     private val userService: UserService,
@@ -46,6 +45,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
     @GetMapping("/{guid}")
     suspend fun getUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.getUserByGuid(guid).mapBoth(
@@ -111,21 +111,7 @@ class UserController
         )
     }
 
-    @PostMapping
-    suspend fun createUser(@RequestBody user: UserCreateRequest): ResponseEntity<Any> {
-        return userService.createUser(user).mapBoth(
-            success = { ResponseEntity.status(201).body(it) },
-            failure = { error ->
-                when (error) {
-                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
-                    is UserAlreadyExists -> ResponseEntity.badRequest().build()
-                    is UserValidationError -> ResponseEntity.status(403).body("Usuario inválido")
-                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
-                }
-            }
-        )
-    }
-
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
     @PatchMapping("/avatar/{guid}")
     suspend fun updateAvatar(@PathVariable guid: String, @RequestBody user: UserAvatarUpdateRequest) : ResponseEntity<Any> {
         return userService.updateAvatar(guid, user).mapBoth(
@@ -139,7 +125,8 @@ class UserController
             }
         )
     }
-    
+
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
     @PatchMapping("/{guid}")
     suspend fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<Any> {
         return userService.resetPassword(guid, user).mapBoth(
