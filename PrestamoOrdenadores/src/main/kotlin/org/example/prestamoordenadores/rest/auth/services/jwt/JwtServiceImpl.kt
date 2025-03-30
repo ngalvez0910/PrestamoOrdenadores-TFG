@@ -56,12 +56,12 @@ class JwtServiceImpl(
 
     override fun extractUserName(token: String?): String {
         log.debug { "Extracting username from token $token" }
-        return extractClaim(token.toString(), { obj: DecodedJWT? -> obj?.subject }) ?: ""
+        return extractClaim(token.toString()) { obj: DecodedJWT? -> obj?.subject } ?: ""
     }
 
     override fun generateToken(userDetails: UserDetails?): String? {
         log.debug { "Generating token for user ${userDetails?.username}" }
-        return generateToken(mutableMapOf<String?, Any?>(), userDetails!!)
+        return generateToken(HashMap(), userDetails!!)
     }
 
     override fun isTokenValid(

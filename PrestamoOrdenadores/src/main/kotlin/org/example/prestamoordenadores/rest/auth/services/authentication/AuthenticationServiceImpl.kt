@@ -30,7 +30,7 @@ class AuthenticationServiceImpl
     private val authenticationManager: AuthenticationManager
 ): AuthenticationService {
     override fun signUp(request: UserCreateRequest?): JwtAuthResponse? {
-        log.info { "Creando usuario: {}$request" }
+        log.debug { "Creando usuario: $request" }
 
         if (request?.password.contentEquals(request?.confirmPassword)) {
             val user = User(
@@ -46,7 +46,7 @@ class AuthenticationServiceImpl
             )
             try {
                 val userStored = authUsersRepository.save<User>(user)
-                return JwtAuthResponse(token=jwtService.generateToken(userStored))
+                return JwtAuthResponse(token = jwtService.generateToken(userStored))
             } catch (ex: DataIntegrityViolationException) {
                 throw UserAuthNameOrEmailExisten("El usuario con username " + request?.email + " ya existe")
             }
@@ -56,19 +56,19 @@ class AuthenticationServiceImpl
     }
 
     override fun signIn(request: UserLoginRequest?): JwtAuthResponse? {
-        log.info { "Autenticando usuario: {}$request" }
+        log.debug { "Autenticando usuario: $request" }
 
         authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(request?.email, request?.password)
+            UsernamePasswordAuthenticationToken(request!!.email, request.password)
         )
 
         val userDetails: UserDetails? =
-            authUsersRepository.findByEmail(request?.email ?: "")
+            authUsersRepository.findByEmail(request.email)
 
         val user = userDetails ?: throw AuthLoginInvalid("Usuario o contraseña incorrectos")
 
         val jwt = jwtService.generateToken(user)
 
-        return JwtAuthResponse(token=jwt)
+        return JwtAuthResponse(token = jwt)
     }
 }

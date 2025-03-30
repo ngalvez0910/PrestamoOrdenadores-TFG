@@ -9,11 +9,12 @@ import org.lighthousegames.logging.logging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.lang.NonNull
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
-import org.springframework.util.StringUtils;
+import org.springframework.util.StringUtils
 import org.springframework.web.filter.OncePerRequestFilter
 
 private val log = logging()
@@ -21,11 +22,9 @@ private val log = logging()
 @Component
 class JwtAuthenticationFilter
 @Autowired constructor(
-    jwtService: JwtService,
-    authUsersService: CustomUserDetailsService
+    private val jwtService: JwtService,
+    private val authUsersService: CustomUserDetailsService
 ): OncePerRequestFilter(){
-    private val jwtService: JwtService = jwtService
-    private val authUsersService: CustomUserDetailsService = authUsersService
 
     override fun doFilterInternal(
         @NonNull request: HttpServletRequest,
@@ -33,7 +32,6 @@ class JwtAuthenticationFilter
     ) {
         log.debug { "Iniciando el filtro de autenticación" }
         val authHeader = request.getHeader("Authorization")
-        val jwt: String
         var userDetails: UserDetails?
         var userName: String?
 
@@ -44,7 +42,7 @@ class JwtAuthenticationFilter
         }
 
         log.debug { "Se ha encontrado cabecera de autenticación, se procesa" }
-        jwt = authHeader.substring(7)
+        val jwt: String = authHeader.substring(7)
         try {
             userName = jwtService.extractUserName(jwt)
         } catch (e: Exception) {
@@ -67,16 +65,20 @@ class JwtAuthenticationFilter
             }
             authUsersService.loadUserByUsername(userName.toString())
             log.debug { "Usuario encontrado: $userDetails" }
-            if (jwtService.isTokenValid(jwt, userDetails) == true) {
+            if (jwtService.isTokenValid(jwt, userDetails)) {
                 log.debug { "JWT válido" }
+
+                val roles = jwtService.extractRoles(jwt)
+                val authorities = roles.map { SimpleGrantedAuthority(it) }
+
                 val context = SecurityContextHolder.createEmptyContext()
-                val authToken = UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails!!.getAuthorities()
-                )
-                authToken.setDetails(WebAuthenticationDetailsSource().buildDetails(request))
-                context.setAuthentication(authToken)
+                val authToken = UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+                authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
+
+                context.authentication = authToken
                 SecurityContextHolder.setContext(context)
             }
+
         }
         filterChain.doFilter(request, response)
     }
