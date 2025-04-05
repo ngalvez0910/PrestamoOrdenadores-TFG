@@ -4,6 +4,7 @@ import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRe
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
+import org.example.prestamoordenadores.rest.incidencias.mappers.IncidenciaMapper
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 

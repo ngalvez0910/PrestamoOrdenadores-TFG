@@ -77,14 +77,18 @@ class DispositivoServiceImpl(
             return Err(DispositivoError.DispositivoNotFound("Dispositivo con GUID: $guid no encontrado"))
         }
 
-        val incidencia = incidenciaRepository.findIncidenciaByGuid(dispositivo.incidenciaGuid!!)
-        if (incidencia == null){
-            dispositivo.incidenciaGuid = ""
+        if (dispositivo.incidenciaGuid != null) {
+            val incidencia = incidenciaRepository.findIncidenciaByGuid(dispositivo.incidenciaGuid!!)
+            if (incidencia == null) {
+                return Err(DispositivoError.IncidenciaNotFound("Incidencia con GUID: ${dispositivo.incidenciaGuid} no encontrada"))
+            }
+            existingDispositivo.incidencia = incidencia
+        } else {
+            existingDispositivo.incidencia = null
         }
 
         dispositivo.componentes?.let { existingDispositivo.componentes = it }
         dispositivo.estado?.let { existingDispositivo.estadoDispositivo = EstadoDispositivo.valueOf(it) }
-        dispositivo.incidenciaGuid?.let { existingDispositivo.incidencia = incidencia }
         dispositivo.isActivo?.let { existingDispositivo.isActivo = it }
 
         dispositivoRepository.save(existingDispositivo)
