@@ -6,6 +6,5 @@ data class DispositivoResponseAdmin (
     var componentes: String,
     var estado: String,
     var incidenciaGuid: String?,
-    var stock: Int,
     var isActivo: Boolean
 )

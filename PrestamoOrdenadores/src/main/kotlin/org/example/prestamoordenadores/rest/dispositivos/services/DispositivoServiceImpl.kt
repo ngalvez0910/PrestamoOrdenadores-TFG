@@ -3,8 +3,6 @@ package org.example.prestamoordenadores.rest.dispositivos.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
@@ -80,7 +78,6 @@ class DispositivoServiceImpl(
         dispositivo.componentes?.let { existingDispositivo.componentes = it }
         dispositivo.estado?.let { existingDispositivo.estadoDispositivo = EstadoDispositivo.valueOf(it) }
         dispositivo.incidenciaGuid?.let { existingDispositivo.incidenciaGuid = it }
-        dispositivo.stock?.let { existingDispositivo.stock = it }
         dispositivo.isActivo?.let { existingDispositivo.isActivo = it }
 
         dispositivoRepository.save(existingDispositivo)
@@ -133,5 +130,11 @@ class DispositivoServiceImpl(
         val dispositivos = dispositivoRepository.findByEstadoDispositivo(estadoEnum)
 
         return Ok(mapper.toDispositivoResponseListAdmin(dispositivos))
+    }
+
+    override fun getStock(): Result<Int, DispositivoError> {
+        logger.debug { "Obteniendo stock" }
+
+        return Ok(dispositivoRepository.findAll().count())
     }
 }

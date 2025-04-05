@@ -27,7 +27,7 @@ class DispositivoCsvStorage(
                 .withLineEnd(ICSVWriter.DEFAULT_LINE_END)
                 .build()
 
-            val header = arrayOf("Guid", "Nº Serie", "Componentes", "Estado", "Incidencias", "Stock", "Activo")
+            val header = arrayOf("Guid", "Nº Serie", "Componentes", "Estado", "Incidencias", "Activo")
             csvWriter.writeNext(header, false)
 
             dispositivos.forEach { dispositivo ->
@@ -38,7 +38,6 @@ class DispositivoCsvStorage(
                         dispositivo.componentes,
                         dispositivo.estadoDispositivo.name,
                         dispositivo.incidenciaGuid ?: "",
-                        dispositivo.stock.toString(),
                         dispositivo.isActivo.toString()
                     ),
                     false

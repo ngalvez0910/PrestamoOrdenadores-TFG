@@ -14,14 +14,12 @@ class DispositivoMapper {
             guid = dispositivo.guid,
             numeroSerie = dispositivo.numeroSerie,
             componentes = dispositivo.componentes,
-            stock = dispositivo.stock
         )
     }
 
     fun toDispositivoFromCreate(dispositivo: DispositivoCreateRequest): Dispositivo {
         return Dispositivo(
             componentes = dispositivo.componentes,
-            stock = dispositivo.stock,
             createdDate = LocalDateTime.now(),
             updatedDate = LocalDateTime.now()
         )
@@ -34,7 +32,6 @@ class DispositivoMapper {
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
             incidenciaGuid = dispositivo.incidenciaGuid ?:"",
-            stock = dispositivo.stock,
             isActivo = dispositivo.isActivo
         )
     }

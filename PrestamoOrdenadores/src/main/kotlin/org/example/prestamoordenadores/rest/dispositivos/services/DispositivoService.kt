@@ -17,4 +17,5 @@ interface DispositivoService {
     fun deleteDispositivoByGuid(guid: String) : Result<DispositivoResponse?, DispositivoError>
     fun getDispositivoByNumeroSerie(numeroSerie: String) : Result<DispositivoResponseAdmin?, DispositivoError>
     fun getDispositivoByEstado(estado: String): Result<List<DispositivoResponseAdmin>, DispositivoError>
+    fun getStock(): Result<Int, DispositivoError>
 }

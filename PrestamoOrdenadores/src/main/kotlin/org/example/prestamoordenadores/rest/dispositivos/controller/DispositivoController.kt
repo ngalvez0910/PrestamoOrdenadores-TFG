@@ -143,4 +143,12 @@ class DispositivoController
             ResponseEntity(HttpStatus.NOT_FOUND)
         }
     }
+
+    @GetMapping("/stock")
+    fun getStock(): ResponseEntity<Any> {
+        return dispositivoService.getStock().mapBoth(
+            success = { ResponseEntity.ok(it) },
+            failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
+        )
+    }
 }

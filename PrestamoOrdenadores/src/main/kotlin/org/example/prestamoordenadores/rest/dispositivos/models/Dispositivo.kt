@@ -30,8 +30,6 @@ class Dispositivo(
 
     var incidenciaGuid : String? = "",
 
-    var stock: Int = 0,
-
     var isActivo: Boolean = true,
 
     @CreatedDate
@@ -40,6 +38,6 @@ class Dispositivo(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor(guid: String, numeroSerie: String, componentes: String, estadoDispositivo: EstadoDispositivo, incidenciaGuid: String, stock: Int, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, numeroSerie, componentes, estadoDispositivo, incidenciaGuid, stock, isActivo, createdDate, updatedDate)
+    constructor(guid: String, numeroSerie: String, componentes: String, estadoDispositivo: EstadoDispositivo, incidenciaGuid: String, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, numeroSerie, componentes, estadoDispositivo, incidenciaGuid, isActivo, createdDate, updatedDate)
 }
