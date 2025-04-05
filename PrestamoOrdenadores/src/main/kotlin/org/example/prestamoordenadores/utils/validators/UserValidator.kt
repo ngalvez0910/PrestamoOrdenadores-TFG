@@ -13,28 +13,28 @@ import org.example.prestamoordenadores.rest.users.models.Role
 
 fun UserCreateRequest.validate(): Result<UserCreateRequest, UserError> {
     return when {
-        numeroIdentificacion.isBlank() ->
+        numeroIdentificacion!!.isBlank() ->
             Err(UserError.UserValidationError("El número de identificación no puede estar vacío"))
 
-        nombre.isBlank() ->
+        nombre!!.isBlank() ->
             Err(UserError.UserValidationError("El nombre no puede estar vacío"))
 
-        apellidos.isBlank() ->
+        apellidos!!.isBlank() ->
             Err(UserError.UserValidationError("Los apellidos no pueden estar vacíos"))
 
-        fotoCarnet.isBlank() ->
+        fotoCarnet!!.isBlank() ->
             Err(UserError.UserValidationError("La foto de carnet no puede estar vacía"))
 
-        email.isBlank() || !email.matches(Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) ->
+        email!!.isBlank() || !email!!.matches(Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) ->
             Err(UserError.UserValidationError("El email no es válido o está vacío"))
 
-        password.isBlank() ->
+        password!!.isBlank() ->
             Err(UserError.UserValidationError("La contraseña no puede estar vacía"))
 
-        !password.matches(Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[\\W_]).{8,}$")) ->
+        !password!!.matches(Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[\\W_]).{8,}$")) ->
             Err(UserError.UserValidationError("La contraseña no es válida"))
 
-        confirmPassword.isBlank() ->
+        confirmPassword!!.isBlank() ->
             Err(UserError.UserValidationError("La confirmación de contraseña no puede estar vacía"))
 
         password != confirmPassword ->

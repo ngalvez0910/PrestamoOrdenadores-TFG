@@ -4,7 +4,5 @@ import org.jetbrains.annotations.NotNull
 
 data class DispositivoCreateRequest(
     @NotNull("Componentes no puede ser null")
-    var componentes: String,
-    @NotNull("Stock no puede ser null")
-    var stock: Int,
+    var componentes: String
 )

@@ -34,7 +34,7 @@ class SancionCsvStorage(
                 csvWriter.writeNext(
                     arrayOf(
                         sancion.guid,
-                        sancion.userGuid,
+                        sancion.user.guid,
                         sancion.tipoSancion.name,
                         sancion.fechaSancion.toDefaultDateString()
                     ),

@@ -56,13 +56,9 @@ class User (
 
     @JsonIgnore
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return mutableListOf(SimpleGrantedAuthority(rol.name))
+        return mutableListOf(SimpleGrantedAuthority("ROLE_${rol.name}"))
     }
 
-    @JsonIgnore
-    override fun getPassword(): String = campoPassword
-
-    @JsonIgnore
     override fun getUsername(): String = email
 
     @JsonIgnore
@@ -73,4 +69,9 @@ class User (
 
     @JsonIgnore
     override fun isCredentialsNonExpired(): Boolean = true
+
+    @JsonIgnore
+    override fun isEnabled(): Boolean = isActivo
+
+    override fun getPassword(): String = campoPassword
 }

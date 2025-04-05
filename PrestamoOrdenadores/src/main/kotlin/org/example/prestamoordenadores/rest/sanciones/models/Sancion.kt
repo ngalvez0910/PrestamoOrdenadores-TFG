@@ -6,7 +6,10 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.utils.generators.generateSancionGuid
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -21,7 +24,9 @@ class Sancion (
     val id: Long = 0L,
     var guid : String = generateSancionGuid(),
 
-    var userGuid : String = "",
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true)
+    var user : User = User(),
 
     @Enumerated(EnumType.STRING)
     var tipoSancion : TipoSancion = TipoSancion.ADVERTENCIA,
@@ -34,6 +39,6 @@ class Sancion (
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ){
-    constructor(guid: String, userGuid: String, tipoSancion: TipoSancion, fechaSancion: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, userGuid, tipoSancion, fechaSancion, createdDate, updatedDate)
+    constructor(guid: String, user: User, tipoSancion: TipoSancion, fechaSancion: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, user, tipoSancion, fechaSancion, createdDate, updatedDate)
 }

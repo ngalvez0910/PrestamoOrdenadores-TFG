@@ -4,6 +4,7 @@ import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRe
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
+import org.example.prestamoordenadores.rest.incidencias.mappers.IncidenciaMapper
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -14,14 +15,12 @@ class DispositivoMapper {
             guid = dispositivo.guid,
             numeroSerie = dispositivo.numeroSerie,
             componentes = dispositivo.componentes,
-            stock = dispositivo.stock
         )
     }
 
     fun toDispositivoFromCreate(dispositivo: DispositivoCreateRequest): Dispositivo {
         return Dispositivo(
             componentes = dispositivo.componentes,
-            stock = dispositivo.stock,
             createdDate = LocalDateTime.now(),
             updatedDate = LocalDateTime.now()
         )
@@ -33,8 +32,7 @@ class DispositivoMapper {
             numeroSerie = dispositivo.numeroSerie,
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
-            incidenciaGuid = dispositivo.incidenciaGuid ?:"",
-            stock = dispositivo.stock,
+            incidencia = dispositivo.incidencia,
             isActivo = dispositivo.isActivo
         )
     }

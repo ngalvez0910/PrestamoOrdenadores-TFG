@@ -1,6 +1,5 @@
 package org.example.prestamoordenadores.config.auth
 
-import jakarta.servlet.Filter
 import org.example.prestamoordenadores.rest.users.services.CustomUserDetailsService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -8,14 +7,13 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
-import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
-import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
@@ -26,30 +24,32 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 class SecurityConfig
 @Autowired constructor(
-    private var userService: CustomUserDetailsService?,
-    private var jwtAuthenticationFilter: JwtAuthenticationFilter?
-){
+    private val userService: CustomUserDetailsService,
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter
+) {
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain? {
+    @Throws(Exception::class)
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .csrf(Customizer<CsrfConfigurer<HttpSecurity>> { obj -> obj.disable() })
-            .sessionManagement(Customizer<SessionManagementConfigurer<HttpSecurity>> { manager ->
+            .csrf { obj: CsrfConfigurer<HttpSecurity> -> obj.disable() }
+            .sessionManagement { manager: SessionManagementConfigurer<HttpSecurity?> ->
                 manager.sessionCreationPolicy(
-                    STATELESS
+                    SessionCreationPolicy.STATELESS
                 )
-            })
-            .authorizeHttpRequests(Customizer { request ->
-                request
+            }
+            .authorizeHttpRequests { requests ->
+                requests
                     .requestMatchers("/auth/signin", "/auth/signup").permitAll()
-                    .requestMatchers("/error/**").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                    .requestMatchers("/static/**").permitAll()
-                    .requestMatchers("/ws/**").permitAll()
-                    .requestMatchers("/" + "/**").permitAll()
                     .anyRequest().authenticated()
-            })
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+//                    .requestMatchers("/error/**").permitAll()
+//                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+//                    .requestMatchers("/static/**").permitAll()
+//                    .requestMatchers("/ws/**").permitAll()
+
+            }
+            .authenticationProvider(authenticationProvider()).addFilterBefore(
+                jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java
+            )
 
         return http.build()
     }
@@ -61,14 +61,15 @@ class SecurityConfig
 
     @Bean
     fun authenticationProvider(): AuthenticationProvider {
-        return DaoAuthenticationProvider().apply {
-            setUserDetailsService(userService)
-            setPasswordEncoder(passwordEncoder())
-        }
+        val authProvider = DaoAuthenticationProvider()
+        authProvider.setUserDetailsService(userService)
+        authProvider.setPasswordEncoder(passwordEncoder())
+        return authProvider
     }
 
     @Bean
-    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager? {
-        return config.getAuthenticationManager()
+    @Throws(Exception::class)
+    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager {
+        return config.authenticationManager
     }
 }

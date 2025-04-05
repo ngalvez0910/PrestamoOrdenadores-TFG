@@ -4,19 +4,19 @@ import org.jetbrains.annotations.NotNull
 
 data class UserCreateRequest (
     @NotNull("Numero identificacion no puede ser null")
-    var numeroIdentificacion: String,
+    var numeroIdentificacion: String?,
     @NotNull("Nombre no puede ser null")
-    var nombre: String,
+    var nombre: String?,
     @NotNull("Apellidos no puede ser null")
-    var apellidos: String,
+    var apellidos: String?,
     @NotNull("Email no puede ser null")
-    var email: String,
-    var curso: String,
-    var tutor: String,
+    var email: String?,
+    var curso: String?,
+    var tutor: String?,
     @NotNull("Foto carnet no puede ser null")
-    var fotoCarnet: String,
+    var fotoCarnet: String?,
     @NotNull("Password no puede estar vacío")
-    var password : String,
+    var password : String?,
     @NotNull("Confirm password no puede estar vacío")
-    var confirmPassword : String
+    var confirmPassword : String?
 )

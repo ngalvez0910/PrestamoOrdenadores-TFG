@@ -34,8 +34,8 @@ class PrestamoCsvStorage(
                 csvWriter.writeNext(
                     arrayOf(
                         prestamo.guid,
-                        prestamo.userGuid,
-                        prestamo.dispositivoGuid,
+                        prestamo.user.guid,
+                        prestamo.dispositivo.guid,
                         prestamo.estadoPrestamo.name,
                         prestamo.fechaPrestamo.toDefaultDateString(),
                         prestamo.fechaDevolucion.toDefaultDateString()

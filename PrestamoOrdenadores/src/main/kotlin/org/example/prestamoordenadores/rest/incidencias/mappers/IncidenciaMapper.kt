@@ -4,7 +4,8 @@ import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequ
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
-import org.example.prestamoordenadores.utils.locale.toDefaultDateString
+import org.example.prestamoordenadores.rest.users.mappers.UserMapper
+import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.utils.locale.toDefaultDateTimeString
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -12,21 +13,24 @@ import java.time.LocalDateTime
 @Component
 class IncidenciaMapper {
     fun toIncidenciaResponse(incidencia: Incidencia) : IncidenciaResponse{
+        val userMapper = UserMapper()
+
         return IncidenciaResponse(
             guid = incidencia.guid,
             asunto = incidencia.asunto,
             descripcion = incidencia.descripcion,
             estadoIncidencia = incidencia.estadoIncidencia.toString(),
-            userGuid = incidencia.userGuid,
+            user = userMapper.toUserResponse(incidencia.user),
             createdDate = incidencia.createdDate.toDefaultDateTimeString()
         )
     }
 
-    fun toIncidenciaFromCreate(incidencia: IncidenciaCreateRequest) : Incidencia{
+    fun toIncidenciaFromCreate(incidencia: IncidenciaCreateRequest, user: User) : Incidencia{
         return Incidencia(
             asunto = incidencia.asunto,
             descripcion = incidencia.descripcion,
             estadoIncidencia = EstadoIncidencia.PENDIENTE,
+            user = user,
             createdDate = LocalDateTime.now(),
             updatedDate = LocalDateTime.now()
         )

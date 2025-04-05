@@ -37,7 +37,7 @@ class IncidenciaCsvStorage(
                         incidencia.guid,
                         incidencia.asunto,
                         incidencia.estadoIncidencia.name,
-                        incidencia.userGuid,
+                        incidencia.user.guid,
                         incidencia.createdDate.toDefaultDateTimeString()
                     ),
                     false

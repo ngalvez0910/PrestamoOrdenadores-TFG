@@ -42,14 +42,14 @@ class UserMapper {
 
     fun toUserFromCreate(user: UserCreateRequest): User {
         return User(
-            numeroIdentificacion = user.numeroIdentificacion,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            email = user.email,
+            numeroIdentificacion = user.numeroIdentificacion!!,
+            nombre = user.nombre!!,
+            apellidos = user.apellidos!!,
+            email = user.email!!,
             curso = user.curso,
             tutor = user.tutor,
-            fotoCarnet = user.fotoCarnet,
-            campoPassword = user.password,
+            fotoCarnet = user.fotoCarnet!!,
+            campoPassword = user.password!!,
             rol = Role.ALUMNO,
             isActivo = true,
             createdDate = LocalDateTime.now(),

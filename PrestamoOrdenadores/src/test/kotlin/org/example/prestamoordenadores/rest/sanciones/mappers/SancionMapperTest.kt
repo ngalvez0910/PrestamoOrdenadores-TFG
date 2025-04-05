@@ -50,7 +50,7 @@ class SancionMapperTest {
         val response = mapper.toSancionFromRequest(sancionRequest)
 
         assertAll(
-            { assertEquals(sancionRequest.userGuid, response.userGuid) },
+            { assertEquals(sancionRequest.userGuid, response.user) },
             { assertEquals(sancionRequest.tipoSancion, response.tipoSancion.toString()) }
         )
     }
@@ -62,7 +62,7 @@ class SancionMapperTest {
         assertAll(
             { assertEquals(1, responses.size) },
             { assertEquals(sancion.guid, responses[0].guid) },
-            { assertEquals(sancion.userGuid, responses[0].userGuid) },
+            { assertEquals(sancion.user, responses[0].userGuid) },
             { assertEquals(sancion.tipoSancion.toString(), responses[0].tipoSancion) }
         )
     }
