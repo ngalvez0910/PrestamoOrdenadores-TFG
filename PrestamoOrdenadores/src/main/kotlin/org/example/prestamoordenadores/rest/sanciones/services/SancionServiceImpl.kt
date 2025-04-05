@@ -72,7 +72,7 @@ class SancionServiceImpl(
         val tipoNormalizado = sancion.tipoSancion.replace(" ", "_").uppercase()
         sancion.tipoSancion = tipoNormalizado
 
-        val sancionCreada = mapper.toSancionFromRequest(sancion)
+        val sancionCreada = mapper.toSancionFromRequest(sancion, userRepository)
         repository.save(sancionCreada)
 
         return Ok(mapper.toSancionResponse(sancionCreada))

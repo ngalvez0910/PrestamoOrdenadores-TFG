@@ -4,6 +4,9 @@ import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.models.Sancion
 import org.example.prestamoordenadores.rest.sanciones.models.TipoSancion
+import org.example.prestamoordenadores.rest.users.mappers.UserMapper
+import org.example.prestamoordenadores.rest.users.models.User
+import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -12,17 +15,25 @@ import java.time.LocalDateTime
 @Component
 class SancionMapper {
     fun toSancionResponse(sancion: Sancion) : SancionResponse{
+        val userMapper = UserMapper()
+
         return SancionResponse(
             guid = sancion.guid,
-            userGuid = sancion.userGuid,
+            user = userMapper.toUserResponse(sancion.user),
             tipoSancion = sancion.tipoSancion.toString(),
             fechaSancion = sancion.fechaSancion.toDefaultDateString()
         )
     }
 
-    fun toSancionFromRequest(sancion: SancionRequest) : Sancion{
+    fun toSancionFromRequest(sancion: SancionRequest, userRepository: UserRepository): Sancion {
+        val user: User? = userRepository.findByGuid(sancion.userGuid)
+
+        if (user == null) {
+            throw IllegalArgumentException("Usuario con GUID ${sancion.userGuid} no encontrado")
+        }
+
         return Sancion(
-            userGuid = sancion.userGuid,
+            user = user,
             tipoSancion = TipoSancion.valueOf(sancion.tipoSancion),
             fechaSancion = LocalDate.now(),
             createdDate = LocalDateTime.now(),
