@@ -10,12 +10,12 @@ import java.time.LocalDate
 
 @Service
 interface SancionService {
-    suspend fun getAllSanciones(page: Int, size: Int): Result<List<SancionResponse>, SancionError>
-    suspend fun getSancionByGuid(guid: String) : Result<SancionResponse?, SancionError>
-    suspend fun createSancion(sancion: SancionRequest) : Result<SancionResponse, SancionError>
-    suspend fun updateSancion(guid: String, sancion: SancionUpdateRequest) : Result<SancionResponse?, SancionError>
-    suspend fun deleteSancionByGuid(guid: String) : Result<SancionResponse?, SancionError>
-    suspend fun getByFecha(fecha: LocalDate): Result<List<SancionResponse>, SancionError>
-    suspend fun getByTipo(tipo: String): Result<List<SancionResponse>, SancionError>
-    suspend fun getSancionByUserGuid(userGuid: String) : Result<List<SancionResponse>, SancionError>
+    fun getAllSanciones(page: Int, size: Int): Result<List<SancionResponse>, SancionError>
+    fun getSancionByGuid(guid: String) : Result<SancionResponse?, SancionError>
+    fun createSancion(sancion: SancionRequest) : Result<SancionResponse, SancionError>
+    fun updateSancion(guid: String, sancion: SancionUpdateRequest) : Result<SancionResponse?, SancionError>
+    fun deleteSancionByGuid(guid: String) : Result<SancionResponse?, SancionError>
+    fun getByFecha(fecha: LocalDate): Result<List<SancionResponse>, SancionError>
+    fun getByTipo(tipo: String): Result<List<SancionResponse>, SancionError>
+    fun getSancionByUserGuid(userGuid: String) : Result<List<SancionResponse>, SancionError>
 }
