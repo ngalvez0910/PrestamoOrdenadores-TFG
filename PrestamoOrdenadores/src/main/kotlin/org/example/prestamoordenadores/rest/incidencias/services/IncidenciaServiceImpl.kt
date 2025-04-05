@@ -3,8 +3,6 @@ package org.example.prestamoordenadores.rest.incidencias.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
@@ -19,6 +17,7 @@ import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -63,7 +62,13 @@ class IncidenciaServiceImpl(
             return Err(IncidenciaError.IncidenciaValidationError("Incidencia inválida"))
         }
 
-        val newIncidencia = mapper.toIncidenciaFromCreate(incidencia)
+        val authentication = SecurityContextHolder.getContext().authentication
+        val email = authentication.name
+
+        val user = userRepository.findByEmail(email)
+            ?: return Err(IncidenciaError.UserNotFound("No se encontró el usuario con email: $email"))
+
+        val newIncidencia = mapper.toIncidenciaFromCreate(incidencia, user)
         repository.save(newIncidencia)
 
         return Ok(mapper.toIncidenciaResponse(newIncidencia))

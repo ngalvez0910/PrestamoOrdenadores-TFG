@@ -4,8 +4,6 @@ import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequ
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
-import org.example.prestamoordenadores.rest.users.models.Role
-import org.example.prestamoordenadores.rest.users.models.User
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -43,7 +41,7 @@ class IncidenciaMapperTest {
             { assertEquals(incidenciaResponse.asunto, response.asunto) },
             { assertEquals(incidenciaResponse.descripcion, response.descripcion) },
             { assertEquals(incidenciaResponse.estadoIncidencia, response.estadoIncidencia) },
-            { assertEquals(incidenciaResponse.userGuid, response.userGuid) }
+            { assertEquals(incidenciaResponse.user, response.user) }
         )
     }
 
@@ -73,7 +71,7 @@ class IncidenciaMapperTest {
             { assertEquals(incidenciaList[0].asunto, response[0].asunto) },
             { assertEquals(incidenciaList[0].descripcion, response[0].descripcion) },
             { assertEquals(incidenciaList[0].estadoIncidencia.toString(), response[0].estadoIncidencia) },
-            { assertEquals(incidenciaList[0].userGuid, response[0].userGuid) }
+            { assertEquals(incidenciaList[0].userGuid, response[0].user) }
         )
     }
 

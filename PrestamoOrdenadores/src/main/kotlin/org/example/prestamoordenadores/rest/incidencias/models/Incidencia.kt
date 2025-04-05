@@ -6,7 +6,10 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.utils.generators.generateIncidenciaGuid
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -27,7 +30,9 @@ class Incidencia(
     @Enumerated(EnumType.STRING)
     var estadoIncidencia : EstadoIncidencia = EstadoIncidencia.PENDIENTE,
 
-    var userGuid: String = "",
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true)
+    var user: User = User(),
 
     @CreatedDate
     var createdDate: LocalDateTime = LocalDateTime.now(),
@@ -35,6 +40,6 @@ class Incidencia(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now()
 ) {
-    constructor(guid: String, asunto: String, descripcion: String, estadoIncidencia: EstadoIncidencia, userGuid: String, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, asunto, descripcion, estadoIncidencia, userGuid, createdDate, updatedDate)
+    constructor(guid: String, asunto: String, descripcion: String, estadoIncidencia: EstadoIncidencia, user: User, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, asunto, descripcion, estadoIncidencia, user, createdDate, updatedDate)
 }

@@ -33,17 +33,17 @@ CREATE TABLE IF NOT EXISTS incidencias (
     asunto VARCHAR(500) NOT NULL,
     descripcion VARCHAR(999) NOT NULL,
     estado_incidencia VARCHAR(9) NOT NULL,
-    user_guid VARCHAR(11) NULL DEFAULT NULL,
+    user_id BIGINT,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insertar incidencias de prueba
-INSERT INTO incidencias (guid, asunto, descripcion, estado_incidencia, user_guid, created_date, updated_date)
+INSERT INTO incidencias (guid, asunto, descripcion, estado_incidencia, user_id, created_date, updated_date)
 VALUES
-    ('INC000003', 'Cargador roto', 'El cargador esta despeluchado', 'PENDIENTE', '3854b5ba26c', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('INC000006', 'Tecla W rota', 'La tecla W esta levantada y no se puede volver a colocar', 'PENDIENTE', 'c1f40bb1900', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('INC000010', 'Virus', 'El ordenador tiene un virus', 'PENDIENTE', 'c1f40bb1900', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('INC000003', 'Cargador roto', 'El cargador esta despeluchado', 'PENDIENTE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('INC000006', 'Tecla W rota', 'La tecla W esta levantada y no se puede volver a colocar', 'PENDIENTE', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('INC000010', 'Virus', 'El ordenador tiene un virus', 'PENDIENTE', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 -- Crear tabla dispositivos
