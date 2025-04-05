@@ -11,6 +11,7 @@ import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
 import org.example.prestamoordenadores.rest.dispositivos.mappers.DispositivoMapper
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
+import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
@@ -26,7 +27,8 @@ private val logger = logging()
 @CacheConfig(cacheNames = ["dispositivos"])
 class DispositivoServiceImpl(
     private val dispositivoRepository: DispositivoRepository,
-    private val mapper: DispositivoMapper
+    private val mapper: DispositivoMapper,
+    private val incidenciaRepository: IncidenciaRepository
 ) : DispositivoService {
     override fun getAllDispositivos(page: Int, size: Int): Result<List<DispositivoResponseAdmin>, DispositivoError> {
         logger.debug { "Obteniendo todos los dispositivos" }
@@ -75,9 +77,14 @@ class DispositivoServiceImpl(
             return Err(DispositivoError.DispositivoNotFound("Dispositivo con GUID: $guid no encontrado"))
         }
 
+        val incidencia = incidenciaRepository.findIncidenciaByGuid(dispositivo.incidenciaGuid!!)
+        if (incidencia == null){
+            dispositivo.incidenciaGuid = ""
+        }
+
         dispositivo.componentes?.let { existingDispositivo.componentes = it }
         dispositivo.estado?.let { existingDispositivo.estadoDispositivo = EstadoDispositivo.valueOf(it) }
-        dispositivo.incidenciaGuid?.let { existingDispositivo.incidenciaGuid = it }
+        dispositivo.incidenciaGuid?.let { existingDispositivo.incidencia = incidencia }
         dispositivo.isActivo?.let { existingDispositivo.isActivo = it }
 
         dispositivoRepository.save(existingDispositivo)

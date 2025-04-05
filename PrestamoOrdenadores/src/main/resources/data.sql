@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS dispositivos (
     numero_serie VARCHAR(255) NOT NULL UNIQUE,
     componentes VARCHAR(255) NOT NULL,
     estado_dispositivo VARCHAR(13) NOT NULL,
-    incidencia_guid VARCHAR(9) NULL DEFAULT NULL,
+    incidencia_id BIGINT UNIQUE,
     is_activo BOOLEAN DEFAULT true,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -61,15 +61,15 @@ CREATE TABLE IF NOT EXISTS dispositivos (
 
 
 -- Insertar dispositivos de prueba
-INSERT INTO dispositivos (guid, numero_serie, componentes, estado_dispositivo, incidencia_guid, is_activo, created_date, updated_date)
+INSERT INTO dispositivos (guid, numero_serie, componentes, estado_dispositivo, incidencia_id, is_activo, created_date, updated_date)
 VALUES
     ('ed472271676', '1AB123WXYZ', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('a1b2c3d4e5f', '5CD456QWER', 'ratón, cargador', 'PRESTADO', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('x9y8z7w6v5u', '9EF789TYUI', 'ratón, cargador', 'NO_DISPONIBLE', 'INC000003', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('x9y8z7w6v5u', '9EF789TYUI', 'ratón, cargador', 'NO_DISPONIBLE', 1, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('m3n4o5p6q7r', '3GH012ASDF', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('l8k9j0h1g2f', '7JK345ZXCV', 'ratón, cargador', 'PRESTADO', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('t5s4r3q2p1o', '2LM678POIU', 'ratón, cargador', 'NO_DISPONIBLE', 'INC000006', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('t5s4r3q2p1o', '2LM678POIU', 'ratón, cargador', 'NO_DISPONIBLE', 2, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('d7e8f9g0h1i', '8NO901LKJH', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('v2w3x4y5z6a', '4PQ234MNBV', 'ratón, cargador', 'PRESTADO', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('c6b5a4z3y2x', '6RS567QAZX', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('n0m9l8k7j6i', '0TU890WSXC', 'ratón, cargador', 'NO_DISPONIBLE', 'INC000010', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('n0m9l8k7j6i', '0TU890WSXC', 'ratón, cargador', 'NO_DISPONIBLE', 3, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

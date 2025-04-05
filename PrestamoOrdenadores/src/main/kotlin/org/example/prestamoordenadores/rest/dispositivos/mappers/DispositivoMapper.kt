@@ -31,7 +31,7 @@ class DispositivoMapper {
             numeroSerie = dispositivo.numeroSerie,
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
-            incidenciaGuid = dispositivo.incidenciaGuid ?:"",
+            incidencia = dispositivo.incidencia,
             isActivo = dispositivo.isActivo
         )
     }

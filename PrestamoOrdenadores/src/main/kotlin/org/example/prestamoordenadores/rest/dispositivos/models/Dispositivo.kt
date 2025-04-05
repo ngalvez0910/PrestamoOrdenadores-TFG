@@ -6,12 +6,16 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.Table
+import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.utils.generators.generateGuid
 import org.example.prestamoordenadores.utils.generators.generateNumeroSerie
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDateTime
+import jakarta.persistence.OneToOne
+import jakarta.persistence.FetchType
 
 @Entity
 @Table(name = "dispositivos")
@@ -28,7 +32,9 @@ class Dispositivo(
     @Enumerated(EnumType.STRING)
     var estadoDispositivo : EstadoDispositivo = EstadoDispositivo.DISPONIBLE,
 
-    var incidenciaGuid : String? = "",
+    @OneToOne
+    @JoinColumn(name = "incidencia_id", referencedColumnName = "id", unique = true)
+    var incidencia: Incidencia? = null,
 
     var isActivo: Boolean = true,
 
@@ -38,6 +44,6 @@ class Dispositivo(
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor(guid: String, numeroSerie: String, componentes: String, estadoDispositivo: EstadoDispositivo, incidenciaGuid: String, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, numeroSerie, componentes, estadoDispositivo, incidenciaGuid, isActivo, createdDate, updatedDate)
+    constructor(guid: String, numeroSerie: String, componentes: String, estadoDispositivo: EstadoDispositivo, incidencia: Incidencia?, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, numeroSerie, componentes, estadoDispositivo, incidencia, isActivo, createdDate, updatedDate)
 }
