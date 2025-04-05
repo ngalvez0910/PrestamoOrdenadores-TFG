@@ -22,19 +22,21 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.http.HttpHeaders
+import org.springframework.security.access.prepost.PreAuthorize
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
 
 @RestController
 @RequestMapping("/dispositivos")
+@PreAuthorize("hasRole('ADMIN')")
 class DispositivoController
 @Autowired constructor(
     private val dispositivoService: DispositivoService,
     private val dispositivoCsvStorage: DispositivoCsvStorage
 )  {
     @GetMapping
-    suspend fun getAllDispositivos(
+    fun getAllDispositivos(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "5") size: Int
     ): ResponseEntity<Any> {
@@ -45,7 +47,7 @@ class DispositivoController
     }
 
     @GetMapping("/{guid}")
-    suspend fun getDispositivoByGuid(@PathVariable guid: String): ResponseEntity<Any>{
+    fun getDispositivoByGuid(@PathVariable guid: String): ResponseEntity<Any>{
         return dispositivoService.getDispositivoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -58,7 +60,7 @@ class DispositivoController
     }
 
     @GetMapping("/numeroSerie/{numeroSerie}")
-    suspend fun getDispositivoByNumeroSerie(@PathVariable numeroSerie: String): ResponseEntity<Any>{
+    fun getDispositivoByNumeroSerie(@PathVariable numeroSerie: String): ResponseEntity<Any>{
         return dispositivoService.getDispositivoByNumeroSerie(numeroSerie).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -71,7 +73,7 @@ class DispositivoController
     }
 
     @GetMapping("/estado/{estado}")
-    suspend fun getDispositivoByEstado(@PathVariable estado: String): ResponseEntity<Any>{
+    fun getDispositivoByEstado(@PathVariable estado: String): ResponseEntity<Any>{
         return dispositivoService.getDispositivoByEstado(estado).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -84,7 +86,7 @@ class DispositivoController
     }
 
     @PostMapping
-    suspend fun createDispositivo(@RequestBody dispositivo: DispositivoCreateRequest): ResponseEntity<Any> {
+    fun createDispositivo(@RequestBody dispositivo: DispositivoCreateRequest): ResponseEntity<Any> {
         return dispositivoService.createDispositivo(dispositivo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
@@ -97,7 +99,7 @@ class DispositivoController
     }
 
     @PatchMapping("/{guid}")
-    suspend fun updateDispositivo(@PathVariable guid: String, @RequestBody dispositivo : DispositivoUpdateRequest): ResponseEntity<Any>{
+    fun updateDispositivo(@PathVariable guid: String, @RequestBody dispositivo : DispositivoUpdateRequest): ResponseEntity<Any>{
         return dispositivoService.updateDispositivo(guid, dispositivo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -111,7 +113,7 @@ class DispositivoController
     }
 
     @DeleteMapping("/{guid}")
-    suspend fun deleteDispositivo(@PathVariable guid: String): ResponseEntity<Any>{
+    fun deleteDispositivo(@PathVariable guid: String): ResponseEntity<Any>{
         return dispositivoService.deleteDispositivoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
