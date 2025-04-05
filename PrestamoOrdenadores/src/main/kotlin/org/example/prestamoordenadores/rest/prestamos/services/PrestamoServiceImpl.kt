@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
-import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
+import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -61,18 +62,14 @@ class PrestamoServiceImpl(
     }
 
     @CachePut(key = "#result.guid")
-    override fun createPrestamo(prestamo: PrestamoCreateRequest): Result<PrestamoResponse, PrestamoError> {
+    override fun createPrestamo(): Result<PrestamoResponse, PrestamoError> {
         logger.debug { "Creando nuevo prestamo" }
 
-        val prestamoValidado = prestamo.validate()
-        if (prestamoValidado.isErr) {
-            return Err(PrestamoError.PrestamoValidationError("Préstamo inválido"))
-        }
+        val authentication = SecurityContextHolder.getContext().authentication
+        val email = authentication.name
 
-        val user = userRepository.findByGuid(prestamo.userGuid)
-        if (user == null) {
-            return Err(PrestamoError.UserNotFound("Usuario con GUID: ${prestamo.userGuid} no encontrado"))
-        }
+        val user = userRepository.findByEmail(email)
+            ?: return Err(PrestamoError.UserNotFound("No se encontró el usuario con email: $email"))
 
         val dispositivosDisponibles = dispositivoRepository.findByEstadoDispositivo(EstadoDispositivo.DISPONIBLE)
         if (dispositivosDisponibles.isEmpty()) {
@@ -81,7 +78,7 @@ class PrestamoServiceImpl(
 
         val dispositivoSeleccionado = dispositivosDisponibles.random()
 
-        var prestamoCreado = mapper.toPrestamoFromCreate(prestamo, dispositivoSeleccionado)
+        var prestamoCreado = mapper.toPrestamoFromCreate(user, dispositivoSeleccionado)
         prestamoCreado.fechaDevolucion = LocalDate.now().plusWeeks(3)
         prestamoRepository.save(prestamoCreado)
 

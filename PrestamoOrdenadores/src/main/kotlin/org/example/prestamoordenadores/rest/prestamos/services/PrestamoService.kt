@@ -1,7 +1,6 @@
 package org.example.prestamoordenadores.rest.prestamos.services
 
 import com.github.michaelbull.result.Result
-import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
@@ -12,7 +11,7 @@ import java.time.LocalDate
 interface PrestamoService {
     fun getAllPrestamos(page: Int, size: Int): Result<List<PrestamoResponse>, PrestamoError>
     fun getPrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
-    fun createPrestamo(prestamo: PrestamoCreateRequest) : Result<PrestamoResponse, PrestamoError>
+    fun createPrestamo() : Result<PrestamoResponse, PrestamoError>
     fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>
     fun deletePrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
     fun getByFechaPrestamo(fechaPrestamo: LocalDate): Result<List<PrestamoResponse>, PrestamoError>

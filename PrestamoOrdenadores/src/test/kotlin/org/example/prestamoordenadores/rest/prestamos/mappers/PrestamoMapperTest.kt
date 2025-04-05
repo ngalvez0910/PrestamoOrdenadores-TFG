@@ -2,7 +2,6 @@ package org.example.prestamoordenadores.rest.prestamos.mappers
 
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
-import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
@@ -40,8 +39,8 @@ class PrestamoMapperTest {
 
         assertAll(
             { assertEquals(prestamoResponse.guid, response.guid) },
-            { assertEquals(prestamoResponse.userGuid, response.userGuid) },
-            { assertEquals(prestamoResponse.dispositivoGuid, response.dispositivoGuid) }
+            { assertEquals(prestamoResponse.user, response.user) },
+            { assertEquals(prestamoResponse.dispositivo, response.dispositivo) }
         )
     }
 
@@ -67,7 +66,7 @@ class PrestamoMapperTest {
         val response = mapper.toPrestamoFromCreate(prestamoCreate, dispositivo)
 
         assertAll(
-            { assertEquals(prestamoCreate.userGuid, response.userGuid) }
+            { assertEquals(prestamoCreate.userGuid, response.user) }
         )
     }
 
@@ -80,8 +79,8 @@ class PrestamoMapperTest {
         assertAll(
             { assertEquals(prestamoResponseList.size, responseList.size) },
             { assertEquals(prestamoResponseList[0].guid, responseList[0].guid) },
-            { assertEquals(prestamoResponseList[0].userGuid, responseList[0].userGuid) },
-            { assertEquals(prestamoResponseList[0].dispositivoGuid, responseList[0].dispositivoGuid) }
+            { assertEquals(prestamoResponseList[0].user, responseList[0].user) },
+            { assertEquals(prestamoResponseList[0].dispositivo, responseList[0].dispositivo) }
         )
     }
 

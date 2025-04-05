@@ -1,7 +1,6 @@
 package org.example.prestamoordenadores.rest.prestamos.controller
 
 import com.github.michaelbull.result.mapBoth
-import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.DispositivoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoNotFound
@@ -95,8 +94,8 @@ class PrestamoController
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
-    fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<Any>{
-        return prestamoService.createPrestamo(prestamo).mapBoth(
+    fun createPrestamo(): ResponseEntity<Any>{
+        return prestamoService.createPrestamo().mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
                 when(error) {

@@ -59,7 +59,7 @@ class PrestamoPdfStorage(
 
         document.add(Paragraph("\n"))
 
-        val user = userRepository.findByGuid(prestamo?.userGuid ?: "")
+        val user = userRepository.findByGuid(prestamo?.user?.guid ?: "")
 
         document.add(
             Paragraph("Datos del usuario: ")
@@ -99,7 +99,7 @@ class PrestamoPdfStorage(
 
         document.add(Paragraph("\n"))
 
-        val dispositivo = dispositivoRepository.findDispositivoByGuid(prestamo?.dispositivoGuid ?: "")
+        val dispositivo = dispositivoRepository.findDispositivoByGuid(prestamo?.dispositivo?.guid ?: "")
 
         document.add(
             Paragraph("Datos del dispositivo: ")
