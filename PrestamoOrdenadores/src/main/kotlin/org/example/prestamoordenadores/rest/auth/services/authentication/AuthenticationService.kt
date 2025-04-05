@@ -6,6 +6,5 @@ import org.example.prestamoordenadores.rest.auth.dto.UserLoginRequest
 
 interface AuthenticationService {
     fun signUp(request: UserCreateRequest?): JwtAuthResponse?
-
     fun signIn(request: UserLoginRequest?): JwtAuthResponse?
 }

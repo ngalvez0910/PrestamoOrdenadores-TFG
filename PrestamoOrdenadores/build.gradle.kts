@@ -53,9 +53,6 @@ dependencies {
     // Ficheros Csv
     implementation("com.opencsv:opencsv:5.8")
 
-    // Mordant
-    implementation("com.github.ajalt.mordant:mordant:2.0.0-beta9")
-
     // Result
     implementation("com.michael-bull.kotlin-result:kotlin-result:2.0.0")
 

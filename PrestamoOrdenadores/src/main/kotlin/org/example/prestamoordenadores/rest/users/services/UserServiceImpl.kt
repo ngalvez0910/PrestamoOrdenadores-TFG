@@ -6,7 +6,6 @@ import com.github.michaelbull.result.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
-import org.example.prestamoordenadores.rest.auth.exceptions.UserNotFoundException
 import org.example.prestamoordenadores.rest.users.dto.*
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
@@ -19,10 +18,8 @@ import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-
 
 private val logger = logging()
 
@@ -32,16 +29,14 @@ class UserServiceImpl(
     private val repository : UserRepository,
     private val mapper: UserMapper,
 ): UserService {
-    override suspend fun getAllUsers(page: Int, size: Int): Result<List<UserResponseAdmin>, UserError> {
+    override fun getAllUsers(page: Int, size: Int): Result<List<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
 
-        return withContext(Dispatchers.IO) {
-            val pageRequest = PageRequest.of(page, size)
-            val pageUsers = repository.findAll(pageRequest)
-            val usersResponses = mapper.toUserResponseListAdmin(pageUsers.content)
+        val pageRequest = PageRequest.of(page, size)
+        val pageUsers = repository.findAll(pageRequest)
+        val usersResponses = mapper.toUserResponseListAdmin(pageUsers.content)
 
-            Ok(usersResponses)
-        }
+        return Ok(usersResponses)
     }
 
     @Cacheable(key = "#guid")
@@ -68,16 +63,16 @@ class UserServiceImpl(
                 return@withContext Err(UserError.UserValidationError("Usuario inválido"))
             }
 
-            if (repository.existsUserByNumeroIdentificacion(user.numeroIdentificacion)) {
+            if (repository.existsUserByNumeroIdentificacion(user.numeroIdentificacion!!)) {
                 return@withContext Err(UserError.UserAlreadyExists("Usuario con numero de identificacion ${user.numeroIdentificacion} ya existe"))
             }
 
-            val existingUser = repository.findByEmail(user.email)
+            val existingUser = repository.findByEmail(user.email!!)
             if (existingUser != null) {
                 return@withContext Err(UserError.UserAlreadyExists("Usuario con email ${user.email} ya existe"))
             }
 
-            if (repository.existsUserByNombreAndApellidosAndCurso(user.nombre, user.apellidos, user.curso)) {
+            if (repository.existsUserByNombreAndApellidosAndCurso(user.nombre!!, user.apellidos!!, user.curso!!)) {
                 return@withContext Err(UserError.UserAlreadyExists("Usuario con nombre ${user.nombre}, apellidos ${user.apellidos} y curso ${user.curso} ya existe"))
             }
 
