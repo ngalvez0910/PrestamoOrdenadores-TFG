@@ -3,7 +3,6 @@ package org.example.prestamoordenadores.rest.prestamos.controller
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoCreateRequest
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
-import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.DispositivoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoNotFound
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError.PrestamoValidationError
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -31,6 +31,7 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/prestamos")
+@PreAuthorize("hasRole('ADMIN')")
 class PrestamoController
 @Autowired constructor(
     private val prestamoService: PrestamoService,
@@ -38,7 +39,7 @@ class PrestamoController
     private val prestamoCsvStorage: PrestamoCsvStorage
 ) {
     @GetMapping
-    suspend fun getAllPrestamos(
+    fun getAllPrestamos(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "5") size: Int
     ): ResponseEntity<Any> {
@@ -49,7 +50,8 @@ class PrestamoController
     }
 
     @GetMapping("/{guid}")
-    suspend fun getPrestamoByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
+    fun getPrestamoByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return prestamoService.getPrestamoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -62,7 +64,7 @@ class PrestamoController
     }
 
     @GetMapping("/fecha/{fecha}")
-    suspend fun getPrestamoByFechaPrestamo(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
+    fun getPrestamoByFechaPrestamo(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
         return prestamoService.getByFechaPrestamo(fecha).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -70,7 +72,7 @@ class PrestamoController
     }
 
     @GetMapping("/devoluciones/{fecha}")
-    suspend fun getPrestamoByFechaDevolucion(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
+    fun getPrestamoByFechaDevolucion(@PathVariable fecha: LocalDate) : ResponseEntity<Any>{
         return prestamoService.getByFechaDevolucion(fecha).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -78,7 +80,8 @@ class PrestamoController
     }
 
     @GetMapping("/user/{guid}")
-    suspend fun getPrestamosByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
+    fun getPrestamosByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return prestamoService.getPrestamoByUserGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -91,7 +94,8 @@ class PrestamoController
     }
 
     @PostMapping
-    suspend fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<Any>{
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
+    fun createPrestamo(@RequestBody prestamo : PrestamoCreateRequest): ResponseEntity<Any>{
         return prestamoService.createPrestamo(prestamo).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
@@ -106,7 +110,7 @@ class PrestamoController
     }
 
     @PatchMapping("/{guid}")
-    suspend fun updatePrestamo(@PathVariable guid: String, @RequestBody prestamo : PrestamoUpdateRequest): ResponseEntity<Any>{
+    fun updatePrestamo(@PathVariable guid: String, @RequestBody prestamo : PrestamoUpdateRequest): ResponseEntity<Any>{
         return prestamoService.updatePrestamo(guid, prestamo).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -120,7 +124,7 @@ class PrestamoController
     }
 
     @DeleteMapping("/{guid}")
-    suspend fun deletePrestamo(@PathVariable guid: String): ResponseEntity<Any>{
+    fun deletePrestamo(@PathVariable guid: String): ResponseEntity<Any>{
         return prestamoService.deletePrestamoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -133,6 +137,7 @@ class PrestamoController
     }
 
     @GetMapping("/export/pdf/{guid}")
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
     fun generateAndSavePdf(@PathVariable guid: String): ResponseEntity<String> {
         val fileName = "prestamo_${LocalDate.now().toDefaultDateString()}.pdf"
         prestamoPdfStorage.generateAndSavePdf(guid)
