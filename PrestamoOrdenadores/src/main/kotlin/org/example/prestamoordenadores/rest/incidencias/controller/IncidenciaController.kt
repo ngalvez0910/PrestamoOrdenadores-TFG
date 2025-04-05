@@ -3,7 +3,6 @@ package org.example.prestamoordenadores.rest.incidencias.controller
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
-import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError.IncidenciaNotFound
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError.IncidenciaValidationError
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError.UserNotFound
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -30,6 +30,7 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/incidencias")
+@PreAuthorize("hasRole('ADMIN')")
 class IncidenciaController
 @Autowired constructor(
     private val incidenciaService: IncidenciaService,
@@ -37,7 +38,7 @@ class IncidenciaController
     private val incidenciaPdfStorage: IncidenciaPdfStorage
 )  {
     @GetMapping
-    suspend fun getAllIncidencias(
+    fun getAllIncidencias(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "5") size: Int
     ): ResponseEntity<Any> {
@@ -48,7 +49,7 @@ class IncidenciaController
     }
 
     @GetMapping("/{guid}")
-    suspend fun getIncidenciaByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    fun getIncidenciaByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return incidenciaService.getIncidenciaByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -61,7 +62,7 @@ class IncidenciaController
     }
 
     @GetMapping("/estado/{estado}")
-    suspend fun getIncidenciaByEstado(@PathVariable estado: String): ResponseEntity<Any>{
+    fun getIncidenciaByEstado(@PathVariable estado: String): ResponseEntity<Any>{
         return incidenciaService.getIncidenciaByEstado(estado).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -74,7 +75,8 @@ class IncidenciaController
     }
 
     @GetMapping("/user/{guid}")
-    suspend fun getIncidenciasByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
+    fun getIncidenciasByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return incidenciaService.getIncidenciasByUserGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -87,7 +89,7 @@ class IncidenciaController
     }
 
     @PostMapping
-    suspend fun createIncidencia(@RequestBody incidencia: IncidenciaCreateRequest): ResponseEntity<Any> {
+    fun createIncidencia(@RequestBody incidencia: IncidenciaCreateRequest): ResponseEntity<Any> {
         return incidenciaService.createIncidencia(incidencia).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
@@ -100,7 +102,7 @@ class IncidenciaController
     }
 
     @PatchMapping("/{guid}")
-    suspend fun updateIncidencia(@PathVariable guid: String, @RequestBody incidencia : IncidenciaUpdateRequest): ResponseEntity<Any>{
+    fun updateIncidencia(@PathVariable guid: String, @RequestBody incidencia : IncidenciaUpdateRequest): ResponseEntity<Any>{
         return incidenciaService.updateIncidencia(guid, incidencia).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -114,7 +116,7 @@ class IncidenciaController
     }
 
     @DeleteMapping("/{guid}")
-    suspend fun deleteIncidencia(@PathVariable guid: String): ResponseEntity<Any>{
+    fun deleteIncidencia(@PathVariable guid: String): ResponseEntity<Any>{
         return incidenciaService.deleteIncidenciaByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->

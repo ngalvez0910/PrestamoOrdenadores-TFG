@@ -31,121 +31,107 @@ class IncidenciaServiceImpl(
     private val mapper: IncidenciaMapper,
     private val userRepository: UserRepository
 ) : IncidenciaService {
-    override suspend fun getAllIncidencias(page: Int, size: Int): Result<List<IncidenciaResponse>, IncidenciaError> {
+    override fun getAllIncidencias(page: Int, size: Int): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo todas las incidencias" }
 
-        return withContext(Dispatchers.IO) {
-            val pageRequest = PageRequest.of(page, size)
-            val pagesIncidencias = repository.findAll(pageRequest)
-            val incidenciaResponses = mapper.toIncidenciaResponseList(pagesIncidencias.content)
+        val pageRequest = PageRequest.of(page, size)
+        val pagesIncidencias = repository.findAll(pageRequest)
+        val incidenciaResponses = mapper.toIncidenciaResponseList(pagesIncidencias.content)
 
-            Ok(incidenciaResponses)
-        }
+        return Ok(incidenciaResponses)
     }
 
     @Cacheable(key = "#guid")
-    override suspend fun getIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
+    override fun getIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
         logger.debug { "Obteniendo incidencia con GUID: $guid" }
 
-        return withContext(Dispatchers.IO) {
-            val incidencia = repository.findIncidenciaByGuid(guid)
+        val incidencia = repository.findIncidenciaByGuid(guid)
 
-            if (incidencia == null) {
-                Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
-            } else {
-                Ok(mapper.toIncidenciaResponse(incidencia))
-            }
-        }
-    }
-
-    @CachePut(key = "#result.guid")
-    override suspend fun createIncidencia(incidencia: IncidenciaCreateRequest): Result<IncidenciaResponse, IncidenciaError> {
-        logger.debug { "Creando incidencia" }
-
-        return withContext(Dispatchers.IO) {
-            val incidenciaValidada = incidencia.validate()
-            if (incidenciaValidada.isErr) {
-                return@withContext Err(IncidenciaError.IncidenciaValidationError("Incidencia inválida"))
-            }
-
-            val newIncidencia = mapper.toIncidenciaFromCreate(incidencia)
-            repository.save(newIncidencia)
-
-            Ok(mapper.toIncidenciaResponse(newIncidencia))
-        }
-    }
-
-    @CachePut(key = "#result.guid")
-    override suspend fun updateIncidencia(guid: String, incidencia: IncidenciaUpdateRequest): Result<IncidenciaResponse?, IncidenciaError> {
-        return withContext(Dispatchers.IO) {
-            val existingIncidencia = repository.findIncidenciaByGuid(guid)
-            if (existingIncidencia == null) {
-                return@withContext Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
-            }
-
-            val incidenciaValidada = incidencia.validate()
-            if (incidenciaValidada.isErr) {
-                return@withContext Err(IncidenciaError.IncidenciaValidationError("Incidencia inválida"))
-            }
-
-            val estadoNormalizado = incidencia.estadoIncidencia.replace(" ", "_").uppercase()
-
-            existingIncidencia.estadoIncidencia = EstadoIncidencia.valueOf(estadoNormalizado)
-            existingIncidencia.updatedDate = LocalDateTime.now()
-
-            repository.save(existingIncidencia)
-
-            Ok(mapper.toIncidenciaResponse(existingIncidencia))
-        }
-    }
-
-    @CachePut(key = "#guid")
-    override suspend fun deleteIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
-        logger.debug { "Eliminando incidencia con GUID: $guid" }
-
-        return withContext(Dispatchers.IO) {
-            val incidencia = repository.findIncidenciaByGuid(guid)
-            if (incidencia == null) {
-                return@withContext Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
-            }
-
-            repository.delete(incidencia)
-
+        return if (incidencia == null) {
+            Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
+        } else {
             Ok(mapper.toIncidenciaResponse(incidencia))
         }
     }
 
+    @CachePut(key = "#result.guid")
+    override fun createIncidencia(incidencia: IncidenciaCreateRequest): Result<IncidenciaResponse, IncidenciaError> {
+        logger.debug { "Creando incidencia" }
+
+        val incidenciaValidada = incidencia.validate()
+        if (incidenciaValidada.isErr) {
+            return Err(IncidenciaError.IncidenciaValidationError("Incidencia inválida"))
+        }
+
+        val newIncidencia = mapper.toIncidenciaFromCreate(incidencia)
+        repository.save(newIncidencia)
+
+        return Ok(mapper.toIncidenciaResponse(newIncidencia))
+    }
+
+    @CachePut(key = "#result.guid")
+    override fun updateIncidencia(guid: String, incidencia: IncidenciaUpdateRequest): Result<IncidenciaResponse?, IncidenciaError> {
+        val existingIncidencia = repository.findIncidenciaByGuid(guid)
+        if (existingIncidencia == null) {
+            return Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
+        }
+
+        val incidenciaValidada = incidencia.validate()
+        if (incidenciaValidada.isErr) {
+            return Err(IncidenciaError.IncidenciaValidationError("Incidencia inválida"))
+        }
+
+        val estadoNormalizado = incidencia.estadoIncidencia.replace(" ", "_").uppercase()
+
+        existingIncidencia.estadoIncidencia = EstadoIncidencia.valueOf(estadoNormalizado)
+        existingIncidencia.updatedDate = LocalDateTime.now()
+
+        repository.save(existingIncidencia)
+
+        return Ok(mapper.toIncidenciaResponse(existingIncidencia))
+    }
+
+    @CachePut(key = "#guid")
+    override fun deleteIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
+        logger.debug { "Eliminando incidencia con GUID: $guid" }
+
+        val incidencia = repository.findIncidenciaByGuid(guid)
+        if (incidencia == null) {
+            return Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
+        }
+
+        repository.delete(incidencia)
+
+        return Ok(mapper.toIncidenciaResponse(incidencia))
+    }
+
     @Cacheable(key = "#estado")
-    override suspend fun getIncidenciaByEstado(estado: String): Result<List<IncidenciaResponse>, IncidenciaError> {
+    override fun getIncidenciaByEstado(estado: String): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo incidencias en estado: $estado" }
 
-        return withContext(Dispatchers.IO) {
-            val estadoNormalizado = estado.replace(" ", "_").uppercase()
+        val estadoNormalizado = estado.replace(" ", "_").uppercase()
 
-            val estadoEnum = EstadoIncidencia.entries.find { it.name == estadoNormalizado }
-            if (estadoEnum == null) {
-                return@withContext Err(IncidenciaError.IncidenciaNotFound("Incidencia con estado '$estado' no encontrada"))
-            }
-
-            val incidencias = repository.findIncidenciasByEstadoIncidencia(estadoEnum)
-
-            Ok(mapper.toIncidenciaResponseList(incidencias))
+        val estadoEnum = EstadoIncidencia.entries.find { it.name == estadoNormalizado }
+        if (estadoEnum == null) {
+            return Err(IncidenciaError.IncidenciaNotFound("Incidencia con estado '$estado' no encontrada"))
         }
+
+        val incidencias = repository.findIncidenciasByEstadoIncidencia(estadoEnum)
+
+        return Ok(mapper.toIncidenciaResponseList(incidencias))
     }
 
     @Cacheable(key = "#userGuid")
-    override suspend fun getIncidenciasByUserGuid(userGuid: String): Result<List<IncidenciaResponse>, IncidenciaError> {
+    override fun getIncidenciasByUserGuid(userGuid: String): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo incidencias de user con GUID: $userGuid" }
 
-        return withContext(Dispatchers.IO) {
-            val user = userRepository.findByGuid(userGuid)
-            if (user == null) {
-                return@withContext Err(IncidenciaError.UserNotFound("Usuario no encontrado"))
-            }
-
-            val incidencias = repository.findIncidenciasByUserGuid(userGuid)
-
-            Ok(mapper.toIncidenciaResponseList(incidencias))
+        val user = userRepository.findByGuid(userGuid)
+        if (user == null) {
+            return Err(IncidenciaError.UserNotFound("Usuario no encontrado"))
         }
+
+        val incidencias = repository.findIncidenciasByUserGuid(userGuid)
+
+        return Ok(mapper.toIncidenciaResponseList(incidencias))
     }
 }
