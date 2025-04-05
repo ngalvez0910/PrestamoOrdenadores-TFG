@@ -47,7 +47,7 @@ class UserController
 
     @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
     @GetMapping("/{guid}")
-    suspend fun getUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
+    fun getUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.getUserByGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -60,7 +60,7 @@ class UserController
     }
 
     @GetMapping("/nombre/{nombre}")
-    suspend fun getUserByNombre(@PathVariable nombre: String) : ResponseEntity<Any> {
+    fun getUserByNombre(@PathVariable nombre: String) : ResponseEntity<Any> {
         return userService.getByNombre(nombre).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -73,7 +73,7 @@ class UserController
     }
 
     @GetMapping("/curso/{curso}")
-    suspend fun getUsersByGrade(@PathVariable curso: String) : ResponseEntity<Any> {
+    fun getUsersByGrade(@PathVariable curso: String) : ResponseEntity<Any> {
         return userService.getByCurso(curso).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -86,7 +86,7 @@ class UserController
     }
 
     @GetMapping("/email/{email}")
-    suspend fun getUserByEmail(@PathVariable email: String) : ResponseEntity<Any> {
+    fun getUserByEmail(@PathVariable email: String) : ResponseEntity<Any> {
         return userService.getByEmail(email).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -99,7 +99,7 @@ class UserController
     }
 
     @GetMapping("/tutor/{tutor}")
-    suspend fun getUsersByTutor(@PathVariable tutor: String) : ResponseEntity<Any> {
+    fun getUsersByTutor(@PathVariable tutor: String) : ResponseEntity<Any> {
         return userService.getByTutor(tutor).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -113,7 +113,7 @@ class UserController
 
     @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
     @PatchMapping("/avatar/{guid}")
-    suspend fun updateAvatar(@PathVariable guid: String, @RequestBody user: UserAvatarUpdateRequest) : ResponseEntity<Any> {
+    fun updateAvatar(@PathVariable guid: String, @RequestBody user: UserAvatarUpdateRequest) : ResponseEntity<Any> {
         return userService.updateAvatar(guid, user).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -128,7 +128,7 @@ class UserController
 
     @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
     @PatchMapping("/{guid}")
-    suspend fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<Any> {
+    fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<Any> {
         return userService.resetPassword(guid, user).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
@@ -142,7 +142,7 @@ class UserController
     }
 
     @DeleteMapping("/{guid}")
-    suspend fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
+    fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.deleteUserByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).build() },
             failure = { error ->
@@ -174,7 +174,7 @@ class UserController
     }
 
     @GetMapping("/admin/{guid}")
-    suspend fun getUserByGuidAdmin(@PathVariable guid: String) : ResponseEntity<Any> {
+    fun getUserByGuidAdmin(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.getUserByGuidAdmin(guid).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { error ->
@@ -187,7 +187,7 @@ class UserController
     }
 
     @PatchMapping("/rol/{guid}")
-    suspend fun updateRol(@PathVariable guid: String, @RequestBody user: UserRoleUpdateRequest) : ResponseEntity<Any> {
+    fun updateRol(@PathVariable guid: String, @RequestBody user: UserRoleUpdateRequest) : ResponseEntity<Any> {
         return userService.updateRole(guid, user).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
