@@ -66,6 +66,9 @@ export default {
 
     const logout = () => {
       console.log("Cerrando sesión...");
+
+      localStorage.removeItem("token");
+
       router.push("/");
     };
 
