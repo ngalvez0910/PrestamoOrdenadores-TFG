@@ -5,27 +5,29 @@
     <input type="text" v-model="search" placeholder="Buscar..." @input="filterData" />
   </div>
   <br>
-  <div class="table row-12" style="margin-left: -40%; margin-top: 2%; width: 150%">
-    <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
-      <Column field="numeroSerie" header="Número de serie"></Column>
-      <Column field="componentes" header="Componentes"></Column>
-      <Column field="estado" header="Estado"></Column>
-      <Column field="incidenciaGuid" header="Incidencias"></Column>
-      <Column field="edit">
-        <template #body="slotProps">
-          <button @click="editDispositivo(slotProps.data)" class="editDispositivo-button">
-            <i class="pi pi-eye"></i>
-          </button>
-        </template>
-      </Column>
-      <Column field="delete">
-        <template #body="slotProps">
-          <button @click="deleteDispositivo(slotProps.data)" class="delete-button">
-            <i class="pi pi-ban"></i>
-          </button>
-        </template>
-      </Column>
-    </DataTable>
+  <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
+    <div class="table row-12">
+      <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
+        <Column field="numeroSerie" header="Número de serie"></Column>
+        <Column field="componentes" header="Componentes"></Column>
+        <Column field="estado" header="Estado"></Column>
+        <Column field="incidenciaGuid" header="Incidencias"></Column>
+        <Column field="edit">
+          <template #body="slotProps">
+            <button @click="editDispositivo(slotProps.data)" class="editDispositivo-button">
+              <i class="pi pi-eye"></i>
+            </button>
+          </template>
+        </Column>
+        <Column field="delete">
+          <template #body="slotProps">
+            <button @click="deleteDispositivo(slotProps.data)" class="delete-button">
+              <i class="pi pi-ban"></i>
+            </button>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </div>
 </template>
 
