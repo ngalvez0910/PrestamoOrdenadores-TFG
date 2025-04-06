@@ -86,7 +86,7 @@ export default {
           if (rol === 'ADMIN') {
             this.$router.push('/admin/dashboard');
           } else {
-            this.$router.push('/dashboard');
+            this.$router.push('/profile');
           }
 
           this.toast.add({

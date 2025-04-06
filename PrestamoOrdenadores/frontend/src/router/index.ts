@@ -47,9 +47,10 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
-      path: '/admin/profile',
+      path: '/profile',
       name: 'Profile',
       component: Profile,
+      meta: { requiresAuth: true, roles: ['ADMIN', 'ALUMNO', 'PROFESOR'] },
     },
     {
       path: "/admin/dispositivo/detalle/:guid",
