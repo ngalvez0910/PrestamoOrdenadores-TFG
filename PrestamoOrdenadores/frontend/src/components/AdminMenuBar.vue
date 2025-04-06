@@ -1,9 +1,9 @@
 <template>
   <div class="menubar">
-    <h1><a href="/admin/dashboard">LoanTech</a></h1>
+    <h1><a :href="getHomeRoute()">LoanTech</a></h1>
     <Button class="user-info" @click="toggleMenu($event)">
-      <p class="username">Usuario</p>
-      <Avatar image="https://placehold.co/400" shape="circle" class="avatar" />
+      <p class="username">{{ username || "Usuario" }}</p>
+      <Avatar :image="avatarUrl || 'https://placehold.co/400'" shape="circle" class="avatar" />
     </Button>
 
     <Menu ref="menu" class="user-menu" :model="items" :popup="true">
@@ -25,6 +25,8 @@ import Menu from "primevue/menu";
 import Button from "primevue/button";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 export default {
   name: "MenuBar",
@@ -49,7 +51,10 @@ export default {
           icon: 'pi pi-sign-out',
           command: () => this.logout()
         }
-      ]
+      ],
+      username: "",
+      avatarUrl: "",
+      rol: "",
     };
   },
   setup() {
@@ -61,15 +66,46 @@ export default {
     };
 
     const goToProfile = () => {
-      router.push("/admin/profile");
+      router.push("/profile");
     };
 
     const logout = () => {
       console.log("Cerrando sesión...");
+      localStorage.removeItem("token");
       router.push("/");
     };
 
-    return { menu, toggleMenu, goToProfile, logout };
+    return { menu, toggleMenu, goToProfile, logout  };
+  },
+  mounted() {
+    this.loadUserData();
+  },
+  methods: {
+    async loadUserData() {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const decodedToken: any = jwtDecode(token);
+          const email = decodedToken.sub;
+          this.rol = decodedToken.rol;
+
+          const response = await axios.get(`http://localhost:8080/users/email/${email}`);
+          const userData = response.data;
+
+          this.username = userData.nombre || "Usuario";
+          this.avatarUrl = userData.avatarUrl || "https://placehold.co/400";
+        } catch (error) {
+          console.error("Error al obtener la información del usuario:", error);
+        }
+      }
+    },
+    getHomeRoute(): string {
+      if (this.rol === "ADMIN") {
+        return "/admin/dashboard";
+      } else {
+        return "/profile";
+      }
+    },
   },
 };
 </script>

@@ -32,10 +32,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import {defineComponent} from 'vue'
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
-import router from "@/router";
+import {useRouter} from "vue-router";
 
 export default defineComponent({
   nombre: "Profile",
@@ -48,6 +48,17 @@ export default defineComponent({
       avatar: 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
       datos: null
     };
+  },
+  setup() {
+    const router = useRouter();
+
+    const logout = () => {
+      console.log("Cerrando sesión...");
+      localStorage.removeItem("token");
+      router.push("/");
+    };
+
+    return { logout };
   },
   mounted() {
     this.obtenerDatos();
@@ -80,11 +91,6 @@ export default defineComponent({
 
     changeAvatar() {
       console.log('Cambiar avatar');
-    },
-
-    logout() {
-      console.log("Cerrando sesión...");
-      router.push("/");
     },
   },
 });

@@ -5,7 +5,7 @@
     <div class="login-box">
       <h1>Login</h1>
 
-      <form @submit.prevent="validateForm">
+      <form @submit.prevent="login">
         <div class="row">
           <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
           <input type="text" class="input-field" name="email" placeholder="Correo electrónico" v-model="form.email">
@@ -29,68 +29,95 @@
 </template>
 
 <script lang="ts">
-  import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
-  import Toast from "primevue/toast";
-  import Button from "primevue/button";
-  import {useToast} from "primevue/usetoast";
+import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
+import Toast from "primevue/toast";
+import Button from "primevue/button";
+import { useToast } from "primevue/usetoast";
+import axios from 'axios';
+import * as jwt_decode from 'jwt-decode';
 
-  export default {
-    name: 'Login',
-    components: { MenuBarNoSession, Toast, Button },
-    setup() {
-      const toast = useToast();
-      return { toast };
-    },
-    data() {
-      return {
-        form: {
-          email: '',
-          password: ''
-        },
-        errors: {
-          email: '',
-          password: ''
-        }
+export default {
+  name: 'Login',
+  components: { MenuBarNoSession, Toast, Button },
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
+  data() {
+    return {
+      form: {
+        email: '',
+        password: ''
+      },
+      errors: {
+        email: '',
+        password: ''
+      }
+    };
+  },
+  methods: {
+    async login() {
+      this.errors = {
+        email: '',
+        password: ''
       };
-    },
-    methods: {
-      validateForm() {
-        this.errors = {
-          email: '',
-          password: ''
-        };
 
-        let formIsValid = true;
+      let formIsValid = true;
 
-        if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
-          this.errors.email = 'Correo electrónico inválido';
-          formIsValid = false;
-        }
-        if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
-          this.errors.password = 'La contraseña debe tener al menos 8 caracteres';
-          formIsValid = false;
-        }
+      if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = 'Correo electrónico inválido';
+        formIsValid = false;
+      }
+      if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
+        this.errors.password = 'Contraseña inválida: 8 dígitos, 1 mayúscula, 1 caracter especial, 1 número';
+        formIsValid = false;
+      }
 
-        if (formIsValid) {
+      if (formIsValid) {
+        try {
+          const response = await axios.post('http://localhost:8080/auth/signin', this.form);
+
+          localStorage.setItem('token', response.data.token);
+          const decodedToken: any = jwt_decode.jwtDecode(response.data.token);
+          const rol = decodedToken.rol;
+
+          console.log("Rol del usuario:", rol);
+
+          if (rol === 'ADMIN') {
+            this.$router.push('/admin/dashboard');
+          } else {
+            this.$router.push('/profile');
+          }
+
           this.toast.add({
             severity: 'success',
-            summary: 'Registro Exitoso',
-            detail: 'El registro ha sido completado exitosamente.',
+            summary: 'Inicio de sesión exitoso',
+            detail: '¡Has iniciado sesión correctamente!',
             life: 3000,
             styleClass: 'custom-toast-success'
           });
-        } else if (!formIsValid) {
+        } catch (error) {
+          console.error('Error al iniciar sesión:', error);
           this.toast.add({
             severity: 'error',
-            summary: 'Error en el Registro',
-            detail: 'Por favor, corrija los errores y vuelva a intentarlo.',
+            summary: 'Error en el inicio de sesión',
+            detail: 'Usuario o contraseña incorrectos.',
             life: 3000,
             styleClass: 'custom-toast-error'
           });
         }
-      },
+      } else {
+        this.toast.add({
+          severity: 'error',
+          summary: 'Error en el inicio de sesión',
+          detail: 'Por favor, corrija los errores y vuelva a intentarlo.',
+          life: 3000,
+          styleClass: 'custom-toast-error'
+        });
+      }
     },
-  };
+  },
+};
 </script>
 
 <style>

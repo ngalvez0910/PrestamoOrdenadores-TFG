@@ -16,6 +16,8 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "firebase": "^11.6.0",
+    "jwt-decode": "^4.0.0",
     "pinia": "^2.3.1",
     "primeicons": "^7.0.0",
     "primevue": "^3.53.1",

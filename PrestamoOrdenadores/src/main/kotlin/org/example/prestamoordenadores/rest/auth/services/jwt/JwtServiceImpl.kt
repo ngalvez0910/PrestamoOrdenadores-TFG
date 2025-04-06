@@ -3,6 +3,7 @@ package org.example.prestamoordenadores.rest.auth.services.jwt
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
+import org.example.prestamoordenadores.rest.users.models.User
 import org.lighthousegames.logging.logging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cglib.core.internal.Function
@@ -87,11 +88,14 @@ class JwtServiceImpl(
         val now = Date()
         val expirationDate = Date(now.time + (1000 * jwtExpiration!!))
 
+        val user = userDetails as User
+
         return JWT.create()
             .withHeader(createHeader())
-            .withSubject(userDetails.username)
+            .withSubject(user.username)
             .withIssuedAt(now)
             .withExpiresAt(expirationDate)
+            .withClaim("rol", user.rol.name)
             .withClaim("extraClaims", extraClaims)
             .sign(algorithm)
     }

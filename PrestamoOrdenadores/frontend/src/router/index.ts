@@ -14,36 +14,43 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: Login,
+      meta: { requiresAuth: false },
     },
     {
       path: '/registro',
       name: 'registro',
       component: () => import('../views/Registro.vue'),
+      meta: { requiresAuth: false },
     },
     {
       path: '/admin/dashboard',
       name: 'adminDashboard',
       component: AdminDashboard,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
       path: '/admin/dashboard/dispositivos',
       name: 'adminDashboardDispositivos',
       component: DispositivosDashboard,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
       path: '/admin/dashboard/usuarios',
       name: 'adminDashboardUsuarios',
       component: UsuariosDashboard,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
       path: '/admin/dashboard/incidencias',
       name: 'adminDashboardIncidencias',
       component: IncidenciasDashboard,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
-      path: '/admin/profile',
+      path: '/profile',
       name: 'Profile',
       component: Profile,
+      meta: { requiresAuth: true, roles: ['ADMIN', 'ALUMNO', 'PROFESOR'] },
     },
     {
       path: "/admin/dispositivo/detalle/:guid",
@@ -55,29 +62,34 @@ const router = createRouter({
         componentes: route.query.componentes,
         estado: route.query.estado,
         incidenciaGuid: route.query.incidenciaGuid,
-      })
+      }),
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
       path: "/admin/usuario/detalle/:guid",
       name: "UsuarioDetalle",
       component: () => import("@/views/admin/UsuarioDetalle.vue"),
-      props: true
+      props: true,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
       path: "/admin/incidencia/detalle/:guid",
       name: "IncidenciaDetalle",
       component: () => import("@/views/admin/IncidenciaDetalle.vue"),
-      props: true
+      props: true,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
       path: '/cambioContrasena',
       name: 'CambioContrasena',
       component: () => import('../views/user/CambioContrasena.vue'),
+      meta: { requiresAuth: true, roles: ['ADMIN', 'ALUMNO', 'PROFESOR'] },
     },
     {
       path: '/prestamo/me',
       name: 'PrestamoMe',
       component: () => import('../views/user/PrestamoMe.vue'),
+      meta: { requiresAuth: true, roles: ['ADMIN', 'ALUMNO', 'PROFESOR'] },
     },
   ],
 })
