@@ -22,11 +22,29 @@
   </div>
   <div class="side-menu">
     <ul>
-      <li><a href="/prestamo/me">Mis préstamos</a></li>
-      <li><a href="#">Mis incidencias</a></li>
-      <li><a href="#">Notificaciones</a></li>
-      <li><a href="/cambioContrasena">Cambiar contraseña</a></li>
-      <li><a @click="logout">Cerrar sesión</a></li>
+      <li class="side-menu-item">
+        <a href="/prestamo/me" class="side-menu-link">
+          <i class="pi pi-briefcase mr-2"></i> Mis préstamos
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#" class="side-menu-link">
+          <i class="pi pi-exclamation-triangle mr-2"></i> Mis incidencias
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#" class="side-menu-link">
+          <i class="pi pi-bell mr-2"></i> Notificaciones
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="/cambioContrasena" class="side-menu-link">
+          <i class="pi pi-key mr-2"></i> Cambiar contraseña
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <button @click="logout" class="logout-button">Cerrar sesión</button>
+      </li>
     </ul>
   </div>
 </template>
@@ -36,6 +54,14 @@ import {defineComponent} from 'vue'
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
 import {useRouter} from "vue-router";
+import {jwtDecode} from "jwt-decode";
+
+interface UserData {
+  nombre: string;
+  email: string;
+  curso: string;
+  avatar?: string;
+}
 
 export default defineComponent({
   nombre: "Profile",
@@ -65,16 +91,31 @@ export default defineComponent({
   },
   methods: {
     async obtenerDatos() {
-      try {
-        const response = await axios.get("http://localhost:8080/users/{id}");
-        this.nombre = response.data.nombre;
-        this.email = response.data.email;
-        this.avatar = response.data.avatar;
-      } catch (error) {
-        console.error("Error obteniendo datos:", error);
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const decodedToken = jwtDecode(token);
+          const userEmail = decodedToken.sub;
+
+          let apiUrl = `http://localhost:8080/users/email/${userEmail}`;
+
+          const response = await axios.get<UserData>(apiUrl, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          this.nombre = response.data.nombre;
+          this.email = response.data.email;
+          this.curso = response.data.curso;
+          if (response.data.avatar) {
+            this.avatar = response.data.avatar;
+          }
+        } catch (error) {
+          console.error("Error al obtener los datos del usuario:", error);
+        }
       }
     },
-
     async saveProfile() {
       try {
         const updatedUser = {
@@ -130,8 +171,9 @@ export default defineComponent({
   background-color: #d6621e;
   color: white;
   border: none;
-  padding: 5px 10px;
+  padding: 5px;
   cursor: pointer;
+  width: 100%;
 }
 
 .avatar button:hover {
@@ -150,23 +192,17 @@ export default defineComponent({
 }
 
 .user-details input {
-  width: 100%;
+  border-radius: 30px;
   padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid #d1d3e2;
+  width: 100%;
+  margin-bottom: 18px;
+  transition: border 0.3s ease;
+  outline: none;
 }
 
-.user-details button {
-  background-color: #2196F3;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
-.user-details button:hover {
-  background-color: #1b82c7;
+.user-details input:focus {
+  border-color: #d6621e;
 }
 
 .side-menu {
@@ -181,25 +217,46 @@ export default defineComponent({
   z-index: 10;
 }
 
-.side-menu ul {
-  list-style-type: none;
-  padding: 0;
+.side-menu-item {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin-left: -15%
 }
 
-.side-menu ul li {
-  margin: 15px 0;
-}
-
-.side-menu ul li a {
+.side-menu-item a {
   text-decoration: none;
   color: #14124f;
-  display: block;
-  padding: 10px;
-  border-radius: 4px;
 }
 
-.side-menu ul li a:hover {
-  background-color: #f0f0f0;
-  cursor: pointer;
+.side-menu-item a:hover {
+  color: #d6621e;
+  padding-left: 22px;
+}
+
+.side-menu-item i,
+.logout-button i {
+  margin-right: 0.5rem;
+}
+
+.logout-button {
+  background-color: #d61e1e;
+  color: white;
+  border: none;
+  padding: 5px;
+  border-radius: 30px;
+  width: 100%;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+  margin-left: 1%
+}
+
+.logout-button:hover {
+  background-color: #9b1616;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgb(214, 30, 30);
 }
 </style>
