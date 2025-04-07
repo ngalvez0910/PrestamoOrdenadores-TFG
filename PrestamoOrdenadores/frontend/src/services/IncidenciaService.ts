@@ -5,6 +5,7 @@ interface Incidencia {
     asunto: string;
     descripcion: string;
     estado: string;
+    user: { guid: string; };
     userGuid: string;
     createdDate: string;
     updatedDate: string;
@@ -12,8 +13,29 @@ interface Incidencia {
 
 export const getIncidenciaByGuid = async (guid: string): Promise<Incidencia | null> => {
     try {
-        const response = await axios.get(`http://localhost:8080/incidencias/${guid}`);
-        return response.data || null;
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.get(`http://localhost:8080/incidencias/${guid}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (!response.data) {
+            return null;
+        }
+
+        const incidencia: Incidencia = {
+            ...response.data,
+            user: response.data.user ? { guid: response.data.user.guid } : null,
+            userGuid: response.data.user ? response.data.user.guid : null,
+        };
+
+        return incidencia;
     } catch (error) {
         console.error('Error obteniendo incidencia por GUID:', error);
         return null;
