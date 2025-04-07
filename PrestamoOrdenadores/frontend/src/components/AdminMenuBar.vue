@@ -89,7 +89,12 @@ export default {
           const email = decodedToken.sub;
           this.rol = decodedToken.rol;
 
-          const response = await axios.get(`http://localhost:8080/users/email/${email}`);
+          const response = await axios.get(`http://localhost:8080/users/email/${email}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
           const userData = response.data;
 
           this.username = userData.nombre || "Usuario";
