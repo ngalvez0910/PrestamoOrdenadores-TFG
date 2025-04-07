@@ -3,7 +3,7 @@
 
   <div class="botones-container">
     <div class="boton-atras">
-      <a href="/admin/profile">
+      <a href="/profile">
         <button class="back-button">
           <i class="pi pi-arrow-left"></i>
         </button>
