@@ -133,6 +133,8 @@ export default {
   position: relative;
   width: 100%;
   padding: 1rem;
+  display: flex;
+  align-items: center;
 }
 
 .filters input {
