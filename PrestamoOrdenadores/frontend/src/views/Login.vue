@@ -88,7 +88,7 @@ export default {
           } else {
             this.$router.push('/profile');
           }
-          
+
         } catch (error) {
           console.error('Error al iniciar sesión:', error);
           this.toast.add({

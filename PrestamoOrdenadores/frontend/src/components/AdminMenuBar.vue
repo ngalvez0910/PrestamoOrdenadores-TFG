@@ -193,7 +193,7 @@ export default {
 .user-menu a i, .user-menu a {
   color: #14124f !important;
   margin-right: 8px;
-  margin-left: -5%;
+  margin-left: -1%;
 }
 
 .user-menu a i:hover, .user-menu a:hover {
