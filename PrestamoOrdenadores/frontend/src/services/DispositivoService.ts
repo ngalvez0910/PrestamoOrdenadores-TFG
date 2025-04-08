@@ -5,7 +5,8 @@ interface Dispositivo {
     numeroSerie: string;
     componentes: string;
     estadoDispositivo: string;
-    incidenciaGuid: string | null;
+    incidencia?: { guid: string; };
+    incidenciaGuid?: string;
     stock: number;
     isActivo: boolean;
     createdDate: string;
@@ -14,8 +15,29 @@ interface Dispositivo {
 
 export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | null> => {
     try {
-        const response = await axios.get(`http://localhost:8080/dispositivos/${guid}`);
-        return response.data || null;
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.get(`http://localhost:8080/dispositivos/${guid}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (!response.data) {
+            return null;
+        }
+
+        const dispositivo: Dispositivo = {
+            ...response.data,
+            incidencia: response.data.incidencia ? { guid: response.data.incidencia.guid } : null,
+            incidenciaGuid: response.data.incidencia ? response.data.incidencia.guid : null,
+        };
+
+        return dispositivo;
     } catch (error) {
         console.error('Error obteniendo dispositivo por GUID:', error);
         return null;
@@ -27,7 +49,18 @@ export const actualizarDispositivo = async (
     data: { componentes: string; estadoDispositivo: string; incidenciaGuid: string | null }
 ): Promise<Dispositivo | null> => {
     try {
-        const response = await axios.patch(`http://localhost:8080/dispositivos/${guid}`, data);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.patch(`http://localhost:8080/dispositivos/${guid}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
         return response.data || null;
     } catch (error) {
         console.error('Error al actualizar el dispositivo:', error);

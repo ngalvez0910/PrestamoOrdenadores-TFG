@@ -85,6 +85,7 @@ class UserController
         )
     }
 
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
     @GetMapping("/email/{email}")
     fun getUserByEmail(@PathVariable email: String) : ResponseEntity<Any> {
         return userService.getByEmail(email).mapBoth(

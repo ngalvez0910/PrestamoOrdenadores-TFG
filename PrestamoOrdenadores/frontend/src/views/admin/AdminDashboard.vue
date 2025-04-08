@@ -22,8 +22,8 @@
     </div>
 
     <div class="dashboard-box">
-      <i class="pi pi-box icon"></i>
-      <p>Ver stock</p>
+      <i class="pi pi-ban icon"></i>
+      <p>Ver sanciones</p>
     </div>
   </div>
 </template>

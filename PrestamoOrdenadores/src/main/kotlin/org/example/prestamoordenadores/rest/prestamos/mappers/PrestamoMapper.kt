@@ -22,6 +22,7 @@ class PrestamoMapper {
             guid = prestamo.guid,
             user = userMapper.toUserResponse(prestamo.user),
             dispositivo = dispositivoMapper.toDispositivoResponse(prestamo.dispositivo),
+            estadoPrestamo = prestamo.estadoPrestamo.toString(),
             fechaPrestamo = prestamo.fechaPrestamo.toDefaultDateString(),
             fechaDevolucion = prestamo.fechaDevolucion.toDefaultDateString()
         )

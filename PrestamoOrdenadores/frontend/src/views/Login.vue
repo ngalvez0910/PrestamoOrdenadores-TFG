@@ -89,13 +89,6 @@ export default {
             this.$router.push('/profile');
           }
 
-          this.toast.add({
-            severity: 'success',
-            summary: 'Inicio de sesión exitoso',
-            detail: '¡Has iniciado sesión correctamente!',
-            life: 3000,
-            styleClass: 'custom-toast-success'
-          });
         } catch (error) {
           console.error('Error al iniciar sesión:', error);
           this.toast.add({

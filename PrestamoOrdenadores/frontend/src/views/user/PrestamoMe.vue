@@ -3,7 +3,7 @@
 
   <div class="botones-container">
     <div class="boton-atras">
-      <a href="/admin/profile">
+      <a href="/profile">
         <button class="back-button">
           <i class="pi pi-arrow-left"></i>
         </button>
@@ -14,23 +14,43 @@
   <button class="buttonPrestamo" label="realizarPrestamo">Realizar Préstamo</button>
 
   <div class="table row-12" style="margin-left: -17%; margin-top: 5%">
-    <DataTable :value="datos" stripedRows tableStyle="min-width: 50rem">
-      <Column field="numeroSerie" header="Número de serie"></Column>
+    <DataTable :value="prestamos" stripedRows tableStyle="min-width: 50rem">
+      <Column header="Número de serie">
+        <template #body="slotProps">
+          {{ slotProps.data.dispositivo?.numeroSerie ?? '—' }}
+        </template>
+      </Column>
       <Column field="fechaPrestamo" header="Fecha Préstamo"></Column>
       <Column field="fechaDevolucion" header="Fecha Devolución"></Column>
-      <Column field="estado" header="Estado"></Column>
+      <Column field="estadoPrestamo" header="Estado"></Column>
     </DataTable>
   </div>
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue'
+import { defineComponent, ref, onMounted } from 'vue';
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
+import { getPrestamosByUserGuid, type Prestamo } from '@/services/PrestamoService.ts';
 
 export default defineComponent({
   name: "PrestamoMe",
-  components: {AdminMenuBar},
-})
+  components: { AdminMenuBar },
+  setup() {
+    const prestamos = ref<Prestamo[]>([]);
+
+    onMounted(async () => {
+      try {
+        const data = await getPrestamosByUserGuid();
+        prestamos.value = data;
+        console.log("Datos de préstamos:", prestamos.value);
+      } catch (error) {
+        console.error("Error al obtener los préstamos:", error);
+      }
+    });
+
+    return { prestamos, };
+  },
+});
 </script>
 
 <style scoped>

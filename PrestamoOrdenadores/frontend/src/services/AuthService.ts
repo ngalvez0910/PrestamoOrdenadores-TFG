@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { reactive } from "vue";
 
-interface UserData {
+export interface UserData {
     guid: string;
     email: string;
     nombre: string;
