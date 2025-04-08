@@ -7,6 +7,7 @@ data class PrestamoResponse (
     var guid: String,
     var user: UserResponse,
     var dispositivo: DispositivoResponse,
+    var estadoPrestamo: String,
     var fechaPrestamo: String,
     var fechaDevolucion: String?
 )

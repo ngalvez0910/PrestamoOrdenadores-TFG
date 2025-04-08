@@ -35,7 +35,9 @@ CREATE TABLE IF NOT EXISTS incidencias (
     estado_incidencia VARCHAR(9) NOT NULL,
     user_id BIGINT,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_incidencia_user FOREIGN KEY (user_id) REFERENCES usuarios(id)
 );
 
 -- Insertar incidencias de prueba
@@ -56,7 +58,9 @@ CREATE TABLE IF NOT EXISTS dispositivos (
     incidencia_id BIGINT UNIQUE,
     is_activo BOOLEAN DEFAULT true,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_dispositivo_incidencia FOREIGN KEY (incidencia_id) REFERENCES incidencias(id)
 );
 
 
@@ -73,3 +77,27 @@ VALUES
     ('v2w3x4y5z6a', '4PQ234MNBV', 'ratón, cargador', 'PRESTADO', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('c6b5a4z3y2x', '6RS567QAZX', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('n0m9l8k7j6i', '0TU890WSXC', 'ratón, cargador', 'NO_DISPONIBLE', 3, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+
+-- Crear tabla prestamos
+CREATE TABLE IF NOT EXISTS prestamos (
+    id SERIAL PRIMARY KEY,
+    guid VARCHAR(11) NOT NULL UNIQUE,
+    user_id BIGINT UNIQUE NOT NULL,
+    dispositivo_id BIGINT UNIQUE NOT NULL,
+    estado_prestamo VARCHAR(20) NOT NULL,
+    fecha_prestamo DATE NOT NULL,
+    fecha_devolucion DATE NOT NULL,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_prestamo_user FOREIGN KEY (user_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_prestamo_dispositivo FOREIGN KEY (dispositivo_id) REFERENCES dispositivos(id)
+);
+
+
+-- Insertar prestamos de prueba
+INSERT INTO prestamos (guid, user_id, dispositivo_id, estado_prestamo, fecha_prestamo, fecha_devolucion, created_date, updated_date)
+VALUES
+    ('938012eccbd', 1, 2, 'EN_CURSO', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
