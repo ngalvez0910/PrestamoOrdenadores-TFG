@@ -55,8 +55,8 @@ export default defineComponent({
 
 <style scoped>
 .boton-atras {
-  margin-left: -40%;
-  margin-top: 20%;
+  margin-left: -45%;
+  margin-top: 15%;
 }
 
 .back-button {
@@ -104,13 +104,15 @@ a{
   padding: 5px;
   font-size: 1.1rem;
   width: 25%;
-  transition: background-color 0.3s ease;
-  margin-bottom: 10px;
+  transition: all 0.3s ease-in-out;
+  margin-bottom: -1%;
   margin-left: 80%;
   margin-top: -35%;
 }
 
 .buttonPrestamo:hover {
   background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
 }
 </style>
