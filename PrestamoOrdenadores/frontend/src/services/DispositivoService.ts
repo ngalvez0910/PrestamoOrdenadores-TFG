@@ -33,6 +33,7 @@ export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | 
 
         const dispositivo: Dispositivo = {
             ...response.data,
+            estadoDispositivo: response.data.estadoDispositivo?.toUpperCase() || '',
             incidencia: response.data.incidencia ? { guid: response.data.incidencia.guid } : null,
             incidenciaGuid: response.data.incidencia ? response.data.incidencia.guid : null,
         };
@@ -43,6 +44,7 @@ export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | 
         return null;
     }
 };
+
 
 export const actualizarDispositivo = async (
     guid: string,

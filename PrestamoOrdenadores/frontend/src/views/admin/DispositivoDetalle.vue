@@ -27,14 +27,14 @@
       <div class="estado col-6">
         <h5>Estado</h5>
         <div v-if="editable">
-          <select v-model="dispositivoData.estadoDispositivo">
+          <select v-model="dispositivoData.estado">
             <option value="DISPONIBLE">Disponible</option>
             <option value="NO_DISPONIBLE">No Disponible</option>
             <option value="PRESTADO">Prestado</option>
           </select>
         </div>
         <div v-else>
-          <input readonly type="text" v-model="dispositivoData.estadoDispositivo"/>
+          <input readonly type="text" v-model="dispositivoData.estado"/>
         </div>
       </div>
     </div>
@@ -52,11 +52,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import MenuBar from "@/components/AdminMenuBar.vue";
-import { getDispositivoByGuid, actualizarDispositivo } from "@/services/DispositivoService";
+import MenuBar from '@/components/AdminMenuBar.vue';
+import {
+  getDispositivoByGuid,
+  actualizarDispositivo,
+} from '@/services/DispositivoService';
 
 export default defineComponent({
-  name: "DispositivoDetalle",
+  name: 'DispositivoDetalle',
   components: { MenuBar },
   data() {
     return {
@@ -74,7 +77,7 @@ export default defineComponent({
       this.originalData = { ...dispositivo };
       console.log(dispositivo);
     } catch (error) {
-      console.error("Error al obtener los detalles del dispositivo:", error);
+      console.error('Error al obtener los detalles del dispositivo:', error);
     }
   },
   methods: {
@@ -90,16 +93,17 @@ export default defineComponent({
             incidenciaGuid: this.dispositivoData.incidenciaGuid,
           });
           this.originalData = { ...this.dispositivoData };
-          alert("Dispositivo actualizado correctamente.");
+          alert('Dispositivo actualizado correctamente.');
           this.editable = false;
         } catch (error) {
-          alert("No se pudo actualizar el dispositivo.");
+          alert('No se pudo actualizar el dispositivo.');
         }
       }
-    }
-  }
+    },
+  },
 });
 </script>
+
 
 <style scoped>
 body{
