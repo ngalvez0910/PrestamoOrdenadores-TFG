@@ -87,6 +87,13 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
+      path: "/admin/sancion/detalle/:guid",
+      name: "SancionDetalle",
+      component: () => import("@/views/admin/SancionDetalle.vue"),
+      props: true,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
       path: '/cambioContrasena',
       name: 'CambioContrasena',
       component: () => import('../views/user/CambioContrasena.vue'),
