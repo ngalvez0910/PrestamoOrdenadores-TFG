@@ -7,6 +7,7 @@ import IncidenciasDashboard from "@/views/admin/IncidenciasDashboard.vue";
 import Profile from "@/views/user/Profile.vue";
 import DispositivoDetalle from "@/views/admin/DispositivoDetalle.vue";
 import SancionDashboard from "@/views/admin/SancionDashboard.vue";
+import StorageDashboard from "@/views/admin/StorageDashboard.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,12 @@ const router = createRouter({
       path: '/admin/dashboard/usuarios',
       name: 'adminDashboardUsuarios',
       component: UsuariosDashboard,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+      path: '/admin/dashboard/storage',
+      name: 'adminDashboardStorage',
+      component: StorageDashboard,
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
