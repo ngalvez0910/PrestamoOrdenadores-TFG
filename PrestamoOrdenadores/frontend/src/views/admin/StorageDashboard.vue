@@ -1,31 +1,31 @@
 <template>
   <MenuBar />
   <div class="dashboard">
-    <div class="dashboard-box">
+    <div class="dashboard-box-storage">
       <i class="pi pi-desktop icon"></i>
       <p>Dispositivos</p>
       <button class="botonCsv" @click="descargarCsvDispositivos">CSV</button>
     </div>
 
-    <div class="dashboard-box">
+    <div class="dashboard-box-storage">
       <i class="pi pi-users icon"></i>
       <p>Usuarios</p>
       <button class="botonCsv" @click="descargarCsvUsers">CSV</button>
     </div>
 
-    <div class="dashboard-box">
+    <div class="dashboard-box-storage">
       <i class="pi pi-exclamation-triangle icon"></i>
       <p>Incidencias</p>
       <button class="botonCsv" @click="descargarCsvIncidencias">CSV</button>
     </div>
 
-    <div class="dashboard-box">
+    <div class="dashboard-box-storage">
       <i class="pi pi-file icon"></i>
       <p>Préstamos</p>
       <button class="botonCsv" @click="descargarCsvPrestamos">CSV</button>
     </div>
 
-    <div class="dashboard-box">
+    <div class="dashboard-box-storage">
       <i class="pi pi-ban icon"></i>
       <p>Sanciones</p>
       <button class="botonCsv" @click="descargarCsvSanciones">CSV</button>
@@ -97,7 +97,7 @@ export default {
   margin-left: -25%;
 }
 
-.dashboard-box {
+.dashboard-box-storage {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -115,18 +115,18 @@ export default {
   transition: transform 0.2s ease, color 0.3s ease;
 }
 
-.dashboard-box:hover {
+.dashboard-box-storage:hover {
   transform: translateY(-10px);
   background-color: #f8f9fa;
   box-shadow: 0 4px 6px rgba(239, 139, 85, 0.19);
   cursor: default;
 }
 
-.dashboard-box:hover .icon, .dashboard-box:hover p {
+.dashboard-box-storage:hover .icon, .dashboard-box-storage:hover p {
   color: #a14916;
 }
 
-.dashboard-box .icon, .dashboard-box p {
+.dashboard-box-storage .icon, .dashboard-box-storage p {
   transition: color 0.3s ease;
 }
 
@@ -136,14 +136,14 @@ export default {
   color: #14124f;
 }
 
-.dashboard-box p {
+.dashboard-box-storage p {
   font-size: 1.1rem;
   font-weight: bold;
   margin: 0;
 }
 
-.dashboard .dashboard-box:nth-last-child(2),
-.dashboard .dashboard-box:nth-last-child(1) {
+.dashboard .dashboard-box-storage:nth-last-child(2),
+.dashboard .dashboard-box-storage:nth-last-child(1) {
   margin-left: 55%;
 }
 
@@ -158,7 +158,7 @@ export default {
     gap: 15px;
   }
 
-  .dashboard-box {
+  .dashboard-box-storage {
     max-width: 180px;
   }
 
@@ -166,7 +166,7 @@ export default {
     font-size: 4rem;
   }
 
-  .dashboard-box p {
+  .dashboard-box-storage p {
     font-size: 1rem;
   }
 }

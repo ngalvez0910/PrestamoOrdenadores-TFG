@@ -5,7 +5,6 @@ import DispositivosDashboard from "@/views/admin/DispositivosDashboard.vue";
 import UsuariosDashboard from "@/views/admin/UsuariosDashboard.vue";
 import IncidenciasDashboard from "@/views/admin/IncidenciasDashboard.vue";
 import Profile from "@/views/user/Profile.vue";
-import DispositivoDetalle from "@/views/admin/DispositivoDetalle.vue";
 import SancionDashboard from "@/views/admin/SancionDashboard.vue";
 import StorageDashboard from "@/views/admin/StorageDashboard.vue";
 
