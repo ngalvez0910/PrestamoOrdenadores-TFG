@@ -22,9 +22,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
 -- Insertar usuarios de prueba
 INSERT INTO usuarios (guid, email, campo_password, rol, numero_identificacion, nombre, apellidos, curso, tutor, foto_carnet, avatar, is_activo, created_date, updated_date, last_login_date, last_password_reset_date)
 VALUES
-    ('3854b5ba26c', 'juan@colegio.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ALUMNO', '12345678A', 'Juan', 'Pérez', '1º Bachillerato', 'María Gómez', 'foto1.jpg', 'avatar1.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('c1f40bb1900', 'maria@profesor.colegio.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'PROFESOR', '87654321B', 'María', 'Gómez', '1º Bachillerato', NULL, 'foto2.jpg', 'avatar2.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('0d6d031ad0a', 'admin@admin.colegio.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ADMIN', '00000000X', 'Admin', 'User', NULL, NULL, 'foto3.jpg', 'avatar3.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('3854b5ba26c', 'juan@loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ALUMNO', '12345678A', 'Juan', 'Pérez', '1º Bachillerato', 'María Gómez', 'foto1.jpg', 'avatar1.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('c1f40bb1900', 'maria@profesor.loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'PROFESOR', '87654321B', 'María', 'Gómez', '1º Bachillerato', NULL, 'foto2.jpg', 'avatar2.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('0d6d031ad0a', 'admin@admin.loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ADMIN', '00000000X', 'Admin', 'User', NULL, NULL, 'foto3.jpg', 'avatar3.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Crear tabla incidencias
 CREATE TABLE IF NOT EXISTS incidencias (
@@ -101,3 +101,24 @@ CREATE TABLE IF NOT EXISTS prestamos (
 INSERT INTO prestamos (guid, user_id, dispositivo_id, estado_prestamo, fecha_prestamo, fecha_devolucion, created_date, updated_date)
 VALUES
     ('938012eccbd', 1, 2, 'EN_CURSO', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+
+-- Crear tabla sanciones
+CREATE TABLE IF NOT EXISTS sanciones (
+    id SERIAL PRIMARY KEY,
+    guid VARCHAR(11) NOT NULL UNIQUE,
+    user_id BIGINT UNIQUE NOT NULL,
+    tipo_sancion VARCHAR(20) NOT NULL,
+    fecha_sancion DATE NOT NULL,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_sancion_user FOREIGN KEY (user_id) REFERENCES usuarios(id)
+);
+
+
+-- Insertar sanciones de prueba
+INSERT INTO sanciones (guid, user_id, tipo_sancion, fecha_sancion, created_date, updated_date)
+VALUES
+    ('c45862f7b95', 1, 'ADVERTENCIA', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

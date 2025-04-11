@@ -1,22 +1,16 @@
 import axios from 'axios';
 
-interface User {
+interface Sancion {
     guid: string;
-    email: string;
-    nombre: string;
-    apellidos: string;
-    curso: string;
-    tutor: string;
-    rol: string;
-    numeroIdentificacion: string;
-    fotoCarnet: string;
-    lastLoginDate: string;
-    lastPasswordResetDate: string;
+    tipo: string;
+    user: { guid: string; };
+    userGuid: string;
+    fechaSancion: string;
     createdDate: string;
     updatedDate: string;
 }
 
-export const getUserByGuidAdmin = async (guid: string): Promise<User | null> => {
+export const getSancionByGuid = async (guid: string): Promise<Sancion | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -24,7 +18,7 @@ export const getUserByGuidAdmin = async (guid: string): Promise<User | null> => 
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/users/admin/${guid}`, {
+        const response = await axios.get(`http://localhost:8080/sanciones/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -34,18 +28,33 @@ export const getUserByGuidAdmin = async (guid: string): Promise<User | null> => 
             return null;
         }
 
-        const user: User = {
+        const sancion: Sancion = {
             ...response.data,
+            user: response.data.user ? { guid: response.data.user.guid } : null,
+            userGuid: response.data.user ? response.data.user.guid : null,
         };
 
-        return user;
+        return sancion;
     } catch (error) {
-        console.error('Error obteniendo usuario por GUID:', error);
+        console.error('Error obteniendo sancion por GUID:', error);
         return null;
     }
 };
 
-export const descargarCsvUsers = async (): Promise<void | null> => {
+export const actualizarSancion = async (
+    guid: string,
+    data: { tipoSancion: string }
+): Promise<Sancion | null> => {
+    try {
+        const response = await axios.patch(`http://localhost:8080/sanciones/${guid}`, data);
+        return response.data || null;
+    } catch (error) {
+        console.error('Error al actualizar la sancion:', error);
+        return null;
+    }
+};
+
+export const descargarCsvSanciones = async (): Promise<void | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -53,7 +62,7 @@ export const descargarCsvUsers = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/storage/csv/users`, {
+        const response = await axios.get(`http://localhost:8080/storage/csv/sanciones`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -65,13 +74,13 @@ export const descargarCsvUsers = async (): Promise<void | null> => {
         link.href = url;
         const today = new Date();
         const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-        link.setAttribute('download', `usuarios_${formattedDate}.csv`);
+        link.setAttribute('download', `sanciones_${formattedDate}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Error al descargar el CSV de usuarios', error);
+        console.error('Error al descargar el CSV de sanciones', error);
         throw error;
     }
 }

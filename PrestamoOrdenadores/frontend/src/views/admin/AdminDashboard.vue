@@ -16,15 +16,15 @@
       <p>Ver incidencias</p>
     </router-link>
 
-    <div class="dashboard-box">
+    <router-link to="/admin/dashboard/storage" class="dashboard-box">
       <i class="pi pi-file icon"></i>
       <p>Ver informes</p>
-    </div>
+    </router-link>
 
-    <div class="dashboard-box">
+    <router-link to="/admin/dashboard/sanciones" class="dashboard-box">
       <i class="pi pi-ban icon"></i>
       <p>Ver sanciones</p>
-    </div>
+    </router-link>
   </div>
 </template>
 
@@ -57,7 +57,7 @@ export default {
   justify-content: center;
   padding: 25px;
   border-radius: 12px;
-  background: white;
+  background: white !important;
   box-shadow: 0 6px 12px rgba(20, 18, 79, 0.15);
   text-align: center;
   cursor: pointer;

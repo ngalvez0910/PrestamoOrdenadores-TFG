@@ -11,8 +11,6 @@ import org.example.prestamoordenadores.storage.csv.PrestamoCsvStorage
 import org.example.prestamoordenadores.storage.pdf.PrestamoPdfStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -24,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.LocalDate
 
 @RestController
@@ -35,7 +31,6 @@ class PrestamoController
 @Autowired constructor(
     private val prestamoService: PrestamoService,
     private val prestamoPdfStorage: PrestamoPdfStorage,
-    private val prestamoCsvStorage: PrestamoCsvStorage
 ) {
     @GetMapping
     fun getAllPrestamos(
@@ -142,24 +137,5 @@ class PrestamoController
         prestamoPdfStorage.generateAndSavePdf(guid)
 
         return ResponseEntity.ok("El PDF ha sido guardado exitosamente en la carpeta 'data' con el nombre $fileName")
-    }
-
-    @GetMapping("/export/csv")
-    fun exportCsv(): ResponseEntity<ByteArray> {
-        prestamoCsvStorage.generateAndSaveCsv()
-
-        val fileName = "prestamos_${LocalDate.now().toDefaultDateString()}.csv"
-        val filePath = Paths.get("data", fileName)
-
-        return if (Files.exists(filePath)) {
-            val fileContent = Files.readAllBytes(filePath)
-            val headers = HttpHeaders().apply {
-                add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$fileName")
-                add(HttpHeaders.CONTENT_TYPE, "text/csv")
-            }
-            ResponseEntity(fileContent, headers, HttpStatus.OK)
-        } else {
-            ResponseEntity(HttpStatus.NOT_FOUND)
-        }
     }
 }

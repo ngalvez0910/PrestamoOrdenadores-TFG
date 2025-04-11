@@ -5,7 +5,8 @@ import DispositivosDashboard from "@/views/admin/DispositivosDashboard.vue";
 import UsuariosDashboard from "@/views/admin/UsuariosDashboard.vue";
 import IncidenciasDashboard from "@/views/admin/IncidenciasDashboard.vue";
 import Profile from "@/views/user/Profile.vue";
-import DispositivoDetalle from "@/views/admin/DispositivoDetalle.vue";
+import SancionDashboard from "@/views/admin/SancionDashboard.vue";
+import StorageDashboard from "@/views/admin/StorageDashboard.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,9 +42,21 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
+      path: '/admin/dashboard/storage',
+      name: 'adminDashboardStorage',
+      component: StorageDashboard,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
       path: '/admin/dashboard/incidencias',
       name: 'adminDashboardIncidencias',
       component: IncidenciasDashboard,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+      path: '/admin/dashboard/sanciones',
+      name: 'adminDashboardSanciones',
+      component: SancionDashboard,
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
@@ -76,6 +89,13 @@ const router = createRouter({
       path: "/admin/incidencia/detalle/:guid",
       name: "IncidenciaDetalle",
       component: () => import("@/views/admin/IncidenciaDetalle.vue"),
+      props: true,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+      path: "/admin/sancion/detalle/:guid",
+      name: "SancionDetalle",
+      component: () => import("@/views/admin/SancionDetalle.vue"),
       props: true,
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
