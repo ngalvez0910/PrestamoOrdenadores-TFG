@@ -36,6 +36,7 @@
 <script lang="ts">
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import { descargarCsvDispositivos } from "@/services/DispositivoService";
+import {descargarCsvUsers} from "@/services/UsuarioService.ts";
 
 export default {
   name: "StorageDashboard",
@@ -44,6 +45,13 @@ export default {
     async descargarCsvDispositivos() {
       try {
         await descargarCsvDispositivos();
+      } catch (error) {
+        console.error('Error al descargar el CSV en el componente', error);
+      }
+    },
+    async descargarCsvUsers() {
+      try {
+        await descargarCsvUsers();
       } catch (error) {
         console.error('Error al descargar el CSV en el componente', error);
       }
