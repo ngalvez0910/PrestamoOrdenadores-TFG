@@ -33,7 +33,6 @@ import java.time.LocalDate
 class SancionController
 @Autowired constructor(
     private val sancionService: SancionService,
-    private val sancionCsvStorage: SancionCsvStorage
 ) {
     @GetMapping
     fun getAllSanciones(
@@ -132,24 +131,5 @@ class SancionController
                 }
             }
         )
-    }
-
-    @GetMapping("/export/csv")
-    fun exportCsv(): ResponseEntity<ByteArray> {
-        sancionCsvStorage.generateAndSaveCsv()
-
-        val fileName = "sanciones_${LocalDate.now().toDefaultDateString()}.csv"
-        val filePath = Paths.get("data", fileName)
-
-        return if (Files.exists(filePath)) {
-            val fileContent = Files.readAllBytes(filePath)
-            val headers = HttpHeaders().apply {
-                add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$fileName")
-                add(HttpHeaders.CONTENT_TYPE, "text/csv")
-            }
-            ResponseEntity(fileContent, headers, HttpStatus.OK)
-        } else {
-            ResponseEntity(HttpStatus.NOT_FOUND)
-        }
     }
 }

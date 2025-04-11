@@ -28,7 +28,7 @@
     <div class="dashboard-box">
       <i class="pi pi-ban icon"></i>
       <p>Sanciones</p>
-      <button class="botonCsv">CSV</button>
+      <button class="botonCsv" @click="descargarCsvSanciones">CSV</button>
     </div>
   </div>
 </template>
@@ -39,6 +39,7 @@ import { descargarCsvDispositivos } from "@/services/DispositivoService";
 import {descargarCsvUsers} from "@/services/UsuarioService.ts";
 import {descargarCsvIncidencias} from "@/services/IncidenciaService.ts";
 import {descargarCsvPrestamos} from "@/services/PrestamoService.ts";
+import {descargarCsvSanciones} from "@/services/SancionService.ts";
 
 export default {
   name: "StorageDashboard",
@@ -68,6 +69,13 @@ export default {
     async descargarCsvPrestamos() {
       try {
         await descargarCsvPrestamos();
+      } catch (error) {
+        console.error('Error al descargar el CSV en el componente', error);
+      }
+    },
+    async descargarCsvSanciones() {
+      try {
+        await descargarCsvSanciones();
       } catch (error) {
         console.error('Error al descargar el CSV en el componente', error);
       }
