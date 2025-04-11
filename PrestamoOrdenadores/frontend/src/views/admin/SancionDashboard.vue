@@ -9,20 +9,19 @@
     <div class="table row-12">
       <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
         <Column field="guid" header="GUID"></Column>
-        <Column field="asunto" header="Asunto"></Column>
-        <Column field="estadoIncidencia" header="Estado"></Column>
         <Column field="userGuid" header="Usuario"></Column>
-        <Column field="createdDate" header="Fecha de incidencia"></Column>
+        <Column field="tipoSancion" header="Tipo"></Column>
+        <Column field="fechaSancion" header="Fecha de sanción"></Column>
         <Column field="ver">
           <template #body="slotProps">
-            <button @click="verIncidencia(slotProps.data)" class="verIncidencia-button">
+            <button @click="verSancion(slotProps.data)" class="verSancion-button">
               <i class="pi pi-eye"></i>
             </button>
           </template>
         </Column>
         <Column field="delete">
           <template #body="slotProps">
-            <button @click="deleteIncidencia(slotProps.data)" class="deleteIncidencia-button">
+            <button @click="deleteSancion(slotProps.data)" class="deleteSancion-button">
               <i class="pi pi-ban"></i>
             </button>
           </template>
@@ -36,27 +35,26 @@
 import MenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
 
-interface Incidencia {
+interface Sancion {
   guid: string;
-  asunto: string;
-  descripcion: string;
-  estadoIncidencia: string;
-  estado: string;
+  tipoSancion: string;
+  tipo: string;
   user: { guid: string } | null;
   userGuid: string;
+  fechaSancion: string;
   createdDate: string;
   updatedDate: string;
 }
 
 export default {
-  name: 'IncidenciasDashboard',
+  name: 'SancionDashboard',
   components: { MenuBar },
   emits: ['input-change'],
   data() {
     return {
       search: '',
-      datos: [] as Incidencia[],
-      filteredDatos: [] as Incidencia[]
+      datos: [] as Sancion[],
+      filteredDatos: [] as Sancion[]
     };
   },
   mounted() {
@@ -71,24 +69,24 @@ export default {
           return;
         }
 
-        const response = await axios.get(`http://localhost:8080/incidencias`, {
+        const response = await axios.get(`http://localhost:8080/sanciones`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
 
         console.log("Datos recibidos:", response.data);
-        let incidencias = response.data.content || response.data;
+        let sanciones = response.data.content || response.data;
 
-        if (!Array.isArray(incidencias)) {
-          incidencias = [incidencias];
+        if (!Array.isArray(sanciones)) {
+          sanciones = [sanciones];
         }
 
-        this.datos = incidencias.map((incidencia: any) => {
+        this.datos = sanciones.map((sancion: any) => {
           return {
-            ...incidencia,
-            user: incidencia.user ? { guid: incidencia.user.guid } : null,
-            userGuid: incidencia.user ? incidencia.user.guid : null,
+            ...sancion,
+            user: sancion.user ? { guid: sancion.user.guid } : null,
+            userGuid: sancion.user ? sancion.user.guid : null,
           };
         });
 
@@ -98,26 +96,24 @@ export default {
       }
     },
     filterData() {
-      this.filteredDatos = this.datos.filter(incidencia => {
+      this.filteredDatos = this.datos.filter(sancion => {
         const searchText = this.search.toLowerCase();
-        const guid = (incidencia.guid || "").toLowerCase();
-        const asunto = (incidencia.asunto || "").toLowerCase();
-        const estado = (incidencia.estado || '').toLowerCase();
-        const userGuid = (incidencia.userGuid || "").toLowerCase();
+        const guid = (sancion.guid || "").toLowerCase();
+        const tipo = (sancion.tipoSancion || '').toLowerCase();
+        const userGuid = (sancion.userGuid || "").toLowerCase();
 
         return (
             guid.includes(searchText) ||
-            asunto.includes(searchText) ||
-            estado.includes(searchText) ||
+            tipo.includes(searchText) ||
             userGuid.includes(searchText)
         );
       });
     },
-    verIncidencia(incidencia: Incidencia) {
-      console.log("Navegando a detalle de incidencia con estos datos:", incidencia);
+    verSancion(sancion: Sancion) {
+      console.log("Navegando a detalle de sancion con estos datos:", sancion);
       this.$router.push({
-        name: 'IncidenciaDetalle',
-        params: { guid: incidencia.guid }
+        name: 'SancionDetalle',
+        params: { guid: sancion.guid }
       });
     }
   },
@@ -147,7 +143,7 @@ export default {
   border-color: #d6621e;
 }
 
-.verIncidencia-button {
+.verSancion-button {
   width: 40px;
   height: 40px;
   display: flex;
@@ -161,17 +157,17 @@ export default {
   transition: all 0.3s ease-in-out;
 }
 
-.verIncidencia-button:hover {
+.verSancion-button:hover {
   background-color: #a14916;
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgb(236, 145, 96);
 }
 
-.verIncidencia-button i {
+.verSancion-button i {
   transform: scale(1.1);
 }
 
-.deleteIncidencia-button {
+.deleteSancion-button {
   width: 40px;
   height: 40px;
   display: flex;
@@ -187,11 +183,11 @@ export default {
   margin-top: -2%;
 }
 
-.deleteIncidencia-button:hover {
+.deleteSancion-button:hover {
   background-color: #9b1616;
 }
 
-.deleteIncidencia-button i {
+.deleteSancion-button i {
   margin-top: 1%;
   margin-left: 3%
 }

@@ -21,10 +21,10 @@
       <p>Ver informes</p>
     </div>
 
-    <div class="dashboard-box">
+    <router-link to="/admin/dashboard/sanciones" class="dashboard-box">
       <i class="pi pi-ban icon"></i>
       <p>Ver sanciones</p>
-    </div>
+    </router-link>
   </div>
 </template>
 
