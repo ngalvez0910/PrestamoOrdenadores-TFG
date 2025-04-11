@@ -1,39 +1,54 @@
 <template>
   <MenuBar />
   <div class="dashboard">
-    <router-link to="/admin/dashboard/dispositivos" class="dashboard-box">
+    <div class="dashboard-box">
       <i class="pi pi-desktop icon"></i>
-      <p>Ver dispositivos</p>
-    </router-link>
+      <p>Dispositivos</p>
+      <button class="botonCsv" @click="descargarCsvDispositivos">CSV</button>
+    </div>
 
-    <router-link to="/admin/dashboard/usuarios" class="dashboard-box">
+    <div class="dashboard-box">
       <i class="pi pi-users icon"></i>
-      <p>Ver usuarios</p>
-    </router-link>
+      <p>Usuarios</p>
+      <button class="botonCsv" @click="descargarCsvUsers">CSV</button>
+    </div>
 
-    <router-link to="/admin/dashboard/incidencias" class="dashboard-box">
+    <div class="dashboard-box">
       <i class="pi pi-exclamation-triangle icon"></i>
-      <p>Ver incidencias</p>
-    </router-link>
+      <p>Incidencias</p>
+      <button class="botonCsv">CSV</button>
+    </div>
 
-    <router-link to="/admin/dashboard/storage" class="dashboard-box">
+    <div class="dashboard-box">
       <i class="pi pi-file icon"></i>
-      <p>Ver informes</p>
-    </router-link>
+      <p>Préstamos</p>
+      <button class="botonCsv">CSV</button>
+    </div>
 
-    <router-link to="/admin/dashboard/sanciones" class="dashboard-box">
+    <div class="dashboard-box">
       <i class="pi pi-ban icon"></i>
-      <p>Ver sanciones</p>
-    </router-link>
+      <p>Sanciones</p>
+      <button class="botonCsv">CSV</button>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
+import { descargarCsvDispositivos } from "@/services/DispositivoService";
 
 export default {
-  name: "Dashboard",
+  name: "StorageDashboard",
   components: { MenuBar: AdminMenuBar },
+  methods: {
+    async descargarCsvDispositivos() {
+      try {
+        await descargarCsvDispositivos();
+      } catch (error) {
+        console.error('Error al descargar el CSV en el componente', error);
+      }
+    },
+  },
 };
 </script>
 
@@ -44,7 +59,7 @@ export default {
   gap: 20px;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 10%;
   max-width: 900px;
   padding: 20px;
   margin-left: -25%;
@@ -55,7 +70,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 25px;
+  padding: 15px;
   border-radius: 12px;
   background: white;
   box-shadow: 0 6px 12px rgba(20, 18, 79, 0.15);
@@ -72,6 +87,7 @@ export default {
   transform: translateY(-10px);
   background-color: #f8f9fa;
   box-shadow: 0 4px 6px rgba(239, 139, 85, 0.19);
+  cursor: default;
 }
 
 .dashboard-box:hover .icon, .dashboard-box:hover p {
@@ -97,6 +113,11 @@ export default {
 .dashboard .dashboard-box:nth-last-child(2),
 .dashboard .dashboard-box:nth-last-child(1) {
   margin-left: 55%;
+}
+
+.botonCsv{
+  margin-top: 7%;
+  margin-left: 3%;
 }
 
 @media (max-width: 768px) {
