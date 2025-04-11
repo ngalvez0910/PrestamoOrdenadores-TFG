@@ -22,7 +22,7 @@
     <div class="dashboard-box">
       <i class="pi pi-file icon"></i>
       <p>Préstamos</p>
-      <button class="botonCsv">CSV</button>
+      <button class="botonCsv" @click="descargarCsvPrestamos">CSV</button>
     </div>
 
     <div class="dashboard-box">
@@ -38,6 +38,7 @@ import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import { descargarCsvDispositivos } from "@/services/DispositivoService";
 import {descargarCsvUsers} from "@/services/UsuarioService.ts";
 import {descargarCsvIncidencias} from "@/services/IncidenciaService.ts";
+import {descargarCsvPrestamos} from "@/services/PrestamoService.ts";
 
 export default {
   name: "StorageDashboard",
@@ -60,6 +61,13 @@ export default {
     async descargarCsvIncidencias() {
       try {
         await descargarCsvIncidencias();
+      } catch (error) {
+        console.error('Error al descargar el CSV en el componente', error);
+      }
+    },
+    async descargarCsvPrestamos() {
+      try {
+        await descargarCsvPrestamos();
       } catch (error) {
         console.error('Error al descargar el CSV en el componente', error);
       }
