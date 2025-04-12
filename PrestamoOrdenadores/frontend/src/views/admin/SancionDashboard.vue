@@ -10,7 +10,11 @@
       <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
         <Column field="guid" header="GUID"></Column>
         <Column field="userGuid" header="Usuario"></Column>
-        <Column field="tipoSancion" header="Tipo"></Column>
+        <Column field="tipoSancion" header="Tipo">
+          <template #body="slotProps">
+            {{ formatTipoSancion(slotProps.data.tipoSancion) }}
+          </template>
+        </Column>
         <Column field="fechaSancion" header="Fecha de sanción"></Column>
         <Column field="ver">
           <template #body="slotProps">
@@ -61,6 +65,9 @@ export default {
     this.obtenerDatos();
   },
   methods: {
+    formatTipoSancion(tipoSancion: 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'INDEFINIDO'): string {
+      return tipoSancion.replace(/_/g, ' ');
+    },
     async obtenerDatos() {
       try {
         const token = localStorage.getItem('token');
