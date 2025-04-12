@@ -10,7 +10,11 @@
       <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
         <Column field="numeroSerie" header="Número de serie"></Column>
         <Column field="componentes" header="Componentes"></Column>
-        <Column field="estado" header="Estado"></Column>
+        <Column field="estado" header="Estado">
+          <template #body="slotProps">
+            {{ formatEstado(slotProps.data.estado) }}
+          </template>
+        </Column>
         <Column field="incidenciaGuid" header="Incidencias"></Column>
         <Column field="edit">
           <template #body="slotProps">
@@ -63,6 +67,9 @@ export default {
     this.obtenerDatos();
   },
   methods: {
+    formatEstado(estado: 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO'): string {
+      return estado.replace(/_/g, ' ');
+    },
     async obtenerDatos() {
       try {
         const token = localStorage.getItem('token');
