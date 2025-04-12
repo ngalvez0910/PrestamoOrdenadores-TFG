@@ -8,9 +8,6 @@
         </button>
       </a>
     </div>
-    <button class="editPrestamo-button" @click="toggleEdit">
-      <i class="pi pi-pencil"></i>
-    </button>
   </div>
   <div class="prestamo-details" v-if="prestamoData">
     <div class="iconoPrestamo">
@@ -50,11 +47,6 @@
       </div>
     </div>
   </div>
-  <transition name="fade">
-    <button v-if="editable" class="update-button" @click="actualizarPrestamo">
-      Actualizar
-    </button>
-  </transition>
 </template>
 
 <script lang="ts">
@@ -131,7 +123,7 @@ body{
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  margin-top: 20%;
+  margin-top: -80%;
   width: 5%;
   display: flex;
   align-items: center;
@@ -195,66 +187,11 @@ textarea{
   max-width: 100%;
 }
 
-.editPrestamo-button {
-  padding: 0.7rem 1rem;
-  font-size: 0.875rem;
-  background-color: #d6621e;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  width: 9%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: -25%;
-  margin-top: 25%;
-}
-
-.editPrestamo-button:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
-}
-
-.editPrestamo-button i {
-  pointer-events: none;
-}
-
 .botones-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 20px;
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease-in-out;
-}
-
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-
-.update-button {
-  padding: 5px 15px;
-  background-color: #d6621e;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  width: 15%;
-  transition: all 0.3s ease-in-out;
-  margin-left: 47%;
-  margin-top: -25%;
-  position: absolute;
-}
-
-.update-button:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
+  margin-bottom: 13%;
 }
 </style>
