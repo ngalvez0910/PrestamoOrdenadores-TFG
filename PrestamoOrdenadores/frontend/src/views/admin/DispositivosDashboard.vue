@@ -8,10 +8,29 @@
   <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
     <div class="table row-12">
       <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
-        <Column field="numeroSerie" header="Número de serie"></Column>
-        <Column field="componentes" header="Componentes"></Column>
-        <Column field="estado" header="Estado"></Column>
-        <Column field="incidenciaGuid" header="Incidencias"></Column>
+        <Column field="numeroSerie">
+          <template #header>
+            <b>Número de serie</b>
+          </template>
+        </Column>
+        <Column field="componentes">
+          <template #header>
+            <b>Componentes</b>
+          </template>
+        </Column>
+        <Column>
+          <template #body="slotProps">
+            {{ formatEstado(slotProps.data.estado) }}
+          </template>
+          <template #header>
+            <b>Estado</b>
+          </template>
+        </Column>
+        <Column field="incidenciaGuid">
+          <template #header>
+            <b>Incidencias</b>
+          </template>
+        </Column>
         <Column field="edit">
           <template #body="slotProps">
             <button @click="editDispositivo(slotProps.data)" class="editDispositivo-button">
@@ -63,6 +82,9 @@ export default {
     this.obtenerDatos();
   },
   methods: {
+    formatEstado(estado: 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO'): string {
+      return estado.replace(/_/g, ' ');
+    },
     async obtenerDatos() {
       try {
         const token = localStorage.getItem('token');

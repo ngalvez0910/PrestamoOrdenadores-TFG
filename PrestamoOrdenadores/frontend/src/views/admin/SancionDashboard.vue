@@ -8,10 +8,29 @@
   <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
     <div class="table row-12">
       <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
-        <Column field="guid" header="GUID"></Column>
-        <Column field="userGuid" header="Usuario"></Column>
-        <Column field="tipoSancion" header="Tipo"></Column>
-        <Column field="fechaSancion" header="Fecha de sanción"></Column>
+        <Column field="guid">
+          <template #header>
+            <b>GUID</b>
+          </template>
+        </Column>
+        <Column field="userGuid">
+          <template #header>
+            <b>Usuario</b>
+          </template>
+        </Column>
+        <Column field="tipoSancion">
+          <template #body="slotProps">
+            {{ formatTipoSancion(slotProps.data.tipoSancion) }}
+          </template>
+          <template #header>
+            <b>Tipo</b>
+          </template>
+        </Column>
+        <Column field="fechaSancion">
+          <template #header>
+            <b>Fecha de sanción</b>
+          </template>
+        </Column>
         <Column field="ver">
           <template #body="slotProps">
             <button @click="verSancion(slotProps.data)" class="verSancion-button">
@@ -61,6 +80,9 @@ export default {
     this.obtenerDatos();
   },
   methods: {
+    formatTipoSancion(tipoSancion: 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'INDEFINIDO'): string {
+      return tipoSancion.replace(/_/g, ' ');
+    },
     async obtenerDatos() {
       try {
         const token = localStorage.getItem('token');

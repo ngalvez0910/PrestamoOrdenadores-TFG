@@ -45,7 +45,6 @@ export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | 
     }
 };
 
-
 export const actualizarDispositivo = async (
     guid: string,
     data: { componentes: string; estadoDispositivo: string; incidenciaGuid: string | null }

@@ -8,15 +8,34 @@
   <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
     <div class="table row-12">
       <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
-        <Column field="email" header="Email"></Column>
-        <Column header="Nombre">
+        <Column field="email">
+          <template #header>
+            <b>Email</b>
+          </template>
+        </Column>
+        <Column>
           <template #body="slotProps">
             <span>{{ slotProps.data.nombre }} {{ slotProps.data.apellidos }}</span>
           </template>
+          <template #header>
+            <b>Nombre</b>
+          </template>
         </Column>
-        <Column field="curso" header="Curso"></Column>
-        <Column field="tutor" header="Tutor"></Column>
-        <Column field="rol" header="Rol"></Column>
+        <Column field="curso">
+          <template #header>
+            <b>Curso</b>
+          </template>
+        </Column>
+        <Column field="tutor">
+          <template #header>
+            <b>Tutor</b>
+          </template>
+        </Column>
+        <Column field="rol">
+          <template #header>
+            <b>Rol</b>
+          </template>
+        </Column>
         <Column field="ver">
           <template #body="slotProps">
             <button @click="verUsuario(slotProps.data)" class="ver-button">

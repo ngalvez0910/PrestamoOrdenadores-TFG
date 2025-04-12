@@ -27,7 +27,7 @@
           </select>
         </div>
         <div v-else>
-          <input readonly type="text" id="tipo" v-model="sancionData.tipoSancion"/>
+          <input readonly type="text" id="tipo" :value="formatTipoSancion(sancionData.tipoSancion)"/>
         </div>
       </div>
       <div class="userGuid col-6">
@@ -74,6 +74,12 @@ export default defineComponent({
     }
   },
   methods: {
+    formatTipoSancion(tipoSancion: 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'INDEFINIDO' | undefined): string {
+      if (!tipoSancion) {
+        return '';
+      }
+      return tipoSancion.replace(/_/g, ' ');
+    },
     toggleEdit() {
       this.editable = !this.editable;
     },

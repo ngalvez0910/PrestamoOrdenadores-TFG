@@ -34,7 +34,7 @@
           </select>
         </div>
         <div v-else>
-          <input readonly type="text" v-model="dispositivoData.estado"/>
+          <input readonly type="text" :value="formatEstado(dispositivoData.estado)"/>
         </div>
       </div>
     </div>
@@ -81,6 +81,12 @@ export default defineComponent({
     }
   },
   methods: {
+    formatEstado(estado: 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO' | undefined): string {
+      if (!estado) {
+        return '';
+      }
+      return estado.replace(/_/g, ' ');
+    },
     toggleEdit() {
       this.editable = !this.editable;
     },

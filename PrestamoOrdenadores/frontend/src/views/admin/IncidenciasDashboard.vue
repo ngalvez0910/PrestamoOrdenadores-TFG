@@ -8,11 +8,31 @@
   <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
     <div class="table row-12">
       <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
-        <Column field="guid" header="GUID"></Column>
-        <Column field="asunto" header="Asunto"></Column>
-        <Column field="estadoIncidencia" header="Estado"></Column>
-        <Column field="userGuid" header="Usuario"></Column>
-        <Column field="createdDate" header="Fecha de incidencia"></Column>
+        <Column field="guid">
+          <template #header>
+            <b>GUID</b>
+          </template>
+        </Column>
+        <Column field="asunto">
+          <template #header>
+            <b>Asunto</b>
+          </template>
+        </Column>
+        <Column field="estadoIncidencia">
+          <template #header>
+            <b>Estado</b>
+          </template>
+        </Column>
+        <Column field="userGuid">
+          <template #header>
+            <b>Usuario</b>
+          </template>
+        </Column>
+        <Column field="createdDate">
+          <template #header>
+            <b>Fecha de incidencia</b>
+          </template>
+        </Column>
         <Column field="ver">
           <template #body="slotProps">
             <button @click="verIncidencia(slotProps.data)" class="verIncidencia-button">
