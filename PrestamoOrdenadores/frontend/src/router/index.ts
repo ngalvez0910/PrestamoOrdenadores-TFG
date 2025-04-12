@@ -7,6 +7,7 @@ import IncidenciasDashboard from "@/views/admin/incidencias/IncidenciasDashboard
 import Profile from "@/views/user/Profile.vue";
 import SancionDashboard from "@/views/admin/sanciones/SancionDashboard.vue";
 import StorageDashboard from "@/views/admin/storage/StorageDashboard.vue";
+import PrestamoDashboard from "@/views/admin/prestamos/PrestamoDashboard.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,12 @@ const router = createRouter({
       path: '/admin/dashboard/dispositivos',
       name: 'adminDashboardDispositivos',
       component: DispositivosDashboard,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+      path: '/admin/dashboard/prestamos',
+      name: 'adminDashboardPrestamos',
+      component: PrestamoDashboard,
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
@@ -96,6 +103,13 @@ const router = createRouter({
       path: "/admin/sancion/detalle/:guid",
       name: "SancionDetalle",
       component: () => import("@/views/admin/sanciones/SancionDetalle.vue"),
+      props: true,
+      meta: { requiresAuth: true, roles: ['ADMIN'] },
+    },
+    {
+      path: "/admin/prestamo/detalle/:guid",
+      name: "PrestamoDetalle",
+      component: () => import("@/views/admin/prestamos/PrestamoDetalle.vue"),
       props: true,
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
