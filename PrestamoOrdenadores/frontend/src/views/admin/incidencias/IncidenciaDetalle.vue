@@ -58,7 +58,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import MenuBar from "@/components/AdminMenuBar.vue";
-import {getIncidenciaByGuid, actualizarIncidencia} from "@/services/IncidenciaService";
+import {getIncidenciaByGuid, actualizarIncidencia} from "@/services/IncidenciaService.ts";
 
 export default defineComponent({
   name: "IncidenciaDetalle",

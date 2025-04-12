@@ -50,7 +50,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import MenuBar from "@/components/AdminMenuBar.vue";
-import {getSancionByGuid, actualizarSancion} from "@/services/SancionService";
+import {getSancionByGuid, actualizarSancion} from "@/services/SancionService.ts";
 
 export default defineComponent({
   name: "SancionDetalle",

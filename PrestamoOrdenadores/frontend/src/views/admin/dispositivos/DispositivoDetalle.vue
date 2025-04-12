@@ -56,7 +56,7 @@ import MenuBar from '@/components/AdminMenuBar.vue';
 import {
   getDispositivoByGuid,
   actualizarDispositivo,
-} from '@/services/DispositivoService';
+} from '@/services/DispositivoService.ts';
 
 export default defineComponent({
   name: 'DispositivoDetalle',

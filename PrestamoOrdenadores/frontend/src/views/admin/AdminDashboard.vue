@@ -1,6 +1,11 @@
 <template>
   <MenuBar />
   <div class="dashboard">
+    <router-link to="/admin/dashboard/prestamos" class="dashboard-box">
+      <i class="pi pi-list-check icon"></i>
+      <p>Ver préstamos</p>
+    </router-link>
+
     <router-link to="/admin/dashboard/dispositivos" class="dashboard-box">
       <i class="pi pi-desktop icon"></i>
       <p>Ver dispositivos</p>
@@ -40,7 +45,7 @@ export default {
 <style>
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   justify-content: center;
   align-items: center;
@@ -92,11 +97,6 @@ export default {
   font-size: 1.1rem;
   font-weight: bold;
   margin: 0;
-}
-
-.dashboard .dashboard-box:nth-last-child(2),
-.dashboard .dashboard-box:nth-last-child(1) {
-  margin-left: 55%;
 }
 
 @media (max-width: 768px) {

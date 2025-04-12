@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue';
-import DispositivosDashboard from "@/views/admin/DispositivosDashboard.vue";
-import UsuariosDashboard from "@/views/admin/UsuariosDashboard.vue";
-import IncidenciasDashboard from "@/views/admin/IncidenciasDashboard.vue";
+import DispositivosDashboard from "@/views/admin/dispositivos/DispositivosDashboard.vue";
+import UsuariosDashboard from "@/views/admin/users/UsuariosDashboard.vue";
+import IncidenciasDashboard from "@/views/admin/incidencias/IncidenciasDashboard.vue";
 import Profile from "@/views/user/Profile.vue";
-import SancionDashboard from "@/views/admin/SancionDashboard.vue";
-import StorageDashboard from "@/views/admin/StorageDashboard.vue";
+import SancionDashboard from "@/views/admin/sanciones/SancionDashboard.vue";
+import StorageDashboard from "@/views/admin/storage/StorageDashboard.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -68,7 +68,7 @@ const router = createRouter({
     {
       path: "/admin/dispositivo/detalle/:guid",
       name: "DispositivoDetalle",
-      component: () => import("@/views/admin/DispositivoDetalle.vue"),
+      component: () => import("@/views/admin/dispositivos/DispositivoDetalle.vue"),
       props: route => ({
         guid: route.params.guid,
         numeroSerie: route.query.numeroSerie,
@@ -81,21 +81,21 @@ const router = createRouter({
     {
       path: "/admin/usuario/detalle/:guid",
       name: "UsuarioDetalle",
-      component: () => import("@/views/admin/UsuarioDetalle.vue"),
+      component: () => import("@/views/admin/users/UsuarioDetalle.vue"),
       props: true,
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
       path: "/admin/incidencia/detalle/:guid",
       name: "IncidenciaDetalle",
-      component: () => import("@/views/admin/IncidenciaDetalle.vue"),
+      component: () => import("@/views/admin/incidencias/IncidenciaDetalle.vue"),
       props: true,
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
       path: "/admin/sancion/detalle/:guid",
       name: "SancionDetalle",
-      component: () => import("@/views/admin/SancionDetalle.vue"),
+      component: () => import("@/views/admin/sanciones/SancionDetalle.vue"),
       props: true,
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
