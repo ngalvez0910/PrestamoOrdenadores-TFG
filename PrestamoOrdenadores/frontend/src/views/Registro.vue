@@ -30,17 +30,19 @@
           <div class="col-md-6 mb-3">
             <label for="curso" class="input-label"><strong>Curso</strong></label>
             <input class="input-field" type="text" name="curso" placeholder="Curso"  v-model="form.curso">
+            <p class="error-message" v-if="errors.curso">{{ errors.curso }}</p>
           </div>
 
           <div class="col-md-6 mb-3">
             <label for="tutor" class="input-label"><strong>Tutor</strong></label>
-            <input class="input-field" type="text" name="tutor" placeholder="Tutor"  v-model="form.tutor">
+            <input class="input-field" type="text" name="tutor" placeholder="Tutor" v-model="form.tutor">
+            <p class="error-message" v-if="errors.tutor">{{ errors.tutor }}</p>
           </div>
         </div>
 
         <div class="row mb-3">
           <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
-          <input class="input-field" type="email" name="email" placeholder="Correo electrónico"  v-model="form.email">
+          <input class="input-field" type="email" name="email" placeholder="Correo electrónico" v-model="form.email" @blur="validateEmail">
           <p class="error-message" v-if="errors.email">{{ errors.email }}</p>
         </div>
 
@@ -108,32 +110,28 @@ export default {
     };
   },
   methods: {
-    isRequired(fieldName: string): boolean {
-      if (this.form.email.endsWith('@loantech.com')) {
-        return fieldName === 'curso' || fieldName === 'tutor';
-      } else if (this.form.email.endsWith('@profesor.loantech.com')) {
-        return fieldName === 'curso';
+    validateEmail() {
+      if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = 'Correo electrónico inválido';
+      } else {
+        this.errors.email = '';
+        this.validateEmailDependencies();
       }
-      return false;
     },
     validateEmailDependencies() {
-      if (this.form.email.endsWith('@loantech')) {
+      this.errors.curso = '';
+      this.errors.tutor = '';
+      if (this.form.email.endsWith('@loantech.com')) {
         if (!this.form.curso) {
           this.errors.curso = 'Campo obligatorio';
         }
         if (!this.form.tutor) {
           this.errors.tutor = 'Campo obligatorio';
         }
-      } else if (this.form.email.endsWith('@profesor.loantech')) {
+      } else if (this.form.email.endsWith('@profesor.loantech.com')) {
         if (!this.form.curso) {
           this.errors.curso = 'Campo obligatorio';
-        } else {
-          this.errors.curso = '';
         }
-        this.errors.tutor = '';
-      } else if (this.form.email.endsWith('@admin.loantech')) {
-        this.errors.curso = '';
-        this.errors.tutor = '';
       }
     },
     validateForm(): boolean {
@@ -168,11 +166,6 @@ export default {
       this.validateEmailDependencies();
       if (this.errors.curso) formIsValid = false;
       if (this.errors.tutor) formIsValid = false;
-
-      if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
-        this.errors.email = 'Correo electrónico inválido';
-        formIsValid = false;
-      }
 
       if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
         this.errors.password = 'La contraseña debe tener al menos 8 caracteres';
@@ -327,7 +320,7 @@ button:hover {
 
 .error-message {
   color: red;
-  margin-top: -10%;
+  margin-top: -5%;
 }
 
 .custom-toast-success, .custom-toast-error {
