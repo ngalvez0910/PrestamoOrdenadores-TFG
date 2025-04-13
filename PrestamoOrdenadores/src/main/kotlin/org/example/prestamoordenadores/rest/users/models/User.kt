@@ -35,8 +35,6 @@ class User (
 
     var tutor: String?= "",
 
-    var fotoCarnet: String= "",
-
     var avatar: String = "",
 
     var isActivo: Boolean = false,
@@ -51,8 +49,8 @@ class User (
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ): UserDetails{
-    constructor(guid: String, email: String, password: String, rol: Role, numeroIdentificacion: String, nombre: String, apellidos: String, curso: String, tutor: String, fotoCarnet: String, avatar: String, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime, lastLoginDate: LocalDateTime, lastPasswordResetDate: LocalDateTime) :
-            this(0, guid, email, password, rol, numeroIdentificacion, nombre, apellidos, curso, tutor, fotoCarnet, avatar, isActivo, createdDate, updatedDate, lastLoginDate, lastPasswordResetDate)
+    constructor(guid: String, email: String, password: String, rol: Role, numeroIdentificacion: String, nombre: String, apellidos: String, curso: String, tutor: String, avatar: String, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime, lastLoginDate: LocalDateTime, lastPasswordResetDate: LocalDateTime) :
+            this(0, guid, email, password, rol, numeroIdentificacion, nombre, apellidos, curso, tutor, avatar, isActivo, createdDate, updatedDate, lastLoginDate, lastPasswordResetDate)
 
     @JsonIgnore
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {

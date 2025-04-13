@@ -35,7 +35,6 @@ class AuthenticationServiceImpl
                 email = request.email!!,
                 curso = request.curso,
                 tutor = request.tutor,
-                fotoCarnet = request.fotoCarnet!!,
                 campoPassword = passwordEncoder.encode(request.password),
                 rol = Role.ALUMNO
             )

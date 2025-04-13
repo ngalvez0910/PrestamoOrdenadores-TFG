@@ -48,7 +48,6 @@ class UserMapper {
             email = user.email!!,
             curso = user.curso,
             tutor = user.tutor,
-            fotoCarnet = user.fotoCarnet!!,
             campoPassword = user.password!!,
             rol = Role.ALUMNO,
             isActivo = true,
@@ -56,28 +55,6 @@ class UserMapper {
             updatedDate = LocalDateTime.now(),
             lastLoginDate = LocalDateTime.now(),
             lastPasswordResetDate = LocalDateTime.now()
-        )
-    }
-
-    fun toUserFromResponseAdmin(userResponse: UserResponseAdmin?): User {
-        return User(
-            id = 0L,
-            guid = userResponse?.guid ?: "",
-            email = userResponse?.email ?: "",
-            campoPassword = "",
-            rol = Role.valueOf((userResponse?.rol ?: "ALUMNO").toString()),
-            numeroIdentificacion = userResponse?.numeroIdentificacion ?: "",
-            nombre = userResponse?.nombre ?: "",
-            apellidos = userResponse?.apellidos ?: "",
-            curso = userResponse?.curso ?: "",
-            tutor = userResponse?.tutor ?: "",
-            fotoCarnet = "",
-            avatar = "",
-            isActivo = userResponse?.isActivo == true,
-            lastLoginDate = LocalDateTime.now(),
-            lastPasswordResetDate = LocalDateTime.now(),
-            createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
         )
     }
 

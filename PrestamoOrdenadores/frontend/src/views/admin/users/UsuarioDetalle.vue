@@ -70,7 +70,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import MenuBar from "@/components/AdminMenuBar.vue";
-import {getUserByGuidAdmin} from "@/services/UsuarioService";
+import {getUserByGuidAdmin} from "@/services/UsuarioService.ts";
 
 export default defineComponent({
   name: "UsuarioDetalle",

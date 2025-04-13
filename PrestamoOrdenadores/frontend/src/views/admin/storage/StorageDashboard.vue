@@ -35,7 +35,7 @@
 
 <script lang="ts">
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
-import { descargarCsvDispositivos } from "@/services/DispositivoService";
+import { descargarCsvDispositivos } from "@/services/DispositivoService.ts";
 import {descargarCsvUsers} from "@/services/UsuarioService.ts";
 import {descargarCsvIncidencias} from "@/services/IncidenciaService.ts";
 import {descargarCsvPrestamos} from "@/services/PrestamoService.ts";

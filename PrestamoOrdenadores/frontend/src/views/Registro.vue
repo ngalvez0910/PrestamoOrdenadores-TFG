@@ -5,38 +5,43 @@
     <div class="register-box">
       <h1>Registro</h1>
 
-      <form @submit.prevent="validateForm">
+      <form @submit.prevent="registerUser">
+        <div class="row">
+          <label for="numeroIdentificacion" class="input-label"><strong>Número de Identificación</strong></label>
+          <input type="text" class="input-field" name="numeroIdentificacion" placeholder="Número de Identificación" v-model="form.numeroIdentificacion">
+          <p class="error-message" v-if="errors.numeroIdentificacion">{{ errors.numeroIdentificacion }}</p>
+        </div>
+
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="name" class="input-label"><strong>Nombre</strong></label>
-            <input type="text" class="input-field" name="name" placeholder="Nombre" v-model="form.name">
-            <p class="error-message" v-if="errors.name">{{ errors.name }}</p>
+            <label for="nombre" class="input-label"><strong>Nombre</strong></label>
+            <input type="text" class="input-field" name="nombre" placeholder="Nombre" v-model="form.nombre">
+            <p class="error-message" v-if="errors.nombre">{{ errors.nombre }}</p>
           </div>
 
           <div class="col-md-6 mb-3">
-            <label for="surname" class="input-label"><strong>Apellidos</strong></label>
-            <input type="text" class="input-field" name="surname" placeholder="Apellidos" v-model="form.surname">
-            <p class="error-message" v-if="errors.surname">{{ errors.surname }}</p>
+            <label for="apellidos" class="input-label"><strong>Apellidos</strong></label>
+            <input type="text" class="input-field" name="apellidos" placeholder="Apellidos" v-model="form.apellidos">
+            <p class="error-message" v-if="errors.apellidos">{{ errors.apellidos }}</p>
           </div>
         </div>
 
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="grade" class="input-label"><strong>Curso</strong></label>
-            <input class="input-field" type="text" name="grade" placeholder="Curso"  v-model="form.grade">
+            <label for="curso" class="input-label"><strong>Curso</strong></label>
+            <input class="input-field" type="text" name="curso" placeholder="Curso"  v-model="form.curso">
           </div>
 
           <div class="col-md-6 mb-3">
-            <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
-            <input class="input-field" type="email" name="email" placeholder="Correo electrónico"  v-model="form.email">
-            <p class="error-message" v-if="errors.email">{{ errors.email }}</p>
+            <label for="tutor" class="input-label"><strong>Tutor</strong></label>
+            <input class="input-field" type="text" name="tutor" placeholder="Tutor"  v-model="form.tutor">
           </div>
         </div>
 
-        <div class="row">
-          <label for="image" class="input-label"><strong>Foto carnet de estudiante</strong></label>
-          <input class="input-field" type="file" name="image" @change="handleFileUpload">
-          <p class="error-message" v-if="errors.image">{{ errors.image }}</p>
+        <div class="row mb-3">
+          <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
+          <input class="input-field" type="email" name="email" placeholder="Correo electrónico"  v-model="form.email">
+          <p class="error-message" v-if="errors.email">{{ errors.email }}</p>
         </div>
 
         <div class="row">
@@ -47,13 +52,13 @@
           </div>
 
           <div class="col-md-6 mb-3">
-            <label for="passwordConfirm" class="input-label"><strong>Confirmar contraseña</strong></label>
-            <input type="password" name="passwordConfirm" class="input-field" placeholder="Confirmar contraseña"  v-model="form.passwordConfirm">
-            <p class="error-message" v-if="errors.passwordConfirm">{{ errors.passwordConfirm }}</p>
+            <label for="confirmPassword" class="input-label"><strong>Confirmar contraseña</strong></label>
+            <input type="password" name="confirmPassword" class="input-field" placeholder="Confirmar contraseña"  v-model="form.confirmPassword">
+            <p class="error-message" v-if="errors.confirmPassword">{{ errors.confirmPassword }}</p>
           </div>
         </div>
 
-        <button type="submit">Registrarse</button>
+        <button type="submit" :disabled="isSubmitting">Registrarse</button>
       </form>
 
       <p class="login-link"><a href="/">Login</a></p>
@@ -68,6 +73,7 @@ import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
+import { authService } from '@/services/AuthService.ts';
 
 export default {
   name: 'Register',
@@ -79,66 +85,109 @@ export default {
   data() {
     return {
       form: {
-        name: '',
-        surname: '',
-        grade: '',
+        numeroIdentificacion: '',
+        nombre: '',
+        apellidos: '',
+        curso: '',
+        tutor: '',
         email: '',
         password: '',
-        passwordConfirm: ''
+        confirmPassword: '',
       },
       errors: {
-        name: '',
-        surname: '',
+        numeroIdentificacion: '',
+        nombre: '',
+        apellidos: '',
         email: '',
+        curso: '',
+        tutor: '',
         password: '',
-        passwordConfirm: '',
-        image: ''
-      }
+        confirmPassword: '',
+      },
+      isSubmitting: false
     };
   },
   methods: {
-    validateForm() {
+    isRequired(fieldName: string): boolean {
+      if (this.form.email.endsWith('@loantech.com')) {
+        return fieldName === 'curso' || fieldName === 'tutor';
+      } else if (this.form.email.endsWith('@profesor.loantech.com')) {
+        return fieldName === 'curso';
+      }
+      return false;
+    },
+    validateEmailDependencies() {
+      if (this.form.email.endsWith('@loantech')) {
+        if (!this.form.curso) {
+          this.errors.curso = 'Campo obligatorio';
+        }
+        if (!this.form.tutor) {
+          this.errors.tutor = 'Campo obligatorio';
+        }
+      } else if (this.form.email.endsWith('@profesor.loantech')) {
+        if (!this.form.curso) {
+          this.errors.curso = 'Campo obligatorio';
+        } else {
+          this.errors.curso = '';
+        }
+        this.errors.tutor = '';
+      } else if (this.form.email.endsWith('@admin.loantech')) {
+        this.errors.curso = '';
+        this.errors.tutor = '';
+      }
+    },
+    validateForm(): boolean {
       this.errors = {
-        name: '',
-        surname: '',
+        numeroIdentificacion: '',
+        nombre: '',
+        apellidos: '',
+        curso: '',
+        tutor: '',
         email: '',
         password: '',
-        passwordConfirm: '',
-        image: ''
+        confirmPassword: '',
       };
 
       let formIsValid = true;
 
-      if (!this.form.name) {
-        this.errors.name = 'Campo obligatorio';
+      if (!this.form.numeroIdentificacion) {
+        this.errors.numeroIdentificacion = 'Campo obligatorio';
         formIsValid = false;
       }
-      if (!this.form.surname) {
-        this.errors.surname = 'Campo obligatorio';
+
+      if (!this.form.nombre) {
+        this.errors.nombre = 'Campo obligatorio';
         formIsValid = false;
       }
+
+      if (!this.form.apellidos) {
+        this.errors.apellidos = 'Campo obligatorio';
+        formIsValid = false;
+      }
+
+      this.validateEmailDependencies();
+      if (this.errors.curso) formIsValid = false;
+      if (this.errors.tutor) formIsValid = false;
+
       if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
         this.errors.email = 'Correo electrónico inválido';
         formIsValid = false;
       }
+
       if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
         this.errors.password = 'La contraseña debe tener al menos 8 caracteres';
         formIsValid = false;
       }
-      if (this.form.password !== this.form.passwordConfirm) {
-        this.errors.passwordConfirm = 'Las contraseñas no coinciden';
+
+      if (this.form.password !== this.form.confirmPassword) {
+        this.errors.confirmPassword = 'Las contraseñas no coinciden';
         formIsValid = false;
       }
 
-      if (formIsValid) {
-        this.toast.add({
-          severity: 'success',
-          summary: 'Registro Exitoso',
-          detail: 'El registro ha sido completado exitosamente.',
-          life: 3000,
-          styleClass: 'custom-toast-success'
-        });
-      } else if (!formIsValid) {
+      return formIsValid;
+    },
+    async registerUser() {
+      if (!this.validateForm()) {
         this.toast.add({
           severity: 'error',
           summary: 'Error en el Registro',
@@ -146,17 +195,55 @@ export default {
           life: 3000,
           styleClass: 'custom-toast-error'
         });
+        return;
       }
-    },
-    handleFileUpload(event: Event) {
-      const inputElement = event.target as HTMLInputElement;
-      const file = inputElement.files?.[0];
 
-      if (!file) {
-        this.errors.image = 'Debe subir una imagen';
+      this.isSubmitting = true;
+
+      const userData = {
+        numeroIdentificacion: this.form.numeroIdentificacion,
+        nombre: this.form.nombre,
+        apellidos: this.form.apellidos,
+        curso: this.form.curso,
+        email: this.form.email,
+        tutor: this.form.tutor,
+        password: this.form.password,
+        confirmPassword: this.form.confirmPassword,
+      };
+
+      try {
+        const token = await authService.register(userData);
+        if (token) {
+          this.toast.add({
+            severity: 'success',
+            summary: 'Registro Exitoso',
+            detail: 'El registro se completó y la sesión se inició automáticamente.',
+            life: 3000,
+            styleClass: 'custom-toast-success'
+          });
+          this.$router.push('/profile');
+        } else {
+          this.toast.add({
+            severity: 'error',
+            summary: 'Error en el Registro',
+            detail: 'Hubo un problema al iniciar sesión automáticamente después del registro.',
+            life: 5000,
+            styleClass: 'custom-toast-error'
+          });
+        }
+      } catch (error: any) {
+        console.error('Error al registrar el usuario:', error.response?.data?.message || error.message);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Error en el Registro',
+          detail: error.response?.data?.message || 'Hubo un error al registrar el usuario. Inténtelo de nuevo.',
+          life: 5000,
+          styleClass: 'custom-toast-error'
+        });
+      } finally {
+        this.isSubmitting = false;
       }
     }
-
   },
 };
 </script>
@@ -174,8 +261,8 @@ body {
   align-items: center;
   width: 100%;
   min-height: 100vh;
-  padding: 20px 0;
-  margin-top: 45%;
+  padding: 10px 0px;
+  margin-top: 15%;
 }
 
 .register-box {
@@ -183,10 +270,10 @@ body {
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  width: 100%;
-  max-width: 500px;
+  width: max-content;
+  max-width: 550px;
   box-sizing: border-box;
-  margin-top: 25%;
+  margin-top: 55%;
 }
 
 h1 {

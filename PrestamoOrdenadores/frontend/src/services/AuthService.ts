@@ -21,17 +21,26 @@ const state = reactive<AuthState>({
 });
 
 export const authService = {
-    async login(credentials: any): Promise<void> {
-        const response = await axios.post("http://localhost:8080/auth/signin", credentials);
-        state.token = response.data.token;
-        if (state.token) {
-            localStorage.setItem("token", state.token);
-            await this.fetchUser();
+    async register(userData: any): Promise<string | null> {
+        try {
+            const response = await axios.post("http://localhost:8080/auth/signup", userData);
+            const token = response.data.token;
+            if (token) {
+                this.setToken(token);
+                await this.fetchUser();
+                return token;
+            }
+            return null;
+        } catch (error) {
+            console.error("Error al registrar el usuario:", error);
+            throw error;
         }
     },
 
-    async register(userData: any): Promise<void> {
-        await axios.post("http://localhost:8080/auth/signup", userData);
+    setToken(token: string): void {
+        state.token = token;
+        localStorage.setItem("token", token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     },
 
     async logout(): Promise<void> {
@@ -61,6 +70,13 @@ export const authService = {
     get token(): string | null {
         return state.token;
     },
+
+    isAuthenticated(): boolean {
+        return !!state.token;
+    }
 };
 
-authService.fetchUser();
+if (authService.token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${authService.token}`;
+    authService.fetchUser();
+}

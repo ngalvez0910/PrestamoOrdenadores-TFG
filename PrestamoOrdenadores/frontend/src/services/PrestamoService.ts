@@ -18,6 +18,39 @@ export interface Prestamo {
     fechaDevolucion: string;
 }
 
+export const getPrestamoByGuid = async (guid: string): Promise<Prestamo | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.get(`http://localhost:8080/prestamos/${guid}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (!response.data) {
+            return null;
+        }
+
+        const prestamo: Prestamo = {
+            ...response.data,
+            user: response.data.user ? { guid: response.data.user.guid } : null,
+            userGuid: response.data.user ? response.data.user.guid : null,
+            dispositivo: response.data.dispositivo ? { guid: response.data.dispositivo.guid } : null,
+            dispositivoGuid: response.data.dispositivo ? response.data.dispositivo.guid : null,
+        };
+
+        return prestamo;
+    } catch (error) {
+        console.error('Error obteniendo prestamo por GUID:', error);
+        return null;
+    }
+};
+
 export const getPrestamosByUserGuid = async (): Promise<Prestamo[]> => {
     const token = localStorage.getItem('token');
     if (!token) {

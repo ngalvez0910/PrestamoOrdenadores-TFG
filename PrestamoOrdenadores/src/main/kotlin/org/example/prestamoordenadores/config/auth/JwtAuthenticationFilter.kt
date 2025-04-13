@@ -39,6 +39,12 @@ class JwtAuthenticationFilter
         var userDetails: UserDetails?
         var userName: String?
 
+        if (request.servletPath.equals("/auth/signin") || request.servletPath.equals("/auth/signup")) {
+            log.info { "Petición a ruta de autenticación/registro, se ignora el filtro JWT" }
+            filterChain.doFilter(request, response)
+            return
+        }
+
         if (!StringUtils.hasText(authHeader) || !StringUtils.startsWithIgnoreCase(authHeader, "Bearer ")) {
             log.info { "No se ha encontrado cabecera de autenticación, se ignora" }
             filterChain.doFilter(request, response)
