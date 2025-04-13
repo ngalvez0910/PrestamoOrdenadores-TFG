@@ -22,9 +22,6 @@ fun UserCreateRequest.validate(): Result<UserCreateRequest, UserError> {
         apellidos!!.isBlank() ->
             Err(UserError.UserValidationError("Los apellidos no pueden estar vacíos"))
 
-        fotoCarnet!!.isBlank() ->
-            Err(UserError.UserValidationError("La foto de carnet no puede estar vacía"))
-
         email!!.isBlank() || !email!!.matches(Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) ->
             Err(UserError.UserValidationError("El email no es válido o está vacío"))
 

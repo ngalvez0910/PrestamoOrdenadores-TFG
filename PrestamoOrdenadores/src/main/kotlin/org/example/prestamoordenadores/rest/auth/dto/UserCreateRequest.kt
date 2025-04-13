@@ -13,8 +13,6 @@ data class UserCreateRequest (
     var email: String?,
     var curso: String?,
     var tutor: String?,
-    @NotNull("Foto carnet no puede ser null")
-    var fotoCarnet: String?,
     @NotNull("Password no puede estar vacío")
     var password : String?,
     @NotNull("Confirm password no puede estar vacío")

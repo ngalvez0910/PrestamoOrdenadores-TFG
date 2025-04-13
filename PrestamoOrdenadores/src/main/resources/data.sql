@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
     apellidos VARCHAR(255) NOT NULL,
     curso VARCHAR(100) NULL DEFAULT NULL,
     tutor VARCHAR(100) NULL DEFAULT NULL,
-    foto_carnet VARCHAR(255) NOT NULL,
     avatar VARCHAR(255) NOT NULL,
     is_activo BOOLEAN DEFAULT false,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -20,11 +19,11 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 
 -- Insertar usuarios de prueba
-INSERT INTO usuarios (guid, email, campo_password, rol, numero_identificacion, nombre, apellidos, curso, tutor, foto_carnet, avatar, is_activo, created_date, updated_date, last_login_date, last_password_reset_date)
+INSERT INTO usuarios (guid, email, campo_password, rol, numero_identificacion, nombre, apellidos, curso, tutor, avatar, is_activo, created_date, updated_date, last_login_date, last_password_reset_date)
 VALUES
-    ('3854b5ba26c', 'juan@loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ALUMNO', '12345678A', 'Juan', 'Pérez', '1º Bachillerato', 'María Gómez', 'foto1.jpg', 'avatar1.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('c1f40bb1900', 'maria@profesor.loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'PROFESOR', '87654321B', 'María', 'Gómez', '1º Bachillerato', NULL, 'foto2.jpg', 'avatar2.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('0d6d031ad0a', 'admin@admin.loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ADMIN', '00000000X', 'Admin', 'User', NULL, NULL, 'foto3.jpg', 'avatar3.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('3854b5ba26c', 'juan@loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ALUMNO', '12345678A', 'Juan', 'Pérez', '1º Bachillerato', 'María Gómez', 'avatar1.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('c1f40bb1900', 'maria@profesor.loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'PROFESOR', '87654321B', 'María', 'Gómez', '1º Bachillerato', NULL, 'avatar2.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('0d6d031ad0a', 'admin@admin.loantech.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ADMIN', '00000000X', 'Admin', 'User', NULL, NULL, 'avatar3.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Crear tabla incidencias
 CREATE TABLE IF NOT EXISTS incidencias (
@@ -100,7 +99,7 @@ CREATE TABLE IF NOT EXISTS prestamos (
 -- Insertar prestamos de prueba
 INSERT INTO prestamos (guid, user_id, dispositivo_id, estado_prestamo, fecha_prestamo, fecha_devolucion, created_date, updated_date)
 VALUES
-    ('938012eccbd', 1, 2, 'EN_CURSO', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('938012eccbd', 1, 2, 'EN_CURSO', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '3 weeks', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 
