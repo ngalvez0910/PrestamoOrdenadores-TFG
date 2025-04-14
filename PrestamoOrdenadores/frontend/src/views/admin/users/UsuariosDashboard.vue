@@ -2,12 +2,20 @@
   <MenuBar />
   <div class="filters" style="margin-left: -20%; margin-top: 35%">
     Buscar:
-    <input type="text" v-model="search" placeholder="Buscar..." @input="filterData" />
+    <input type="text" v-model="search" placeholder="Buscar..." @input="handleSearchInput" />
   </div>
   <br>
   <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
     <div class="table row-12">
-      <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
+      <DataTable
+          :value="datos"
+          paginator
+          :rows="5"
+          :totalRecords="totalRecords"
+          :lazy="true"
+          @page="onPage"
+          paginatorClass="custom-paginator"
+      >
         <Column field="email">
           <template #header>
             <b>Email</b>
@@ -58,6 +66,8 @@
 <script lang="ts">
 import MenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 interface User {
   guid: string;
@@ -78,70 +88,83 @@ interface User {
   updatedDate: string;
 }
 
+interface PagedResponse {
+  content: User[];
+  totalElements: number;
+}
+
 export default {
   name: 'UsuariosDashboard',
-  components: { MenuBar },
+  components: { MenuBar, DataTable, Column },
   emits: ['input-change'],
   data() {
     return {
       search: '',
       datos: [] as User[],
-      filteredDatos: [] as User[]
+      totalRecords: 0,
+      loading: false,
+      currentPage: 0,
+      pageSize: 5,
+      filters: {}
     };
   },
-  mounted() {
-    this.obtenerDatos();
+  async mounted() {
+    console.log("Componente montado. Llamando a obtenerDatos inicial...");
+    await this.loadData();
+    console.log("Datos iniciales y totalRecords cargados.");
   },
   methods: {
-    async obtenerDatos() {
+    async loadData(page: number = this.currentPage, size: number = this.pageSize, query: string = '') {
+      this.loading = true;
       try {
         const token = localStorage.getItem('token');
         if (!token) {
           console.error("No se encontró el token de autenticación.");
+          this.loading = false;
           return;
         }
 
-        const response = await axios.get(`http://localhost:8080/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        let users = response.data.content || response.data;
-
-        if (!Array.isArray(users)) {
-          users = [users];
+        let url = `http://localhost:8080/users?page=${page}&size=${size}`;
+        if (query) {
+          url += `&search=${query}`; // Assuming your API supports a 'search' parameter
         }
 
-        this.datos = users.map((user: any) => {
-          return {
-            ...user
-          };
+        console.log("Llamando a la API:", url);
+
+        const response = await axios.get<PagedResponse>(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
-        console.log("Datos recibidos:", response.data);
-        this.filteredDatos = this.datos;
+        console.log("Respuesta de la API:", response.data);
+
+        this.datos = response.data.content;
+        this.totalRecords = response.data.totalElements;
+        this.loading = false;
+        console.log("Datos actualizados en el componente:", this.datos);
+        console.log("Total de registros:", this.totalRecords);
+
       } catch (error) {
         console.error("Error obteniendo datos:", error);
+        this.loading = false;
       }
     },
-    filterData() {
-      this.filteredDatos = this.datos.filter(user => {
-        const searchText = this.search.toLowerCase();
-        const email = (user.email || "").toLowerCase();
-        const nombre = (user.nombre || "").toLowerCase();
-        const curso = (user.curso || "").toLowerCase();
-        const tutor = (user.tutor || "").toLowerCase();
-        const rol = (user.rol || "").toLowerCase();
-
-        return (
-            email.includes(searchText) ||
-            nombre.includes(searchText) ||
-            curso.includes(searchText) ||
-            tutor.includes(searchText) ||
-            rol.includes(searchText)
-        );
-      });
+    onPage(event: any) {
+      console.log("Evento de paginación:", event);
+      this.currentPage = event.page;
+      this.pageSize = event.rows;
+      this.loadData(this.currentPage, this.pageSize, this.search);
+    },
+    handleSearchInput(event: Event) {
+      const target = event.target as HTMLInputElement;
+      this.search = target.value;
+      this.filterData(this.search);
+    },
+    filterData(query: string) {
+      console.log("Filtrando datos con:", query);
+      this.currentPage = 0;
+      this.loadData(this.currentPage, this.pageSize, query);
     },
     verUsuario(usuario: User) {
       console.log("Navegando a detalle de usuario con estos datos:", usuario);
@@ -228,5 +251,65 @@ export default {
 
 a {
   background-color: inherit !important;
+}
+
+.custom-paginator {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #eee;
+  background-color: #f9f9f9;
+}
+
+.p-paginator-pages button {
+  background-color: #d6621e;
+  color: #ffffff;
+  padding: 0.5rem 0.5rem;
+  margin: 0 5px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.p-paginator-pages button:hover {
+  background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
+}
+
+.p-paginator-pages .p-highlight {
+  background-color: #d6621e;
+  color: white;
+}
+
+.p-paginator-current {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0 10px;
+}
+
+.p-paginator-first,
+.p-paginator-prev,
+.p-paginator-next,
+.p-paginator-last {
+  background-color: #d6621e;
+  color: #ffffff;
+  border-radius: 40px;
+  padding: 0.5rem 0.75rem;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  max-width: 2%
+}
+
+.p-paginator-first:hover,
+.p-paginator-prev:hover,
+.p-paginator-next:hover,
+.p-paginator-last:hover {
+  background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
 }
 </style>

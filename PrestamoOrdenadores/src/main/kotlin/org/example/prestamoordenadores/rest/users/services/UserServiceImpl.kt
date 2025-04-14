@@ -3,9 +3,6 @@ package org.example.prestamoordenadores.rest.users.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.users.dto.*
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
@@ -23,21 +20,32 @@ import java.time.LocalDateTime
 
 private val logger = logging()
 
+data class PagedResponse<T>(
+    val content: List<T>,
+    val totalElements: Long
+)
+
 @Service
 @CacheConfig(cacheNames = ["users"])
 class UserServiceImpl(
     private val repository : UserRepository,
     private val mapper: UserMapper,
 ): UserService {
-    override fun getAllUsers(page: Int, size: Int): Result<List<UserResponseAdmin>, UserError> {
+    override fun getAllUsers(page: Int, size: Int): Result<PagedResponse<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
 
         val pageRequest = PageRequest.of(page, size)
         val pageUsers = repository.findAll(pageRequest)
         val usersResponses = mapper.toUserResponseListAdmin(pageUsers.content)
 
-        return Ok(usersResponses)
+        val pagedResponse = PagedResponse(
+            content = usersResponses,
+            totalElements = pageUsers.totalElements
+        )
+
+        return Ok(pagedResponse)
     }
+
 
     @Cacheable(key = "#guid")
     override fun getUserByGuid(guid: String): Result<UserResponse?, UserError> {

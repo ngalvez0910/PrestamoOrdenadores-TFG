@@ -19,6 +19,7 @@ import Menu from 'primevue/menu'
 import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
+import Paginator from 'primevue/paginator';
 
 const app = createApp(App)
 
@@ -34,6 +35,7 @@ app.component('Column', Column)
 app.component('Menu', Menu)
 app.component('Badge', Badge)
 app.component('Toast', Toast)
+app.component('Paginator', Paginator)
 
 
 app.mount('#app')
