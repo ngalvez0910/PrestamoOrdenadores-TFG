@@ -1,65 +1,63 @@
 <template>
   <MenuBar />
-  <div class="filters" style="margin-left: -20%; margin-top: 35%">
+  <div class="filters" style="margin-left: -20%; margin-top: -23%">
     Buscar:
     <input type="text" v-model="search" placeholder="Buscar..." @input="handleSearchInput" />
   </div>
   <br>
-  <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
-    <div class="table row-12">
-      <DataTable
-          :value="datos"
-          paginator
-          :rows="5"
-          :totalRecords="totalRecords"
-          :lazy="true"
-          @page="onPage"
-          paginatorClass="custom-paginator"
-      >
-        <Column field="email">
-          <template #header>
-            <b>Email</b>
-          </template>
-        </Column>
-        <Column>
-          <template #body="slotProps">
-            <span>{{ slotProps.data.nombre }} {{ slotProps.data.apellidos }}</span>
-          </template>
-          <template #header>
-            <b>Nombre</b>
-          </template>
-        </Column>
-        <Column field="curso">
-          <template #header>
-            <b>Curso</b>
-          </template>
-        </Column>
-        <Column field="tutor">
-          <template #header>
-            <b>Tutor</b>
-          </template>
-        </Column>
-        <Column field="rol">
-          <template #header>
-            <b>Rol</b>
-          </template>
-        </Column>
-        <Column field="ver">
-          <template #body="slotProps">
-            <button @click="verUsuario(slotProps.data)" class="ver-button">
-              <i class="pi pi-eye"></i>
-            </button>
-          </template>
-        </Column>
-        <Column field="delete">
-          <template #body="slotProps">
-            <button @click="deleteUsuario(slotProps.data)" class="delete-button">
-              <i class="pi pi-ban"></i>
-            </button>
-          </template>
-        </Column>
-      </DataTable>
-    </div>
+  <div class="table-container row-12">
+    <DataTable
+        :value="datos"
+        paginator
+        :rows="5"
+        :totalRecords="totalRecords"
+        :lazy="true"
+        @page="onPage"
+        paginatorClass="custom-paginator"
+    >
+      <Column field="email">
+        <template #header>
+          <b>Email</b>
+        </template>
+      </Column>
+      <Column>
+        <template #body="slotProps">
+          <span>{{ slotProps.data.nombre }} {{ slotProps.data.apellidos }}</span>
+        </template>
+        <template #header>
+          <b>Nombre</b>
+        </template>
+      </Column>
+      <Column field="curso">
+        <template #header>
+          <b>Curso</b>
+        </template>
+      </Column>
+      <Column field="tutor">
+        <template #header>
+          <b>Tutor</b>
+        </template>
+      </Column>
+      <Column field="rol">
+        <template #header>
+          <b>Rol</b>
+        </template>
+      </Column>
+      <Column field="ver">
+        <template #body="slotProps">
+          <button @click="verUsuario(slotProps.data)" class="ver-button">
+            <i class="pi pi-eye"></i>
+          </button>
+        </template>
+      </Column>
+      <Column field="delete">
+        <template #body="slotProps">
+          <button @click="deleteUsuario(slotProps.data)" class="delete-button">
+            <i class="pi pi-ban"></i>
+          </button>
+        </template>
+      </Column>
+    </DataTable>
   </div>
 </template>
 
@@ -101,6 +99,7 @@ export default {
     return {
       search: '',
       datos: [] as User[],
+      todosLosDatos: [] as User[],
       totalRecords: 0,
       loading: false,
       currentPage: 0,
@@ -114,7 +113,7 @@ export default {
     console.log("Datos iniciales y totalRecords cargados.");
   },
   methods: {
-    async loadData(page: number = this.currentPage, size: number = this.pageSize, query: string = '') {
+    async loadData() {
       this.loading = true;
       try {
         const token = localStorage.getItem('token');
@@ -124,47 +123,62 @@ export default {
           return;
         }
 
-        let url = `http://localhost:8080/users?page=${page}&size=${size}`;
-        if (query) {
-          url += `&search=${query}`; // Assuming your API supports a 'search' parameter
-        }
-
-        console.log("Llamando a la API:", url);
-
-        const response = await axios.get<PagedResponse>(url, {
+        const urlTotal = `http://localhost:8080/users?page=0&size=1`;
+        const responseTotal = await axios.get<PagedResponse>(urlTotal, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        console.log("Respuesta de la API:", response.data);
+        this.totalRecords = responseTotal.data.totalElements;
 
-        this.datos = response.data.content;
-        this.totalRecords = response.data.totalElements;
+        const urlAll = `http://localhost:8080/users?page=0&size=${this.totalRecords}`;
+        const responseAll = await axios.get<PagedResponse>(urlAll, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        this.todosLosDatos = responseAll.data.content;
+        this.paginar();
         this.loading = false;
-        console.log("Datos actualizados en el componente:", this.datos);
-        console.log("Total de registros:", this.totalRecords);
-
       } catch (error) {
         console.error("Error obteniendo datos:", error);
         this.loading = false;
       }
     },
+    paginar() {
+      const inicio = this.currentPage * this.pageSize;
+      const fin = inicio + this.pageSize;
+      this.datos = this.filtrarPorTexto(this.search).slice(inicio, fin);
+    },
     onPage(event: any) {
-      console.log("Evento de paginación:", event);
       this.currentPage = event.page;
       this.pageSize = event.rows;
-      this.loadData(this.currentPage, this.pageSize, this.search);
+      this.paginar();
     },
     handleSearchInput(event: Event) {
       const target = event.target as HTMLInputElement;
       this.search = target.value;
-      this.filterData(this.search);
-    },
-    filterData(query: string) {
-      console.log("Filtrando datos con:", query);
       this.currentPage = 0;
-      this.loadData(this.currentPage, this.pageSize, query);
+
+      const resultadosFiltrados = this.filtrarPorTexto(this.search);
+      this.totalRecords = resultadosFiltrados.length;
+
+      this.paginar();
+    },
+    filtrarPorTexto(query: string) {
+      if (!query) return this.todosLosDatos;
+
+      const q = query.toLowerCase();
+      return this.todosLosDatos.filter(user =>
+          user.nombre?.toLowerCase().includes(q) ||
+          user.apellidos?.toLowerCase().includes(q) ||
+          user.email?.toLowerCase().includes(q) ||
+          user.curso?.toLowerCase().includes(q) ||
+          user.tutor?.toLowerCase().includes(q) ||
+          user.rol?.toLowerCase().includes(q)
+      );
     },
     verUsuario(usuario: User) {
       console.log("Navegando a detalle de usuario con estos datos:", usuario);
@@ -178,6 +192,10 @@ export default {
 </script>
 
 <style>
+body{
+  overflow-y: auto;
+}
+
 .filters {
   position: relative;
   width: 100%;
@@ -187,7 +205,7 @@ export default {
 }
 
 .filters input {
-  width: 100%;
+  min-width: 800px;
   padding: 0.5rem;
   border: 1px solid #d1d3e2;
   border-radius: 25px;
@@ -212,6 +230,7 @@ export default {
   border: none;
   border-radius: 50%;
   transition: all 0.3s ease-in-out;
+  margin-left: -10%;
 }
 
 .ver-button:hover {
@@ -238,6 +257,7 @@ export default {
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: -2%;
+  margin-left: -10%;
 }
 
 .delete-button:hover {
@@ -311,5 +331,13 @@ a {
   background-color: #a14916;
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgb(236, 145, 96);
+}
+
+.table-container {
+  width: 90%;
+  overflow-x: auto;
+  margin-bottom: 40px;
+  margin-left: -26%;
+  position: fixed
 }
 </style>
