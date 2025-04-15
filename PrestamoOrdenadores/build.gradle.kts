@@ -62,6 +62,9 @@ dependencies {
 
     // Validaciones
     implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    //MockK
+    testImplementation("io.mockk:mockk:1.14.0")
 }
 
 kotlin {

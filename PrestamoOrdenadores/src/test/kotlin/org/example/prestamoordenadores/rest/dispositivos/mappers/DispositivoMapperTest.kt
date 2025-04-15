@@ -16,8 +16,7 @@ class DispositivoMapperTest {
         "5CD1234XYZ",
         "raton, cargador",
         EstadoDispositivo.DISPONIBLE,
-        "",
-        20,
+        null,
         true,
         LocalDateTime.now(),
         LocalDateTime.now()
@@ -31,7 +30,6 @@ class DispositivoMapperTest {
             "guidTest123",
             "5CD1234XYZ",
             "raton, cargador",
-            20,
         )
 
         val response = mapper.toDispositivoResponse(dispositivo)
@@ -40,7 +38,6 @@ class DispositivoMapperTest {
             { assertEquals(dispositivoResponse.guid, response.guid) },
             { assertEquals(dispositivoResponse.numeroSerie, response.numeroSerie) },
             { assertEquals(dispositivoResponse.componentes, response.componentes) },
-            { assertEquals(dispositivoResponse.stock, response.stock) }
         )
     }
 
@@ -48,14 +45,12 @@ class DispositivoMapperTest {
     fun toDispositivoFromCreate() {
         val dispositivoCreate = DispositivoCreateRequest(
             "raton, cargador",
-            20,
         )
 
         val response = mapper.toDispositivoFromCreate(dispositivoCreate)
 
         assertAll(
             { assertEquals(dispositivoCreate.componentes, response.componentes) },
-            { assertEquals(dispositivoCreate.stock, response.stock) }
         )
     }
 
@@ -66,8 +61,7 @@ class DispositivoMapperTest {
             "5CD1234XYZ",
             "raton, cargador",
             EstadoDispositivo.DISPONIBLE.toString(),
-            "",
-            20,
+            null,
             true
         )
 
@@ -78,8 +72,7 @@ class DispositivoMapperTest {
             { assertEquals(dispositivoResponseAdmin.numeroSerie, response.numeroSerie) },
             { assertEquals(dispositivoResponseAdmin.componentes, response.componentes) },
             { assertEquals(dispositivoResponseAdmin.estado, response.estado) },
-            { assertEquals(dispositivoResponseAdmin.incidenciaGuid, response.incidenciaGuid) },
-            { assertEquals(dispositivoResponseAdmin.stock, response.stock) },
+            { assertEquals(dispositivoResponseAdmin.incidencia, response.incidencia) },
             { assertEquals(dispositivoResponseAdmin.isActivo, response.isActivo) }
         )
     }
@@ -95,7 +88,7 @@ class DispositivoMapperTest {
             { assertEquals("guidTest123", responses[0].guid) },
             { assertEquals("5CD1234XYZ", responses[0].numeroSerie) },
             { assertEquals("DISPONIBLE", responses[0].estado) },
-            { assertEquals("", responses[0].incidenciaGuid) }
+            { assertEquals(null, responses[0].incidencia) }
         )
     }
 
