@@ -4,19 +4,42 @@ import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequ
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
+import org.example.prestamoordenadores.rest.users.dto.UserResponse
+import org.example.prestamoordenadores.rest.users.mappers.UserMapper
+import org.example.prestamoordenadores.rest.users.models.Role
+import org.example.prestamoordenadores.rest.users.models.User
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 class IncidenciaMapperTest {
+    private val user = User(
+        1,
+        "guidTest123",
+        "email",
+        "password",
+        Role.ALUMNO,
+        "numIdent",
+        "name",
+        "apellido",
+        "curso",
+        "tutor",
+        "avatar",
+        true,
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        LocalDateTime.now()
+    )
+
     private val incidencia = Incidencia(
         1,
         "guidTest123",
         "Asunto",
         "Descripcion",
         EstadoIncidencia.PENDIENTE,
-        "userGuid",
+        user,
         LocalDateTime.now(),
         LocalDateTime.now()
     )
@@ -25,12 +48,21 @@ class IncidenciaMapperTest {
 
     @Test
     fun toIncidenciaResponse() {
+        val userResponse = UserResponse(
+            "guidTest123",
+            "email",
+            "name",
+            "apellido",
+            "curso",
+            "tutor"
+        )
+
         val incidenciaResponse = IncidenciaResponse(
             "guidTest123",
             "Asunto",
             "Descripcion",
             EstadoIncidencia.PENDIENTE.toString(),
-            "userGuid",
+            userResponse,
             LocalDate.now().toString()
         )
 
@@ -52,7 +84,7 @@ class IncidenciaMapperTest {
             "Descripcion"
         )
 
-        val response = mapper.toIncidenciaFromCreate(incidenciaCreate)
+        val response = mapper.toIncidenciaFromCreate(incidenciaCreate, user)
 
         assertAll(
             { assertEquals(incidenciaCreate.asunto, response.asunto) },
@@ -71,7 +103,7 @@ class IncidenciaMapperTest {
             { assertEquals(incidenciaList[0].asunto, response[0].asunto) },
             { assertEquals(incidenciaList[0].descripcion, response[0].descripcion) },
             { assertEquals(incidenciaList[0].estadoIncidencia.toString(), response[0].estadoIncidencia) },
-            { assertEquals(incidenciaList[0].userGuid, response[0].user) }
+            { assertEquals(incidenciaList[0].user.guid, response[0].user.guid) }
         )
     }
 
