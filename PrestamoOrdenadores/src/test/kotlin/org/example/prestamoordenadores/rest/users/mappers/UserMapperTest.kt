@@ -21,7 +21,6 @@ class UserMapperTest {
         "apellido",
         "curso",
         "tutor",
-        "fotocarnet",
         "avatar",
         true,
         LocalDateTime.now(),
@@ -53,10 +52,10 @@ class UserMapperTest {
         )
     }
 
-    /*
     @Test
     fun toUserResponseAdmin() {
         val userResponseAdmin = UserResponseAdmin(
+            "numIdent",
             "guidTest123",
             "email",
             "name",
@@ -81,7 +80,7 @@ class UserMapperTest {
             { assertEquals(userResponseAdmin.isActivo, response.isActivo) }
         )
     }
-*/
+
     @Test
     fun toUserFromCreate() {
         val userCreate = UserCreateRequest(
@@ -91,7 +90,6 @@ class UserMapperTest {
             "email",
             "curso",
             "tutor",
-            "fotocarnet",
             "password",
             "password"
         )
@@ -102,7 +100,6 @@ class UserMapperTest {
             { assertEquals(userCreate.numeroIdentificacion, response.numeroIdentificacion) },
             { assertEquals(userCreate.nombre, response.nombre) },
             { assertEquals(userCreate.email, response.email) },
-            { assertEquals(userCreate.fotoCarnet, response.fotoCarnet) },
             { assertEquals(userCreate.password, response.campoPassword) }
         )
     }
