@@ -1,21 +1,56 @@
 package org.example.prestamoordenadores.rest.prestamos.mappers
 
+import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
+import org.example.prestamoordenadores.rest.users.dto.UserResponse
+import org.example.prestamoordenadores.rest.users.models.Role
+import org.example.prestamoordenadores.rest.users.models.User
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 class PrestamoMapperTest {
+    private val dispositivo = Dispositivo(
+        1,
+        "guidTest123",
+        "5CD1234XYZ",
+        "raton, cargador",
+        EstadoDispositivo.DISPONIBLE,
+        null,
+        true,
+        LocalDateTime.now(),
+        LocalDateTime.now()
+    )
+
+    private val user = User(
+        1,
+        "guidTest123",
+        "email",
+        "password",
+        Role.ALUMNO,
+        "numIdent",
+        "name",
+        "apellido",
+        "curso",
+        "tutor",
+        "avatar",
+        true,
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        LocalDateTime.now()
+    )
+
     private val prestamo = Prestamo(
         1,
         "guidTest123",
-        "userGuid",
-        "dispositivoGuid",
+        user,
+        dispositivo,
         EstadoPrestamo.EN_CURSO,
         LocalDate.now(),
         LocalDate.now(),
@@ -27,10 +62,26 @@ class PrestamoMapperTest {
 
     @Test
     fun toPrestamoResponse() {
+        val userResponse = UserResponse(
+            "guidTest123",
+            "email",
+            "name",
+            "apellido",
+            "curso",
+            "tutor"
+        )
+
+        val dispositivoResponse = DispositivoResponse(
+            "guidTest123",
+            "5CD1234XYZ",
+            "raton, cargador",
+        )
+
         val prestamoResponse = PrestamoResponse(
             "guidTest123",
-            "userGuid",
-            "dispositivoGuid",
+            userResponse,
+            dispositivoResponse,
+            "EN_CURSO",
             LocalDate.now().toString(),
             LocalDate.now().toString(),
         )
@@ -46,27 +97,11 @@ class PrestamoMapperTest {
 
     @Test
     fun toPrestamoFromCreate() {
-        val dispositivo = Dispositivo(
-            1,
-            "guidTest123",
-            "5CD1234XYZ",
-            "raton, cargador",
-            EstadoDispositivo.DISPONIBLE,
-            "",
-            20,
-            true,
-            LocalDateTime.now(),
-            LocalDateTime.now()
-        )
-
-        val prestamoCreate = PrestamoCreateRequest(
-            "userGuid"
-        )
-
-        val response = mapper.toPrestamoFromCreate(prestamoCreate, dispositivo)
+        val response = mapper.toPrestamoFromCreate(user, dispositivo)
 
         assertAll(
-            { assertEquals(prestamoCreate.userGuid, response.user) }
+            { assertEquals(user, response.user) },
+            { assertEquals(dispositivo, response.dispositivo) }
         )
     }
 
@@ -79,8 +114,8 @@ class PrestamoMapperTest {
         assertAll(
             { assertEquals(prestamoResponseList.size, responseList.size) },
             { assertEquals(prestamoResponseList[0].guid, responseList[0].guid) },
-            { assertEquals(prestamoResponseList[0].user, responseList[0].user) },
-            { assertEquals(prestamoResponseList[0].dispositivo, responseList[0].dispositivo) }
+            { assertEquals(prestamoResponseList[0].user.guid, responseList[0].user.guid) },
+            { assertEquals(prestamoResponseList[0].dispositivo.guid, responseList[0].dispositivo.guid) }
         )
     }
 
