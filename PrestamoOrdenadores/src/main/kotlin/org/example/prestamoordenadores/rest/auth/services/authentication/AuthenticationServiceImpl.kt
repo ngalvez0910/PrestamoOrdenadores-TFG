@@ -28,6 +28,13 @@ class AuthenticationServiceImpl
 
     override fun signUp(request: UserCreateRequest?): JwtAuthResponse {
         if (request!!.password == request.confirmPassword) {
+            val rol = when {
+                request.email!!.endsWith("@profesor.loantech.com") -> Role.PROFESOR
+                request.email!!.endsWith("@admin.loantech.com") -> Role.ADMIN
+                request.email!!.endsWith("@loantech.com") -> Role.ALUMNO
+                else -> Role.ALUMNO
+            }
+
             val user = User(
                 numeroIdentificacion = request.numeroIdentificacion!!,
                 nombre = request.nombre!!,
@@ -36,7 +43,7 @@ class AuthenticationServiceImpl
                 curso = request.curso,
                 tutor = request.tutor,
                 campoPassword = passwordEncoder.encode(request.password),
-                rol = Role.ALUMNO
+                rol = rol
             )
             try {
                 val userStored = authUsersRepository.save(user)

@@ -28,7 +28,7 @@
         </a>
       </li>
       <li class="side-menu-item">
-        <a href="#" class="side-menu-link">
+        <a href="/incidencias/me" class="side-menu-link">
           <i class="pi pi-exclamation-triangle mr-2"></i> Mis incidencias
         </a>
       </li>
