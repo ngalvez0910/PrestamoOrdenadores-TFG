@@ -1,6 +1,8 @@
 import axios from 'axios';
+import {jwtDecode} from "jwt-decode";
+import type {UserData} from "@/services/AuthService.ts";
 
-interface Incidencia {
+export interface Incidencia {
     guid: string;
     asunto: string;
     descripcion: string;
@@ -39,6 +41,44 @@ export const getIncidenciaByGuid = async (guid: string): Promise<Incidencia | nu
     } catch (error) {
         console.error('Error obteniendo incidencia por GUID:', error);
         return null;
+    }
+};
+
+export const getIncidenciasByUserGuid = async (): Promise<Incidencia[]> => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error("No se encontró el token de autenticación.");
+        return [];
+    }
+
+    try {
+        const decodedToken = jwtDecode(token);
+        const userEmail = decodedToken.sub;
+
+        if (!userEmail) {
+            console.error("No se encontró el email del usuario en el token.");
+            return [];
+        }
+
+        const userResponse = await axios.get<UserData>(`http://localhost:8080/users/email/${userEmail}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const userGuid = userResponse.data.guid;
+
+        const incidenciasResponse = await axios.get<Incidencia[]>(`http://localhost:8080/incidencias/user/${userGuid}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        return incidenciasResponse.data || [];
+
+    } catch (error: any) {
+        console.error('Error obteniendo préstamos y/o número de serie:', error.response?.data || error.message);
+        throw new Error(error.response?.data || error.message);
     }
 };
 
