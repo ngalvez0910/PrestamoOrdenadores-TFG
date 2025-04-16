@@ -1,63 +1,139 @@
 package org.example.prestamoordenadores.rest.dispositivos.repositories
 
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
-import org.junit.jupiter.api.BeforeEach
+import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
+import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
+import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
+import org.example.prestamoordenadores.rest.users.models.Role
+import org.example.prestamoordenadores.rest.users.models.User
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import kotlin.test.assertEquals
+import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDateTime
+import java.util.*
 
-/*
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class DispositivoRepositoryTest{
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+class DispositivoRepositoryTest {
 
     @Autowired
-    lateinit var dispositivoRepository: DispositivoRepository
+    private lateinit var entityManager: TestEntityManager
 
     @Autowired
-    lateinit var entityManager: TestEntityManager
+    private lateinit var dispositivoRepository: DispositivoRepository
 
-    private val dispositivo = Dispositivo(guid = "guidTest123", numeroSerie = "5CD1234XYZ", stock = 20)
-    private val dispositivo2 = Dispositivo(guid = "guidTest234", numeroSerie = "CNB4567ABC", stock = 10)
+    private val dispositivo1 = Dispositivo(
+        "guidTest123",
+        "5CD1234XYZ",
+        "raton, cargador",
+        EstadoDispositivo.DISPONIBLE,
+        null,
+        true,
+        LocalDateTime.now(),
+        LocalDateTime.now()
+    )
+
+    private val dispositivo2 = Dispositivo(
+        "guidTest234",
+        "6EF2345ABC",
+        "raton, cargador",
+        EstadoDispositivo.DISPONIBLE,
+        null,
+        true,
+        LocalDateTime.now(),
+        LocalDateTime.now()
+    )
+
+    private val user = User(
+        "guidTest123",
+        "email",
+        "password",
+        Role.ALUMNO,
+        "numIdent",
+        "name",
+        "apellido",
+        "curso",
+        "tutor",
+        "avatar",
+        true,
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        LocalDateTime.now()
+    )
+
+    private val incidencia = Incidencia(
+        "guidTestINC",
+        "Asunto",
+        "Descripcion",
+        EstadoIncidencia.PENDIENTE,
+        user,
+        LocalDateTime.now(),
+        LocalDateTime.now()
+    )
+
+    private var dispositivo3 = Dispositivo(
+        "guidTest345",
+        "7GH3456DEF",
+        "raton, cargador",
+        EstadoDispositivo.NO_DISPONIBLE,
+        incidencia,
+        true,
+        LocalDateTime.now(),
+        LocalDateTime.now()
+    )
 
     @BeforeEach
-    fun setUp() {
-        entityManager.merge<Any?>(dispositivo)
-        entityManager.merge<Any?>(dispositivo2)
+    fun setup() {
+        entityManager.persist(dispositivo1)
+        entityManager.persist(dispositivo2)
+        entityManager.persist(user)
+        entityManager.persist(incidencia)
+        entityManager.persist(dispositivo3)
         entityManager.flush()
     }
 
     @Test
-    fun findByNumeroSerieTest() {
-        val res = dispositivoRepository.findByNumeroSerie(dispositivo.numeroSerie)
+    fun findByNumeroSerie() {
+        val result = dispositivoRepository.findByNumeroSerie("5CD1234XYZ")
 
-        assertAll(
-            { assertEquals(res, dispositivo) },
-            { assert(res.numeroSerie == dispositivo.numeroSerie) }
-        )
+        assertEquals(dispositivo1.guid, result.guid)
+        assertEquals("5CD1234XYZ", result.numeroSerie)
     }
 
     @Test
-    fun findByEstadoDispositivoTest() {
-        val res = dispositivoRepository.findByEstadoDispositivo(dispositivo.estadoDispositivo)
+    fun findByEstadoDispositivo() {
+        val disponibles = dispositivoRepository.findByEstadoDispositivo(EstadoDispositivo.DISPONIBLE)
 
-        assertAll(
-            { assertEquals(res, listOf(dispositivo)) },
-            { assert(res[0].estadoDispositivo == dispositivo.estadoDispositivo) }
-        )
+        assertEquals(2, disponibles.size)
+        assertEquals(dispositivo1.guid, disponibles[0].guid)
+        assertEquals(dispositivo1.numeroSerie, disponibles[0].numeroSerie)
+        assertEquals(dispositivo2.guid, disponibles[1].guid)
+        assertEquals(dispositivo2.numeroSerie, disponibles[1].numeroSerie)
     }
 
     @Test
-    fun findDispositivoByGuidTest() {
-        val res = dispositivoRepository.findDispositivoByGuid(dispositivo.guid)
+    fun findDispositivoByGuid() {
+        val found = dispositivoRepository.findDispositivoByGuid(dispositivo1.guid)
+        val notFound = dispositivoRepository.findDispositivoByGuid("non-existent-guid")
 
-        assertAll(
-            { assertEquals(res, dispositivo) },
-            { assert(res?.guid == dispositivo.guid) }
-        )
+        assertNotNull(found)
+        assertEquals(dispositivo1.numeroSerie, found?.numeroSerie)
+        assertNull(notFound)
     }
-}*/
+
+    @Test
+    fun findDispositivoByIncidenciaGuid() {
+        val found = dispositivoRepository.findDispositivoByIncidenciaGuid("guidTestINC")
+
+        assertNotNull(found)
+        assertEquals(dispositivo3.guid, found?.guid)
+        assertEquals("7GH3456DEF", found?.numeroSerie)
+    }
+}

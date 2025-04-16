@@ -9,7 +9,6 @@ import org.example.prestamoordenadores.rest.users.models.Role
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class UserValidatorTest {
