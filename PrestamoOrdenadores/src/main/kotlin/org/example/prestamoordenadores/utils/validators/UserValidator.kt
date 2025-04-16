@@ -10,10 +10,12 @@ import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.models.Role
+import java.time.LocalDate
 
 fun UserCreateRequest.validate(): Result<UserCreateRequest, UserError> {
+    val regex = generarRegexCarnet()
     return when {
-        numeroIdentificacion!!.isBlank() ->
+        numeroIdentificacion!!.isBlank() || !numeroIdentificacion!!.matches(regex) ->
             Err(UserError.UserValidationError("El número de identificación no puede estar vacío"))
 
         nombre!!.isBlank() ->
@@ -85,4 +87,14 @@ fun UserPasswordResetRequest.validate(): Result<UserPasswordResetRequest, UserEr
 
         else -> Ok(this)
     }
+}
+
+fun generarRegexCarnet(): Regex {
+    val añoActual = LocalDate.now().year
+    val añoInicio = añoActual - 30
+
+    val añosValidos = (añoInicio..añoActual).joinToString("|")
+    val regex = "($añosValidos)LT\\d{6}"
+
+    return Regex(regex)
 }
