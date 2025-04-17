@@ -9,7 +9,7 @@
     </a>
   </div>
 
-  <button class="buttonIncidencia" label="reportarIncidencia">Reportar Incidencia</button>
+  <button class="buttonIncidencia" @click="crearIncidencia()" label="reportarIncidencia">Reportar Incidencia</button>
 
   <div class="table row-12" style="margin-left: -17%; margin-top: 1%; position: relative;">
     <DataTable :value="incidencias" stripedRows tableStyle="min-width: 50rem">
@@ -54,6 +54,14 @@ export default defineComponent({
 
     return { incidencias, };
   },
+  methods: {
+    crearIncidencia() {
+      console.log("Navegando a crear incidencia");
+      this.$router.push({
+        name: 'ReportarIncidencia'
+      });
+    }
+  }
 });
 </script>
 

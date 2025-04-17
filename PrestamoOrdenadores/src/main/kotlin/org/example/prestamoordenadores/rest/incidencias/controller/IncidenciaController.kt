@@ -83,6 +83,7 @@ class IncidenciaController
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
     fun createIncidencia(@RequestBody incidencia: IncidenciaCreateRequest): ResponseEntity<Any> {
         return incidenciaService.createIncidencia(incidencia).mapBoth(
             success = { ResponseEntity.status(201).body(it) },
