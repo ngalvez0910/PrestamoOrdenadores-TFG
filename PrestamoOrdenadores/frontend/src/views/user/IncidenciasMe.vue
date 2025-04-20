@@ -1,34 +1,33 @@
 <template>
   <AdminMenuBar/>
-
-  <div class="boton-atras">
+  <button class="back-button">
     <a href="/profile">
-      <button class="back-button">
-        <i class="pi pi-arrow-left"></i>
-      </button>
+      <i class="pi pi-arrow-left"></i>
     </a>
-  </div>
+  </button>
 
-  <button class="buttonIncidencia" label="reportarIncidencia">Reportar Incidencia</button>
+  <button class="buttonIncidencia" @click="crearIncidencia()" label="reportarIncidencia">Reportar Incidencia</button>
 
-  <div class="table row-12" style="margin-left: -17%; margin-top: 1%; position: relative;">
-    <DataTable :value="incidencias" stripedRows tableStyle="min-width: 50rem">
-      <Column field="asunto">
-        <template #header>
-          <b>Asunto</b>
-        </template>
-      </Column>
-      <Column field="createdDate">
-        <template #header>
-          <b>Fecha Incidencia</b>
-        </template>
-      </Column>
-      <Column field="estadoIncidencia">
-        <template #header>
-          <b>Estado</b>
-        </template>
-      </Column>
-    </DataTable>
+  <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
+    <div class="table row-12">
+      <DataTable :value="incidencias" stripedRows tableStyle="min-width: 50rem">
+        <Column field="asunto">
+          <template #header>
+            <b>Asunto</b>
+          </template>
+        </Column>
+        <Column field="createdDate">
+          <template #header>
+            <b>Fecha Incidencia</b>
+          </template>
+        </Column>
+        <Column field="estadoIncidencia">
+          <template #header>
+            <b>Estado</b>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </div>
 </template>
 
@@ -54,12 +53,20 @@ export default defineComponent({
 
     return { incidencias, };
   },
+  methods: {
+    crearIncidencia() {
+      console.log("Navegando a crear incidencia");
+      this.$router.push({
+        name: 'ReportarIncidencia'
+      });
+    }
+  }
 });
 </script>
 
 <style scoped>
 .back-button {
-  padding: 0.7rem 0.5rem;
+  padding: 0.3rem 0.5rem;
   font-size: 0.875rem;
   background-color: #14124f;
   color: white;
@@ -67,11 +74,12 @@ export default defineComponent({
   border-radius: 50%;
   transition: all 0.3s ease-in-out;
   margin-left: -40%;
-  margin-top: -13%;
+  margin-top: 40%;
   width: 5%;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .back-button:hover{
@@ -86,6 +94,7 @@ export default defineComponent({
 
 a{
   background-color: inherit !important;
+  color: inherit !important;
 }
 
 .buttonIncidencia {
@@ -98,7 +107,7 @@ a{
   width: 25%;
   transition: all 0.3s ease-in-out;
   position: relative;
-  top: -50px;
+  top: -2%;
   left: 75%;
   margin-top: 0;
   margin-left: 0;

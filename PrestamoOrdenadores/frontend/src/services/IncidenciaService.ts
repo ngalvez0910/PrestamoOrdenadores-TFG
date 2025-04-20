@@ -13,6 +13,11 @@ export interface Incidencia {
     updatedDate: string;
 }
 
+export interface IncidenciaCreateRequest {
+    asunto: string;
+    descripcion: string;
+}
+
 export const getIncidenciaByGuid = async (guid: string): Promise<Incidencia | null> => {
     try {
         const token = localStorage.getItem('token');
@@ -124,4 +129,48 @@ export const descargarCsvIncidencias = async (): Promise<void | null> => {
         console.error('Error al descargar el CSV de incidencias', error);
         throw error;
     }
-}
+};
+
+export const createIncidencia = async (incidenciaData: IncidenciaCreateRequest): Promise<Incidencia | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No se encontró el token de autenticación.');
+            return null;
+        }
+
+        const decodedToken = jwtDecode(token);
+        const userEmail = decodedToken.sub;
+
+        if (!userEmail) {
+            console.error('No se encontró el email del usuario en el token.');
+            return null;
+        }
+
+        const userResponse = await axios.get<UserData>(`http://localhost:8080/users/email/${userEmail}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const userGuid = userResponse.data.guid;
+
+        const response = await axios.post<Incidencia>(
+            'http://localhost:8080/incidencias',
+            {
+                ...incidenciaData,
+                userGuid: userGuid,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        console.error('Error al crear la incidencia:', error.response?.data || error.message);
+        return null;
+    }
+};
