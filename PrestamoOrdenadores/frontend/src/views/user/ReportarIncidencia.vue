@@ -34,7 +34,6 @@ import { defineComponent } from 'vue';
 import MenuBar from '@/components/AdminMenuBar.vue';
 import { createIncidencia, type Incidencia } from '@/services/IncidenciaService';
 import { useToast } from 'primevue/usetoast';
-import Toast from "primevue/toast";
 
 export default defineComponent({
   name: 'ReportarIncidencia',
@@ -67,7 +66,7 @@ export default defineComponent({
             summary: 'Éxito',
             detail: 'Incidencia reportada correctamente',
             life: 3000 ,
-            styleClass: 'custom-toast'
+            styleClass: 'custom-toast-success'
           });
           this.asunto = '';
           this.descripcion = '';
