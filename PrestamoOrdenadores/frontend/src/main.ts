@@ -20,6 +20,8 @@ import Badge from 'primevue/badge';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import Paginator from 'primevue/paginator';
+import ConfirmDialog from 'primevue/confirmdialog';
+import ConfirmationService from 'primevue/confirmationservice';
 
 const app = createApp(App)
 
@@ -27,6 +29,8 @@ app.use(createPinia())
 app.use(router)
 app.use(PrimeVue)
 app.use(ToastService)
+app.use(ConfirmationService);
+app.component('ConfirmDialog', ConfirmDialog);
 app.component('Menubar', Menubar)
 app.component('Button', Button)
 app.component('AdminMenuBar', AdminMenuBar)

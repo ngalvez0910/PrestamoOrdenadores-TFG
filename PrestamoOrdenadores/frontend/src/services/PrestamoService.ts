@@ -148,3 +148,32 @@ export const descargarCsvPrestamos = async (): Promise<void | null> => {
         throw error;
     }
 }
+
+export const createPrestamo = async (): Promise<void | null> => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error("No se encontró el token de autenticación.");
+        return null;
+    }
+
+    try {
+        const response = await axios.post(
+            'http://localhost:8080/prestamos',
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+
+        if (response.status !== 201) {
+            console.error('Error al realizar el préstamo:', response.data);
+        }
+        return;
+    } catch (error: any) {
+        console.error('Error al realizar el préstamo:', error.response?.data || error.message);
+        return null;
+    }
+};

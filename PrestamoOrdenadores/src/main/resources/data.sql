@@ -83,7 +83,7 @@ VALUES
 CREATE TABLE IF NOT EXISTS prestamos (
     id SERIAL PRIMARY KEY,
     guid VARCHAR(11) NOT NULL UNIQUE,
-    user_id BIGINT UNIQUE NOT NULL,
+    user_id BIGINT NOT NULL,
     dispositivo_id BIGINT UNIQUE NOT NULL,
     estado_prestamo VARCHAR(20) NOT NULL,
     fecha_prestamo DATE NOT NULL,

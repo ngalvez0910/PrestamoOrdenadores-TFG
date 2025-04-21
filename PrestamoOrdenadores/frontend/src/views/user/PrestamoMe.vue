@@ -11,7 +11,7 @@
     </div>
   </div>
 
-  <button class="buttonPrestamo" label="realizarPrestamo">Realizar Préstamo</button>
+  <button class="buttonPrestamo" label="realizarPrestamo" @click="realizarPrestamo">Realizar Préstamo</button>
 
   <div class="table row-12" style="margin-left: -17%; margin-top: 5%">
     <DataTable :value="prestamos" stripedRows tableStyle="min-width: 50rem">
@@ -25,30 +25,69 @@
       <Column field="estadoPrestamo" header="Estado"></Column>
     </DataTable>
   </div>
+
+  <ConfirmDialog />
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
-import { getPrestamosByUserGuid, type Prestamo } from '@/services/PrestamoService.ts';
+import { getPrestamosByUserGuid, createPrestamo, type Prestamo } from '@/services/PrestamoService.ts';
+import { useToast } from 'primevue/usetoast';
+import { useRouter } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
+
 
 export default defineComponent({
   name: "PrestamoMe",
   components: { AdminMenuBar },
   setup() {
     const prestamos = ref<Prestamo[]>([]);
+    const toast = useToast();
+    const router = useRouter();
+    const confirm = useConfirm();
+
 
     onMounted(async () => {
+      await fetchPrestamos();
+    });
+
+    const fetchPrestamos = async () => {
       try {
         const data = await getPrestamosByUserGuid();
         prestamos.value = data;
         console.log("Datos de préstamos:", prestamos.value);
       } catch (error) {
         console.error("Error al obtener los préstamos:", error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los préstamos.', life: 3000 });
       }
-    });
+    };
 
-    return { prestamos, };
+    const realizarPrestamo = async () => {
+      confirm.require({
+        message: '¿Estás seguro de que deseas realizar el préstamo?',
+        header: 'Confirmación',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Sí',
+        rejectLabel: 'No',
+        accept: async () => {
+          try {
+            await createPrestamo();
+            toast.add({ severity: 'success', summary: 'Éxito', detail: 'Préstamo realizado con éxito.', life: 3000 });
+            await fetchPrestamos();
+          } catch (error: any) {
+            console.error('Error al realizar el préstamo:', error.message);
+            toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 5000 });
+          }
+        },
+        reject: () => {
+          toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Operación cancelada.', life: 3000 });
+        },
+      });
+    };
+
+
+    return { prestamos, realizarPrestamo };
   },
 });
 </script>
