@@ -113,7 +113,6 @@ a{
   margin-left: 0;
 }
 
-
 .buttonIncidencia:hover {
   background-color: #a14916;
   transform: scale(1.1);

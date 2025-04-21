@@ -149,14 +149,14 @@ export const descargarCsvPrestamos = async (): Promise<void | null> => {
     }
 }
 
-export const createPrestamo = async (): Promise<void | null> => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        console.error("No se encontró el token de autenticación.");
-        return null;
-    }
-
+export const createPrestamo = async (): Promise<string | null> => {
     try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
         const response = await axios.post(
             'http://localhost:8080/prestamos',
             {},
@@ -167,13 +167,52 @@ export const createPrestamo = async (): Promise<void | null> => {
             }
         );
 
-
-        if (response.status !== 201) {
+        if (response.status === 201 && response.data?.guid) {
+            console.log('Préstamo creado con éxito, GUID:', response.data.guid);
+            return response.data.guid;
+        } else {
             console.error('Error al realizar el préstamo:', response.data);
+            return null;
         }
-        return;
     } catch (error: any) {
         console.error('Error al realizar el préstamo:', error.response?.data || error.message);
+        return null;
+    }
+};
+
+export const descargarPdfPrestamo = async (guid: string): Promise<void | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("descargarPdfPrestamo - No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.get(`http://localhost:8080/prestamos/export/pdf/${guid}`, {
+            responseType: 'blob',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (response.status === 200) {
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const today = new Date();
+            const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+            link.download = `prestamo_${formattedDate}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } else {
+            console.error('descargarPdfPrestamo - Error al descargar el PDF:', response.data);
+            return null;
+        }
+    } catch (error: any) {
+        console.error('descargarPdfPrestamo - Error al descargar el PDF:', error.response?.data || error.message);
         return null;
     }
 };
