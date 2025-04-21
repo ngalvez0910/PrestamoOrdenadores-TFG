@@ -40,6 +40,7 @@
   </div>
 
   <ConfirmDialog />
+  <Toast />
 </template>
 
 <script lang="ts">
@@ -50,7 +51,6 @@ import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 
-
 export default defineComponent({
   name: "PrestamoMe",
   components: { AdminMenuBar },
@@ -59,7 +59,6 @@ export default defineComponent({
     const toast = useToast();
     const router = useRouter();
     const confirm = useConfirm();
-
 
     onMounted(async () => {
       await fetchPrestamos();
@@ -97,26 +96,40 @@ export default defineComponent({
             } else {
               toast.add({ severity: 'error', summary: 'Error', detail: 'Error al realizar el préstamo.', life: 5000 });
             }
-            console.log('Proceso de préstamo completado');
           } catch (error: any) {
-            console.error('Error al realizar el préstamo:', error.message);
-            toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 5000 });
-            console.log('Proceso de préstamo fallido');
+            console.error('Error al realizar el préstamo:', error.response?.data || error.message);
+            if (error.response?.status === 404 && error.response?.data === 'No hay dispositivos disponibles actualmente') {
+              toast.add({
+                severity: 'warn',
+                summary: 'Advertencia',
+                detail: 'No hay dispositivos disponibles para realizar el préstamo en este momento.',
+                life: 5000,
+                styleClass: 'custom-toast-warning'
+              });
+            } else {
+              toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 5000 });
+            }
           }
         },
         reject: () => {
           console.log('Confirmación rechazada');
-          toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Operación cancelada.', life: 3000 });
+          toast.add({
+            severity: 'info',
+            summary: 'Cancelado',
+            detail: 'Operación cancelada.',
+            life: 3000,
+            styleClass: 'custom-toast-info'
+          });
         },
       });
     };
 
-    return { prestamos, realizarPrestamo };
+    return { prestamos, realizarPrestamo, toast };
   },
 });
 </script>
 
-<style scoped>
+<style>
 .back-button {
   padding: 0.3rem 0.5rem;
   font-size: 0.875rem;
@@ -167,5 +180,65 @@ a{
   background-color: #a14916;
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgb(236, 145, 96);
+}
+
+.custom-toast-warning, .custom-toast-info {
+  background-color: white !important;
+  border-radius: 10px !important;
+  padding: 10px !important;
+}
+
+.custom-toast-warning button, .custom-toast-info button {
+  background-color: white !important;
+  color: #14124f !important;
+  width: 100% !important;
+  margin-top: -75%
+}
+
+.p-confirm-dialog .p-confirm-dialog-accept {
+  background-color: #28a745 !important;
+  color: white !important;
+  transition: all 0.3s ease-in-out;
+}
+
+.p-confirm-dialog .p-confirm-dialog-accept:hover {
+  background-color: #218838 !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(103, 250, 29);
+}
+
+.p-confirm-dialog .p-confirm-dialog-reject {
+  background-color: #dc3545 !important;
+  color: white !important;
+  transition: all 0.3s ease-in-out;
+}
+
+.p-confirm-dialog .p-confirm-dialog-reject:hover {
+  background-color: #c82333 !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(253, 18, 18);
+}
+
+.p-confirm-dialog .p-confirm-dialog-accept,
+.p-confirm-dialog .p-confirm-dialog-reject {
+  width: 120px;
+  text-align: center;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  justify-content: center;
+  border-radius: 40px;
+  border:none;
+}
+
+.p-confirm-dialog .p-dialog-header .p-dialog-header-icon {
+  background-color: white !important;
+  color: #14124f !important;
+  width: 4.5rem !important;
+  margin-top: -15%;
+  margin-right: -25%;
+  font-weight: bold;
+  padding: 5px;
+  font-size: 1.2rem !important;
 }
 </style>

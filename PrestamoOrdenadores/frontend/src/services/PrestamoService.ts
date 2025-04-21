@@ -176,7 +176,7 @@ export const createPrestamo = async (): Promise<string | null> => {
         }
     } catch (error: any) {
         console.error('Error al realizar el préstamo:', error.response?.data || error.message);
-        return null;
+        throw error;
     }
 };
 
