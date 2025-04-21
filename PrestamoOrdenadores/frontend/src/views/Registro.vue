@@ -111,8 +111,8 @@ export default {
   },
   methods: {
     validateEmail() {
-      if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
-        this.errors.email = 'Correo electrónico inválido';
+      if (!this.form.email || !/^[^\s@]+@loantech\.com$/.test(this.form.email)) {
+        this.errors.email = 'El correo electrónico debe terminar en @loantech.com';
       } else {
         this.errors.email = '';
         this.validateEmailDependencies();
@@ -168,7 +168,7 @@ export default {
       if (this.errors.tutor) formIsValid = false;
 
       if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
-        this.errors.password = 'La contraseña debe tener al menos 8 caracteres';
+        this.errors.password = 'La contraseña debe contener: 8 caracteres, Mayúscula, 1 caracter especial, Número';
         formIsValid = false;
       }
 
@@ -320,7 +320,7 @@ button:hover {
 
 .error-message {
   color: red;
-  margin-top: -5%;
+  margin-top: -2%;
 }
 
 .custom-toast-success, .custom-toast-error {
