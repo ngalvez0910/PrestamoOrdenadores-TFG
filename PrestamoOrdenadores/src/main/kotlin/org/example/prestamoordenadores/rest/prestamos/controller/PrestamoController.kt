@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 
 @RestController
 @RequestMapping("/prestamos")
@@ -131,10 +134,14 @@ class PrestamoController
 
     @GetMapping("/export/pdf/{guid}")
     @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
-    fun generateAndSavePdf(@PathVariable guid: String): ResponseEntity<String> {
+    fun generateAndSavePdf(@PathVariable guid: String): ResponseEntity<ByteArray> {
+        val pdfBytes = prestamoPdfStorage.generatePdf(guid)
         val fileName = "prestamo_${LocalDate.now().toDefaultDateString()}.pdf"
-        prestamoPdfStorage.generateAndSavePdf(guid)
 
-        return ResponseEntity.ok("El PDF ha sido guardado exitosamente en la carpeta 'data' con el nombre $fileName")
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        headers.contentDisposition = org.springframework.http.ContentDisposition.builder("attachment").filename(fileName).build()
+
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
 }
