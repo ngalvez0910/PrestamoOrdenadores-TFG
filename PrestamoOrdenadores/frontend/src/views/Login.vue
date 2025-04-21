@@ -69,7 +69,7 @@ export default {
         formIsValid = false;
       }
       if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
-        this.errors.password = 'Contraseña inválida: 8 dígitos, 1 mayúscula, 1 caracter especial, 1 número';
+        this.errors.password = 'Contraseña incorrecta';
         formIsValid = false;
       }
 
