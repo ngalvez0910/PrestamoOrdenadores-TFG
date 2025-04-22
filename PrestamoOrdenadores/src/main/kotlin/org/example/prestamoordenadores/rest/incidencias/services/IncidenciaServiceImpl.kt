@@ -1,18 +1,26 @@
 package org.example.prestamoordenadores.rest.incidencias.services
 
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.config.websockets.WebSocketConfig
+import org.example.prestamoordenadores.config.websockets.WebSocketHandler
+import org.example.prestamoordenadores.config.websockets.models.Notification
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
 import org.example.prestamoordenadores.rest.incidencias.mappers.IncidenciaMapper
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
+import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
+import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
@@ -28,7 +36,10 @@ private val logger = logging()
 class IncidenciaServiceImpl(
     private val repository: IncidenciaRepository,
     private val mapper: IncidenciaMapper,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val webSocketConfig: WebSocketConfig,
+    private val objectMapper: ObjectMapper,
+    @Qualifier("webSocketIncidenciasHandler") private val webSocketHandler: WebSocketHandler
 ) : IncidenciaService {
     override fun getAllIncidencias(page: Int, size: Int): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo todas las incidencias" }
@@ -71,7 +82,9 @@ class IncidenciaServiceImpl(
         val newIncidencia = mapper.toIncidenciaFromCreate(incidencia, user)
         repository.save(newIncidencia)
 
-        return Ok(mapper.toIncidenciaResponse(newIncidencia))
+        val incidenciaResponse = mapper.toIncidenciaResponse(newIncidencia)
+        onChange(Notification.Tipo.CREATE, newIncidencia)
+        return Ok(incidenciaResponse)
     }
 
     @CachePut(key = "#result.guid")
@@ -138,5 +151,46 @@ class IncidenciaServiceImpl(
         val incidencias = repository.findIncidenciasByUserGuid(userGuid)
 
         return Ok(mapper.toIncidenciaResponseList(incidencias))
+    }
+
+    fun onChange(tipo: Notification.Tipo?, incidencia: Incidencia) {
+        logger.info { "Servicio de Incidencias onChange con tipo: $tipo e incidencia GUID: ${incidencia.guid}" }
+
+        try {
+            val incidenciaResponse = mapper.toIncidenciaResponse(incidencia)
+            val notificacion = Notification(
+                "INCIDENCIAS",
+                tipo,
+                incidenciaResponse,
+                LocalDateTime.now().toString()
+            )
+
+            val json = objectMapper.writeValueAsString(notificacion)
+
+            val creatorUsername = incidencia.user.username
+            sendMessageUser(creatorUsername, json)
+
+            val adminUsername = getAdminUsername()
+            sendMessageUser(adminUsername, json)
+        } catch (e: JsonProcessingException) {
+            logger.error { "Error al convertir la notificación a JSON" }
+        }
+    }
+
+    private fun getAdminUsername(): String? {
+        return userRepository.findUsersByRol(Role.ADMIN).firstOrNull()?.getUsername()
+    }
+
+    private fun sendMessageUser(userName: String?, json: String?) {
+        logger.info { "Enviando mensaje WebSocket al usuario: $userName" }
+        if (!userName.isNullOrBlank() && !json.isNullOrBlank()) {
+            try {
+                webSocketHandler.sendMessageToUser(userName, json)
+            } catch (e: Exception) {
+                logger.error { "Error al enviar el mensaje WebSocket al usuario $userName" }
+            }
+        } else {
+            logger.warn { "No se puede enviar el mensaje WebSocket. Nombre de usuario o JSON nulo/vacío." }
+        }
     }
 }

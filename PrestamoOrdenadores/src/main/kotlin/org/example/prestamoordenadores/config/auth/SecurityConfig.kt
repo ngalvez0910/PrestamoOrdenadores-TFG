@@ -44,12 +44,11 @@ class SecurityConfig
             .authorizeHttpRequests { requests ->
                 requests
                     .requestMatchers("/auth/signin", "/auth/signup").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
                     .anyRequest().authenticated()
 //                    .requestMatchers("/error/**").permitAll()
 //                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 //                    .requestMatchers("/static/**").permitAll()
-//                    .requestMatchers("/ws/**").permitAll()
-
             }
             .authenticationProvider(authenticationProvider()).addFilterBefore(
                 jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java
@@ -82,7 +81,7 @@ class SecurityConfig
         val configuration = CorsConfiguration()
         configuration.allowedOriginPatterns = listOf("http://localhost:[*]")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-        configuration.allowedHeaders = listOf("Authorization", "Content-Type")
+        configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization", "Upgrade", "Connection")
         configuration.allowCredentials = true
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)

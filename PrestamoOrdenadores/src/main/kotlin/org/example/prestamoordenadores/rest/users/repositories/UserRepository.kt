@@ -1,5 +1,6 @@
 package org.example.prestamoordenadores.rest.users.repositories
 
+import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
@@ -11,5 +12,6 @@ interface UserRepository: JpaRepository<User, Long> {
     fun findByNombre(nombre: String): User?
     fun findByEmail(email: String): User?
     fun findByTutor(tutor: String): List<User?>
+    fun findUsersByRol(rol: Role): List<User?>
     fun existsUserByNombreAndApellidosAndCurso(nombre: String, apellidos:String, curso: String): Boolean
 }
