@@ -1,20 +1,26 @@
 package org.example.prestamoordenadores.rest.sanciones.services
 
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import org.example.prestamoordenadores.config.websockets.WebSocketConfig
+import org.example.prestamoordenadores.config.websockets.WebSocketHandler
+import org.example.prestamoordenadores.config.websockets.models.Notification
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError
 import org.example.prestamoordenadores.rest.sanciones.mappers.SancionMapper
+import org.example.prestamoordenadores.rest.sanciones.models.Sancion
 import org.example.prestamoordenadores.rest.sanciones.models.TipoSancion
 import org.example.prestamoordenadores.rest.sanciones.repositories.SancionRepository
+import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
@@ -30,7 +36,10 @@ private val logger = logging()
 class SancionServiceImpl(
     private val repository : SancionRepository,
     private val mapper: SancionMapper,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val webSocketConfig: WebSocketConfig,
+    private val objectMapper: ObjectMapper,
+    @Qualifier("webSocketSancionesHandler") private val webSocketHandler: WebSocketHandler
 ) : SancionService {
     override fun getAllSanciones(page: Int, size: Int): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo todas las sanciones" }
@@ -75,6 +84,7 @@ class SancionServiceImpl(
         val sancionCreada = mapper.toSancionFromRequest(sancion, userRepository)
         repository.save(sancionCreada)
 
+        onChange(Notification.Tipo.CREATE, sancionCreada)
         return Ok(mapper.toSancionResponse(sancionCreada))
     }
 
@@ -100,6 +110,7 @@ class SancionServiceImpl(
 
         repository.save(existingSancion)
 
+        onChange(Notification.Tipo.UPDATE, existingSancion)
         return Ok(mapper.toSancionResponse(existingSancion))
     }
 
@@ -115,6 +126,7 @@ class SancionServiceImpl(
         logger.debug { "Eliminando sancion" }
         repository.delete(existingSancion)
 
+        onChange(Notification.Tipo.DELETE, existingSancion)
         return Ok(mapper.toSancionResponse(existingSancion))
     }
 
@@ -154,5 +166,46 @@ class SancionServiceImpl(
         val sanciones = repository.findByUserGuid(userGuid)
 
         return Ok(mapper.toSancionResponseList(sanciones))
+    }
+
+    fun onChange(tipo: Notification.Tipo?, sancion: Sancion) {
+        logger.info { "Servicio de Sanciones onChange con tipo: $tipo y sancion GUID: ${sancion.guid}" }
+
+        try {
+            val sancionResponse = mapper.toSancionResponse(sancion)
+            val notificacion = Notification(
+                "SANCIONES",
+                tipo,
+                sancionResponse,
+                LocalDateTime.now().toString()
+            )
+
+            val json = objectMapper.writeValueAsString(notificacion)
+
+            val creatorUsername = sancion.user.username
+            sendMessageUser(creatorUsername, json)
+
+            val adminUsername = getAdminUsername()
+            sendMessageUser(adminUsername, json)
+        } catch (e: JsonProcessingException) {
+            logger.error { "Error al convertir la notificación a JSON" }
+        }
+    }
+
+    private fun getAdminUsername(): String? {
+        return userRepository.findUsersByRol(Role.ADMIN).firstOrNull()?.getUsername()
+    }
+
+    private fun sendMessageUser(userName: String?, json: String?) {
+        logger.info { "Enviando mensaje WebSocket al usuario: $userName" }
+        if (!userName.isNullOrBlank() && !json.isNullOrBlank()) {
+            try {
+                webSocketHandler.sendMessageToUser(userName, json)
+            } catch (e: Exception) {
+                logger.error { "Error al enviar el mensaje WebSocket al usuario $userName" }
+            }
+        } else {
+            logger.warn { "No se puede enviar el mensaje WebSocket. Nombre de usuario o JSON nulo/vacío." }
+        }
     }
 }
