@@ -1,23 +1,28 @@
 package org.example.prestamoordenadores.rest.prestamos.services
 
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import org.example.prestamoordenadores.config.websockets.WebSocketConfig
+import org.example.prestamoordenadores.config.websockets.WebSocketHandler
+import org.example.prestamoordenadores.config.websockets.models.Notification
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
-import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.example.prestamoordenadores.rest.prestamos.mappers.PrestamoMapper
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
+import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
+import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.storage.pdf.PrestamoPdfStorage
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
@@ -36,7 +41,10 @@ class PrestamoServiceImpl(
     private val mapper: PrestamoMapper,
     private val userRepository: UserRepository,
     private val dispositivoRepository: DispositivoRepository,
-    private val prestamoPdfStorage: PrestamoPdfStorage
+    private val prestamoPdfStorage: PrestamoPdfStorage,
+    private val webSocketConfig: WebSocketConfig,
+    private val objectMapper: ObjectMapper,
+    @Qualifier("webSocketPrestamosHandler") private val webSocketHandler: WebSocketHandler
 ): PrestamoService {
     override fun getAllPrestamos(page: Int, size: Int): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo todos los prestamos" }
@@ -87,6 +95,7 @@ class PrestamoServiceImpl(
 
         prestamoPdfStorage.generateAndSavePdf(prestamoCreado.guid)
 
+        onChange(Notification.Tipo.CREATE, prestamoCreado)
         return Ok(mapper.toPrestamoResponse(prestamoCreado))
     }
 
@@ -108,6 +117,8 @@ class PrestamoServiceImpl(
             prestamoEncontrado.updatedDate = LocalDateTime.now()
 
             prestamoRepository.save(prestamoEncontrado)
+
+            onChange(Notification.Tipo.UPDATE, prestamoEncontrado)
             Ok(mapper.toPrestamoResponse(prestamoEncontrado))
         }
     }
@@ -123,6 +134,8 @@ class PrestamoServiceImpl(
         } else {
             prestamoEncontrado.estadoPrestamo = EstadoPrestamo.CANCELADO
             prestamoRepository.save(prestamoEncontrado)
+
+            onChange(Notification.Tipo.DELETE, prestamoEncontrado)
             Ok(mapper.toPrestamoResponse(prestamoEncontrado))
         }
     }
@@ -154,5 +167,46 @@ class PrestamoServiceImpl(
 
         val prestamos = prestamoRepository.findByUserGuid(userGuid)
         return Ok(mapper.toPrestamoResponseList(prestamos))
+    }
+
+    fun onChange(tipo: Notification.Tipo?, prestamo: Prestamo) {
+        logger.info { "Servicio de Prestamos onChange con tipo: $tipo y prestamo GUID: ${prestamo.guid}" }
+
+        try {
+            val prestamoResponse = mapper.toPrestamoResponse(prestamo)
+            val notificacion = Notification(
+                "PRESTAMOS",
+                tipo,
+                prestamoResponse,
+                LocalDateTime.now().toString()
+            )
+
+            val json = objectMapper.writeValueAsString(notificacion)
+
+            val creatorUsername = prestamo.user.username
+            sendMessageUser(creatorUsername, json)
+
+            val adminUsername = getAdminUsername()
+            sendMessageUser(adminUsername, json)
+        } catch (e: JsonProcessingException) {
+            logger.error { "Error al convertir la notificación a JSON" }
+        }
+    }
+
+    private fun getAdminUsername(): String? {
+        return userRepository.findUsersByRol(Role.ADMIN).firstOrNull()?.getUsername()
+    }
+
+    private fun sendMessageUser(userName: String?, json: String?) {
+        logger.info { "Enviando mensaje WebSocket al usuario: $userName" }
+        if (!userName.isNullOrBlank() && !json.isNullOrBlank()) {
+            try {
+                webSocketHandler.sendMessageToUser(userName, json)
+            } catch (e: Exception) {
+                logger.error { "Error al enviar el mensaje WebSocket al usuario $userName" }
+            }
+        } else {
+            logger.warn { "No se puede enviar el mensaje WebSocket. Nombre de usuario o JSON nulo/vacío." }
+        }
     }
 }
