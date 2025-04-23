@@ -106,6 +106,7 @@ class IncidenciaServiceImpl(
 
         repository.save(existingIncidencia)
 
+        onChangeAdmin(Notification.Tipo.UPDATE, existingIncidencia)
         return Ok(mapper.toIncidenciaResponse(existingIncidencia))
     }
 
@@ -120,6 +121,7 @@ class IncidenciaServiceImpl(
 
         repository.delete(incidencia)
 
+        onChangeAdmin(Notification.Tipo.DELETE, incidencia)
         return Ok(mapper.toIncidenciaResponse(incidencia))
     }
 
@@ -169,6 +171,27 @@ class IncidenciaServiceImpl(
 
             val creatorUsername = incidencia.user.username
             sendMessageUser(creatorUsername, json)
+
+            val adminUsername = getAdminUsername()
+            sendMessageUser(adminUsername, json)
+        } catch (e: JsonProcessingException) {
+            logger.error { "Error al convertir la notificación a JSON" }
+        }
+    }
+
+    fun onChangeAdmin(tipo: Notification.Tipo?, incidencia: Incidencia) {
+        logger.info { "Servicio de Incidencias onChange con tipo: $tipo e incidencia GUID: ${incidencia.guid}" }
+
+        try {
+            val incidenciaResponse = mapper.toIncidenciaResponse(incidencia)
+            val notificacion = Notification(
+                "INCIDENCIAS",
+                tipo,
+                incidenciaResponse,
+                LocalDateTime.now().toString()
+            )
+
+            val json = objectMapper.writeValueAsString(notificacion)
 
             val adminUsername = getAdminUsername()
             sendMessageUser(adminUsername, json)

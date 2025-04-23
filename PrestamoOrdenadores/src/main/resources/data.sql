@@ -107,7 +107,7 @@ VALUES
 CREATE TABLE IF NOT EXISTS sanciones (
     id SERIAL PRIMARY KEY,
     guid VARCHAR(11) NOT NULL UNIQUE,
-    user_id BIGINT UNIQUE NOT NULL,
+    user_id BIGINT NOT NULL,
     tipo_sancion VARCHAR(20) NOT NULL,
     fecha_sancion DATE NOT NULL,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
