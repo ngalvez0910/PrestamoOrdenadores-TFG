@@ -8,6 +8,7 @@ import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.config.websockets.WebSocketConfig
 import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.models.Notification
+import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
@@ -18,8 +19,11 @@ import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.rest.users.models.Role
+import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.storage.pdf.PrestamoPdfStorage
+import org.example.prestamoordenadores.utils.emails.EmailService
+import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.beans.factory.annotation.Qualifier
@@ -44,7 +48,8 @@ class PrestamoServiceImpl(
     private val prestamoPdfStorage: PrestamoPdfStorage,
     private val webSocketConfig: WebSocketConfig,
     private val objectMapper: ObjectMapper,
-    @Qualifier("webSocketPrestamosHandler") private val webSocketHandler: WebSocketHandler
+    @Qualifier("webSocketPrestamosHandler") private val webSocketHandler: WebSocketHandler,
+    private val emailService: EmailService
 ): PrestamoService {
     override fun getAllPrestamos(page: Int, size: Int): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo todos los prestamos" }
@@ -86,7 +91,7 @@ class PrestamoServiceImpl(
 
         val dispositivoSeleccionado = dispositivosDisponibles.random()
 
-        var prestamoCreado = mapper.toPrestamoFromCreate(user, dispositivoSeleccionado)
+        val prestamoCreado = mapper.toPrestamoFromCreate(user, dispositivoSeleccionado)
         prestamoCreado.fechaDevolucion = LocalDate.now().plusWeeks(3)
         prestamoRepository.save(prestamoCreado)
 
@@ -94,6 +99,8 @@ class PrestamoServiceImpl(
         dispositivoRepository.save(dispositivoSeleccionado)
 
         prestamoPdfStorage.generateAndSavePdf(prestamoCreado.guid)
+
+        enviarCorreo(user, dispositivoSeleccionado, prestamoCreado)
 
         onChange(Notification.Tipo.CREATE, prestamoCreado)
         return Ok(mapper.toPrestamoResponse(prestamoCreado))
@@ -208,5 +215,19 @@ class PrestamoServiceImpl(
         } else {
             logger.warn { "No se puede enviar el mensaje WebSocket. Nombre de usuario o JSON nulo/vacío." }
         }
+    }
+
+    private fun enviarCorreo(user: User, dispositivoSeleccionado: Dispositivo, prestamoCreado: Prestamo) {
+        val pdfBytes = prestamoPdfStorage.generatePdf(prestamoCreado.guid)
+
+        emailService.sendHtmlEmail(
+            to = user.email,
+            subject = "Confirmación de Préstamo",
+            nombreUsuario = user.nombre,
+            numeroSerieDispositivo = dispositivoSeleccionado.numeroSerie,
+            fechaDevolucion = prestamoCreado.fechaDevolucion.toDefaultDateString(),
+            pdfBytes = pdfBytes,
+            nombreArchivoPdf = "prestamo_${prestamoCreado.fechaPrestamo.toDefaultDateString()}.pdf"
+        )
     }
 }

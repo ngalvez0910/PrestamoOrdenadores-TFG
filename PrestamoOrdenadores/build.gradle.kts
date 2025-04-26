@@ -65,6 +65,9 @@ dependencies {
 
     //MockK
     testImplementation("io.mockk:mockk:1.14.0")
+
+    // Mandar emails
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 }
 
 kotlin {
