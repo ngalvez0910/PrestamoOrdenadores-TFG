@@ -28,11 +28,13 @@ class BackupStorage {
         try {
             val processBuilder = ProcessBuilder(
                 "pg_dump",
-                "-Fc",
                 "-h", dbHost,
                 "-U", dbUser,
-                "-d", dbName,
-                "-f", backupFile.absolutePath
+                "-F", "p",
+                "-b",
+                "-v",
+                "-f", backupFile.absolutePath,
+                dbName
             )
 
             if (pgpassFile != null) {
@@ -46,7 +48,7 @@ class BackupStorage {
                 BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
                     var line: String?
                     while (reader.readLine().also { line = it } != null) {
-                        logger.debug { "pg_dump stdout: $line" }
+                        logger.debug { "pg_dump: $line" }
                     }
                 }
             }
@@ -87,87 +89,40 @@ class BackupStorage {
         }
     }
 
-    /*
-    fun restoreBackup(file: MultipartFile): Boolean {
-        if (file.isEmpty) {
-            logger.error { "El archivo subido está vacío" }
+    fun restoreDatabaseBackup(backupFileName: String): Boolean {
+        val backupFile = File("data/backup", backupFileName)
+        if (!backupFile.exists() || !backupFile.isFile) {
+            logger.error { "Archivo de backup no encontrado: ${backupFile.absolutePath}" }
             return false
         }
 
-        if (!file.originalFilename?.endsWith(".sql", ignoreCase = true)!!) {
-            logger.error { "El archivo debe ser un archivo SQL (.sql)" }
-            return false
-        }
-
-        val currentDir = System.getProperty("user.dir")
-
-        val backupDir = Paths.get(currentDir, "data", "backup")
-
-        if (!Files.exists(backupDir)) {
-            Files.createDirectories(backupDir)
-        }
-
-        val fileName = "uploaded_backup_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))}.sql"
-        val filePath = backupDir.resolve(fileName)
-
-        return try {
-            logger.debug { "Intentando guardar el backup en: $filePath" }
-            file.transferTo(filePath.toFile())
-            val success = restoreDatabaseBackup(filePath.toFile())
-
-            try {
-                filePath.toFile().delete()
-            } catch (e: Exception) {
-                logger.warn { "Error al intentar borrar el archivo temporal de restauración: ${e.message}" }
-            }
-
-            success
-        } catch (e: Exception) {
-            logger.error(e) { "Error al procesar y guardar el archivo subido: ${e.message}" }
-            false
-        }
-    }
-
-    private fun restoreDatabaseBackup(backupFile: File? = null): Boolean {
         val dbHost = "localhost"
         val dbName = "prestamosDB"
         val dbUser = "admin"
 
-        val fileToRestore = backupFile
-
-        if (fileToRestore == null || !fileToRestore.exists()) {
-            logger.error { "No se encontró ningún archivo de backup para restaurar" }
-            return false
-        }
-
-        logger.info { "Restaurando base de datos desde: ${fileToRestore.absolutePath}" }
-
-        val pgpassFile = setupPgPassFile(dbHost, dbName, dbUser, "tu_contraseña_aquí")
+        val pgpassFile = setupPgPassFile(dbHost, dbName, dbUser, "adminPassword123")
 
         try {
-            //dropConnections(dbHost, dbName, dbUser, pgpassFile)
-
             val processBuilder = ProcessBuilder(
-                "pg_restore",
+                "psql",
                 "-h", dbHost,
                 "-U", dbUser,
                 "-d", dbName,
-                "-j", "4",
-                fileToRestore.absolutePath
+                "-f", backupFile.absolutePath
             )
 
             if (pgpassFile != null) {
-                processBuilder.environment()["DATABASE_PASSWORD_POSTGRES"] = pgpassFile.absolutePath
+                processBuilder.environment()["PGPASSFILE"] = pgpassFile.absolutePath
             }
 
-            logger.info { "Ejecutando restauración de la base de datos..." }
+            logger.info { "Restaurando la base de datos desde: ${backupFile.absolutePath}" }
             val process = processBuilder.start()
 
             val outputReaderThread = thread {
                 BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
                     var line: String?
                     while (reader.readLine().also { line = it } != null) {
-                        logger.info { "psql: $line" }
+                        logger.debug { "pg_restore stdout: $line" }
                     }
                 }
             }
@@ -179,9 +134,9 @@ class BackupStorage {
                         if (line?.contains("error", ignoreCase = true) == true ||
                             line?.contains("ERROR", ignoreCase = true) == true ||
                             line?.contains("fatal", ignoreCase = true) == true) {
-                            logger.error { "psql: $line" }
+                            logger.error { "pg_restore: $line" }
                         } else {
-                            logger.info { "psql: $line" }
+                            logger.info { "pg_restore: $line" }
                         }
                     }
                 }
@@ -195,18 +150,18 @@ class BackupStorage {
             pgpassFile?.delete()
 
             if (exitCode == 0) {
-                logger.info { "Restauración exitosa desde: ${fileToRestore.absolutePath}" }
+                logger.info { "Restauración exitosa de la base de datos desde: ${backupFile.absolutePath}" }
                 return true
             } else {
                 logger.error { "Error al restaurar la base de datos. Código: $exitCode" }
                 return false
             }
         } catch (e: Exception) {
-            logger.error(e) { "Error al ejecutar la restauración: ${e.message}" }
+            logger.error(e) { "Error al ejecutar pg_restore: ${e.message}" }
             pgpassFile?.delete()
             return false
         }
-    }*/
+    }
 
     fun listDatabaseBackups(): List<Map<String, Any>> {
         val backupDir = File("data/backup")
@@ -231,40 +186,6 @@ class BackupStorage {
         logger.info { "Se encontraron ${backupFiles.size} archivos de backup." }
         return backupFiles
     }
-
-    /*
-    private fun dropConnections(host: String, database: String, user: String, pgpassFile: File?): Boolean {
-        try {
-            val sql = """
-                SELECT pg_terminate_backend(pid)
-                FROM pg_stat_activity
-                WHERE datname = '$database'
-                AND pid <> pg_backend_pid()
-            """.trimIndent()
-
-            val processBuilder = ProcessBuilder(
-                "psql",
-                "-h", host,
-                "-U", user,
-                "-d", "postgres",
-                "-c", sql
-            )
-
-            if (pgpassFile != null) {
-                processBuilder.environment()["PGPASSFILE"] = pgpassFile.absolutePath
-            }
-
-            logger.info { "Cerrando conexiones activas a la base de datos..." }
-            val process = processBuilder.start()
-
-            val exitCode = process.waitFor()
-
-            return exitCode == 0
-        } catch (e: Exception) {
-            logger.error { "Error al cerrar conexiones: ${e.message}" }
-            return false
-        }
-    }*/
 
     private fun setupPgPassFile(host: String, database: String, user: String, password: String): File? {
         try {
