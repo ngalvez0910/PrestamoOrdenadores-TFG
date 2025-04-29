@@ -4,6 +4,7 @@ import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.rest.users.dto.*
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.models.User
+import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.springframework.stereotype.Service
 
 @Service

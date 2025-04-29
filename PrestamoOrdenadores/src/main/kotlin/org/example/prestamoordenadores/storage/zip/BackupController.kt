@@ -1,5 +1,6 @@
 package org.example.prestamoordenadores.storage.zip
 
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,26 +23,6 @@ class BackupController(
         return ResponseEntity.ok("Copia de seguridad realizada con éxito.")
     }
 
-    /*
-    @PostMapping("/restore")
-    fun uploadAndRestoreBackup(@RequestParam("file") file: MultipartFile): ResponseEntity<Map<String, Any>> {
-        val success = backupStorage.restoreBackup(file)
-
-        return if (success) {
-            ResponseEntity.ok(mapOf(
-                "success" to true,
-                "message" to "Base de datos restaurada con éxito desde el archivo subido",
-                "timestamp" to LocalDateTime.now().toString()
-            ))
-        } else {
-            ResponseEntity.status(422).body(mapOf(
-                "success" to false,
-                "message" to "Error al restaurar la base de datos desde el archivo subido",
-                "timestamp" to LocalDateTime.now().toString()
-            ))
-        }
-    }*/
-
     @GetMapping("/list")
     fun listBackups(): ResponseEntity<List<Map<String, Any>>> {
         return try {
@@ -49,6 +30,15 @@ class BackupController(
             ResponseEntity.ok(backups)
         } catch (e: Exception) {
             ResponseEntity.status(422).body(emptyList())
+        }
+    }
+
+    @PostMapping("/restore")
+    fun restoreBackup(@RequestParam("fileName") fileName: String): ResponseEntity<String> {
+        return if (backupStorage.restoreDatabaseBackup(fileName)) {
+            ResponseEntity.ok("Restauración desde $fileName realizada con éxito.")
+        } else {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al restaurar desde $fileName.")
         }
     }
 }
