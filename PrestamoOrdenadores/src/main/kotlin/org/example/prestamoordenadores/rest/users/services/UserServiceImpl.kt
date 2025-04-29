@@ -9,6 +9,7 @@ import org.example.prestamoordenadores.rest.users.mappers.UserMapper
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
@@ -19,11 +20,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 private val logger = logging()
-
-data class PagedResponse<T>(
-    val content: List<T>,
-    val totalElements: Long
-)
 
 @Service
 @CacheConfig(cacheNames = ["users"])
