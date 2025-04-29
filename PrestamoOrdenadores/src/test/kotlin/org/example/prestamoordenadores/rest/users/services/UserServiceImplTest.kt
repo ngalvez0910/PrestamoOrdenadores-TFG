@@ -52,7 +52,7 @@ class UserServiceImplTest {
     fun setUp() {
         user = User(
             id = 1,
-            guid = "guidTest001",
+            guid = "guidTestU01",
             email = "email@loantech.com",
             numeroIdentificacion = "2023LT242",
             campoPassword = "Password123?",
@@ -109,7 +109,7 @@ class UserServiceImplTest {
         val paged = result.value
 
         assertEquals(1, paged.content.size)
-        assertEquals("guidTest001", paged.content[0].guid)
+        assertEquals("guidTestU01", paged.content[0].guid)
         assertEquals(1, paged.totalElements)
 
         verify { repository.findAll(pageRequest) }
@@ -168,17 +168,17 @@ class UserServiceImplTest {
 
         every { request.validate() } returns Ok(request)
         every { request.avatar } returns "newAvatar.png"
-        every { repository.findByGuid("guidTest001") } returns user
+        every { repository.findByGuid("guidTestU01") } returns user
         every { repository.save(any()) } returns user
         every { mapper.toUserResponse(user) } returns expectedResponse
 
-        val result = service.updateAvatar("guidTest001", request)
+        val result = service.updateAvatar("guidTestU01", request)
 
         assertAll(
             { assertTrue(result.isOk) },
             { assertEquals(expectedResponse, result.value) },
             { assertEquals("newAvatar.png", user.avatar) },
-            { verify { repository.findByGuid("guidTest001") } },
+            { verify { repository.findByGuid("guidTestU01") } },
             { verify { repository.save(user) } },
             { verify { mapper.toUserResponse(user) } }
         )
@@ -189,7 +189,7 @@ class UserServiceImplTest {
         every { request.validate() } returns Err(UserError.UserValidationError("Usuario inválido"))
         every { request.avatar } returns ""
 
-        val result = service.updateAvatar("guidTest001", request)
+        val result = service.updateAvatar("guidTestU01", request)
 
         assertAll(
             { assertTrue(result.isErr) },
@@ -223,7 +223,7 @@ class UserServiceImplTest {
     fun deleteUserByGuid() {
         var user2 = User(
             id = 2,
-            guid = "guidTest002",
+            guid = "guidTestU02",
             email = "email2@loantech.com",
             numeroIdentificacion = "2023LT243",
             campoPassword = "Password123?",
