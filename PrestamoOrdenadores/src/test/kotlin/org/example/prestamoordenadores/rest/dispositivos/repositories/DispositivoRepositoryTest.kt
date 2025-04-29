@@ -103,8 +103,8 @@ class DispositivoRepositoryTest {
     fun findByNumeroSerie() {
         val result = dispositivoRepository.findByNumeroSerie("5CD1234XYZ")
 
-        assertEquals(dispositivo1.guid, result.guid)
-        assertEquals("5CD1234XYZ", result.numeroSerie)
+        assertEquals(dispositivo1.guid, result?.guid)
+        assertEquals("5CD1234XYZ", result?.numeroSerie)
     }
 
     @Test
