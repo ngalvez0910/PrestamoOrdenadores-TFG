@@ -46,7 +46,6 @@ class PrestamoServiceImpl(
     private val userRepository: UserRepository,
     private val dispositivoRepository: DispositivoRepository,
     private val prestamoPdfStorage: PrestamoPdfStorage,
-    private val webSocketConfig: WebSocketConfig,
     private val objectMapper: ObjectMapper,
     @Qualifier("webSocketPrestamosHandler") private val webSocketHandler: WebSocketHandler,
     private val emailService: EmailService
