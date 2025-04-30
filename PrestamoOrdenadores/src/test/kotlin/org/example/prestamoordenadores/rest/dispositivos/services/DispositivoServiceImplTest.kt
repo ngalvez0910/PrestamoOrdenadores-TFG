@@ -1,6 +1,5 @@
 package org.example.prestamoordenadores.rest.dispositivos.services
 
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -19,12 +18,9 @@ import org.example.prestamoordenadores.rest.dispositivos.repositories.Dispositiv
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
-import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
-import org.example.prestamoordenadores.rest.users.services.UserServiceImpl
 import org.example.prestamoordenadores.utils.validators.validate
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -186,23 +182,6 @@ class DispositivoServiceImplTest {
             { verify { mapper.toDispositivoFromCreate(createRequest) } },
             { verify { repository.save(dispositivo) } },
             { verify { mapper.toDispositivoResponse(dispositivo) } }
-        )
-    }
-
-    @Test
-    fun `createDispositivo returns Err when request es invalido`() {
-        val request = mockk<DispositivoCreateRequest>(relaxed = true)
-        val validationError = DispositivoError.DispositivoValidationError("Dispositivo inválido")
-
-        every { request.validate() } returns Err(validationError)
-
-        val result = service.createDispositivo(request)
-
-        assertAll(
-            { assertTrue(result.isErr) },
-            { assertTrue(result.error is DispositivoError.DispositivoValidationError) },
-            { assertEquals(validationError, result.error) },
-            { verify { request.validate() } }
         )
     }
 

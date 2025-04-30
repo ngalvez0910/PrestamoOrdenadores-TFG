@@ -37,7 +37,6 @@ class SancionServiceImpl(
     private val repository : SancionRepository,
     private val mapper: SancionMapper,
     private val userRepository: UserRepository,
-    private val webSocketConfig: WebSocketConfig,
     private val objectMapper: ObjectMapper,
     @Qualifier("webSocketSancionesHandler") private val webSocketHandler: WebSocketHandler
 ) : SancionService {
