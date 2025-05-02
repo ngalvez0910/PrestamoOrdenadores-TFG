@@ -23,8 +23,6 @@ import org.example.prestamoordenadores.rest.prestamos.mappers.PrestamoMapper
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
-import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
-import org.example.prestamoordenadores.rest.sanciones.errors.SancionError
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
