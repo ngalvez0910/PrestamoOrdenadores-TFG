@@ -8,7 +8,6 @@ import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.property.TextAlignment
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
-import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
