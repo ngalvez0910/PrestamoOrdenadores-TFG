@@ -275,24 +275,24 @@ a {
   background-color: inherit !important;
 }
 
-.custom-paginator {
-  margin-top: 20px;
+.p-paginator-pages {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
   align-items: center;
-  padding: 10px;
-  border-top: 1px solid #eee;
-  background-color: #f9f9f9;
+  gap: 5px;
 }
 
 .p-paginator-pages button {
-  background-color: #d6621e;
+  background-color: #a6a6a6;
   color: #ffffff;
   padding: 0.5rem 0.5rem;
   margin: 0 5px;
-  border-radius: 40px;
+  border-radius: 80%;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .p-paginator-pages button:hover {
@@ -302,14 +302,11 @@ a {
 }
 
 .p-paginator-pages .p-highlight {
-  background-color: #d6621e;
+  background-color: #d6621e !important; /* Naranja para la página activa */
   color: white;
-}
-
-.p-paginator-current {
-  font-size: 0.9rem;
-  color: #555;
-  margin: 0 10px;
+  font-weight: bold; /* Texto en negrita para mayor distinción */
+  transform: scale(1.05); /* Ligeramente más grande */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
 }
 
 .p-paginator-first,
