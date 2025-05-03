@@ -158,15 +158,22 @@ export default {
 
       this.paginar();
     },
-    filtrarPorTexto(query: string) {
-      if (!query) return this.todosLosDatos;
+    filtrarPorTexto(query: string): Sancion[] {
+      if (!query) {
+        return this.todosLosDatos;
+      }
 
       const q = query.toLowerCase();
-      return this.todosLosDatos.filter(sancion =>
-          sancion.guid?.toLowerCase().includes(q) ||
-          sancion.tipo?.toLowerCase().includes(q) ||
-          sancion.userGuid?.toLowerCase().includes(q)
-      );
+
+      return this.todosLosDatos.filter(sancion => {
+        const guidMatch = sancion.guid?.toLowerCase().startsWith(q) ?? false;
+
+        const tipoMatch = sancion.tipo?.toLowerCase().startsWith(q) ?? false;
+
+        const userGuidMatch = sancion.userGuid?.toLowerCase().startsWith(q) ?? false;
+
+        return guidMatch || tipoMatch || userGuidMatch;
+      });
     },
     verSancion(sancion: Sancion) {
       console.log("Navegando a detalle de sancion con estos datos:", sancion);
