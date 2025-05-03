@@ -2,45 +2,55 @@
   <MenuBar />
   <div class="filters" style="margin-left: -20%; margin-top: 35%">
     Buscar:
-    <input type="text" v-model="search" placeholder="Buscar..." @input="filterData" />
+    <input type="text" v-model="search" placeholder="Buscar..." @input="handleSearchInput" />
   </div>
   <br>
-  <div style="margin-left: -40%; margin-top: 2%; width: 150%; height: 600px; overflow-y: auto;">
+  <div style="margin-left: -40%; margin-top: 2%; width: 140%; height: 600px; overflow-y: auto;">
     <div class="table row-12">
-      <DataTable :value="filteredDatos" stripedRows tableStyle="min-width: 50rem">
-        <Column field="guid">
+      <DataTable
+          :value="datos"
+          paginator
+          :rows="5"
+          :totalRecords="totalRecords"
+          :lazy="true"
+          @page="onPage"
+          paginatorClass="custom-paginator"
+      >
+        <Column field="guid" style="width: 5%">
           <template #header>
             <b>GUID</b>
           </template>
         </Column>
-        <Column field="asunto">
+        <Column field="asunto" style="width: 5%">
           <template #header>
             <b>Asunto</b>
           </template>
         </Column>
-        <Column field="estadoIncidencia">
+        <Column field="estadoIncidencia" style="width: 5%">
           <template #header>
             <b>Estado</b>
           </template>
         </Column>
-        <Column field="userGuid">
+        <Column field="user.guid" style="width: 5%">
+          <template #body="slotProps">
+          {{ slotProps.data.user?.guid }} </template>
           <template #header>
             <b>Usuario</b>
           </template>
         </Column>
-        <Column field="createdDate">
+        <Column field="createdDate" style="width: 5%">
           <template #header>
             <b>Fecha de incidencia</b>
           </template>
         </Column>
-        <Column field="ver">
+        <Column field="ver" style="width: 3%">
           <template #body="slotProps">
             <button @click="verIncidencia(slotProps.data)" class="verIncidencia-button">
               <i class="pi pi-eye"></i>
             </button>
           </template>
         </Column>
-        <Column field="delete">
+        <Column field="delete" style="width: 3%">
           <template #body="slotProps">
             <button @click="deleteIncidencia(slotProps.data)" class="deleteIncidencia-button">
               <i class="pi pi-ban"></i>
@@ -68,6 +78,11 @@ interface Incidencia {
   updatedDate: string;
 }
 
+interface PagedResponse {
+  content: Incidencia[];
+  totalElements: number;
+}
+
 export default {
   name: 'IncidenciasDashboard',
   components: { MenuBar },
@@ -76,62 +91,84 @@ export default {
     return {
       search: '',
       datos: [] as Incidencia[],
-      filteredDatos: [] as Incidencia[]
+      todosLosDatos: [] as Incidencia[],
+      totalRecords: 0,
+      loading: false,
+      currentPage: 0,
+      pageSize: 5,
+      filters: {}
     };
   },
-  mounted() {
-    this.obtenerDatos();
+  async mounted() {
+    console.log("Componente montado. Llamando a obtenerDatos inicial...");
+    await this.loadData();
+    console.log("Datos iniciales y totalRecords cargados.");
   },
   methods: {
-    async obtenerDatos() {
+    async loadData() {
+      this.loading = true;
       try {
         const token = localStorage.getItem('token');
         if (!token) {
           console.error("No se encontró el token de autenticación.");
+          this.loading = false;
           return;
         }
 
-        const response = await axios.get(`http://localhost:8080/incidencias`, {
+        const urlTotal = `http://localhost:8080/incidencias?page=0&size=1`;
+        const responseTotal = await axios.get<PagedResponse>(urlTotal, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
-        console.log("Datos recibidos:", response.data);
-        let incidencias = response.data.content || response.data;
+        this.totalRecords = responseTotal.data.totalElements;
 
-        if (!Array.isArray(incidencias)) {
-          incidencias = [incidencias];
-        }
-
-        this.datos = incidencias.map((incidencia: any) => {
-          return {
-            ...incidencia,
-            user: incidencia.user ? { guid: incidencia.user.guid } : null,
-            userGuid: incidencia.user ? incidencia.user.guid : null,
-          };
+        const urlAll = `http://localhost:8080/incidencias?page=0&size=${this.totalRecords}`;
+        const responseAll = await axios.get<PagedResponse>(urlAll, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
-        this.filteredDatos = this.datos;
+        this.todosLosDatos = responseAll.data.content;
+        this.paginar();
+        this.loading = false;
       } catch (error) {
         console.error("Error obteniendo datos:", error);
+        this.loading = false;
       }
     },
-    filterData() {
-      this.filteredDatos = this.datos.filter(incidencia => {
-        const searchText = this.search.toLowerCase();
-        const guid = (incidencia.guid || "").toLowerCase();
-        const asunto = (incidencia.asunto || "").toLowerCase();
-        const estado = (incidencia.estado || '').toLowerCase();
-        const userGuid = (incidencia.userGuid || "").toLowerCase();
+    paginar() {
+      const inicio = this.currentPage * this.pageSize;
+      const fin = inicio + this.pageSize;
+      this.datos = this.filtrarPorTexto(this.search).slice(inicio, fin);
+    },
+    onPage(event: any) {
+      this.currentPage = event.page;
+      this.pageSize = event.rows;
+      this.paginar();
+    },
+    handleSearchInput(event: Event) {
+      const target = event.target as HTMLInputElement;
+      this.search = target.value;
+      this.currentPage = 0;
 
-        return (
-            guid.includes(searchText) ||
-            asunto.includes(searchText) ||
-            estado.includes(searchText) ||
-            userGuid.includes(searchText)
-        );
-      });
+      const resultadosFiltrados = this.filtrarPorTexto(this.search);
+      this.totalRecords = resultadosFiltrados.length;
+
+      this.paginar();
+    },
+    filtrarPorTexto(query: string) {
+      if (!query) return this.todosLosDatos;
+
+      const q = query.toLowerCase();
+      return this.todosLosDatos.filter(incidencia =>
+          incidencia.guid?.toLowerCase().includes(q) ||
+          incidencia.asunto?.toLowerCase().includes(q) ||
+          incidencia.estado?.toLowerCase().includes(q) ||
+          incidencia.userGuid?.toLowerCase().includes(q)
+      );
     },
     verIncidencia(incidencia: Incidencia) {
       console.log("Navegando a detalle de incidencia con estos datos:", incidencia);
@@ -214,5 +251,62 @@ export default {
 .deleteIncidencia-button i {
   margin-top: 1%;
   margin-left: 3%
+}
+
+.p-paginator-pages {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.p-paginator-pages button {
+  background-color: #a6a6a6;
+  color: #ffffff;
+  padding: 0.5rem 0.5rem;
+  margin: 0 5px;
+  border-radius: 80%;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.p-paginator-pages button:hover {
+  background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
+}
+
+.p-paginator-pages .p-highlight {
+  background-color: #d6621e !important;
+  color: white;
+  font-weight: bold;
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.p-paginator-first,
+.p-paginator-prev,
+.p-paginator-next,
+.p-paginator-last {
+  background-color: #d6621e;
+  color: #ffffff;
+  border-radius: 40px;
+  padding: 0.5rem 0.75rem;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  max-width: 2%
+}
+
+.p-paginator-first:hover,
+.p-paginator-prev:hover,
+.p-paginator-next:hover,
+.p-paginator-last:hover {
+  background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
 }
 </style>

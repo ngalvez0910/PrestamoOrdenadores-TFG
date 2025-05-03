@@ -5,11 +5,12 @@ import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequ
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
+import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.springframework.stereotype.Service
 
 @Service
 interface IncidenciaService {
-    fun getAllIncidencias(page: Int, size: Int): Result<List<IncidenciaResponse>, IncidenciaError>
+    fun getAllIncidencias(page: Int, size: Int): Result<PagedResponse<IncidenciaResponse>, IncidenciaError>
     fun getIncidenciaByGuid(guid: String) : Result<IncidenciaResponse?, IncidenciaError>
     fun createIncidencia(incidencia: IncidenciaCreateRequest) : Result<IncidenciaResponse, IncidenciaError>
     fun updateIncidencia(guid: String, incidencia: IncidenciaUpdateRequest) : Result<IncidenciaResponse?, IncidenciaError>

@@ -18,6 +18,7 @@ import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.beans.factory.annotation.Qualifier
@@ -41,14 +42,19 @@ class IncidenciaServiceImpl(
     private val objectMapper: ObjectMapper,
     @Qualifier("webSocketIncidenciasHandler") private val webSocketHandler: WebSocketHandler
 ) : IncidenciaService {
-    override fun getAllIncidencias(page: Int, size: Int): Result<List<IncidenciaResponse>, IncidenciaError> {
+    override fun getAllIncidencias(page: Int, size: Int): Result<PagedResponse<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo todas las incidencias" }
 
         val pageRequest = PageRequest.of(page, size)
         val pagesIncidencias = repository.findAll(pageRequest)
         val incidenciaResponses = mapper.toIncidenciaResponseList(pagesIncidencias.content)
 
-        return Ok(incidenciaResponses)
+        val pagedResponse = PagedResponse(
+            content = incidenciaResponses,
+            totalElements = pagesIncidencias.totalElements
+        )
+
+        return Ok(pagedResponse)
     }
 
     @Cacheable(key = "#guid")

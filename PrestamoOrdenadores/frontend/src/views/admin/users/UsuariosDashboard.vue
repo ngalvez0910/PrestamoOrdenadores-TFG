@@ -169,18 +169,28 @@ export default {
 
       this.paginar();
     },
-    filtrarPorTexto(query: string) {
-      if (!query) return this.todosLosDatos;
+    filtrarPorTexto(query: string): User[] {
+      if (!query) {
+        return this.todosLosDatos;
+      }
 
       const q = query.toLowerCase();
-      return this.todosLosDatos.filter(user =>
-          user.nombre?.toLowerCase().includes(q) ||
-          user.apellidos?.toLowerCase().includes(q) ||
-          user.email?.toLowerCase().includes(q) ||
-          user.curso?.toLowerCase().includes(q) ||
-          user.tutor?.toLowerCase().includes(q) ||
-          user.rol?.toLowerCase().includes(q)
-      );
+
+      return this.todosLosDatos.filter(user => {
+        const nombreMatch = user.nombre?.toLowerCase().startsWith(q) ?? false;
+
+        const apellidosMatch = user.apellidos?.toLowerCase().startsWith(q) ?? false;
+
+        const emailMatch = user.email?.toLowerCase().startsWith(q) ?? false;
+
+        const cursoMatch = user.curso?.toLowerCase().startsWith(q) ?? false;
+
+        const tutorMatch = user.tutor?.toLowerCase().startsWith(q) ?? false;
+
+        const rolMatch = user.rol?.toLowerCase().startsWith(q) ?? false;
+
+        return nombreMatch || apellidosMatch || emailMatch || cursoMatch || tutorMatch || rolMatch;
+      });
     },
     verUsuario(usuario: User) {
       console.log("Navegando a detalle de usuario con estos datos:", usuario);
@@ -302,11 +312,11 @@ a {
 }
 
 .p-paginator-pages .p-highlight {
-  background-color: #d6621e !important; /* Naranja para la página activa */
+  background-color: #d6621e !important;
   color: white;
-  font-weight: bold; /* Texto en negrita para mayor distinción */
-  transform: scale(1.05); /* Ligeramente más grande */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+  font-weight: bold;
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .p-paginator-first,
