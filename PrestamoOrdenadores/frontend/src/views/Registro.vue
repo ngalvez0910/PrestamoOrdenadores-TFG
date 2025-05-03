@@ -111,11 +111,33 @@ export default {
   },
   methods: {
     validateEmail() {
-      if (!this.form.email || !/^[^\s@]+@loantech\.com$/.test(this.form.email)) {
-        this.errors.email = 'El correo electrónico debe terminar en @loantech.com';
+      const email = this.form.email;
+      let isValidFormat = false;
+      let errorMessage = '';
+
+      if (!email) {
+        errorMessage = 'El correo electrónico es obligatorio';
       } else {
+        const endsWithLoantech = email.endsWith('@loantech.com');
+        const endsWithProfesor = email.endsWith('@profesor.loantech.com');
+        const endsWithAdmin = email.endsWith('@admin.loantech.com');
+
+        const basicFormatCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        if (basicFormatCheck && (endsWithLoantech || endsWithProfesor || endsWithAdmin)) {
+          isValidFormat = true;
+        } else {
+          errorMessage = 'El correo debe ser válido y terminar en @loantech.com, @profesor.loantech.com o @admin.loantech.com';
+        }
+      }
+
+      if (isValidFormat) {
         this.errors.email = '';
         this.validateEmailDependencies();
+      } else {
+        this.errors.email = errorMessage;
+        this.errors.curso = '';
+        this.errors.tutor = '';
       }
     },
     validateEmailDependencies() {
