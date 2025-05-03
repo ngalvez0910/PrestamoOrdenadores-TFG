@@ -302,11 +302,11 @@ a {
 }
 
 .p-paginator-pages .p-highlight {
-  background-color: #d6621e !important; /* Naranja para la página activa */
+  background-color: #d6621e !important;
   color: white;
-  font-weight: bold; /* Texto en negrita para mayor distinción */
-  transform: scale(1.05); /* Ligeramente más grande */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+  font-weight: bold;
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .p-paginator-first,

@@ -252,4 +252,61 @@ export default {
   margin-top: 1%;
   margin-left: 3%
 }
+
+.p-paginator-pages {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.p-paginator-pages button {
+  background-color: #a6a6a6;
+  color: #ffffff;
+  padding: 0.5rem 0.5rem;
+  margin: 0 5px;
+  border-radius: 80%;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.p-paginator-pages button:hover {
+  background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
+}
+
+.p-paginator-pages .p-highlight {
+  background-color: #d6621e !important;
+  color: white;
+  font-weight: bold;
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.p-paginator-first,
+.p-paginator-prev,
+.p-paginator-next,
+.p-paginator-last {
+  background-color: #d6621e;
+  color: #ffffff;
+  border-radius: 40px;
+  padding: 0.5rem 0.75rem;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  max-width: 2%
+}
+
+.p-paginator-first:hover,
+.p-paginator-prev:hover,
+.p-paginator-next:hover,
+.p-paginator-last:hover {
+  background-color: #a14916;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(236, 145, 96);
+}
 </style>
