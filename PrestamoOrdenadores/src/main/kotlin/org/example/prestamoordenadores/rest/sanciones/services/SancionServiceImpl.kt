@@ -18,6 +18,7 @@ import org.example.prestamoordenadores.rest.sanciones.models.TipoSancion
 import org.example.prestamoordenadores.rest.sanciones.repositories.SancionRepository
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.beans.factory.annotation.Qualifier
@@ -40,14 +41,19 @@ class SancionServiceImpl(
     private val objectMapper: ObjectMapper,
     @Qualifier("webSocketSancionesHandler") private val webSocketHandler: WebSocketHandler
 ) : SancionService {
-    override fun getAllSanciones(page: Int, size: Int): Result<List<SancionResponse>, SancionError> {
+    override fun getAllSanciones(page: Int, size: Int): Result<PagedResponse<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo todas las sanciones" }
 
         val pageRequest = PageRequest.of(page, size)
         val pageSanciones = repository.findAll(pageRequest)
         val sancionResponses = mapper.toSancionResponseList(pageSanciones.content)
 
-        return Ok(sancionResponses)
+        val pagedResponse = PagedResponse(
+            content = sancionResponses,
+            totalElements = pageSanciones.totalElements
+        )
+
+        return Ok(pagedResponse)
     }
 
     @Cacheable(key = "#guid")
