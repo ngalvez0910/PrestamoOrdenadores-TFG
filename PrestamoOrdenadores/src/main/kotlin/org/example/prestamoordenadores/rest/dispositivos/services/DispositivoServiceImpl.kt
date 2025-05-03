@@ -12,6 +12,7 @@ import org.example.prestamoordenadores.rest.dispositivos.mappers.DispositivoMapp
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
+import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
@@ -30,14 +31,19 @@ class DispositivoServiceImpl(
     private val mapper: DispositivoMapper,
     private val incidenciaRepository: IncidenciaRepository
 ) : DispositivoService {
-    override fun getAllDispositivos(page: Int, size: Int): Result<List<DispositivoResponseAdmin>, DispositivoError> {
+    override fun getAllDispositivos(page: Int, size: Int): Result<PagedResponse<DispositivoResponseAdmin>, DispositivoError> {
         logger.debug { "Obteniendo todos los dispositivos" }
 
         val pageRequest = PageRequest.of(page, size)
         val pageDispositivos = dispositivoRepository.findAll(pageRequest)
         val dispositivoResponses = mapper.toDispositivoResponseListAdmin(pageDispositivos.content)
 
-        return Ok(dispositivoResponses)
+        val pagedResponse = PagedResponse(
+            content = dispositivoResponses,
+            totalElements = pageDispositivos.totalElements
+        )
+
+        return Ok(pagedResponse)
     }
 
     @Cacheable(key = "#guid")
