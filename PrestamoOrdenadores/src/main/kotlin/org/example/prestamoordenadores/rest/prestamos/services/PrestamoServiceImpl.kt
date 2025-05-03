@@ -24,6 +24,7 @@ import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.storage.pdf.PrestamoPdfStorage
 import org.example.prestamoordenadores.utils.emails.EmailService
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
+import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.beans.factory.annotation.Qualifier
@@ -50,14 +51,19 @@ class PrestamoServiceImpl(
     @Qualifier("webSocketPrestamosHandler") private val webSocketHandler: WebSocketHandler,
     private val emailService: EmailService
 ): PrestamoService {
-    override fun getAllPrestamos(page: Int, size: Int): Result<List<PrestamoResponse>, PrestamoError> {
+    override fun getAllPrestamos(page: Int, size: Int): Result<PagedResponse<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo todos los prestamos" }
 
         val pageRequest = PageRequest.of(page, size)
         val pagePrestamos = prestamoRepository.findAll(pageRequest)
         val prestamoResponses = mapper.toPrestamoResponseList(pagePrestamos.content)
 
-        return Ok(prestamoResponses)
+        val pagedResponse = PagedResponse(
+            content = prestamoResponses,
+            totalElements = pagePrestamos.totalElements
+        )
+
+        return Ok(pagedResponse)
     }
 
     @Cacheable(key = "#guid")

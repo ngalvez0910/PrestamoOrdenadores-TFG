@@ -4,12 +4,13 @@ import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
+import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
 interface PrestamoService {
-    fun getAllPrestamos(page: Int, size: Int): Result<List<PrestamoResponse>, PrestamoError>
+    fun getAllPrestamos(page: Int, size: Int): Result<PagedResponse<PrestamoResponse>, PrestamoError>
     fun getPrestamoByGuid(guid: String) : Result<PrestamoResponse?, PrestamoError>
     fun createPrestamo() : Result<PrestamoResponse, PrestamoError>
     fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest) : Result<PrestamoResponse?, PrestamoError>
