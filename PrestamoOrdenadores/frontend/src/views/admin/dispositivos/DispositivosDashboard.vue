@@ -69,7 +69,7 @@ interface Dispositivo {
   numeroSerie: string;
   componentes: string;
   estadoDispositivo: string;
-  estado: string;
+  estado: 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
   incidencia: { guid: string } | null;
   incidenciaGuid: string | null;
   isActivo: boolean;
@@ -160,16 +160,25 @@ export default {
 
       this.paginar();
     },
-    filtrarPorTexto(query: string) {
-      if (!query) return this.todosLosDatos;
+    filtrarPorTexto(query: string): Dispositivo[] {
+      if (!query) {
+        return this.todosLosDatos;
+      }
 
       const q = query.toLowerCase();
-      return this.todosLosDatos.filter(dispositivo =>
-          dispositivo.numeroSerie?.toLowerCase().includes(q) ||
-          dispositivo.componentes?.toLowerCase().includes(q) ||
-          dispositivo.estado?.toLowerCase().includes(q) ||
-          dispositivo.incidenciaGuid?.toLowerCase().includes(q)
-      );
+
+      return this.todosLosDatos.filter(dispositivo => {
+        const numeroSerieMatch = dispositivo.numeroSerie?.toLowerCase().startsWith(q) ?? false;
+
+        const componentesMatch = dispositivo.componentes?.toLowerCase().startsWith(q) ?? false;
+
+        const estadoFormateado = this.formatEstado(dispositivo.estado);
+        const estadoMatch = estadoFormateado?.toLowerCase().startsWith(q) ?? false;
+
+        const incidenciaMatch = dispositivo.incidencia?.guid?.toLowerCase().startsWith(q) ?? false;
+
+        return numeroSerieMatch || componentesMatch || estadoMatch || incidenciaMatch;
+      });
     },
     editDispositivo(dispositivo: Dispositivo) {
       this.$router.push({
