@@ -1,63 +1,65 @@
 <template>
   <MenuBar />
-  <div class="filters" style="margin-left: -20%; margin-top: -23%">
+  <div class="filters" style="margin-left: -20%; margin-top: 35%">
     Buscar:
     <input type="text" v-model="search" placeholder="Buscar..." @input="handleSearchInput" />
   </div>
   <br>
-  <div class="table-container row-12">
-    <DataTable
-        :value="datos"
-        paginator
-        :rows="5"
-        :totalRecords="totalRecords"
-        :lazy="true"
-        @page="onPage"
-        paginatorClass="custom-paginator"
-    >
-      <Column field="email">
-        <template #header>
-          <b>Email</b>
-        </template>
-      </Column>
-      <Column>
-        <template #body="slotProps">
-          <span>{{ slotProps.data.nombre }} {{ slotProps.data.apellidos }}</span>
-        </template>
-        <template #header>
-          <b>Nombre</b>
-        </template>
-      </Column>
-      <Column field="curso">
-        <template #header>
-          <b>Curso</b>
-        </template>
-      </Column>
-      <Column field="tutor">
-        <template #header>
-          <b>Tutor</b>
-        </template>
-      </Column>
-      <Column field="rol">
-        <template #header>
-          <b>Rol</b>
-        </template>
-      </Column>
-      <Column field="ver">
-        <template #body="slotProps">
-          <button @click="verUsuario(slotProps.data)" class="ver-button">
-            <i class="pi pi-eye"></i>
-          </button>
-        </template>
-      </Column>
-      <Column field="delete">
-        <template #body="slotProps">
-          <button @click="deleteUsuario(slotProps.data)" class="delete-button">
-            <i class="pi pi-ban"></i>
-          </button>
-        </template>
-      </Column>
-    </DataTable>
+  <div style="margin-left: -40%; margin-top: 2%; width: 143%; height: 600px; overflow-y: auto;">
+    <div class="table row-12">
+      <DataTable
+          :value="datos"
+          paginator
+          :rows="5"
+          :totalRecords="totalRecords"
+          :lazy="true"
+          @page="onPage"
+          paginatorClass="custom-paginator"
+      >
+        <Column field="email">
+          <template #header>
+            <b>Email</b>
+          </template>
+        </Column>
+        <Column>
+          <template #body="slotProps">
+            <span>{{ slotProps.data.nombre }} {{ slotProps.data.apellidos }}</span>
+          </template>
+          <template #header>
+            <b>Nombre</b>
+          </template>
+        </Column>
+        <Column field="curso">
+          <template #header>
+            <b>Curso</b>
+          </template>
+        </Column>
+        <Column field="tutor">
+          <template #header>
+            <b>Tutor</b>
+          </template>
+        </Column>
+        <Column field="rol">
+          <template #header>
+            <b>Rol</b>
+          </template>
+        </Column>
+        <Column field="ver">
+          <template #body="slotProps">
+            <button @click="verUsuario(slotProps.data)" class="ver-button">
+              <i class="pi pi-eye"></i>
+            </button>
+          </template>
+        </Column>
+        <Column field="delete">
+          <template #body="slotProps">
+            <button @click="deleteUsuario(slotProps.data)" class="delete-button">
+              <i class="pi pi-ban"></i>
+            </button>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </div>
 </template>
 
@@ -193,7 +195,7 @@ export default {
 
 <style>
 body{
-  overflow-y: auto;
+  overflow-y: auto !important;
 }
 
 .filters {
@@ -331,13 +333,5 @@ a {
   background-color: #a14916;
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgb(236, 145, 96);
-}
-
-.table-container {
-  width: 90%;
-  overflow-x: auto;
-  margin-bottom: 40px;
-  margin-left: -26%;
-  position: fixed
 }
 </style>
