@@ -36,14 +36,14 @@
         <Column field="fechaPrestamo" header="Fecha Préstamo"></Column>
         <Column field="fechaDevolucion" header="Fecha Devolución"></Column>
 
-        <Column header="Acciones" style="min-width:8rem">
+        <Column header="Acciones" style="min-width:100px; width: 100px; text-align: center;">
           <template #body="slotProps">
             <div class="action-buttons">
               <button @click="verPrestamo(slotProps.data)" class="action-button view-button" title="Ver Detalles">
-                <i class="pi pi-eye"></i>
+                <i class="pi pi-info-circle"></i>
               </button>
               <button @click="deletePrestamo(slotProps.data)" class="action-button delete-button" title="Eliminar/Cancelar Préstamo">
-                <i class="pi pi-ban"></i>
+                <i class="pi pi-trash"></i>
               </button>
             </div>
           </template>
@@ -263,6 +263,7 @@ export default {
 }
 
 :deep(.p-datatable-custom .p-datatable-tbody > tr) {
+  font-family: 'Montserrat', sans-serif;
   color: var(--color-text-dark);
   transition: background-color 0.2s ease;
   border-bottom: 1px solid var(--color-background-main);
@@ -312,7 +313,7 @@ export default {
 
 .action-buttons {
   display: flex;
-  gap: 40%;
+  gap: 12px;
   justify-content: center;
   align-items: center;
 }
@@ -324,17 +325,17 @@ export default {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  padding: 6px;
   transition: all 0.3s ease-in-out;
   line-height: 1;
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
   box-sizing: border-box;
 }
 
 .action-button i {
   font-size: 1.1rem;
   display: block;
-  margin-top: 4%;
 }
 
 .view-button {
