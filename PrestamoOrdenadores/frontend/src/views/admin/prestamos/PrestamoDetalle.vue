@@ -1,50 +1,56 @@
 <template>
   <MenuBar />
-  <div class="botones-container">
-    <div class="boton-atras">
-      <a href="/admin/dashboard/prestamos">
-        <button class="back-button">
-          <i class="pi pi-arrow-left"></i>
-        </button>
-      </a>
+  <div class="detalle-container">
+
+    <div class="boton-atras-wrapper">
+      <button @click="goBack" class="back-button" title="Volver a Préstamos">
+        <i class="pi pi-arrow-left"></i>
+      </button>
     </div>
-  </div>
-  <div class="prestamo-details" v-if="prestamoData">
-    <div class="iconoPrestamo">
-      <i class="pi pi-list-check"></i>
-    </div>
-    <div class="row">
-      <div class="userGuid col-4">
-        <h6>UserGuid: </h6>
-        <input readonly type="text" id="userGuid" v-model="prestamoData.userGuid"/>
+
+    <div class="prestamo-details" v-if="prestamoData">
+      <div class="details-header">
+        <h2>Detalles del Préstamo</h2>
+        <i class="pi pi-list-check header-icon"></i>
       </div>
-      <div class="dispositivoGuid col-4">
-        <h6>DispositivoGuid: </h6>
-        <input readonly type="text" id="dispositivoGuid" v-model="prestamoData.dispositivoGuid"/>
-      </div>
-    </div>
-    <div class="row">
-      <div class="estado col-4">
-        <h6>Estado: </h6>
-        <div v-if="editable">
-          <select id="estado" v-model="prestamoData.estadoPrestamo">
+
+      <div class="details-grid">
+
+        <div class="form-group">
+          <label for="userGuid">GUID Usuario</label>
+          <input readonly type="text" id="userGuid" class="input-field" v-model="prestamoData.userGuid"/>
+        </div>
+
+        <div class="form-group">
+          <label for="dispositivoGuid">GUID Dispositivo</label>
+          <input readonly type="text" id="dispositivoGuid" class="input-field" v-model="prestamoData.dispositivoGuid"/>
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado</label>
+          <select v-if="editable" id="estado" class="input-field" v-model="prestamoData.estadoPrestamo">
             <option value="VENCIDO">VENCIDO</option>
             <option value="EN_CURSO">EN CURSO</option>
             <option value="CANCELADO">CANCELADO</option>
+            <option value="FINALIZADO">FINALIZADO</option>
           </select>
+          <input v-else readonly type="text" id="estado" class="input-field" :value="formatEstado(prestamoData.estadoPrestamo)"/>
         </div>
-        <div v-else>
-          <input readonly type="text" id="estado" :value="formatEstado(prestamoData.estadoPrestamo)"/>
+
+        <div class="form-group">
+          <label for="fechaPrestamo">Fecha de Préstamo</label>
+          <input readonly type="text" id="fechaPrestamo" class="input-field" v-model="prestamoData.fechaPrestamo"/>
         </div>
+
+        <div class="form-group">
+          <label for="fechaDevolucion">Fecha de Devolución</label>
+          <input readonly type="text" id="fechaDevolucion" class="input-field" :value="prestamoData.fechaDevolucion || 'Pendiente'"/>
+        </div>
+
       </div>
-      <div class="creacion col-4">
-        <h6>Fecha de Préstamo: </h6>
-        <input readonly type="text" id="fechaPrestamo" v-model="prestamoData.fechaPrestamo"/>
-      </div>
-      <div class="devolucion col-4">
-        <h6>Fecha de Devolución: </h6>
-        <input readonly type="text" id="fechaDevolucion" v-model="prestamoData.fechaDevolucion"/>
-      </div>
+    </div>
+    <div v-else>
+      <p>Cargando detalles del préstamo...</p>
     </div>
   </div>
 </template>
@@ -85,6 +91,9 @@ export default defineComponent({
     toggleEdit() {
       this.editable = !this.editable;
     },
+    goBack() {
+      this.$router.back();
+    },
     /*
     async actualizarPrestamo() {
       if (JSON.stringify(this.prestamoData) !== JSON.stringify(this.originalData)) {
@@ -105,93 +114,170 @@ export default defineComponent({
 </script>
 
 <style scoped>
-body{
-  overflow-y: auto;
+.detalle-container {
+  padding: 80px 30px 40px 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.boton-atras {
-  margin-left: -70%;
-  margin-top: 15%;
+.boton-atras-wrapper {
+  margin-bottom: 25px;
+  margin-top: 5%;
 }
 
 .back-button {
-  padding: 0.7rem 1.2rem;
-  font-size: 0.875rem;
-  background-color: #14124f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 1rem;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  margin-top: -80%;
-  width: 5%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  width: 40px;
+  height: 40px;
+  line-height: 1;
 }
 
-.back-button:hover{
-  background-color: #0d0c34;
+.back-button:hover {
+  background-color: var(--color-interactive-darker);
   transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(72, 70, 159);
-}
-
-.back-button i {
-  pointer-events: none;
-}
-
-a{
-  background-color: inherit !important;
+  box-shadow: 0 4px 8px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .prestamo-details {
   background-color: white;
-  border-radius: 10px;
-  padding: 20px;
-  width: 300%;
-  max-width: 600px;
-  box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  margin-left: -10%;
-  margin-top: -15%;
-  margin-bottom: 7%;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
+  margin-left: 55%;
+  min-width: 500px;
 }
 
-.pi-list-check {
-  font-size: 4.5rem;
-  margin-left: 80%;
-  margin-bottom: 5%;
-  margin-top: 2%
-}
-
-h6{
-  font-weight: bold;
-}
-
-.estado, .creacion, .userGuid, .dispositivoGuid, .devolucion {
-  margin-top: 15px;
-}
-
-input, select, textarea{
-  border-radius: 20px;
-  padding: 8px;
-  border: 1px solid #d6621e;
-  width: 100%;
-  max-width: max-content;
-  transition: border 0.3s ease;
-  outline: none;
-}
-
-textarea{
-  resize: none;
-  width: 100%;
-  max-width: 100%;
-}
-
-.botones-container {
+.details-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--color-neutral-medium);
+}
+
+.details-header h2 {
+  color: var(--color-primary);
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.header-icon {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  opacity: 0.7;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+input.input-field,
+select.input-field {
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-neutral-medium);
+  background-color: white;
+  color: var(--color-text-dark);
   width: 100%;
-  margin-bottom: 13%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+select.input-field {
+  cursor: pointer;
+  appearance: none;
+}
+
+input.input-field[readonly] {
+  background-color: var(--color-background-main);
+  cursor: default;
+  opacity: 0.9;
+}
+
+input.input-field[readonly]:focus {
+  border-color: var(--color-neutral-medium);
+  box-shadow: none;
+}
+
+.action-buttons-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-medium);
+}
+
+.action-buttons-footer button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.action-buttons-footer button:active {
+  transform: scale(0.98);
+}
+
+.edit-button {
+  background-color: var(--color-neutral-medium);
+  color: var(--color-text-dark);
+}
+
+.edit-button:hover {
+  background-color: #B0B9C2;
+}
+
+.save-button {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #146C43;
+}
+
+.cancel-button {
+  background-color: transparent;
+  color: var(--color-text-dark);
+  border: 1px solid var(--color-neutral-medium);
+}
+
+.cancel-button:hover {
+  background-color: var(--color-background-main);
 }
 </style>
