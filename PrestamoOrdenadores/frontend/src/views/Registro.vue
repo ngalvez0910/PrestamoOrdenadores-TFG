@@ -5,9 +5,20 @@
     <div class="register-box">
       <h1>Registro</h1>
 
+      <Dialog :header="modalTitle" v-model:visible="isInfoModalVisible" modal :style="{ width: '50vw' }" :breakpoints="{'960px': '75vw', '641px': '100vw'}">
+        <div style="margin: 0; line-height: 1.6;" v-html="modalBody"></div>
+      </Dialog>
+
       <form @submit.prevent="registerUser">
         <div class="row">
-          <label for="numeroIdentificacion" class="input-label"><strong>Número de Identificación</strong></label>
+          <label for="numeroIdentificacion" class="input-label"><strong>Número de Identificación</strong>
+            <i
+                class="pi pi-info-circle"
+                @click="showInfo('numeroIdentificacion')"
+                style="cursor: pointer; color: #007bff; vertical-align: middle;"
+                title="Haz clic para más información"
+            ></i>
+          </label>
           <input type="text" class="input-field" name="numeroIdentificacion" placeholder="Número de Identificación" v-model="form.numeroIdentificacion">
           <p class="error-message" v-if="errors.numeroIdentificacion">{{ errors.numeroIdentificacion }}</p>
         </div>
@@ -41,14 +52,28 @@
         </div>
 
         <div class="row mb-3">
-          <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
+          <label for="email" class="input-label"><strong>Correo electrónico</strong>
+            <i
+                class="pi pi-info-circle"
+                @click="showInfo('email')"
+                style="cursor: pointer; color: #007bff; vertical-align: middle;"
+                title="Haz clic para más información"
+            ></i>
+          </label>
           <input class="input-field" type="email" name="email" placeholder="Correo electrónico" v-model="form.email" @blur="validateEmail">
           <p class="error-message" v-if="errors.email">{{ errors.email }}</p>
         </div>
 
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="password" class="input-label"><strong>Contraseña</strong></label>
+            <label for="password" class="input-label"><strong>Contraseña</strong>
+              <i
+                  class="pi pi-info-circle"
+                  @click="showInfo('password')"
+                  style="cursor: pointer; color: #007bff; vertical-align: middle;"
+                  title="Haz clic para más información"
+              ></i>
+            </label>
             <input type="password" name="password" class="input-field" placeholder="Contraseña"  v-model="form.password">
             <p class="error-message" v-if="errors.password">{{ errors.password }}</p>
           </div>
@@ -74,12 +99,13 @@
 import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
 import { useToast } from 'primevue/usetoast';
 import { authService } from '@/services/AuthService.ts';
 
 export default {
   name: 'Register',
-  components: { MenuBarNoSession, Toast, Button },
+  components: { MenuBarNoSession, Toast, Button, Dialog },
   setup() {
     const toast = useToast();
     return { toast };
@@ -106,10 +132,41 @@ export default {
         password: '',
         confirmPassword: '',
       },
-      isSubmitting: false
+      isSubmitting: false,
+      isInfoModalVisible: false,
+      modalTitle: '',
+      modalBody: '',
     };
   },
   methods: {
+    showInfo(infoType: string) {
+      switch (infoType) {
+        case 'numeroIdentificacion':
+          this.modalTitle = '¿Cuál es mi Número de Identificación?';
+          this.modalBody = `
+            <p>Generalmente se encuentra en tu carnet de estudiante.</p>
+            <p>Fíjate en la foto:</p>
+            <img
+              src="/carnet.png"
+              alt="Ejemplo de carnet de estudiante mostrando número de identificación"
+              style="max-width: 100%; height: auto; display: block; margin-top: 10px;"
+            />
+          `;
+          break;
+        case 'email':
+          this.modalTitle = '¿Qué Correo Electrónico debo utilizar?';
+          this.modalBody = 'Tu correo institucional asignado. Debe terminar en @loantech.com.';
+          break;
+        case 'password':
+          this.modalTitle = 'Contraseña Segura';
+          this.modalBody = 'La contraseña debe cumplir los siguientes requisitos:\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un dígito.\n- Al menos un carácter especial (ej: !@#$%^&*).';
+          break;
+        default:
+          this.modalTitle = 'Información';
+          this.modalBody = 'No hay información disponible para este campo.';
+      }
+      this.isInfoModalVisible = true;
+    },
     validateEmail() {
       const email = this.form.email;
       let isValidFormat = false;
@@ -264,8 +321,10 @@ export default {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inconsolata:wght@200..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=NTR&family=Quicksand&display=swap');
+
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background-color: #e6e8f0;
   color: #14124f;
 }
@@ -356,5 +415,9 @@ button:hover {
   color: #14124f !important;
   width: 100% !important;
   margin-top: -75%
+}
+
+i{
+  margin-left: 2%;
 }
 </style>
