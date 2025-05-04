@@ -13,10 +13,22 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inconsolata:wght@200..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=NTR&family=Quicksand&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0;700&display=swap');
 
-body{
+:root {
+  --color-primary: #14124f;
+  --color-interactive: #4A90E2;
+  --color-accent-soft: #AEC6F4;
+  --color-background-main: #F8F9FA;
+  --color-text-dark: #495057;
+  --color-neutral-medium: #CED4DA;
+  --color-text-on-dark: #E0E7FF;
+  --color-text-on-dark-hover: #FFFFFF;
+}
+
+body {
   font-family: 'Montserrat', sans-serif;
+  margin: 0;
 }
 
 .menubar {
@@ -25,17 +37,22 @@ body{
   left: 0;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  background-color: #14124f;
-  color: #fff;
+  background-color: var(--color-primary);
+  color: var(--color-text-on-dark);
   padding: 10px 30px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  box-sizing: border-box;
+}
+
+.menubar h1 {
+  margin: 0;
 }
 
 .menubar h1 a {
-  color: white;
+  color: var(--color-text-on-dark);
   text-decoration: none;
   font-size: 1.8rem;
   font-weight: bold;
@@ -43,8 +60,7 @@ body{
 }
 
 .menubar h1 a:hover {
-  color: inherit !important;
-  background-color: inherit !important;
+  color: var(--color-text-on-dark-hover);
 }
 
 @media (max-width: 768px) {
@@ -53,7 +69,7 @@ body{
   }
 
   .menubar h1 a {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
 }
 </style>
