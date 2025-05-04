@@ -1,60 +1,57 @@
 <template>
   <MenuBar />
-  <div class="filters" style="margin-left: -20%; margin-top: 37%">
-      Buscar:
-    <input type="text" v-model="search" placeholder="Buscar..." @input="handleSearchInput" />
+  <div class="dispositivos-container"> <div class="filters">
+    <label for="search-input">Buscar:</label>
+    <input id="search-input" type="text" v-model="search" placeholder="Buscar por Nº Serie, Componentes, Estado..." @input="handleSearchInput" />
   </div>
-  <br>
-  <div style="margin-left: -40%; margin-top: 2%; margin-bottom: 5%; width: 140%; height: 600px;">
-    <div class="table row-12">
+
+    <div class="table-wrapper">
       <DataTable
           :value="datos"
           paginator
           :rows="5"
+          :rowsPerPageOptions="[5, 10, 20, 50]"
           :totalRecords="totalRecords"
-          :lazy="true"
-          @page="onPage"
-          paginatorClass="custom-paginator"
+          :loading="loading"
+          lazy @page="onPage"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} dispositivos"
+          responsiveLayout="scroll"
+          class="p-datatable-custom"
       >
-        <Column field="numeroSerie" style="width: 15%">
-          <template #header>
-            <b>Número de serie</b>
-          </template>
-        </Column>
-        <Column field="componentes" style="width: 15%">
-          <template #header>
-            <b>Componentes</b>
-          </template>
-        </Column>
-        <Column style="width: 15%">
+        <Column field="numeroSerie" header="Número de Serie" style="min-width: 150px;"></Column>
+        <Column field="componentes" header="Componentes" style="min-width: 200px;"></Column>
+        <Column field="estado" header="Estado" style="min-width: 120px;">
           <template #body="slotProps">
-            {{ formatEstado(slotProps.data.estado) }}
-          </template>
-          <template #header>
-            <b>Estado</b>
+                 <span :class="['status-badge', getStatusClass(slotProps.data.estado)]">
+                     {{ formatEstado(slotProps.data.estado) }}
+                 </span>
           </template>
         </Column>
-        <Column field="incidencia.guid" style="width: 15%">
+        <Column field="incidencia.guid" header="Incidencia GUID" style="min-width: 150px;">
           <template #body="slotProps">
-            {{ slotProps.data.incidencia?.guid }} </template>
-          <template #header>
-            <b>Incidencias</b>
+            {{ slotProps.data.incidencia?.guid || '-' }}
           </template>
         </Column>
-        <Column field="edit" style="width: 7%">
+
+        <Column header="Acciones" style="min-width:100px; width: 100px; text-align: center;">
           <template #body="slotProps">
-            <button @click="editDispositivo(slotProps.data)" class="editDispositivo-button">
-              <i class="pi pi-eye"></i>
-            </button>
+            <div class="action-buttons">
+              <button @click="editDispositivo(slotProps.data)" class="action-button edit-button" title="Editar/Ver Detalles">
+                <i class="pi pi-info-circle"></i>
+              </button>
+              <button @click="deleteDispositivo(slotProps.data)" class="action-button delete-button" title="Eliminar Dispositivo">
+                <i class="pi pi-trash"></i> </button>
+            </div>
           </template>
         </Column>
-        <Column field="delete" style="width: 5%">
-          <template #body="slotProps">
-            <button @click="deleteDispositivo(slotProps.data)" class="delete-button">
-              <i class="pi pi-ban"></i>
-            </button>
-          </template>
-        </Column>
+
+        <template #empty>
+          No se encontraron dispositivos.
+        </template>
+        <template #loading>
+          Cargando datos de dispositivos...
+        </template>
       </DataTable>
     </div>
   </div>
@@ -63,6 +60,8 @@
 <script lang="ts">
 import MenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
+
+type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
 
 interface Dispositivo {
   guid: string;
@@ -95,7 +94,6 @@ export default {
       loading: false,
       currentPage: 0,
       pageSize: 5,
-      filters: {}
     };
   },
   async mounted() {
@@ -106,6 +104,15 @@ export default {
   methods: {
     formatEstado(estado: 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO'): string {
       return estado.replace(/_/g, ' ');
+    },
+    getStatusClass(estado: DeviceState | undefined): string {
+      if (!estado) return 'status-unknown';
+      switch (estado) {
+        case 'DISPONIBLE': return 'status-disponible';
+        case 'PRESTADO': return 'status-prestado';
+        case 'NO_DISPONIBLE': return 'status-no-disponible';
+        default: return 'status-unknown';
+      }
     },
     async loadData() {
       this.loading = true;
@@ -141,23 +148,21 @@ export default {
       }
     },
     paginar() {
+      const resultadosFiltrados = this.filtrarPorTexto(this.search);
+      this.totalRecords = resultadosFiltrados.length;
       const inicio = this.currentPage * this.pageSize;
       const fin = inicio + this.pageSize;
-      this.datos = this.filtrarPorTexto(this.search).slice(inicio, fin);
+      this.datos = resultadosFiltrados.slice(inicio, fin);
     },
     onPage(event: any) {
+      this.loading = true;
       this.currentPage = event.page;
       this.pageSize = event.rows;
       this.paginar();
+      setTimeout(() => { this.loading = false; }, 100);
     },
     handleSearchInput(event: Event) {
-      const target = event.target as HTMLInputElement;
-      this.search = target.value;
       this.currentPage = 0;
-
-      const resultadosFiltrados = this.filtrarPorTexto(this.search);
-      this.totalRecords = resultadosFiltrados.length;
-
       this.paginar();
     },
     filtrarPorTexto(query: string): Dispositivo[] {
@@ -183,148 +188,238 @@ export default {
     editDispositivo(dispositivo: Dispositivo) {
       this.$router.push({
         name: 'DispositivoDetalle',
-        params: { guid: dispositivo.guid },
-        query: {
-          numeroSerie: dispositivo.numeroSerie,
-          componentes: dispositivo.componentes,
-          estado: dispositivo.estadoDispositivo,
-          incidenciaGuid: dispositivo.incidenciaGuid
-        }
+        params: { guid: dispositivo.guid }
       });
     }
   },
 };
 </script>
 
-<style>
+<style scoped>
+.dispositivos-container {
+  padding: 80px 30px 40px 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
 .filters {
-  position: relative;
-  width: 100%;
-  padding: 1rem;
   display: flex;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  max-width: 400px;
+  margin-top: -60%;
+}
+
+.filters label {
+  font-weight: 500;
+  color: var(--color-text-dark);
+  white-space: nowrap;
 }
 
 .filters input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #d1d3e2;
-  border-radius: 25px;
-  margin-left: 2%;
-  transition: border 0.3s ease;
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: 1px solid var(--color-neutral-medium);
+  border-radius: 8px;
+  font-size: 1rem;
   outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .filters input:focus {
-  border-color: #d6621e;
+  border-color: var(--color-interactive);
+  box-shadow: 0 0 0 3px rgba(var(--color-interactive-rgb), 0.2);
 }
 
-.editDispositivo-button {
-  width: 40px;
-  height: 40px;
+.table-wrapper {
+  position: fixed;
+  width: 90%;
+  overflow-x: auto;
+  border: 1px solid var(--color-neutral-medium);
+  border-radius: 8px;
+  background-color: white;
+  margin-left: -14%;
+}
+
+:deep(.p-datatable-custom .p-datatable-thead > tr > th) {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--color-background-main);
+  color: var(--color-primary);
+  font-weight: 600;
+  padding: 1rem 1rem;
+  border-bottom: 2px solid var(--color-neutral-medium);
+  text-align: left;
+}
+
+:deep(.p-datatable-custom .p-datatable-tbody > tr) {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--color-text-dark);
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--color-background-main);
+}
+
+:deep(.p-datatable-custom .p-datatable-tbody > tr:last-child) {
+  border-bottom: none;
+}
+
+:deep(.p-datatable-custom .p-datatable-tbody > tr:hover) {
+  background-color: var(--color-accent-soft) !important;
+}
+
+:deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
+  padding: 0.9rem 1rem;
+  vertical-align: middle;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-block;
+}
+
+.status-disponible {
+  background-color: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-success);
+}
+
+.status-prestado {
+  background-color: rgba(var(--color-interactive-rgb), 0.15);
+  color: var(--color-interactive-darker);
+}
+
+.status-no-disponible,
+.status-reparacion {
+  background-color: rgba(var(--color-warning-rgb), 0.15);
+  color: #B45309;
+}
+
+.status-retirado {
+  background-color: rgba(var(--color-error-rgb), 0.1);
+  color: var(--color-error);
+}
+
+.status-unknown {
+  background-color: var(--color-neutral-medium);
+  color: var(--color-text-dark);
+}
+
+.action-buttons {
   display: flex;
+  gap: 12px;
   justify-content: center;
   align-items: center;
-  font-size: 0.875rem;
-  background-color: #d6621e;
-  color: white;
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  border-radius: 50%;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 6px;
   transition: all 0.3s ease-in-out;
-  margin-left: -5%;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
 }
 
-.editDispositivo-button:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
+.action-button i {
+  font-size: 1.1rem;
+  display: block;
 }
 
-.editDispositivo-button i {
+.edit-button {
+  background-color: var(--color-interactive);
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: var(--color-interactive-darker);
   transform: scale(1.1);
 }
 
 .delete-button {
-  padding: 0.5rem 0.8rem;
-  font-size: 0.875rem;
-  background-color: #d61e1e;
+  background-color: var(--color-error);
   color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  margin-top: 20%;
-  transition: all 0.3s ease-in-out;
 }
 
 .delete-button:hover {
-  background-color: #9b1616;
+  background-color: #B91C1C;
   transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(214, 30, 30);
 }
 
-.delete-button i {
-  pointer-events: none;
-  margin-top: 30%;
+:deep(.p-paginator) {
+  background-color: var(--color-background-main) !important;
+  border-top: 1px solid var(--color-neutral-medium) !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0 0 8px 8px !important;
 }
 
-a{
-  background-color: inherit !important;
+:deep(.p-paginator .p-paginator-element) {
+  color: var(--color-text-dark) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--color-neutral-medium) !important;
+  border-radius: 6px !important;
+  margin: 0 3px !important;
+  min-width: 32px;
+  height: 32px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.p-paginator-pages {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
+:deep(.p-paginator .p-paginator-element:not(.p-disabled):hover) {
+  background-color: var(--color-accent-soft) !important;
+  border-color: var(--color-interactive) !important;
+  color: var(--color-interactive-darker) !important;
 }
 
-.p-paginator-pages button {
-  background-color: #a6a6a6;
-  color: #ffffff;
-  padding: 0.5rem 0.5rem;
-  margin: 0 5px;
-  border-radius: 80%;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+:deep(.p-paginator .p-paginator-element.p-highlight) {
+  background-color: var(--color-interactive) !important;
+  border-color: var(--color-interactive) !important;
+  color: white !important;
+  font-weight: 600;
 }
 
-.p-paginator-pages button:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
+:deep(.p-dropdown) {
+  border: 1px solid var(--color-neutral-medium) !important;
+  border-radius: 6px !important;
 }
 
-.p-paginator-pages .p-highlight {
-  background-color: #d6621e !important;
-  color: white;
-  font-weight: bold;
-  transform: scale(1.05);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+:deep(.p-dropdown:not(.p-disabled).p-focus) {
+  border-color: var(--color-interactive) !important;
+  box-shadow: 0 0 0 1px rgba(var(--color-interactive-rgb), 0.2) !important;
 }
 
-.p-paginator-first,
-.p-paginator-prev,
-.p-paginator-next,
-.p-paginator-last {
-  background-color: #d6621e;
-  color: #ffffff;
-  border-radius: 40px;
-  padding: 0.5rem 0.75rem;
-  margin: 0 5px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  max-width: 2%
-}
+@media (max-width: 768px) {
+  .dispositivos-container {
+    padding: 70px 15px 30px 15px;
+  }
 
-.p-paginator-first:hover,
-.p-paginator-prev:hover,
-.p-paginator-next:hover,
-.p-paginator-last:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
+  .filters {
+    max-width: none;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters label {
+    margin-bottom: 5px;
+  }
+
+  :deep(.p-datatable-custom .p-datatable-thead > tr > th),
+  :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
+    padding: 0.75rem 0.5rem;
+    white-space: normal;
+  }
+
+  .action-buttons {
+    gap: 8px;
+  }
 }
 </style>
