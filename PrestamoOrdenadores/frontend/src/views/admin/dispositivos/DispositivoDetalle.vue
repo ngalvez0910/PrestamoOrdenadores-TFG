@@ -1,66 +1,78 @@
 <template>
   <MenuBar />
-  <div class="botones-container">
-    <div class="boton-atras">
-      <a href="/admin/dashboard/dispositivos">
-        <button class="back-button">
-          <i class="pi pi-arrow-left"></i>
-        </button>
-      </a>
+  <div class="detalle-container">
+    <div class="detalle-header-actions">
+      <button @click="goBack" class="back-button" title="Volver a Dispositivos">
+        <i class="pi pi-arrow-left"></i>
+      </button>
+      <button class="action-button edit-button" @click="toggleEdit" title="Editar Dispositivo">
+        <i :class="editable ? 'pi pi-times' : 'pi pi-pencil'"></i> {{ editable ? 'Cancelar' : 'Editar' }}
+      </button>
     </div>
-    <button class="editDispositivo-button" @click="toggleEdit">
-      <i class="pi pi-pencil"></i>
-    </button>
-  </div>
-  <div class="dispositivo-details" v-if="dispositivoData">
-    <div class="iconoPortatil">
-      <i class="pi pi-desktop"></i>
-    </div>
-    <div class="numeroSerie">
-      <h2><strong>Numero de Serie:</strong> {{dispositivoData.numeroSerie}}</h2>
-    </div>
-    <div class="row">
-      <div class="componentes col-6">
-        <h5>Componentes</h5>
-        <input :readonly="!editable" type="text" id="componentes" v-model="dispositivoData.componentes"/>
+
+    <div class="dispositivo-details" v-if="dispositivoData">
+      <div class="details-header">
+        <h2>Detalles del Dispositivo</h2>
+        <i class="pi pi-desktop header-icon"></i>
       </div>
-      <div class="estado col-6">
-        <h5>Estado</h5>
-        <div v-if="editable">
-          <select v-model="dispositivoData.estado">
+
+      <div class="details-grid">
+
+        <div class="form-group">
+          <label>Número de Serie</label>
+          <div class="readonly-field">{{ dispositivoData.numeroSerie }}</div> </div>
+
+        <div class="form-group">
+          <label for="componentes">Componentes</label>
+          <input :readonly="!editable" type="text" id="componentes" class="input-field" v-model="dispositivoData.componentes"/>
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado</label>
+          <select v-if="editable" id="estado" class="input-field" v-model="dispositivoData.estado">
             <option value="DISPONIBLE">Disponible</option>
             <option value="NO_DISPONIBLE">No Disponible</option>
             <option value="PRESTADO">Prestado</option>
           </select>
+          <input v-else readonly type="text" id="estado-readonly" class="input-field" :value="formatEstado(dispositivoData.estado)"/>
         </div>
-        <div v-else>
-          <input readonly type="text" :value="formatEstado(dispositivoData.estado)"/>
+
+        <div class="form-group">
+          <label for="incidencias">Incidencia Asociada (GUID)</label>
+          <input :readonly="!editable" type="text" id="incidencias" class="input-field" v-model="dispositivoData.incidenciaGuid"/>
         </div>
+
       </div>
+
+      <div v-if="editable" class="update-button-wrapper">
+        <button class="action-button update-button" @click="actualizarDispositivo">
+          Actualizar Dispositivo
+        </button>
+      </div>
+
     </div>
-    <div class="incidencias">
-      <h5>Incidencias</h5>
-      <input :readonly="!editable" type="text" id="incidencias" v-model="dispositivoData.incidenciaGuid"/>
+
+    <div v-else class="loading-message">
+      <p>Cargando detalles del dispositivo...</p>
     </div>
   </div>
-  <transition name="fade">
-    <button v-if="editable" class="update-button" @click="actualizarDispositivo">
-      Actualizar
-    </button>
-  </transition>
+
+  <Toast />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import MenuBar from '@/components/AdminMenuBar.vue';
-import {
-  getDispositivoByGuid,
-  actualizarDispositivo,
-} from '@/services/DispositivoService.ts';
+import {getDispositivoByGuid,} from '@/services/DispositivoService.ts';
+import {useToast} from "primevue/usetoast";
 
 export default defineComponent({
   name: 'DispositivoDetalle',
   components: { MenuBar },
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       dispositivoData: null as any,
@@ -90,169 +102,280 @@ export default defineComponent({
     toggleEdit() {
       this.editable = !this.editable;
     },
+    goBack() {
+      this.$router.back();
+    },
     async actualizarDispositivo() {
-      if (JSON.stringify(this.dispositivoData) !== JSON.stringify(this.originalData)) {
+      if (!this.dispositivoData || !this.originalData) return;
+
+      const hasChanged = this.dispositivoData.componentes !== this.originalData.componentes ||
+          this.dispositivoData.estado !== this.originalData.estado ||
+          this.dispositivoData.incidenciaGuid !== this.originalData.incidenciaGuid;
+
+      if (hasChanged) {
         try {
-          await actualizarDispositivo(this.dispositivoData.guid, {
+          const updatePayload = {
             componentes: this.dispositivoData.componentes,
-            estadoDispositivo: this.dispositivoData.estadoDispositivo,
-            incidenciaGuid: this.dispositivoData.incidenciaGuid,
-          });
-          this.originalData = { ...this.dispositivoData };
-          alert('Dispositivo actualizado correctamente.');
+            estado: this.dispositivoData.estado,
+            incidenciaGuid: this.dispositivoData.incidenciaGuid || null,
+          };
+
+          console.log("Actualizando dispositivo con:", updatePayload);
+
+          await actualizarDispositivo(this.dispositivoData.guid, updatePayload);
+
+          this.originalData = JSON.parse(JSON.stringify(this.dispositivoData));
+
+          this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Dispositivo actualizado.', life: 3000 });
           this.editable = false;
-        } catch (error) {
-          alert('No se pudo actualizar el dispositivo.');
+
+        } catch (error: any) {
+          console.error('Error al actualizar el dispositivo:', error);
+          const errorMessage = error.response?.data?.message || error.message || 'No se pudo actualizar el dispositivo.';
+          this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
         }
+      } else {
+        console.log("No se detectaron cambios.");
+        this.toast.add({ severity: 'info', summary: 'Info', detail: 'No se realizaron cambios.', life: 3000 });
+        this.editable = false;
       }
     },
   },
 });
 </script>
 
-
 <style scoped>
-body{
-  overflow-y: auto;
+.detalle-container {
+  padding: 80px 30px 40px 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.boton-atras {
-  margin-left: -70%;
-  margin-top: -15%;
+.detalle-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  margin-top: 5%;
+  margin-left: 40%;
 }
 
 .back-button {
-  padding: 0.7rem 1.2rem;
-  font-size: 0.875rem;
-  background-color: #14124f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 1rem;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  margin-top: 20%;
-  width: 5%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  width: 40px;
+  height: 40px;
+  line-height: 1;
 }
 
-.back-button:hover{
-  background-color: #0d0c34;
+.back-button:hover {
+  background-color: var(--color-interactive-darker);
   transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(72, 70, 159);
+  box-shadow: 0 4px 8px rgba(var(--color-primary-rgb), 0.2);
 }
 
-.back-button i {
-  pointer-events: none;
+.action-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-a{
-  background-color: inherit !important;
+.action-button:active {
+  transform: scale(0.98);
+}
+
+.action-button i {
+  font-size: 1rem;
+}
+
+.edit-button {
+  background-color: var(--color-interactive);
+  color: white;
+  margin-right: -135%;
+}
+
+.edit-button:hover {
+  background-color: var(--color-interactive-darker);
 }
 
 .dispositivo-details {
   background-color: white;
-  border-radius: 10px;
-  padding: 20px;
-  width: 300%;
-  max-width: 520px;
-  box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  margin-left: -5%;
-  margin-top: -15%;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
+  margin-left: 55%;
+  min-width: 500px;
 }
 
-.pi-desktop {
-  font-size: 4.5rem;
-  margin-left: 80%;
-  margin-bottom: 5%;
-  margin-top: 2%
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--color-neutral-medium);
 }
 
-.numeroSerie {
-  margin-top: 0;
-  font-size: 1.5rem;
+.details-header h2 {
+  color: var(--color-primary);
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
 }
 
-.componentes, .estado, .incidencias {
-  margin-top: 15px;
+.header-icon {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  opacity: 0.7;
 }
 
-input, select{
-  border-radius: 20px;
-  padding: 8px;
-  border: 1px solid #d1d3e2;
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.readonly-field {
+  padding: 10px 12px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--color-text-dark);
+  background-color: var(--color-background-main);
+  border-radius: 8px;
+  min-height: calc(1.4em + 20px + 2px);
+  word-wrap: break-word;
+}
+
+input.input-field,
+select.input-field {
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-neutral-medium);
+  background-color: white;
+  color: var(--color-text-dark);
   width: 100%;
-  max-width: max-content;
-  transition: border 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   outline: none;
+  box-sizing: border-box;
+  font-size: 1rem;
+  line-height: 1.4;
 }
 
-input:focus, select:focus {
-  border-color: #d6621e;
+select.input-field {
+  cursor: pointer;
+  appearance: none;
+}
+
+input.input-field[readonly] {
+  background-color: var(--color-background-main);
+  cursor: default;
+  opacity: 0.9;
+}
+
+input.input-field[readonly]:focus {
+  border-color: var(--color-neutral-medium);
+  box-shadow: none;
+}
+
+input.input-field:not([readonly]):focus,
+select.input-field:focus {
+  border-color: var(--color-interactive);
+  box-shadow: 0 0 0 3px rgba(var(--color-interactive-rgb), 0.2);
+}
+
+.update-button-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-medium);
 }
 
 .update-button {
-  padding: 5px 15px;
-  background-color: #d6621e;
+  background-color: var(--color-interactive);
   color: white;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  width: 15%;
-  transition: all 0.3s ease-in-out;
-  margin-left: 47%;
-  margin-top: -25%;
-  position: absolute;
 }
 
 .update-button:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
+  background-color: var(--color-interactive-darker);
 }
 
-.editDispositivo-button {
-  padding: 0.7rem 1rem;
-  font-size: 0.875rem;
-  background-color: #d6621e;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  width: 9%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: -13%;
-  margin-top: -7%;
+.loading-message {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-dark);
 }
 
-.editDispositivo-button:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
-}
-
-.editDispositivo-button i {
-  pointer-events: none;
-}
-
-.botones-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 20px;
-  margin-top: 20%;
-}
-
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s ease-in-out;
 }
 
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .detalle-container {
+    padding: 70px 20px 30px 20px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detalle-header-actions {
+    margin-bottom: 20px;
+  }
+
+  .details-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .header-icon {
+    font-size: 2rem;
+  }
+
+  .back-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .action-button {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
 }
 </style>

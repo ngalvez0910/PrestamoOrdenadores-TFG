@@ -55,5 +55,6 @@ body {
 a {
   color: var(--color-interactive);
   text-decoration: none;
+  background-color: inherit !important;
 }
 </style>
