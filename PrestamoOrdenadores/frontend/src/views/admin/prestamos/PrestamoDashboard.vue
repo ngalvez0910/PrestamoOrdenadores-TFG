@@ -218,7 +218,7 @@ export default {
   gap: 10px;
   margin-bottom: 25px;
   max-width: 400px;
-  margin-top: -60%;
+  margin-top: -80%;
 }
 
 .filters label {
@@ -235,6 +235,7 @@ export default {
   font-size: 1rem;
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  min-width: 250%;
 }
 
 .filters input:focus {
@@ -249,7 +250,8 @@ export default {
   border: 1px solid var(--color-neutral-medium);
   border-radius: 8px;
   background-color: white;
-  margin-left: -14%;
+  margin-left: -21%;
+  margin-top: 1%;
 }
 
 :deep(.p-datatable-custom .p-datatable-thead > tr > th) {
@@ -359,6 +361,7 @@ export default {
 }
 
 :deep(.p-paginator) {
+  font-family: 'Montserrat', sans-serif;
   background-color: var(--color-background-main) !important;
   border-top: 1px solid var(--color-neutral-medium) !important;
   padding: 0.75rem 1rem !important;
@@ -393,6 +396,7 @@ export default {
   border: 1px solid var(--color-neutral-medium) !important;
   border-radius: 6px !important;
 }
+
 :deep(.p-dropdown:not(.p-disabled).p-focus) {
   border-color: var(--color-interactive) !important;
   box-shadow: 0 0 0 1px rgba(var(--color-interactive-rgb), 0.2) !important;
