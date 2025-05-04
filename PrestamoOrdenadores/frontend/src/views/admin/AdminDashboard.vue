@@ -42,17 +42,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  max-width: 900px;
-  padding: 20px;
-  margin-left: -25%;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  max-width: 1000px;
+  margin-left: 20%;
+  margin-top: 5%;
 }
 
 .dashboard-box {
@@ -60,61 +57,74 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 25px;
+  padding: 30px 20px;
   border-radius: 12px;
-  background: white !important;
-  box-shadow: 0 6px 12px rgba(20, 18, 79, 0.15);
+  background-color: white;
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
   text-align: center;
   cursor: pointer;
-  width: 100%;
-  max-width: 220px;
   text-decoration: none;
-  color: #14124f;
-  transition: transform 0.2s ease, color 0.3s ease;
+  color: var(--color-primary);
+  min-height: 160px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+  overflow: hidden;
 }
 
 .dashboard-box:hover {
-  transform: translateY(-10px);
-  background-color: #f8f9fa;
-  box-shadow: 0 4px 6px rgba(239, 139, 85, 0.19);
-}
-
-.dashboard-box:hover .icon, .dashboard-box:hover p {
-  color: #a14916;
-}
-
-.dashboard-box .icon, .dashboard-box p {
-  transition: color 0.3s ease;
+  transform: translateY(-8px);
+  background-color: var(--color-background-main);
+  color: var(--color-interactive);
+  box-shadow: 0 8px 16px rgba(var(--color-primary-rgb), 0.12);
 }
 
 .icon {
-  font-size: 4.5rem;
-  margin-bottom: 10px;
-  color: #14124f;
+  font-size: 4rem;
+  margin-bottom: 15px;
+  transition: color 0.25s ease;
 }
 
 .dashboard-box p {
-  font-size: 1.1rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
   margin: 0;
+  line-height: 1.3;
+  transition: color 0.25s ease;
 }
 
 @media (max-width: 768px) {
+  .dashboard-container {
+    padding: 70px 15px 30px 15px;
+  }
+
   .dashboard {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 15px;
   }
 
   .dashboard-box {
-    max-width: 180px;
+    padding: 20px 15px;
+    min-height: 140px;
   }
 
   .icon {
-    font-size: 4rem;
+    font-size: 3.5rem;
+    margin-bottom: 10px;
   }
 
   .dashboard-box p {
-    font-size: 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+  .dashboard-box {
+    min-height: 120px;
+  }
+  .icon {
+    font-size: 3rem;
   }
 }
 </style>

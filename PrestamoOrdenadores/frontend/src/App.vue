@@ -26,7 +26,7 @@ export default defineComponent({
   --color-interactive-rgb: 74, 144, 226;
   --color-interactive-darker: #3B7ACC;
   --color-accent-soft: #AEC6F4;
-  --color-background-main: #F8F9FA;
+  --color-background-main: #ffffff;
   --color-text-dark: #495057;
   --color-neutral-medium: #CED4DA;
   --color-text-on-dark: #E0E7FF;
