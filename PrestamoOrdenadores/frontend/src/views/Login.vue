@@ -1,27 +1,45 @@
 <template>
   <MenuBarNoSession />
 
-  <div class="login-container">
+  <div class="login-page-container">
     <div class="login-box">
-      <h1>Login</h1>
+      <h2>Iniciar Sesión</h2> <form @submit.prevent="login" novalidate>
+      <div class="form-group">
+        <label for="email" class="input-label">Correo electrónico</label>
+        <input
+            type="email"
+            id="email"
+            class="input-field"
+            name="email"
+            placeholder="email@loantech.com"
+            v-model="form.email"
+            :aria-invalid="errors.email ? 'true' : 'false'"
+            aria-describedby="email-error"
+        >
+        <p id="email-error" class="error-message" v-if="errors.email">{{ errors.email }}</p>
+      </div>
 
-      <form @submit.prevent="login">
-        <div class="row">
-          <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
-          <input type="text" class="input-field" name="email" placeholder="Correo electrónico" v-model="form.email">
-          <p class="error-message" v-if="errors.email">{{ errors.email }}</p>
-        </div>
+      <div class="form-group">
+        <label for="password" class="input-label">Contraseña</label>
+        <input
+            type="password"
+            id="password"
+            name="password"
+            class="input-field"
+            placeholder="Introduce tu contraseña"
+            v-model="form.password"
+            :aria-invalid="errors.password ? 'true' : 'false'"
+            aria-describedby="password-error"
+        >
+        <p id="password-error" class="error-message" v-if="errors.password">{{ errors.password }}</p>
+      </div>
 
-        <div class="row">
-          <label for="password" class="input-label"><strong>Contraseña</strong></label>
-          <input type="password" name="password" class="input-field" placeholder="Contraseña" v-model="form.password">
-          <p class="error-message" v-if="errors.password">{{ errors.password }}</p>
-        </div>
+      <button type="submit" class="submit-button">Entrar</button>
+    </form>
 
-        <button type="submit">Login</button>
-      </form>
-
-      <p class="register-link"><a href="/registro">Registrarse</a></p>
+      <p class="register-link">
+        ¿No tienes cuenta? <a href="/registro">Regístrate aquí</a>
+      </p>
 
       <Toast />
     </div>
@@ -113,102 +131,140 @@ export default {
 };
 </script>
 
-<style>
-body {
-  font-family: 'Arial',sans-serif;
-  background-color: #e6e8f0;
-  color: #14124f;
-  margin-left: 28%;
-  height: 100vh;
-}
-
-.login-container {
+<style scoped>
+.login-page-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  width: 100%;
-  margin-top: 15%;
-}
-
-.login-box {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  width: 500px;
-}
-
-h1{
-  margin: 10px 0;
-  text-align: center;
-}
-
-.input-label {
-  font-size: 1rem;
-  color: #14124f;
-  margin-bottom: 8px;
-  justify-content: left;
-}
-
-.input-field {
-  border-radius: 30px;
-  padding: 8px;
-  border: 1px solid #d1d3e2;
-  width: 100%;
-  margin-bottom: 18px;
-  transition: border 0.3s ease;
-  outline: none;
-}
-
-.input-field:focus {
-  border-color: #d6621e;
-}
-
-button {
-  background-color: #d6621e;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  padding: 5px;
-  font-size: 1.1rem;
-  width: 50%;
-  transition: background-color 0.3s ease;
-  margin-bottom: 10px;
+  min-height: calc(100vh - 60px);
+  min-width: 500px;
+  padding: 80px 20px 40px 20px;
+  box-sizing: border-box;
   margin-left: 50%;
 }
 
-button:hover {
-  background-color: #a14916;
+.login-box {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
+  width: 100%;
+  max-width: 600px !important;
+  text-align: center;
 }
 
-.register-link a {
-  color: #14124f;
-  text-decoration: none;
-  justify-content: center;
+.login-box h2 {
+  color: var(--color-primary);
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+form {
   display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
 }
 
-.register-link a:hover {
-  background-color: inherit !important;
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-label {
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.input-field {
+  border-radius: 8px;
+  padding: 12px 15px;
+  border: 1px solid var(--color-neutral-medium);
+  background-color: white;
+  color: var(--color-text-dark);
+  width: 100%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.input-field:focus {
+  border-color: var(--color-interactive);
+  box-shadow: 0 0 0 3px rgba(var(--color-interactive-rgb), 0.2);
+}
+
+.input-field[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.input-field[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(var(--color-error-rgb), 0.2);
 }
 
 .error-message {
-  color: red;
+  color: var(--color-error);
+  font-size: 0.85rem;
+  margin-top: 6px;
+  min-height: 1.2em;
 }
 
-.custom-toast-success, .custom-toast-error {
-  background-color: white !important;
-  border-radius: 10px !important;
-  padding: 10px !important;
+.submit-button {
+  background-color: var(--color-interactive);
+  color: var(--color-text-on-dark-hover);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
-.custom-toast-success button, .custom-toast-error button {
-  background-color: white !important;
-  color: #14124f !important;
-  width: 100% !important;
-  margin-top: -75%
+.submit-button:hover {
+  background-color: var(--color-interactive-darker);
+}
+
+.submit-button:active {
+  transform: scale(0.98);
+}
+
+.register-link {
+  margin-top: 25px;
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+}
+
+.register-link a {
+  color: var(--color-interactive);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+:global(.p-toast .p-toast-message) {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid transparent !important;
+  border-left-width: 5px !important;
+}
+
+:global(.p-toast .p-toast-message-error) {
+  background-color: #FFF1F2 !important;
+  border-color: var(--color-error) !important;
+}
+:global(.p-toast .p-toast-message-error .p-toast-message-icon),
+:global(.p-toast .p-toast-message-error .p-toast-summary),
+:global(.p-toast .p-toast-message-error .p-toast-detail) {
+  color: #B91C1C !important;
 }
 </style>
