@@ -1,62 +1,62 @@
 <template>
   <MenuBar />
-  <div class="filters" style="margin-left: -20%; margin-top: 35%">
-    Buscar:
-    <input type="text" v-model="search" placeholder="Buscar..." @input="handleSearchInput" />
+  <div class="incidencias-container"> <div class="filters">
+    <label for="search-input">Buscar:</label>
+    <input id="search-input" type="text" v-model="search" placeholder="Buscar por GUID, Asunto, Estado, Usuario..." @input="handleSearchInput" />
   </div>
-  <br>
-  <div style="margin-left: -40%; margin-top: 2%; width: 140%; height: 600px; overflow-y: auto;">
-    <div class="table row-12">
+
+    <div class="table-wrapper">
       <DataTable
           :value="datos"
           paginator
           :rows="5"
+          :rowsPerPageOptions="[5, 10, 20, 50]"
           :totalRecords="totalRecords"
-          :lazy="true"
-          @page="onPage"
-          paginatorClass="custom-paginator"
+          :loading="loading"
+          lazy @page="onPage"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} incidencias"
+          responsiveLayout="scroll"
+          class="p-datatable-custom"
       >
-        <Column field="guid" style="width: 5%">
-          <template #header>
-            <b>GUID</b>
-          </template>
-        </Column>
-        <Column field="asunto" style="width: 5%">
-          <template #header>
-            <b>Asunto</b>
-          </template>
-        </Column>
-        <Column field="estadoIncidencia" style="width: 5%">
-          <template #header>
-            <b>Estado</b>
-          </template>
-        </Column>
-        <Column field="user.guid" style="width: 5%">
+        <Column field="guid" header="GUID" style="min-width: 150px;"></Column>
+        <Column field="asunto" header="Asunto" style="min-width: 200px;"></Column>
+        <Column field="estadoIncidencia" header="Estado" style="min-width: 120px;">
           <template #body="slotProps">
-          {{ slotProps.data.user?.guid }} </template>
-          <template #header>
-            <b>Usuario</b>
+                 <span :class="['status-badge', getStatusClass(slotProps.data.estadoIncidencia)]">
+                     {{ formatEstado(slotProps.data.estadoIncidencia) }}
+                 </span>
           </template>
         </Column>
-        <Column field="createdDate" style="width: 5%">
-          <template #header>
-            <b>Fecha de incidencia</b>
-          </template>
-        </Column>
-        <Column field="ver" style="width: 3%">
+        <Column field="user.guid" header="Usuario GUID" style="min-width: 150px;">
           <template #body="slotProps">
-            <button @click="verIncidencia(slotProps.data)" class="verIncidencia-button">
-              <i class="pi pi-eye"></i>
-            </button>
+            {{ slotProps.data.user?.guid || 'N/A' }}
           </template>
         </Column>
-        <Column field="delete" style="width: 3%">
+        <Column field="createdDate" header="Fecha Creación" style="min-width: 150px;">
           <template #body="slotProps">
-            <button @click="deleteIncidencia(slotProps.data)" class="deleteIncidencia-button">
-              <i class="pi pi-ban"></i>
-            </button>
+            {{ slotProps.data.createdDate }} </template>
+        </Column>
+
+
+        <Column header="Acciones" style="min-width:100px; width: 100px; text-align: center;">
+          <template #body="slotProps">
+            <div class="action-buttons">
+              <button @click="verIncidencia(slotProps.data)" class="action-button view-button" title="Ver Detalles Incidencia">
+                <i class="pi pi-info-circle"></i>
+              </button>
+              <button @click="deleteIncidencia(slotProps.data)" class="action-button delete-button" title="Eliminar Incidencia">
+                <i class="pi pi-trash"></i> </button>
+            </div>
           </template>
         </Column>
+
+        <template #empty>
+          No se encontraron incidencias.
+        </template>
+        <template #loading>
+          Cargando datos de incidencias...
+        </template>
       </DataTable>
     </div>
   </div>
@@ -65,6 +65,8 @@
 <script lang="ts">
 import MenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
+
+type IncidenceState = 'PENDIENTE' | 'RESUELTO';
 
 interface Incidencia {
   guid: string;
@@ -96,7 +98,6 @@ export default {
       loading: false,
       currentPage: 0,
       pageSize: 5,
-      filters: {}
     };
   },
   async mounted() {
@@ -105,6 +106,19 @@ export default {
     console.log("Datos iniciales y totalRecords cargados.");
   },
   methods: {
+    formatEstado(estado: IncidenceState | undefined): string {
+      if (!estado) return 'Desconocido';
+      const formatted = estado.replace(/_/g, ' ');
+      return formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase();
+    },
+    getStatusClass(estado: IncidenceState | undefined): string {
+      if (!estado) return 'status-unknown';
+      switch (estado) {
+        case 'PENDIENTE': return 'status-pendiente';
+        case 'RESUELTO': return 'status-resuelto';
+        default: return 'status-unknown';
+      }
+    },
     async loadData() {
       this.loading = true;
       try {
@@ -140,24 +154,22 @@ export default {
       }
     },
     paginar() {
+      const resultadosFiltrados = this.filtrarPorTexto(this.search);
+      this.totalRecords = resultadosFiltrados.length;
       const inicio = this.currentPage * this.pageSize;
       const fin = inicio + this.pageSize;
-      this.datos = this.filtrarPorTexto(this.search).slice(inicio, fin);
+      this.datos = resultadosFiltrados.slice(inicio, fin);
+    },
+    handleSearchInput() {
+      this.currentPage = 0;
+      this.paginar();
     },
     onPage(event: any) {
+      this.loading = true;
       this.currentPage = event.page;
       this.pageSize = event.rows;
       this.paginar();
-    },
-    handleSearchInput(event: Event) {
-      const target = event.target as HTMLInputElement;
-      this.search = target.value;
-      this.currentPage = 0;
-
-      const resultadosFiltrados = this.filtrarPorTexto(this.search);
-      this.totalRecords = resultadosFiltrados.length;
-
-      this.paginar();
+      setTimeout(() => { this.loading = false; }, 100);
     },
     filtrarPorTexto(query: string) {
       if (!query) return this.todosLosDatos;
@@ -181,132 +193,216 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.incidencias-container {
+  padding: 80px 30px 40px 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
 .filters {
-  position: relative;
-  width: 100%;
-  padding: 1rem;
   display: flex;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  max-width: 400px;
+  margin-top: -80%;
+}
+
+.filters label {
+  font-weight: 500;
+  color: var(--color-text-dark);
+  white-space: nowrap;
 }
 
 .filters input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #d1d3e2;
-  border-radius: 25px;
-  margin-left: 2%;
-  transition: border 0.3s ease;
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: 1px solid var(--color-neutral-medium);
+  border-radius: 8px;
+  font-size: 1rem;
   outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  min-width: 250%;
 }
 
 .filters input:focus {
-  border-color: #d6621e;
+  border-color: var(--color-interactive);
+  box-shadow: 0 0 0 3px rgba(var(--color-interactive-rgb), 0.2);
 }
 
-.verIncidencia-button {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.875rem;
-  background-color: #d6621e;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  transition: all 0.3s ease-in-out;
-}
-
-.verIncidencia-button:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
-}
-
-.verIncidencia-button i {
-  transform: scale(1.1);
-}
-
-.deleteIncidencia-button {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.875rem;
-  background-color: #d61e1e;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: -2%;
-}
-
-.deleteIncidencia-button:hover {
-  background-color: #9b1616;
-}
-
-.deleteIncidencia-button i {
+.table-wrapper {
+  position: fixed;
+  width: 90%;
+  overflow-x: auto;
+  border: 1px solid var(--color-neutral-medium);
+  border-radius: 8px;
+  background-color: white;
+  margin-left: -21%;
   margin-top: 1%;
-  margin-left: 3%
 }
 
-.p-paginator-pages {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
+:deep(.p-datatable-custom .p-datatable-thead > tr > th) {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--color-background-main);
+  color: var(--color-primary);
+  font-weight: 600;
+  padding: 1rem 1rem;
+  border-bottom: 2px solid var(--color-neutral-medium);
+  text-align: left;
+  white-space: nowrap;
 }
 
-.p-paginator-pages button {
-  background-color: #a6a6a6;
-  color: #ffffff;
-  padding: 0.5rem 0.5rem;
-  margin: 0 5px;
-  border-radius: 80%;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
+:deep(.p-datatable-custom .p-datatable-tbody > tr) {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--color-text-dark);
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--color-background-main);
+}
+
+:deep(.p-datatable-custom .p-datatable-tbody > tr:last-child) {
+  border-bottom: none;
+}
+
+:deep(.p-datatable-custom .p-datatable-tbody > tr:hover) {
+  background-color: var(--color-accent-soft) !important;
+}
+
+:deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
+  padding: 0.9rem 1rem;
+  vertical-align: middle;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.status-pendiente {
+  background-color: rgba(var(--color-warning-rgb), 0.15);
+  color: #B45309;
+}
+
+.status-resuelto {
+  background-color: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-success);
+}
+
+.action-buttons {
   display: flex;
+  gap: 12px;
   justify-content: center;
   align-items: center;
 }
-
-.p-paginator-pages button:hover {
-  background-color: #a14916;
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
-}
-
-.p-paginator-pages .p-highlight {
-  background-color: #d6621e !important;
-  color: white;
-  font-weight: bold;
-  transform: scale(1.05);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.p-paginator-first,
-.p-paginator-prev,
-.p-paginator-next,
-.p-paginator-last {
-  background-color: #d6621e;
-  color: #ffffff;
-  border-radius: 40px;
-  padding: 0.5rem 0.75rem;
-  margin: 0 5px;
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  padding: 6px;
   transition: all 0.3s ease-in-out;
-  max-width: 2%
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
 }
 
-.p-paginator-first:hover,
-.p-paginator-prev:hover,
-.p-paginator-next:hover,
-.p-paginator-last:hover {
-  background-color: #a14916;
+.action-button i {
+  font-size: 1.1rem;
+  display: block;
+}
+
+.view-button {
+  background-color: var(--color-interactive);
+  color: white;
+}
+
+.view-button:hover {
+  background-color: var(--color-interactive-darker);
   transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
+}
+
+.delete-button {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #B91C1C;
+  transform: scale(1.1);
+}
+
+:deep(.p-paginator) {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--color-background-main) !important;
+  border-top: 1px solid var(--color-neutral-medium) !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0 0 8px 8px !important;
+}
+
+:deep(.p-paginator .p-paginator-element) {
+  color: var(--color-text-dark) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--color-neutral-medium) !important;
+  border-radius: 6px !important;
+  margin: 0 3px !important;
+  min-width: 32px;
+  height: 32px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+:deep(.p-paginator .p-paginator-element:not(.p-disabled):hover) {
+  background-color: var(--color-accent-soft) !important;
+  border-color: var(--color-interactive) !important;
+  color: var(--color-interactive-darker) !important;
+}
+
+:deep(.p-paginator .p-paginator-element.p-highlight) {
+  background-color: var(--color-interactive) !important;
+  border-color: var(--color-interactive) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+:deep(.p-dropdown) {
+  border: 1px solid var(--color-neutral-medium) !important;
+  border-radius: 6px !important;
+}
+
+:deep(.p-dropdown:not(.p-disabled).p-focus) {
+  border-color: var(--color-interactive) !important;
+  box-shadow: 0 0 0 1px rgba(var(--color-interactive-rgb), 0.2) !important;
+}
+
+@media (max-width: 768px) {
+  .incidencias-container {
+    padding: 70px 15px 30px 15px;
+  }
+  .filters {
+    max-width: none;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filters label {
+    margin-bottom: 5px;
+  }
+  :deep(.p-datatable-custom .p-datatable-thead > tr > th),
+  :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
+    padding: 0.75rem 0.5rem;
+    white-space: normal;
+    font-size: 0.9rem;
+  }
+  .action-buttons {
+    gap: 8px;
+  }
 }
 </style>

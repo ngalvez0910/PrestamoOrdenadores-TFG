@@ -1,71 +1,80 @@
 <template>
   <MenuBar />
-  <div class="botones-container">
-    <div class="boton-atras">
-      <a href="/admin/dashboard/usuarios">
-        <button class="back-button">
-          <i class="pi pi-arrow-left"></i>
-        </button>
-      </a>
-    </div>
+  <div class="detalle-container"> <div class="detalle-header-actions">
+    <button @click="goBack" class="back-button" title="Volver a Usuarios">
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    <div></div>
   </div>
-  <div class="usuario-details" v-if="userData">
-    <div class="iconoUser">
-      <i class="pi pi-user"></i>
+
+    <div class="usuario-details" v-if="userData">
+      <div class="details-header">
+        <h2>Detalles del Usuario</h2>
+        <i class="pi pi-user header-icon"></i>
+      </div>
+
+      <div class="details-grid">
+
+        <div class="form-group">
+          <label>Número de Identificación</label>
+          <div class="readonly-field">{{ userData.numeroIdentificacion || 'No especificado' }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Nombre</label>
+          <div class="readonly-field">{{ userData.nombre }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Apellidos</label>
+          <div class="readonly-field">{{ userData.apellidos }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <div class="readonly-field">{{ userData.email }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Curso</label>
+          <div class="readonly-field">{{ userData.curso || 'N/A' }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Tutor</label>
+          <div class="readonly-field">{{ userData.tutor || 'N/A' }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Rol</label>
+          <div class="readonly-field">{{ userData.rol }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Último Login</label>
+          <div class="readonly-field">{{ userData.lastLoginDate }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Última Password Reset</label>
+          <div class="readonly-field">{{ userData.lastPasswordResetDate }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Fecha de Creación</label>
+          <div class="readonly-field">{{ userData.createdDate }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Fecha de Actualización</label>
+          <div class="readonly-field">{{ userData.updatedDate }}</div>
+        </div>
+
+      </div> </div> <div v-else class="loading-message">
+      <p>Cargando detalles del usuario...</p>
     </div>
-    <div class="numIdentificacion">
-      <h2><strong>Número de Identificación:</strong> {{userData.numeroIdentificacion}}</h2>
-    </div>
-    <div class="row">
-      <div class="nombre col-4">
-        <h6>Nombre: </h6>
-        <input readonly type="text" id="nombre" v-model="userData.nombre"/>
-      </div>
-      <div class="apellidos col-4">
-        <h6>Apellidos: </h6>
-        <input readonly type="text" id="apellidos" v-model="userData.apellidos"/>
-      </div>
-      <div class="email col-4">
-        <h6>Email: </h6>
-        <input readonly type="text" id="email" v-model="userData.email"/>
-      </div>
-    </div>
-    <div class="row">
-      <div class="curso col-4">
-        <h6>Curso: </h6>
-        <input readonly type="text" id="curso" v-model="userData.curso"/>
-      </div>
-      <div class="tutor col-4">
-        <h6>Tutor: </h6>
-        <input readonly type="text" id="tutor" v-model="userData.tutor"/>
-      </div>
-      <div class="rol col-4">
-        <h6>Rol: </h6>
-        <input readonly type="text" id="rol" v-model="userData.rol"/>
-      </div>
-    </div>
-    <div class="row">
-      <div class="login col-6">
-        <h6>Último Login: </h6>
-        <input readonly type="text" id="lastLoginDate" v-model="userData.lastLoginDate"/>
-      </div>
-      <div class="passReset col-6">
-        <h6>Última Modificación de Contraseña: </h6>
-        <input readonly type="text" id="lastPasswordResetDate" v-model="userData.lastPasswordResetDate"/>
-      </div>
-    </div>
-    <div class="row">
-      <div class="creacion col-6">
-        <h6>Fecha de Creación: </h6>
-        <input readonly type="text" id="createdDate" v-model="userData.createdDate"/>
-      </div>
-      <div class="actualizacion col-6">
-        <h6>Fecha de última Actualización: </h6>
-        <input readonly type="text" id="updatedDate" v-model="userData.updatedDate"/>
-      </div>
-    </div>
-  </div>
-</template>
+
+  </div> </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
@@ -90,97 +99,117 @@ export default defineComponent({
     } catch (error) {
       console.error("Error al obtener los detalles del usuario:", error);
     }
+  },
+  methods: {
+    goBack() {
+      this.$router.back();
+    },
   }
 })
 </script>
 
 <style scoped>
-body{
-  overflow-y: auto;
+.detalle-container {
+  padding: 80px 30px 40px 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.boton-atras {
-  margin-left: -70%;
-  margin-top: 40%;
+.detalle-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
 .back-button {
-  padding: 0.7rem 1.2rem;
-  font-size: 0.875rem;
-  background-color: #14124f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 1rem;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  margin-top: 20%;
-  width: 5%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  width: 40px;
+  height: 40px;
+  line-height: 1;
+  margin-top: 3%;
+  margin-left: 15%;
 }
 
-.back-button:hover{
-  background-color: #0d0c34;
+.back-button:hover {
+  background-color: var(--color-interactive-darker);
   transform: scale(1.1);
-  box-shadow: 0 4px 8px rgb(72, 70, 159);
-}
-
-.back-button i {
-  pointer-events: none;
-}
-
-a{
-  background-color: inherit !important;
+  box-shadow: 0 4px 8px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .usuario-details {
   background-color: white;
-  border-radius: 10px;
-  padding: 20px;
-  width: 300%;
-  max-width: max-content;
-  box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  margin-left: -20%;
-  margin-top: -15%;
-  margin-bottom: 7%;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
+  margin-left: 25%;
+  min-width: 800px;
 }
 
-.pi-user {
-  font-size: 4.5rem;
-  margin-left: 80%;
-  margin-bottom: 5%;
-  margin-top: 2%
+.details-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 30px; padding-bottom: 15px;
+  border-bottom: 1px solid var(--color-neutral-medium);
+}
+.details-header h2 {
+  color: var(--color-primary); margin: 0; font-size: 1.6rem; font-weight: 600;
+}
+.header-icon { font-size: 2.5rem; color: var(--color-primary); opacity: 0.7; }
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px 25px;
 }
 
-h6{
-  font-weight: bold;
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label {
+  font-size: 0.85rem; color: var(--color-text-dark); font-weight: 500;
+  text-transform: uppercase; opacity: 0.8;
 }
 
-.numIdentificacion {
-  margin-top: 0;
-  font-size: 1.5rem;
+.readonly-field {
+  padding: 10px 12px; font-size: 1rem; line-height: 1.4; color: var(--color-text-dark);
+  background-color: var(--color-background-main); border: 1px solid var(--color-neutral-medium);
+  border-radius: 8px; min-height: calc(1.4em + 20px + 2px); word-wrap: break-word;
+  white-space: pre-wrap; box-sizing: border-box; width: 100%;
 }
 
-.nombre, .apellidos, .email, .curso, .tutor, .rol, .fotoCarnet, .login, .creacion, .actualizacion, .passReset {
-  margin-top: 15px;
+.loading-message { text-align: center; padding: 40px; color: var(--color-text-dark); }
+
+@media (max-width: 992px) {
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-input, select{
-  border-radius: 20px;
-  padding: 8px;
-  border: 1px solid #d6621e;
-  width: 100%;
-  max-width: max-content;
-  transition: border 0.3s ease;
-  outline: none;
+@media (max-width: 768px) {
+  .detalle-container { padding: 70px 20px 30px 20px; max-width: 100%; }
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .detalle-header-actions { margin-bottom: 20px; }
+  .details-header h2 { font-size: 1.4rem; }
+  .header-icon { font-size: 2rem; }
+  .back-button { width: 36px; height: 36px; }
 }
 
-.botones-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 20px;
+@media (max-width: 480px) {
+  .usuario-details { padding: 20px; }
+  .form-group label { font-size: 0.8rem; }
+  .readonly-field { font-size: 0.95rem; padding: 8px 10px; }
+  .details-header h2 { font-size: 1.2rem; }
 }
 </style>

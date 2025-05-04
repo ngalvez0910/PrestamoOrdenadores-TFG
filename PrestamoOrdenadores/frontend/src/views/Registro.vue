@@ -1,72 +1,137 @@
 <template>
   <MenuBarNoSession />
 
-  <div class="register-container">
-    <div class="register-box">
-      <h1>Registro</h1>
+  <div class="register-page-container"> <div class="register-box">
+    <h2>Registro</h2> <Dialog :header="modalTitle" v-model:visible="isInfoModalVisible" modal :style="{ width: '50vw', fontFamily: 'Montserrat' }" :breakpoints="{'960px': '75vw', '641px': '100vw'}">
+    <div class="dialog-content" v-html="modalBody"></div>
+  </Dialog>
 
-      <form @submit.prevent="registerUser">
-        <div class="row">
-          <label for="numeroIdentificacion" class="input-label"><strong>Número de Identificación</strong></label>
-          <input type="text" class="input-field" name="numeroIdentificacion" placeholder="Número de Identificación" v-model="form.numeroIdentificacion">
-          <p class="error-message" v-if="errors.numeroIdentificacion">{{ errors.numeroIdentificacion }}</p>
-        </div>
+    <form @submit.prevent="registerUser" novalidate>
+      <div class="form-group">
+        <label for="numeroIdentificacion" class="input-label">
+          Número de Identificación
+          <i
+              class="pi pi-info-circle info-icon"
+              @click="showInfo('numeroIdentificacion')"
+              title="Haz clic para más información"
+          ></i>
+        </label>
+        <input type="text" id="numeroIdentificacion" class="input-field" name="numeroIdentificacion" placeholder="Número de Identificación" v-model="form.numeroIdentificacion">
+        <p class="error-message" v-if="errors.numeroIdentificacion">{{ errors.numeroIdentificacion }}</p>
+      </div>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="nombre" class="input-label"><strong>Nombre</strong></label>
-            <input type="text" class="input-field" name="nombre" placeholder="Nombre" v-model="form.nombre">
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label for="nombre" class="input-label">Nombre</label>
+            <input type="text" id="nombre" class="input-field" name="nombre" placeholder="Tu nombre" v-model="form.nombre">
             <p class="error-message" v-if="errors.nombre">{{ errors.nombre }}</p>
           </div>
-
-          <div class="col-md-6 mb-3">
-            <label for="apellidos" class="input-label"><strong>Apellidos</strong></label>
-            <input type="text" class="input-field" name="apellidos" placeholder="Apellidos" v-model="form.apellidos">
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label for="apellidos" class="input-label">Apellidos</label>
+            <input type="text" id="apellidos" class="input-field" name="apellidos" placeholder="Tus apellidos" v-model="form.apellidos">
             <p class="error-message" v-if="errors.apellidos">{{ errors.apellidos }}</p>
           </div>
         </div>
+      </div>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="curso" class="input-label"><strong>Curso</strong></label>
-            <input class="input-field" type="text" name="curso" placeholder="Curso"  v-model="form.curso">
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label for="curso" class="input-label">Curso</label>
+            <input class="input-field" id="curso" type="text" name="curso" placeholder="Ej: 1ASIR, 2DAW"  v-model="form.curso">
             <p class="error-message" v-if="errors.curso">{{ errors.curso }}</p>
           </div>
-
-          <div class="col-md-6 mb-3">
-            <label for="tutor" class="input-label"><strong>Tutor</strong></label>
-            <input class="input-field" type="text" name="tutor" placeholder="Tutor" v-model="form.tutor">
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label for="tutor" class="input-label">Tutor</label>
+            <input class="input-field" id="tutor" type="text" name="tutor" placeholder="Nombre del tutor" v-model="form.tutor">
             <p class="error-message" v-if="errors.tutor">{{ errors.tutor }}</p>
           </div>
         </div>
+      </div>
 
-        <div class="row mb-3">
-          <label for="email" class="input-label"><strong>Correo electrónico</strong></label>
-          <input class="input-field" type="email" name="email" placeholder="Correo electrónico" v-model="form.email" @blur="validateEmail">
-          <p class="error-message" v-if="errors.email">{{ errors.email }}</p>
-        </div>
+      <div class="form-group">
+        <label for="email" class="input-label">
+          Correo electrónico
+          <i
+              class="pi pi-info-circle info-icon"
+              @click="showInfo('email')"
+              title="Haz clic para más información"
+          ></i>
+        </label>
+        <input class="input-field" id="email" type="email" name="email" placeholder="Correo institucional" v-model="form.email" @blur="validateEmail">
+        <p class="error-message" v-if="errors.email">{{ errors.email }}</p>
+      </div>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="password" class="input-label"><strong>Contraseña</strong></label>
-            <input type="password" name="password" class="input-field" placeholder="Contraseña"  v-model="form.password">
+      <div class="form-row">
+        <div class="form-col">
+          <div class="form-group">
+            <label for="password" class="input-label">
+              Contraseña
+              <i
+                  class="pi pi-info-circle info-icon"
+                  @click="showInfo('password')"
+                  title="Haz clic para más información"
+              ></i>
+            </label>
+            <div class="password-input-wrapper">
+              <input
+                  :type="passwordFieldType" id="password"
+                  name="password"
+                  class="input-field"
+                  placeholder="Crea una contraseña segura"
+                  v-model="form.password"
+                  :aria-invalid="errors.password ? 'true' : 'false'"
+                  aria-describedby="password-error"
+              >
+              <i
+                  :class="['pi', passwordFieldType === 'password' ? 'pi-eye' : 'pi-eye-slash', 'password-toggle-icon']"
+                  @click="togglePasswordVisibility"
+                  title="Mostrar/Ocultar contraseña"
+              ></i>
+            </div>
             <p class="error-message" v-if="errors.password">{{ errors.password }}</p>
           </div>
-
-          <div class="col-md-6 mb-3">
-            <label for="confirmPassword" class="input-label"><strong>Confirmar contraseña</strong></label>
-            <input type="password" name="confirmPassword" class="input-field" placeholder="Confirmar contraseña"  v-model="form.confirmPassword">
+        </div>
+        <div class="form-col">
+          <div class="form-group">
+            <label for="confirmPassword" class="input-label">Confirmar contraseña</label>
+            <div class="password-input-wrapper">
+              <input
+                  :type="confirmPasswordFieldType" id="confirmPassword"
+                  name="confirmPassword"
+                  class="input-field"
+                  placeholder="Vuelve a escribir la contraseña"
+                  v-model="form.confirmPassword"
+                  :aria-invalid="errors.confirmPassword ? 'true' : 'false'"
+                  aria-describedby="confirmPassword-error"
+              >
+              <i
+                  :class="['pi', confirmPasswordFieldType === 'password' ? 'pi-eye' : 'pi-eye-slash', 'password-toggle-icon']"
+                  @click="toggleConfirmPasswordVisibility"
+                  title="Mostrar/Ocultar contraseña"
+              ></i>
+            </div>
             <p class="error-message" v-if="errors.confirmPassword">{{ errors.confirmPassword }}</p>
           </div>
         </div>
+      </div>
 
-        <button type="submit" :disabled="isSubmitting">Registrarse</button>
-      </form>
+      <button type="submit" class="submit-button" :disabled="isSubmitting">
+        {{ isSubmitting ? 'Registrando...' : 'Registrarse' }}
+      </button>
+    </form>
 
-      <p class="login-link"><a href="/">Login</a></p>
+    <p class="login-link">
+      ¿Ya tienes cuenta? <a href="/">Inicia sesión aquí</a>
+    </p>
 
-      <Toast />
-    </div>
+    <Toast />
+  </div>
   </div>
 </template>
 
@@ -74,12 +139,13 @@
 import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
 import { useToast } from 'primevue/usetoast';
 import { authService } from '@/services/AuthService.ts';
 
 export default {
   name: 'Register',
-  components: { MenuBarNoSession, Toast, Button },
+  components: { MenuBarNoSession, Toast, Button, Dialog },
   setup() {
     const toast = useToast();
     return { toast };
@@ -106,10 +172,43 @@ export default {
         password: '',
         confirmPassword: '',
       },
-      isSubmitting: false
+      isSubmitting: false,
+      isInfoModalVisible: false,
+      modalTitle: '',
+      modalBody: '',
+      passwordFieldType: 'password',
+      confirmPasswordFieldType: 'password',
     };
   },
   methods: {
+    showInfo(infoType: string) {
+      switch (infoType) {
+        case 'numeroIdentificacion':
+          this.modalTitle = '¿Cuál es mi Número de Identificación?';
+          this.modalBody = `
+            <p>Generalmente se encuentra en tu carnet de estudiante.</p>
+            <p>Fíjate en la foto:</p>
+            <img
+              src="/carnet.png"
+              alt="Ejemplo de carnet de estudiante mostrando número de identificación"
+              style="max-width: 100%; height: auto; display: block; margin-top: 10px;"
+            />
+          `;
+          break;
+        case 'email':
+          this.modalTitle = '¿Qué Correo Electrónico debo utilizar?';
+          this.modalBody = 'Tu correo institucional asignado. Debe terminar en @loantech.com.';
+          break;
+        case 'password':
+          this.modalTitle = 'Contraseña Segura';
+          this.modalBody = 'La contraseña debe cumplir los siguientes requisitos:<br>- Mínimo 8 caracteres.<br>- Al menos una letra mayúscula.<br>- Al menos una letra minúscula.<br>- Al menos un dígito.<br>- Al menos un carácter especial (ej: !@#$%^&*).';
+          break;
+        default:
+          this.modalTitle = 'Información';
+          this.modalBody = 'No hay información disponible para este campo.';
+      }
+      this.isInfoModalVisible = true;
+    },
     validateEmail() {
       const email = this.form.email;
       let isValidFormat = false;
@@ -258,103 +357,186 @@ export default {
       } finally {
         this.isSubmitting = false;
       }
+    },
+    togglePasswordVisibility() {
+      this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+    },
+    toggleConfirmPasswordVisibility() {
+      this.confirmPasswordFieldType = this.confirmPasswordFieldType === 'password' ? 'text' : 'password';
     }
   },
 };
 </script>
 
-<style>
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #e6e8f0;
-  color: #14124f;
-}
-
-.register-container {
+<style scoped>
+.register-page-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  min-height: 100vh;
-  padding: 10px 0px;
-  margin-top: 15%;
+  min-height: calc(100vh - 60px);
+  min-width: 700px;
+  padding: 80px 20px 40px 20px;
+  box-sizing: border-box;
+  margin-left: 35%;
+  margin-top: 5%;
 }
 
 .register-box {
   background-color: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(20, 18, 79, 0.3);
-  width: max-content;
-  max-width: 550px;
-  box-sizing: border-box;
-  margin-top: 55%;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
+  width: 100%;
+  max-width: 750px;
+  text-align: center;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
+.register-box h2 {
+  color: var(--color-primary);
+  margin-top: 0;
+  margin-bottom: 35px;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.form-col {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .input-label {
-  color: #14124f;
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.info-icon {
+  color: var(--color-interactive);
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 1rem;
+  vertical-align: middle;
+  transition: color 0.2s ease;
+}
+
+.info-icon:hover {
+  color: var(--color-interactive-darker);
 }
 
 .input-field {
-  border-radius: 30px;
-  padding: 8px;
-  border: 1px solid #d1d3e2;
-  transition: border 0.3s ease;
+  border-radius: 8px;
+  padding: 12px 15px;
+  border: 1px solid var(--color-neutral-medium);
+  background-color: white;
+  color: var(--color-text-dark);
+  width: 100%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   outline: none;
+  box-sizing: border-box;
+  font-size: 1rem;
+  padding-right: 45px !important;
 }
 
 .input-field:focus {
-  border-color: #d6621e;
+  border-color: var(--color-interactive);
+  box-shadow: 0 0 0 3px rgba(var(--color-interactive-rgb), 0.2);
 }
 
-button {
-  background-color: #d6621e;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  padding: 5px;
-  font-size: 1.1rem;
-  width: 50%;
-  transition: background-color 0.3s ease;
-  margin-bottom: 10px;
-  margin-left: 50%;
+.input-field[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+.input-field[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(var(--color-error-rgb), 0.2);
 }
 
-button:hover {
-  background-color: #a14916;
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
 }
 
-.login-link a {
-  color: #14124f;
-  text-decoration: none;
-  justify-content: center;
-  display: flex;
+.password-toggle-icon {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--color-neutral-medium);
+  transition: color 0.2s ease;
 }
 
-.login-link a:hover {
-  background-color: inherit !important;
+.password-toggle-icon:hover {
+  color: var(--color-interactive);
 }
 
 .error-message {
-  color: red;
-  margin-top: -2%;
+  color: var(--color-error);
+  font-size: 0.85rem;
+  margin-top: 6px;
+  min-height: 1.2em;
 }
 
-.custom-toast-success, .custom-toast-error {
-  background-color: white !important;
-  border-radius: 10px !important;
-  padding: 10px !important;
+.submit-button {
+  background-color: var(--color-interactive);
+  color: var(--color-text-on-dark-hover);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.1s ease, opacity 0.3s ease;
+  cursor: pointer;
+  margin-top: 20px;
 }
 
-.custom-toast-success button, .custom-toast-error button {
-  background-color: white !important;
-  color: #14124f !important;
-  width: 100% !important;
-  margin-top: -75%
+.submit-button:hover:not(:disabled) {
+  background-color: var(--color-interactive-darker);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-link {
+  margin-top: 25px;
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+}
+
+.login-link a {
+  color: var(--color-interactive);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
 }
 </style>

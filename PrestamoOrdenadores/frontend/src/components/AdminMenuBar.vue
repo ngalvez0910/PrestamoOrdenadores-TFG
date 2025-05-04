@@ -1,18 +1,28 @@
 <template>
   <div class="menubar">
-    <h1><a :href="getHomeRoute()">LoanTech</a></h1>
-    <Button class="user-info" @click="toggleMenu($event)">
+    <div class="brand-and-nav">
+      <h1><a :href="getHomeRoute()">LoanTech</a></h1>
+      <nav class="main-nav">
+        <a :href="getHomeRoute()">Inicio</a>
+        <a href="/admin/dashboard/prestamos">Préstamos</a>
+        <a href="/admin/dashboard/dispositivos">Dispositivos</a>
+        <a href="/admin/dashboard/usuarios">Usuarios</a>
+        <a href="/admin/dashboard/incidencias">Incidencias</a>
+        <a href="/admin/dashboard/sanciones">Sanciones</a>
+        <a href="/admin/dashboard/storage">Almacenamiento</a>
+      </nav>
+    </div>
+
+    <Button class="user-info" @click="toggleMenu($event)" text>
       <p class="username">{{ username || "Usuario" }}</p>
       <Avatar :image="avatarUrl || 'https://placehold.co/400'" shape="circle" class="avatar" />
     </Button>
 
     <Menu ref="menu" class="user-menu" :model="items" :popup="true">
       <template #item="{ item, props }">
-        <a class="flex items-center" v-bind="props.action">
-          <i v-if="item.icon" :class="item.icon + ' mr-2'"></i>
-          <span>{{ item.label }}</span>
-          <span v-if="item.shortcut" class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">{{ item.shortcut }}</span>
-          <i v-if="item.items && item.items.length > 0" :class="['pi pi-angle-down ml-auto', { 'pi-angle-down': item.root, 'pi-angle-right': !item.root }]"></i>
+        <a :href="item.url" class="menu-item-link" v-bind="props.action" @click="item.command">
+          <i v-if="item.icon" :class="item.icon + ' menu-item-icon'"></i>
+          <span class="menu-item-label">{{ item.label }}</span>
         </a>
       </template>
     </Menu>
@@ -124,94 +134,174 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #14124f;
-  color: #fff;
+  background-color: var(--color-text-on-dark);
+  color: var(--color-primary);
   padding: 10px 30px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  box-sizing: border-box;
+}
+
+.brand-and-nav {
+  display: flex;
+  align-items: center;
+}
+
+.menubar h1 {
+  margin-right: 40px;
 }
 
 .menubar h1 a {
-  color: white;
+  color: var(--color-primary);
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
   transition: color 0.3s ease;
 }
 
 .menubar h1 a:hover {
-  color: inherit !important;
-  background-color: inherit !important;
+  color: var(--color-interactive);
 }
 
-.user-info {
+.main-nav {
+  display: flex;
+  gap: 25px;
+}
+
+.main-nav a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 5px 0;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+  color: var(--color-primary);
+}
+
+.main-nav a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-interactive);
+  transition: width 0.3s ease;
+}
+
+.main-nav a:hover::after {
+  width: 100%;
+}
+
+.user-info.p-button {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
+  background-color: var(--color-background-main) !important;
+  color: var(--color-text-dark) !important;
+  border: 1px solid transparent !important;
+  padding: 5px 10px !important;
+  border-radius: 20px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  height: auto;
+  margin-left: -25%;
   width: 15%;
-  height: 40px;
-  margin-top: 2%;
-  background: white;
-  color: #14124f;
-  transition: all 0.3s ease;
-  border:none;
 }
 
-.user-info:hover {
-  border: 1px solid #ec9160;
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
-  transition: all 0.3s ease;
+.user-info.p-button:hover,
+.user-info.p-button:focus {
+  border-color: var(--color-interactive) !important;
+  background-color: var(--color-neutral-medium) !important;
+  box-shadow: none !important;
 }
 
 .username {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  margin-left: 5%;
-  margin-top: 10%;
+  margin: 0;
 }
 
 .avatar {
-  border: 2px solid #ec9160;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-interactive);
   transition: transform 0.2s ease-in-out;
+  vertical-align: middle;
 }
 
-.avatar:hover {
+.user-info:hover .avatar {
   transform: scale(1.1);
 }
 
-.user-menu {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgb(236, 145, 96);
-  padding: 10px 0;
-  min-width: 130px;
-  overflow: visible !important;
+:global(.p-menu.user-menu) {
+  background-color: var(--color-background-main) !important;
+  border: 1px solid var(--color-neutral-medium) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+  padding: 5px 0 !important;
+  min-width: 150px;
 }
 
-.user-menu a i, .user-menu a {
-  color: #14124f !important;
-  margin-right: 8px;
-  margin-left: -1%;
+.menu-item-link {
+  display: flex !important;
+  align-items: center !important;
+  padding: 10px 15px !important;
+  color: var(--color-text-dark) !important;
+  text-decoration: none !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.user-menu a i:hover, .user-menu a:hover {
-  color: #14124f !important;
-  background-color: inherit !important;
+.menu-item-icon {
+  margin-right: 10px !important;
+  color: var(--color-text-dark);
+}
+
+.menu-item-label {
+  flex-grow: 1;
+}
+
+.menu-item-link:hover {
+  background-color: var(--color-accent-soft) !important;
+  color: var(--color-primary) !important;
+}
+
+.menu-item-link:hover .menu-item-icon {
+  color: var(--color-primary) !important;
+}
+
+.menu-separator {
+  height: 1px;
+  background-color: var(--color-neutral-medium);
+  margin: 5px 0;
+}
+
+@media (max-width: 992px) {
+  .main-nav {
+    display: none;
+  }
+  .menubar {
+    padding: 10px 15px;
+  }
 }
 
 @media (max-width: 768px) {
-  .menubar {
-    padding: 12px 20px;
-  }
-
   .menubar h1 a {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
 
   .username {
     display: none;
+  }
+
+  .user-info.p-button {
+    padding: 5px !important;
+    border-radius: 50%;
+    gap: 0;
   }
 }
 </style>

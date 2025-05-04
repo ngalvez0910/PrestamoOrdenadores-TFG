@@ -45,30 +45,6 @@ export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | 
     }
 };
 
-export const actualizarDispositivo = async (
-    guid: string,
-    data: { componentes: string; estadoDispositivo: string; incidenciaGuid: string | null }
-): Promise<Dispositivo | null> => {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.error("No se encontró el token de autenticación.");
-            return null;
-        }
-
-        const response = await axios.patch(`http://localhost:8080/dispositivos/${guid}`, data, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-
-        return response.data || null;
-    } catch (error) {
-        console.error('Error al actualizar el dispositivo:', error);
-        return null;
-    }
-};
-
 export const descargarCsvDispositivos = async (): Promise<void | null> => {
     try {
         const token = localStorage.getItem('token');

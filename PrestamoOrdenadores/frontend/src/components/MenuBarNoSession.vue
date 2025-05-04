@@ -19,26 +19,30 @@ export default {
   left: 0;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  background-color: #14124f;
-  color: #fff;
+  background-color: var(--color-text-on-dark);
+  color: var(--color-primary);
   padding: 10px 30px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  box-sizing: border-box;
+}
+
+.menubar h1 {
+  margin: 0;
 }
 
 .menubar h1 a {
-  color: white;
+  color: var(--color-primary);
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
   transition: color 0.3s ease;
 }
 
 .menubar h1 a:hover {
-  color: inherit !important;
-  background-color: inherit !important;
+  color: var(--color-interactive);
 }
 
 @media (max-width: 768px) {
@@ -47,7 +51,7 @@ export default {
   }
 
   .menubar h1 a {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
 }
 </style>
