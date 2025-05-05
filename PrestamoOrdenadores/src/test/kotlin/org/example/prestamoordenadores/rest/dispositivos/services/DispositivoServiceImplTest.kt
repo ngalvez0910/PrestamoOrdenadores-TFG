@@ -191,7 +191,7 @@ class DispositivoServiceImplTest {
         val request = DispositivoUpdateRequest(
             incidenciaGuid = null,
             componentes = "RAM 16GB",
-            estado = "DISPONIBLE",
+            estadoDispositivo = "DISPONIBLE",
             isActivo = true
         )
 
@@ -219,7 +219,7 @@ class DispositivoServiceImplTest {
         val request = DispositivoUpdateRequest(
             incidenciaGuid = null,
             componentes = null,
-            estado = null,
+            estadoDispositivo = null,
             isActivo = null
         )
 
@@ -241,7 +241,7 @@ class DispositivoServiceImplTest {
         val request = DispositivoUpdateRequest(
             incidenciaGuid = "inc-guid",
             componentes = null,
-            estado = null,
+            estadoDispositivo = null,
             isActivo = null
         )
 

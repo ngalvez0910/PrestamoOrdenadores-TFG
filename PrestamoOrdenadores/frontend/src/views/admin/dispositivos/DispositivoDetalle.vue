@@ -63,12 +63,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import MenuBar from '@/components/AdminMenuBar.vue';
-import {getDispositivoByGuid,} from '@/services/DispositivoService.ts';
+import {actualizarDispositivo, getDispositivoByGuid,} from '@/services/DispositivoService.ts';
 import {useToast} from "primevue/usetoast";
 
 export default defineComponent({
   name: 'DispositivoDetalle',
   components: { MenuBar },
+  inheritAttrs: false,
   setup() {
     const toast = useToast();
     return { toast };
@@ -106,7 +107,10 @@ export default defineComponent({
       this.$router.back();
     },
     async actualizarDispositivo() {
-      if (!this.dispositivoData || !this.originalData) return;
+      if (!this.dispositivoData || !this.originalData) {
+        console.warn("Datos del dispositivo no disponibles para actualizar.");
+        return;
+      }
 
       const hasChanged = this.dispositivoData.componentes !== this.originalData.componentes ||
           this.dispositivoData.estado !== this.originalData.estado ||
@@ -116,27 +120,50 @@ export default defineComponent({
         try {
           const updatePayload = {
             componentes: this.dispositivoData.componentes,
-            estado: this.dispositivoData.estado,
+            estadoDispositivo: this.dispositivoData.estado,
             incidenciaGuid: this.dispositivoData.incidenciaGuid || null,
           };
 
-          console.log("Actualizando dispositivo con:", updatePayload);
+          console.log("Actualizando dispositivo con payload:", updatePayload);
 
-          await actualizarDispositivo(this.dispositivoData.guid, updatePayload);
+          const dispositivoActualizado = await actualizarDispositivo(this.dispositivoData.guid, updatePayload);
 
-          this.originalData = JSON.parse(JSON.stringify(this.dispositivoData));
+          console.log(">>> LLAMADA AL SERVICIO COMPLETADA. Respuesta:", dispositivoActualizado);
 
-          this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Dispositivo actualizado.', life: 3000 });
-          this.editable = false;
+          if (dispositivoActualizado) {
+            console.log(">>> Actualización PARECE exitosa. Actualizando estado local...");
+            this.originalData = {
+              guid: dispositivoActualizado.guid,
+              numeroSerie: dispositivoActualizado.numeroSerie,
+              componentes: dispositivoActualizado.componentes,
+              estado: dispositivoActualizado.estado,
+              incidenciaGuid: dispositivoActualizado.incidencia?.guid || null
+            };
+            this.dispositivoData = JSON.parse(JSON.stringify(this.originalData));
+
+            console.log(">>> Estado local actualizado. Mostrando mensaje...");
+
+            this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Dispositivo actualizado.', life: 3000 });
+
+            this.editable = false;
+
+          } else {
+            throw new Error("La actualización no devolvió datos válidos o falló en el servicio.");
+          }
 
         } catch (error: any) {
-          console.error('Error al actualizar el dispositivo:', error);
+          console.error('Error al actualizar el dispositivo (componente):', error);
           const errorMessage = error.response?.data?.message || error.message || 'No se pudo actualizar el dispositivo.';
           this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
+
+          if (this.originalData) {
+            this.dispositivoData = JSON.parse(JSON.stringify(this.originalData));
+          }
         }
       } else {
         console.log("No se detectaron cambios.");
         this.toast.add({ severity: 'info', summary: 'Info', detail: 'No se realizaron cambios.', life: 3000 });
+
         this.editable = false;
       }
     },
