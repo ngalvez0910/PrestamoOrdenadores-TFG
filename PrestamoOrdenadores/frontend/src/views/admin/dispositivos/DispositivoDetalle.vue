@@ -374,16 +374,6 @@ select.input-field:focus {
   color: var(--color-text-dark);
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease-in-out;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
 .status-badge {
   padding: 4px 10px;
   border-radius: 12px;

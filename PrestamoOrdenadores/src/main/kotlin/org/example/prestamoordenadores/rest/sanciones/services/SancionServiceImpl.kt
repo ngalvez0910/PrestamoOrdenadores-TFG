@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import org.example.prestamoordenadores.config.websockets.WebSocketConfig
 import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.models.Notification
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
@@ -108,7 +107,7 @@ class SancionServiceImpl(
         }
 
         logger.debug { "Actualizando sancion" }
-        val tipoNormalizado = sancion.tipo.replace(" ", "_").uppercase()
+        val tipoNormalizado = sancion.tipoSancion.replace(" ", "_").uppercase()
 
         existingSancion.tipoSancion = TipoSancion.valueOf(tipoNormalizado)
         existingSancion.updatedDate = LocalDateTime.now()

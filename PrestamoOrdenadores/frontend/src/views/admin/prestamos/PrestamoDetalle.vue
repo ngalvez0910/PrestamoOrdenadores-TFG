@@ -238,15 +238,6 @@ input.input-field[readonly]:focus {
   box-shadow: none;
 }
 
-.action-buttons-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid var(--color-neutral-medium);
-}
-
 .action-buttons-footer button {
   padding: 10px 20px;
   border-radius: 8px;

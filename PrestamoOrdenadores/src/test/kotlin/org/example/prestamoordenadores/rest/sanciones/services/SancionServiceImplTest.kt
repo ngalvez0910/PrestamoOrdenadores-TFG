@@ -12,9 +12,6 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import org.example.prestamoordenadores.config.websockets.WebSocketHandler
-import org.example.prestamoordenadores.config.websockets.models.Notification
-import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
-import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
@@ -28,7 +25,6 @@ import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.validators.validate
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -244,7 +240,7 @@ class SancionServiceImplTest {
         every { mapper.toSancionResponse(any()) } returns response
         every { objectMapper.writeValueAsString(any()) } returns "{}"
         every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
-        every { updateRequest.tipo } returns "bloqueo_temporal"
+        every { updateRequest.tipoSancion } returns "bloqueo_temporal"
 
         val result = service.updateSancion(sancion.guid, updateRequest)
 
@@ -262,7 +258,7 @@ class SancionServiceImplTest {
 
     @Test
     fun `updateSancion returns Err when sancion invalida`() {
-        val request = SancionUpdateRequest(tipo = "")
+        val request = SancionUpdateRequest(tipoSancion = "")
 
         mockkStatic("org.example.prestamoordenadores.utils.validators.SancionValidatorKt")
         every { request.validate() } returns Err(SancionError.SancionValidationError("Invalid"))
@@ -279,7 +275,7 @@ class SancionServiceImplTest {
     @Test
     fun `updateSancion  returns Err when sancion no existe`() {
         every { repository.findByGuid("sancion-guid") } returns null
-        every { updateRequest.tipo } returns "BLOQUEO_TEMPORAL"
+        every { updateRequest.tipoSancion } returns "BLOQUEO_TEMPORAL"
 
         val result = service.updateSancion("sancion-guid", updateRequest)
 

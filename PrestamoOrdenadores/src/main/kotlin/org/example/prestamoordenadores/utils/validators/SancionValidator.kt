@@ -19,7 +19,7 @@ fun SancionRequest.validate(): Result<SancionRequest, SancionError> {
 }
 
 fun SancionUpdateRequest.validate(): Result<SancionUpdateRequest, SancionError> {
-    if (this.tipo.isBlank() || this.tipo.uppercase() !in TipoSancion.entries.map { it.name }) {
+    if (this.tipoSancion.isBlank() || this.tipoSancion.uppercase() !in TipoSancion.entries.map { it.name }) {
         return Err(SancionError.SancionValidationError("El tipo de la sanción no puede estar vacío"))
     }
 

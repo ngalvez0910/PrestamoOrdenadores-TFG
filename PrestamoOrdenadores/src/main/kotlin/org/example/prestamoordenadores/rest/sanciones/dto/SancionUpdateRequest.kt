@@ -1,5 +1,5 @@
 package org.example.prestamoordenadores.rest.sanciones.dto
 
 data class SancionUpdateRequest(
-    val tipo : String
+    val tipoSancion : String
 )
