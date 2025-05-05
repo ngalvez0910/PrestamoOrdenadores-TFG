@@ -34,7 +34,11 @@
             <option value="NO_DISPONIBLE">No Disponible</option>
             <option value="PRESTADO">Prestado</option>
           </select>
-          <input v-else readonly type="text" id="estado-readonly" class="input-field" :value="formatEstado(dispositivoData.estado)"/>
+          <div v-else>
+                <span :class="['status-badge', getStatusClass(dispositivoData.estado)]">
+                    {{ dispositivoData.estado }}
+                </span>
+          </div>
         </div>
 
         <div class="form-group">
@@ -65,6 +69,8 @@ import { defineComponent } from 'vue';
 import MenuBar from '@/components/AdminMenuBar.vue';
 import {actualizarDispositivo, getDispositivoByGuid,} from '@/services/DispositivoService.ts';
 import {useToast} from "primevue/usetoast";
+
+type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
 
 export default defineComponent({
   name: 'DispositivoDetalle',
@@ -106,6 +112,15 @@ export default defineComponent({
     goBack() {
       this.$router.back();
     },
+    getStatusClass(estado: DeviceState | undefined): string {
+      if (!estado) return 'status-unknown';
+      switch (estado) {
+        case 'DISPONIBLE': return 'status-disponible';
+        case 'PRESTADO': return 'status-prestado';
+        case 'NO_DISPONIBLE': return 'status-no-disponible';
+        default: return 'status-unknown';
+      }
+    },
     async actualizarDispositivo() {
       if (!this.dispositivoData || !this.originalData) {
         console.warn("Datos del dispositivo no disponibles para actualizar.");
@@ -128,10 +143,7 @@ export default defineComponent({
 
           const dispositivoActualizado = await actualizarDispositivo(this.dispositivoData.guid, updatePayload);
 
-          console.log(">>> LLAMADA AL SERVICIO COMPLETADA. Respuesta:", dispositivoActualizado);
-
           if (dispositivoActualizado) {
-            console.log(">>> Actualización PARECE exitosa. Actualizando estado local...");
             this.originalData = {
               guid: dispositivoActualizado.guid,
               numeroSerie: dispositivoActualizado.numeroSerie,
@@ -140,8 +152,6 @@ export default defineComponent({
               incidenciaGuid: dispositivoActualizado.incidencia?.guid || null
             };
             this.dispositivoData = JSON.parse(JSON.stringify(this.originalData));
-
-            console.log(">>> Estado local actualizado. Mostrando mensaje...");
 
             this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Dispositivo actualizado.', life: 3000 });
 
@@ -372,6 +382,35 @@ select.input-field:focus {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-block;
+  text-transform: uppercase;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+
+.status-disponible {
+  background-color: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-success);
+}
+
+.status-prestado {
+  background-color: rgba(var(--color-warning-rgb), 0.15);
+  color: #B45309;
+}
+
+.status-no-disponible {
+  background-color: var(--color-neutral-medium);
+  color: var(--color-text-dark);
+  opacity: 0.9;
 }
 
 @media (max-width: 768px) {

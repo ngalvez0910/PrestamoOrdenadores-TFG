@@ -295,20 +295,9 @@ export default {
   color: var(--color-interactive-darker);
 }
 
-.status-no-disponible,
-.status-reparacion {
+.status-no-disponible{
   background-color: rgba(var(--color-warning-rgb), 0.15);
   color: #B45309;
-}
-
-.status-retirado {
-  background-color: rgba(var(--color-error-rgb), 0.1);
-  color: var(--color-error);
-}
-
-.status-unknown {
-  background-color: var(--color-neutral-medium);
-  color: var(--color-text-dark);
 }
 
 .action-buttons {
