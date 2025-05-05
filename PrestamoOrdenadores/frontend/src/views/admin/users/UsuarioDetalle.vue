@@ -56,7 +56,7 @@
         </div>
 
         <div class="form-group">
-          <label>Última Password Reset</label>
+          <label>Último Cambio Contraseña</label>
           <div class="readonly-field">{{ userData.lastPasswordResetDate }}</div>
         </div>
 
