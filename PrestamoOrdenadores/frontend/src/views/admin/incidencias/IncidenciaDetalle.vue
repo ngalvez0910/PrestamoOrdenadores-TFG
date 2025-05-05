@@ -74,28 +74,18 @@ import {useToast} from "primevue/usetoast";
 
 type IncidenceState = 'PENDIENTE' | 'RESUELTO';
 
-export interface Incidencia {
-  guid: string;
-  asunto: string;
-  descripcion: string;
-  estado: string;
-  user: { guid: string; };
-  userGuid: string;
-  createdDate: string;
-  updatedDate: string;
-}
-
 export default defineComponent({
   name: "IncidenciaDetalle",
   components: {MenuBar},
+  inheritAttrs: false,
   setup() {
     const toast = useToast();
     return { toast };
   },
   data() {
     return {
-      incidenciaData: null as IncidenciaData | null,
-      originalData: null as IncidenciaData | null,
+      incidenciaData: null as any,
+      originalData: null as any,
       editable: false,
     };
   },
@@ -128,7 +118,11 @@ export default defineComponent({
       }
     },
     async actualizarIncidencia() {
-      if (!this.incidenciaData || !this.originalData) return;
+      if (!this.incidenciaData || !this.originalData) {
+        console.warn("Datos de la incidencia no disponibles para actualizar.");
+        this.toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Datos no disponibles.', life: 3000 });
+        return;
+      }
 
       const hasChanged = this.incidenciaData.asunto !== this.originalData.asunto ||
           this.incidenciaData.descripcion !== this.originalData.descripcion ||
@@ -137,8 +131,6 @@ export default defineComponent({
       if (hasChanged) {
         try {
           const updatePayload = {
-            asunto: this.incidenciaData.asunto,
-            descripcion: this.incidenciaData.descripcion,
             estadoIncidencia: this.incidenciaData.estadoIncidencia,
           };
 
@@ -160,11 +152,15 @@ export default defineComponent({
           console.error('Error al actualizar la incidencia:', error);
           const errorMessage = error.response?.data?.message || error.message || 'No se pudo actualizar la incidencia.';
           this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
-          this.incidenciaData = JSON.parse(JSON.stringify(this.originalData));
+
+          if (this.originalData) {
+            this.incidenciaData = JSON.parse(JSON.stringify(this.originalData));
+          }
         }
       } else {
         console.log("No se detectaron cambios.");
         this.toast.add({ severity: 'info', summary: 'Info', detail: 'No se realizaron cambios.', life: 3000 });
+
         this.editable = false;
       }
     }
@@ -296,6 +292,31 @@ export default defineComponent({
   font-weight: 500;
   text-transform: uppercase;
   opacity: 0.8;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-block;
+}
+
+.status-disponible {
+  background-color: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-success);
+}
+
+.status-prestado {
+  background-color: rgba(var(--color-interactive-rgb), 0.15);
+  color: var(--color-interactive-darker);
+}
+
+.status-no-disponible{
+  background-color: rgba(var(--color-warning-rgb), 0.15);
+  color: #B45309;
 }
 
 .readonly-field {
