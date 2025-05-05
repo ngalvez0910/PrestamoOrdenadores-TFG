@@ -11,7 +11,7 @@ class PrestamoValidatorTest {
     @Test
     fun validate() {
         val request = PrestamoUpdateRequest(
-            estado = "VENCIDO"
+            estadoPrestamo = "VENCIDO"
         )
         val result = request.validate()
         assertTrue(result.isOk)
@@ -21,7 +21,7 @@ class PrestamoValidatorTest {
     @Test
     fun `validate Error when estado es blank`() {
         val request = PrestamoUpdateRequest(
-            estado = ""
+            estadoPrestamo = ""
         )
         val result = request.validate()
         assertTrue(result.isErr)
@@ -31,7 +31,7 @@ class PrestamoValidatorTest {
     @Test
     fun `validate Error when estado invalido`() {
         val request = PrestamoUpdateRequest(
-            estado = "ESTADO_INVALIDO"
+            estadoPrestamo = "ESTADO_INVALIDO"
         )
         val result = request.validate()
         assertTrue(result.isErr)
@@ -41,7 +41,7 @@ class PrestamoValidatorTest {
     @Test
     fun `validate PrestamoUpdateRequest with lowercase valid estado returns Ok`() {
         val request = PrestamoUpdateRequest(
-            estado = EstadoPrestamo.VENCIDO.name.lowercase()
+            estadoPrestamo = EstadoPrestamo.VENCIDO.name.lowercase()
         )
         val result = request.validate()
         assertTrue(result.isOk)

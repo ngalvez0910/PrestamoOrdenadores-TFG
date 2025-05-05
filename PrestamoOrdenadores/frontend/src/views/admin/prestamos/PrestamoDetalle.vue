@@ -32,9 +32,12 @@
             <option value="VENCIDO">VENCIDO</option>
             <option value="EN_CURSO">EN CURSO</option>
             <option value="CANCELADO">CANCELADO</option>
-            <option value="FINALIZADO">FINALIZADO</option>
           </select>
-          <input v-else readonly type="text" id="estado" class="input-field" :value="formatEstado(prestamoData.estadoPrestamo)"/>
+          <div v-else>
+                <span :class="['status-badge', getStatusClass(prestamoData.estadoPrestamo)]">
+                    {{ formatEstado(prestamoData.estadoPrestamo) }}
+                </span>
+          </div>
         </div>
 
         <div class="form-group">
@@ -53,16 +56,24 @@
       <p>Cargando detalles del préstamo...</p>
     </div>
   </div>
+
+  <Toast />
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
 import MenuBar from "@/components/AdminMenuBar.vue";
 import {getPrestamoByGuid} from "@/services/PrestamoService.ts";
+import {useToast} from "primevue/usetoast";
 
 export default defineComponent({
   name: "PrestamoDetalle",
   components: {MenuBar},
+  inheritAttrs: false,
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       prestamoData: null as any,
@@ -94,21 +105,15 @@ export default defineComponent({
     goBack() {
       this.$router.back();
     },
-    /*
-    async actualizarPrestamo() {
-      if (JSON.stringify(this.prestamoData) !== JSON.stringify(this.originalData)) {
-        try {
-          await actualizarPrestamo(this.prestamoData.guid, {
-            estadoPrestamo: this.prestamoData.estadoPrestamo,
-          });
-          this.originalData = { ...this.prestamoData };
-          alert("Prestamo actualizada correctamente.");
-          this.editable = false;
-        } catch (error) {
-          alert("No se pudo actualizar el dispositivo.");
-        }
+    getStatusClass(estado: string): string {
+      if (!estado) return 'status-unknown';
+      switch (estado.toUpperCase()) {
+        case 'EN_CURSO': return 'status-en-curso';
+        case 'VENCIDO': return 'status-vencido';
+        case 'CANCELADO': return 'status-cancelado';
+        default: return 'status-unknown';
       }
-    }*/
+    },
   }
 })
 </script>
@@ -121,9 +126,11 @@ export default defineComponent({
   box-sizing: border-box;
 }
 
+
 .boton-atras-wrapper {
   margin-bottom: 25px;
   margin-top: 5%;
+  margin-left: 40%;
 }
 
 .back-button {
@@ -253,31 +260,31 @@ input.input-field[readonly]:focus {
   transform: scale(0.98);
 }
 
-.edit-button {
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-en-curso {
+  background-color: rgba(var(--color-interactive-rgb), 0.15);
+  color: var(--color-interactive-darker);
+}
+
+.status-cancelado {
+  background-color: rgba(var(--color-error-rgb), 0.1);
+  color: var(--color-error);
+}
+
+.status-vencido {
+  background-color: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-success);
+}
+
+.status-unknown {
   background-color: var(--color-neutral-medium);
   color: var(--color-text-dark);
-}
-
-.edit-button:hover {
-  background-color: #B0B9C2;
-}
-
-.save-button {
-  background-color: var(--color-success);
-  color: white;
-}
-
-.save-button:hover {
-  background-color: #146C43;
-}
-
-.cancel-button {
-  background-color: transparent;
-  color: var(--color-text-dark);
-  border: 1px solid var(--color-neutral-medium);
-}
-
-.cancel-button:hover {
-  background-color: var(--color-background-main);
 }
 </style>
