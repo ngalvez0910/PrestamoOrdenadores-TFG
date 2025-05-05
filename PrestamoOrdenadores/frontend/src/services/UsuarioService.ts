@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type {Incidencia} from "@/services/IncidenciaService.ts";
 
 interface User {
     guid: string;
@@ -74,4 +75,28 @@ export const descargarCsvUsers = async (): Promise<void | null> => {
         console.error('Error al descargar el CSV de usuarios', error);
         throw error;
     }
-}
+};
+
+export const actualizarUsuario = async (
+    guid: string,
+    data: { rol: string }
+): Promise<User | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.patch(`http://localhost:8080/users/rol/${guid}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        return response.data || null;
+    } catch (error) {
+        console.error('Error al actualizar el usuario:', error);
+        return null;
+    }
+};

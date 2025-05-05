@@ -34,7 +34,11 @@
             <option value="NO_DISPONIBLE">No Disponible</option>
             <option value="PRESTADO">Prestado</option>
           </select>
-          <input v-else readonly type="text" id="estado-readonly" class="input-field" :value="formatEstado(dispositivoData.estado)"/>
+          <div v-else>
+                <span :class="['status-badge', getStatusClass(dispositivoData.estado)]">
+                    {{ dispositivoData.estado }}
+                </span>
+          </div>
         </div>
 
         <div class="form-group">
@@ -63,12 +67,15 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import MenuBar from '@/components/AdminMenuBar.vue';
-import {getDispositivoByGuid,} from '@/services/DispositivoService.ts';
+import {actualizarDispositivo, getDispositivoByGuid,} from '@/services/DispositivoService.ts';
 import {useToast} from "primevue/usetoast";
+
+type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
 
 export default defineComponent({
   name: 'DispositivoDetalle',
   components: { MenuBar },
+  inheritAttrs: false,
   setup() {
     const toast = useToast();
     return { toast };
@@ -105,8 +112,20 @@ export default defineComponent({
     goBack() {
       this.$router.back();
     },
+    getStatusClass(estado: DeviceState | undefined): string {
+      if (!estado) return 'status-unknown';
+      switch (estado) {
+        case 'DISPONIBLE': return 'status-disponible';
+        case 'PRESTADO': return 'status-prestado';
+        case 'NO_DISPONIBLE': return 'status-no-disponible';
+        default: return 'status-unknown';
+      }
+    },
     async actualizarDispositivo() {
-      if (!this.dispositivoData || !this.originalData) return;
+      if (!this.dispositivoData || !this.originalData) {
+        console.warn("Datos del dispositivo no disponibles para actualizar.");
+        return;
+      }
 
       const hasChanged = this.dispositivoData.componentes !== this.originalData.componentes ||
           this.dispositivoData.estado !== this.originalData.estado ||
@@ -116,27 +135,45 @@ export default defineComponent({
         try {
           const updatePayload = {
             componentes: this.dispositivoData.componentes,
-            estado: this.dispositivoData.estado,
+            estadoDispositivo: this.dispositivoData.estado,
             incidenciaGuid: this.dispositivoData.incidenciaGuid || null,
           };
 
-          console.log("Actualizando dispositivo con:", updatePayload);
+          console.log("Actualizando dispositivo con payload:", updatePayload);
 
-          await actualizarDispositivo(this.dispositivoData.guid, updatePayload);
+          const dispositivoActualizado = await actualizarDispositivo(this.dispositivoData.guid, updatePayload);
 
-          this.originalData = JSON.parse(JSON.stringify(this.dispositivoData));
+          if (dispositivoActualizado) {
+            this.originalData = {
+              guid: dispositivoActualizado.guid,
+              numeroSerie: dispositivoActualizado.numeroSerie,
+              componentes: dispositivoActualizado.componentes,
+              estado: dispositivoActualizado.estado,
+              incidenciaGuid: dispositivoActualizado.incidencia?.guid || null
+            };
+            this.dispositivoData = JSON.parse(JSON.stringify(this.originalData));
 
-          this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Dispositivo actualizado.', life: 3000 });
-          this.editable = false;
+            this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Dispositivo actualizado.', life: 3000 });
+
+            this.editable = false;
+
+          } else {
+            throw new Error("La actualización no devolvió datos válidos o falló en el servicio.");
+          }
 
         } catch (error: any) {
-          console.error('Error al actualizar el dispositivo:', error);
+          console.error('Error al actualizar el dispositivo (componente):', error);
           const errorMessage = error.response?.data?.message || error.message || 'No se pudo actualizar el dispositivo.';
           this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
+
+          if (this.originalData) {
+            this.dispositivoData = JSON.parse(JSON.stringify(this.originalData));
+          }
         }
       } else {
         console.log("No se detectaron cambios.");
         this.toast.add({ severity: 'info', summary: 'Info', detail: 'No se realizaron cambios.', life: 3000 });
+
         this.editable = false;
       }
     },
@@ -337,14 +374,33 @@ select.input-field:focus {
   color: var(--color-text-dark);
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease-in-out;
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-block;
+  text-transform: uppercase;
+  line-height: 1.4;
+  vertical-align: middle;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.status-disponible {
+  background-color: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-success);
+}
+
+.status-prestado {
+  background-color: rgba(var(--color-warning-rgb), 0.15);
+  color: #B45309;
+}
+
+.status-no-disponible {
+  background-color: var(--color-neutral-medium);
+  color: var(--color-text-dark);
+  opacity: 0.9;
 }
 
 @media (max-width: 768px) {

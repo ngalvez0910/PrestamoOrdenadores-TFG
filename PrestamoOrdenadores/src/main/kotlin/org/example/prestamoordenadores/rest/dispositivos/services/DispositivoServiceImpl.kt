@@ -94,7 +94,7 @@ class DispositivoServiceImpl(
         }
 
         dispositivo.componentes?.let { existingDispositivo.componentes = it }
-        dispositivo.estado?.let { existingDispositivo.estadoDispositivo = EstadoDispositivo.valueOf(it) }
+        dispositivo.estadoDispositivo?.let { existingDispositivo.estadoDispositivo = EstadoDispositivo.valueOf(it) }
         dispositivo.isActivo?.let { existingDispositivo.isActivo = it }
 
         dispositivoRepository.save(existingDispositivo)

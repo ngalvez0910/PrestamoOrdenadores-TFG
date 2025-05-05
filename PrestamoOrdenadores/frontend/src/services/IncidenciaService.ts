@@ -92,7 +92,18 @@ export const actualizarIncidencia = async (
     data: { estadoIncidencia: string }
 ): Promise<Incidencia | null> => {
     try {
-        const response = await axios.patch(`http://localhost:8080/incidencias/${guid}`, data);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.patch(`http://localhost:8080/incidencias/${guid}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
         return response.data || null;
     } catch (error) {
         console.error('Error al actualizar la incidencia:', error);

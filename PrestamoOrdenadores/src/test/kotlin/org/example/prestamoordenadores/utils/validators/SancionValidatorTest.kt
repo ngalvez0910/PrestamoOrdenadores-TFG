@@ -67,7 +67,7 @@ class SancionValidatorTest {
     @Test
     fun validateSancionUpdateRequest() {
         val request = SancionUpdateRequest(
-            tipo = TipoSancion.BLOQUEO_TEMPORAL.name
+            tipoSancion = TipoSancion.BLOQUEO_TEMPORAL.name
         )
         val result = request.validate()
         assertTrue(result.isOk)
@@ -77,7 +77,7 @@ class SancionValidatorTest {
     @Test
     fun `validate SancionUpdateRequest Error when tipoSancion es blank`() {
         val request = SancionUpdateRequest(
-            tipo = ""
+            tipoSancion = ""
         )
         val result = request.validate()
         assertTrue(result.isErr)
@@ -87,7 +87,7 @@ class SancionValidatorTest {
     @Test
     fun `validate SancionUpdateRequest Error when tipoSancion invalido`() {
         val request = SancionUpdateRequest(
-            tipo = "TIPO_INVALIDO"
+            tipoSancion = "TIPO_INVALIDO"
         )
         val result = request.validate()
         assertTrue(result.isErr)
@@ -97,7 +97,7 @@ class SancionValidatorTest {
     @Test
     fun `validate SancionUpdateRequest when tipoSancion en lowercase`() {
         val request = SancionUpdateRequest(
-            tipo = TipoSancion.ADVERTENCIA.name.lowercase()
+            tipoSancion = TipoSancion.ADVERTENCIA.name.lowercase()
         )
         val result = request.validate()
         assertTrue(result.isOk)

@@ -113,7 +113,6 @@ export default {
         case 'EN_CURSO': return 'status-en-curso';
         case 'VENCIDO': return 'status-vencido';
         case 'CANCELADO': return 'status-cancelado';
-        case 'FINALIZADO': return 'status-finalizado';
         default: return 'status-unknown';
       }
     },
@@ -297,13 +296,12 @@ export default {
   color: var(--color-interactive-darker);
 }
 
-.status-vencido,
 .status-cancelado {
   background-color: rgba(var(--color-error-rgb), 0.1);
   color: var(--color-error);
 }
 
-.status-finalizado {
+.status-vencido {
   background-color: rgba(var(--color-success-rgb), 0.15);
   color: var(--color-success);
 }

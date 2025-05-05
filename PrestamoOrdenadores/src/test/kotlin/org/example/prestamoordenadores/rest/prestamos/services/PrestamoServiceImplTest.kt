@@ -294,7 +294,7 @@ class PrestamoServiceImplTest {
         every { mapper.toPrestamoResponse(any()) } returns response
         every { objectMapper.writeValueAsString(any()) } returns "{}"
         every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
-        every { updateRequest.estado } returns "vencido"
+        every { updateRequest.estadoPrestamo } returns "vencido"
 
         val result = service.updatePrestamo(prestamo.guid, updateRequest)
 
@@ -312,7 +312,7 @@ class PrestamoServiceImplTest {
 
     @Test
     fun `updatePrestamo returns Err when prestamo invalida`() {
-        val request = PrestamoUpdateRequest(estado = "")
+        val request = PrestamoUpdateRequest(estadoPrestamo = "")
 
         mockkStatic("org.example.prestamoordenadores.utils.validators.PrestamoValidatorKt")
         every { request.validate() } returns Err(PrestamoError.PrestamoValidationError("Invalid"))
@@ -329,7 +329,7 @@ class PrestamoServiceImplTest {
     @Test
     fun `updatePrestamo returns Err when prestamo no existe`() {
         every { repository.findByGuid("prestamo-guid") } returns null
-        every { updateRequest.estado } returns "VENCIDO"
+        every { updateRequest.estadoPrestamo } returns "VENCIDO"
 
         val result = service.updatePrestamo("prestamo-guid", updateRequest)
 

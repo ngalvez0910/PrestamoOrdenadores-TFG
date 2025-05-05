@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type {Incidencia} from "@/services/IncidenciaService.ts";
 
 interface Sancion {
     guid: string;
@@ -46,7 +47,18 @@ export const actualizarSancion = async (
     data: { tipoSancion: string }
 ): Promise<Sancion | null> => {
     try {
-        const response = await axios.patch(`http://localhost:8080/sanciones/${guid}`, data);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.patch(`http://localhost:8080/sanciones/${guid}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
         return response.data || null;
     } catch (error) {
         console.error('Error al actualizar la sancion:', error);
