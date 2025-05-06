@@ -1,6 +1,6 @@
 <template>
   <AdminMenuBar/>
-  <div class="page-container profile-page profile-page-tabs-internal">
+  <div class="page-container profile-page">
 
     <div class="profile-card">
       <div class="profile-card-header">
@@ -35,7 +35,7 @@
       </div>
 
       <div class="profile-card-footer">
-        <button @click="goToChangePassword" class="action-button change-password-button">
+        <button @click="openChangePasswordModal" class="action-button change-password-button">
           <i class="pi pi-key"></i> Cambiar Contraseña
         </button>
         <button @click="logout" class="action-button logout-button-tabs">
@@ -44,27 +44,69 @@
       </div>
     </div>
   </div>
+
+  <Dialog header="Cambiar Contraseña" v-model:visible="isChangePasswordModalVisible" modal
+          :style="{ width: 'clamp(300px, 40vw, 500px)', fontFamily: 'Montserrat, sans-serif' }"
+          :draggable="false" @hide="resetChangePasswordForm">
+    <form @submit.prevent="handleChangePassword" class="modal-form">
+      <div class="form-group">
+        <label for="oldPassword" class="input-label">Contraseña Antigua</label>
+        <Password id="oldPassword" v-model="changePasswordForm.oldPassword" class="input-field full-width"
+                  :feedback="false" toggleMask placeholder="Introduce tu contraseña actual" />
+        <small v-if="changePasswordErrors.oldPassword" class="error-message p-error">{{ changePasswordErrors.oldPassword }}</small>
+      </div>
+      <div class="form-group">
+        <label for="newPassword" class="input-label">Nueva Contraseña</label>
+        <Password id="newPassword" v-model="changePasswordForm.newPassword" class="input-field full-width"
+                  toggleMask placeholder="Introduce tu nueva contraseña" :feedback="true" />
+        <small v-if="changePasswordErrors.newPassword" class="error-message p-error" style="white-space: pre-wrap;">{{ changePasswordErrors.newPassword }}</small>
+      </div>
+      <div class="form-group">
+        <label for="confirmNewPassword" class="input-label">Confirmar Nueva Contraseña</label>
+        <Password id="confirmNewPassword" v-model="changePasswordForm.confirmNewPassword" class="input-field full-width"
+                  :feedback="false" toggleMask placeholder="Confirma tu nueva contraseña" />
+        <small v-if="changePasswordErrors.confirmNewPassword" class="error-message p-error">{{ changePasswordErrors.confirmNewPassword }}</small>
+      </div>
+      <small v-if="changePasswordErrors.general" class="error-message p-error general-error">{{ changePasswordErrors.general }}</small>
+
+      <div class="dialog-footer-buttons">
+        <Button label="Cancelar" icon="pi pi-times" class="p-button-text action-button secondary-button" @click="isChangePasswordModalVisible = false" />
+        <Button type="submit" label="Cambiar Contraseña" icon="pi pi-save" class="action-button primary-button" :loading="isSubmittingChangePassword" />
+      </div>
+    </form>
+  </Dialog>
+
   <Toast />
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
+import Toast from 'primevue/toast';
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import Password from 'primevue/password';
 import axios from 'axios';
 import {useRouter} from "vue-router";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode, type JwtPayload } from "jwt-decode";
 import {useToast} from "primevue/usetoast";
+import { authService } from '@/services/AuthService';
 
 interface UserData {
   nombre: string;
+  apellidos?: string;
   email: string;
   curso: string;
   avatar?: string;
 }
 
+interface DecodedToken extends JwtPayload {
+  sub: string;
+}
+
 export default defineComponent({
   nombre: "Profile",
-  components: { AdminMenuBar },
+  components: { AdminMenuBar, Toast, Dialog, Button, Password },
   data() {
     return {
       nombre: '',
@@ -72,7 +114,19 @@ export default defineComponent({
       curso: '',
       avatar: 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
       loading: true,
-      activeTab: 'info',
+      isChangePasswordModalVisible: false,
+      changePasswordForm: {
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      },
+      changePasswordErrors: {
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+        general: '',
+      },
+      isSubmittingChangePassword: false,
     };
   },
   setup: function () {
@@ -99,7 +153,7 @@ export default defineComponent({
             },
           });
 
-          this.nombre = response.data.nombre;
+          this.nombre = response.data.apellidos ? `${response.data.nombre} ${response.data.apellidos}` : response.data.nombre;
           this.email = response.data.email;
           this.curso = response.data.curso;
           if (response.data.avatar) {
@@ -110,29 +164,78 @@ export default defineComponent({
         }
       }
     },
-    async saveProfile() {
-      try {
-        const updatedUser = {
-          nombre: this.nombre,
-          email: this.email,
-        };
-
-        const response = await axios.put('/students/2f935f49-4088-4d35-8b5f-246e27ccd12e', updatedUser);
-        console.log('Perfil actualizado con éxito:', response.data);
-      } catch (error) {
-        console.error('Error al guardar el perfil:', error);
-      }
-    },
     logout() {
       console.log("Cerrando sesión...");
       localStorage.removeItem("token");
       this.$router.push("/");
     },
-    goToChangePassword() {
-      this.$router.push('/cambioContrasena');
-    },
     changeAvatar() {
-      console.log('Cambiar avatar');
+      const newAvatarUrl = prompt("Introduce la URL de tu nuevo avatar:", this.avatar);
+      if (newAvatarUrl) {
+        this.avatar = newAvatarUrl;
+        this.toast.add({ severity: 'info', summary: 'Avatar Actualizado', detail: 'El avatar se ha actualizado (simulación).', life: 3000 });
+      }
+    },
+    resetChangePasswordForm() {
+      this.changePasswordForm.oldPassword = '';
+      this.changePasswordForm.newPassword = '';
+      this.changePasswordForm.confirmNewPassword = '';
+      this.changePasswordErrors.oldPassword = '';
+      this.changePasswordErrors.newPassword = '';
+      this.changePasswordErrors.confirmNewPassword = '';
+      this.changePasswordErrors.general = '';
+      this.isSubmittingChangePassword = false;
+    },
+    openChangePasswordModal() {
+      this.resetChangePasswordForm();
+      this.isChangePasswordModalVisible = true;
+    },
+
+    async handleChangePassword() {
+      let isValid = true;
+      this.changePasswordErrors = { oldPassword: '', newPassword: '', confirmNewPassword: '', general: '' };
+
+      if (!this.changePasswordForm.oldPassword) {
+        this.changePasswordErrors.oldPassword = 'La contraseña antigua es obligatoria.';
+        isValid = false;
+      }
+      if (!this.changePasswordForm.newPassword) {
+        this.changePasswordErrors.newPassword = 'La nueva contraseña es obligatoria.';
+        isValid = false;
+      } else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.changePasswordForm.newPassword)) {
+        this.changePasswordErrors.newPassword = 'La contraseña debe cumplir los siguientes requisitos:\n- Mínimo 8 caracteres.\n- Al menos una mayúscula.\n- Al menos una minúscula.\n- Al menos un dígito.\n- Al menos un carácter especial.';
+        isValid = false;
+      }
+      if (!this.changePasswordForm.confirmNewPassword) {
+        this.changePasswordErrors.confirmNewPassword = 'Por favor, confirma la nueva contraseña.';
+        isValid = false;
+      } else if (this.changePasswordForm.newPassword && this.changePasswordForm.newPassword !== this.changePasswordForm.confirmNewPassword) {
+        this.changePasswordErrors.confirmNewPassword = 'Las nuevas contraseñas no coinciden.';
+        isValid = false;
+      }
+      if (this.changePasswordForm.oldPassword && this.changePasswordForm.newPassword && this.changePasswordForm.oldPassword === this.changePasswordForm.newPassword) {
+        this.changePasswordErrors.newPassword = 'La nueva contraseña no puede ser igual a la antigua.';
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      this.isSubmittingChangePassword = true;
+      try {
+        await authService.changePassword({
+          currentPassword: this.changePasswordForm.oldPassword,
+          newPassword: this.changePasswordForm.newPassword,
+        });
+        this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Contraseña actualizada correctamente.', life: 3000 });
+        this.isChangePasswordModalVisible = false;
+      } catch (error: any) {
+        console.error('Error al cambiar la contraseña:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'No se pudo cambiar la contraseña.';
+        this.changePasswordErrors.general = errorMessage;
+        this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
+      } finally {
+        this.isSubmittingChangePassword = false;
+      }
     },
   },
 });
@@ -291,6 +394,101 @@ export default defineComponent({
 }
 .avatar-button:hover {
   background-color: var(--color-interactive-darker);
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.modal-form .input-label {
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+}
+
+.modal-form :deep(.p-password.input-field .p-inputtext) {
+  border-radius: 8px !important;
+  border: 1px solid var(--color-neutral-medium) !important;
+  padding: 10px 12px !important;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+.modal-form :deep(.p-password.input-field .p-inputtext:focus) {
+  border-color: var(--color-interactive) !important;
+  box-shadow: 0 0 0 2px rgba(var(--color-interactive-rgb), 0.2) !important;
+}
+
+.error-message.p-error {
+  color: var(--color-error);
+  font-size: 0.85rem;
+}
+.error-message.general-error {
+  text-align: center;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.dialog-footer-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-medium);
+}
+
+.action-button.primary-button {
+  background-color: var(--color-interactive);
+  color: white;
+  border: 1px solid var(--color-interactive);
+}
+.action-button.primary-button:hover {
+  background-color: var(--color-interactive-darker);
+  color: white;
+}
+
+.action-button.secondary-button {
+  background-color: transparent;
+  color: var(--color-interactive);
+  border: 1px solid var(--color-interactive);
+}
+.action-button.secondary-button:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.05);
+}
+
+:deep(.p-dialog .p-dialog-header) {
+  background-color: var(--color-background-main);
+  color: var(--color-primary);
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-neutral-medium);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+:deep(.p-dialog .p-dialog-header .p-dialog-title) {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+:deep(.p-dialog .p-dialog-header .p-dialog-header-icon) {
+  color: var(--color-text-dark) !important;
+}
+:deep(.p-dialog .p-dialog-header .p-dialog-header-icon:hover) {
+  color: var(--color-primary) !important;
+  background-color: rgba(var(--color-primary-rgb), 0.1) !important;
+}
+:deep(.p-dialog .p-dialog-content) {
+  background-color: white;
+  padding: 1.5rem;
+  font-family: 'Montserrat', sans-serif;
 }
 
 @media (max-width: 992px) {

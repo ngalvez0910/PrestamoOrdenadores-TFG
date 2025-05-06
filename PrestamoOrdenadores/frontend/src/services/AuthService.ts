@@ -15,6 +15,11 @@ interface AuthState {
     token: string | null;
 }
 
+export interface UserPasswordResetRequest {
+    currentPassword: string;
+    newPassword: string;
+}
+
 const state = reactive<AuthState>({
     user: null,
     token: localStorage.getItem("token"),
@@ -60,6 +65,44 @@ export const authService = {
                 console.error("Error al obtener datos del usuario:", error);
                 await this.logout();
             }
+        }
+    },
+
+    async changePassword(payload: UserPasswordResetRequest): Promise<void> {
+        const token = state.token;
+
+        if (!token) {
+            console.error("Intento de cambiar contraseña sin token en el estado del servicio.");
+            throw new Error("Acción no permitida. Debes iniciar sesión.");
+        }
+
+        if (!state.user || !state.user.guid) {
+            console.warn("Datos de usuario (GUID) no disponibles en el estado. Intentando recuperarlos...");
+            await this.fetchUser();
+            if (!state.user || !state.user.guid) {
+                console.error("No se pudieron obtener los datos del usuario (GUID) después del intento de recuperación.");
+                throw new Error("No se pudo obtener la información del usuario para cambiar la contraseña.");
+            }
+        }
+
+        const guid = state.user.guid;
+
+        try {
+            const response = await axios.patch(
+                `http://localhost:8080/users/${guid}`,
+                payload,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            console.log('Contraseña cambiada con éxito en el backend:', response.data);
+        } catch (error) {
+            console.error("Error en authService.changePassword (manual header):", error);
+            throw error;
         }
     },
 
