@@ -76,7 +76,16 @@ VALUES
     ('d7e8f9g0h1i', '8NO901LKJH', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('v2w3x4y5z6a', '4PQ234MNBV', 'ratón, cargador', 'PRESTADO', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('c6b5a4z3y2x', '6RS567QAZX', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('n0m9l8k7j6i', '0TU890WSXC', 'ratón, cargador', 'NO_DISPONIBLE', 3, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('n0m9l8k7j6i', '0TU890WSXC', 'ratón, cargador', 'NO_DISPONIBLE', 3, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('q8p7o6n5m4l', '5VW123ERTY', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('b1a2z3y4x5w', '1XY234CDEF', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('k6l5m4n3o2p', '6ZT345GHIJ', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('f9e8d7c6b5a', '9UA678BCDE', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('r2s1t0u9v8w', '2VB789CDEF', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('j5i4h3g2f1e', '5WC012EFGH', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('h8g7f6e5d4c', '8XD345FGHI', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('g1f2e3d4c5b', '1YE678HIJK', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('e4d5c6b7a8z', '4ZF901IJKL', 'ratón, cargador', 'DISPONIBLE', null, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 
