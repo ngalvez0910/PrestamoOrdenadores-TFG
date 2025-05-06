@@ -15,22 +15,22 @@
 
     <div class="table-card">
       <DataTable :value="prestamos" stripedRows responsiveLayout="scroll" tableStyle="min-width: 50rem; font-family: 'Montserrat', sans-serif" :loading="loading">
-        <Column field="dispositivo.numeroSerie" header="Número de Serie">
+        <Column field="dispositivo.numeroSerie" header="Número de Serie" sortable>
           <template #body="slotProps">
             {{ slotProps.data.dispositivo?.numeroSerie ?? 'N/A' }}
           </template>
         </Column>
-        <Column field="fechaPrestamo" header="Fecha Préstamo">
+        <Column field="fechaPrestamo" header="Fecha Préstamo" sortable>
           <template #body="slotProps">
             {{ slotProps.data.fechaPrestamo }}
           </template>
         </Column>
-        <Column field="fechaDevolucion" header="Fecha Devolución">
+        <Column field="fechaDevolucion" header="Fecha Devolución" sortable>
           <template #body="slotProps">
             {{ slotProps.data.fechaDevolucion ? slotProps.data.fechaDevolucion : 'Pendiente' }}
           </template>
         </Column>
-        <Column field="estadoPrestamo" header="Estado">
+        <Column field="estadoPrestamo" header="Estado" sortable>
           <template #body="slotProps">
             <span :class="['status-badge', getEstadoPrestamoClass(slotProps.data.estadoPrestamo)]">
               {{ slotProps.data.estadoPrestamo }}
@@ -203,7 +203,7 @@ export default defineComponent({
 <style scoped>
 .page-container.prestamos-me-page {
   padding: 30px;
-  max-width: 900px;
+  max-width: 1000px;
   box-sizing: border-box;
   position: fixed;
   top: 80px;
@@ -278,7 +278,7 @@ export default defineComponent({
   overflow-x: auto;
   margin-bottom: 30px;
   width: 100%;
-  max-width: 840px;
+  max-width: 900px;
   margin-left: auto;
   margin-right: auto;
 }
