@@ -226,7 +226,7 @@ export default {
         if (basicFormatCheck && (endsWithLoantech || endsWithProfesor || endsWithAdmin)) {
           isValidFormat = true;
         } else {
-          errorMessage = 'El correo debe ser válido y terminar en @loantech.com, @profesor.loantech.com o @admin.loantech.com';
+          errorMessage = 'El correo debe ser válido y terminar en @loantech.com';
         }
       }
 
@@ -242,16 +242,27 @@ export default {
     validateEmailDependencies() {
       this.errors.curso = '';
       this.errors.tutor = '';
+
       if (this.form.email.endsWith('@loantech.com')) {
         if (!this.form.curso) {
-          this.errors.curso = 'Campo obligatorio';
+          this.errors.curso = 'El curso es obligatorio para estudiantes.';
         }
         if (!this.form.tutor) {
-          this.errors.tutor = 'Campo obligatorio';
+          this.errors.tutor = 'El tutor es obligatorio para estudiantes.';
         }
       } else if (this.form.email.endsWith('@profesor.loantech.com')) {
         if (!this.form.curso) {
-          this.errors.curso = 'Campo obligatorio';
+          this.errors.curso = 'El curso/departamento es obligatorio para profesores.';
+        }
+        if (this.form.tutor) {
+          this.errors.tutor = 'El campo tutor no es aplicable para profesores y debe estar vacío.';
+        }
+      } else if (this.form.email.endsWith('@admin.loantech.com')) {
+        if (this.form.curso) {
+          this.errors.curso = 'El campo curso no es aplicable para administradores y debe estar vacío.';
+        }
+        if (this.form.tutor) {
+          this.errors.tutor = 'El campo tutor no es aplicable para administradores y debe estar vacío.';
         }
       }
     },
@@ -272,6 +283,24 @@ export default {
       if (!this.form.numeroIdentificacion) {
         this.errors.numeroIdentificacion = 'Campo obligatorio';
         formIsValid = false;
+      } else {
+        const nieRegex = /^(\d{4})LT(\d{3})$/;
+        if (!nieRegex.test(this.form.numeroIdentificacion)) {
+          this.errors.numeroIdentificacion = 'Formato incorrecto. Debe ser XXXXLTXXX (ej: 2023LT123).';
+          formIsValid = false;
+        } else {
+          const match = this.form.numeroIdentificacion.match(nieRegex);
+          if (match) {
+            const year = parseInt(match[1], 10);
+            const currentYear = new Date().getFullYear();
+            const minValidYear = currentYear - 30;
+
+            if (year < minValidYear || year > currentYear) {
+              this.errors.numeroIdentificacion = `Número de Identificación inválido`;
+              formIsValid = false;
+            }
+          }
+        }
       }
 
       if (!this.form.nombre) {
@@ -284,16 +313,39 @@ export default {
         formIsValid = false;
       }
 
-      this.validateEmailDependencies();
-      if (this.errors.curso) formIsValid = false;
-      if (this.errors.tutor) formIsValid = false;
+      if (!this.form.email) {
+        this.errors.email = 'El correo electrónico es obligatorio';
+        formIsValid = false;
+      } else {
+        const basicFormatCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email);
+        const endsWithLoantech = this.form.email.endsWith('@loantech.com');
+        const endsWithProfesor = this.form.email.endsWith('@profesor.loantech.com');
+        const endsWithAdmin = this.form.email.endsWith('@admin.loantech.com');
 
-      if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
-        this.errors.password = 'La contraseña debe contener: 8 caracteres, Mayúscula, 1 caracter especial, Número';
+        if (!(basicFormatCheck && (endsWithLoantech || endsWithProfesor || endsWithAdmin))) {
+          this.errors.email = 'El correo debe ser válido y terminar en @loantech.com.';
+          formIsValid = false;
+        }
+      }
+
+      if (!this.errors.email) {
+        this.validateEmailDependencies();
+        if (this.errors.curso) formIsValid = false;
+        if (this.errors.tutor) formIsValid = false;
+      }
+
+      if (!this.form.password) {
+        this.errors.password = 'La contraseña es obligatoria.';
+        formIsValid = false;
+      } else if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
+        this.errors.password = 'La contraseña debe cumplir los siguientes requisitos:\n - Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un dígito.\n- Al menos un carácter especial (ej: !@#$%^&*).';
         formIsValid = false;
       }
 
-      if (this.form.password !== this.form.confirmPassword) {
+      if (!this.form.confirmPassword) {
+        this.errors.confirmPassword = 'Por favor, confirma la contraseña.';
+        formIsValid = false;
+      } else if (this.form.password && this.form.password !== this.form.confirmPassword) {
         this.errors.confirmPassword = 'Las contraseñas no coinciden';
         formIsValid = false;
       }
@@ -377,7 +429,7 @@ export default {
   min-width: 700px;
   padding: 80px 20px 40px 20px;
   box-sizing: border-box;
-  margin-left: 35%;
+  margin-left: 37%;
   margin-top: 5%;
 }
 
@@ -495,6 +547,7 @@ form {
   font-size: 0.85rem;
   margin-top: 6px;
   min-height: 1.2em;
+  white-space: pre-wrap;
 }
 
 .submit-button {

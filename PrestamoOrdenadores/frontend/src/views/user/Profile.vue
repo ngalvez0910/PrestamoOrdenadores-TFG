@@ -1,90 +1,138 @@
 <template>
   <AdminMenuBar/>
-  <div class="profile-container">
-    <div class="avatar">
-      <img :src="avatar" alt="Avatar" />
-      <button @click="changeAvatar">Cambiar Avatar</button>
-    </div>
-    <div class="user-details">
-      <div>
-        <label for="nombre">Nombre</label>
-        <input readonly type="text" id="nombre" v-model="nombre"/>
+  <div class="page-container profile-page">
+
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <h2>Mi Perfil</h2>
+        <i class="pi pi-user header-icon"></i>
       </div>
-      <div>
-        <label for="email">Correo electrónico</label>
-        <input readonly type="email" id="email" v-model="email"/>
+
+      <div class="profile-tab-content">
+        <div class="profile-card-body">
+          <div class="avatar-section">
+            <img :src="avatar" alt="Avatar" class="avatar-image" />
+            <button @click="changeAvatar" class="action-button avatar-button">
+              <i class="pi pi-camera"></i> Cambiar Avatar
+            </button>
+          </div>
+
+          <div class="user-info-section">
+            <div class="form-group">
+              <label for="nombre">Nombre</label>
+              <div id="nombre" class="readonly-field">{{ nombre || '-' }}</div>
+            </div>
+            <div class="form-group">
+              <label for="email">Correo electrónico</label>
+              <div id="email" class="readonly-field">{{ email || '-' }}</div>
+            </div>
+            <div class="form-group">
+              <label for="curso">Curso</label>
+              <div id="curso" class="readonly-field">{{ curso || '-' }}</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label for="curso">Curso</label>
-        <input readonly type="text" id="curso" v-model="curso"/>
+
+      <div class="profile-card-footer">
+        <button @click="openChangePasswordModal" class="action-button change-password-button">
+          <i class="pi pi-key"></i> Cambiar Contraseña
+        </button>
+        <button @click="logout" class="action-button logout-button-tabs">
+          <i class="pi pi-sign-out"></i> Cerrar sesión
+        </button>
       </div>
     </div>
   </div>
-  <div class="side-menu">
-    <ul>
-      <li class="side-menu-item">
-        <a href="/prestamo/me" class="side-menu-link">
-          <i class="pi pi-briefcase mr-2"></i> Mis préstamos
-        </a>
-      </li>
-      <li class="side-menu-item">
-        <a href="/incidencias/me" class="side-menu-link">
-          <i class="pi pi-exclamation-triangle mr-2"></i> Mis incidencias
-        </a>
-      </li>
-      <li class="side-menu-item">
-        <a href="#" class="side-menu-link">
-          <i class="pi pi-bell mr-2"></i> Notificaciones
-        </a>
-      </li>
-      <li class="side-menu-item">
-        <a href="/cambioContrasena" class="side-menu-link">
-          <i class="pi pi-key mr-2"></i> Cambiar contraseña
-        </a>
-      </li>
-      <li class="side-menu-item">
-        <button @click="logout" class="logout-button">Cerrar sesión</button>
-      </li>
-    </ul>
-  </div>
+
+  <Dialog header="Cambiar Contraseña" v-model:visible="isChangePasswordModalVisible" modal
+          :style="{ width: 'clamp(300px, 40vw, 500px)', fontFamily: 'Montserrat, sans-serif' }"
+          :draggable="false" @hide="resetChangePasswordForm">
+    <form @submit.prevent="handleChangePassword" class="modal-form">
+      <div class="form-group">
+        <label for="oldPassword" class="input-label">Contraseña Antigua</label>
+        <Password id="oldPassword" v-model="changePasswordForm.oldPassword" class="input-field full-width"
+                  :feedback="false" toggleMask placeholder="Introduce tu contraseña actual" />
+        <small v-if="changePasswordErrors.oldPassword" class="error-message p-error">{{ changePasswordErrors.oldPassword }}</small>
+      </div>
+      <div class="form-group">
+        <label for="newPassword" class="input-label">Nueva Contraseña</label>
+        <Password id="newPassword" v-model="changePasswordForm.newPassword" class="input-field full-width"
+                  toggleMask placeholder="Introduce tu nueva contraseña" :feedback="true" />
+        <small v-if="changePasswordErrors.newPassword" class="error-message p-error" style="white-space: pre-wrap;">{{ changePasswordErrors.newPassword }}</small>
+      </div>
+      <div class="form-group">
+        <label for="confirmNewPassword" class="input-label">Confirmar Nueva Contraseña</label>
+        <Password id="confirmNewPassword" v-model="changePasswordForm.confirmNewPassword" class="input-field full-width"
+                  :feedback="false" toggleMask placeholder="Confirma tu nueva contraseña" />
+        <small v-if="changePasswordErrors.confirmNewPassword" class="error-message p-error">{{ changePasswordErrors.confirmNewPassword }}</small>
+      </div>
+      <small v-if="changePasswordErrors.general" class="error-message p-error general-error">{{ changePasswordErrors.general }}</small>
+
+      <div class="dialog-footer-buttons">
+        <Button label="Cancelar" icon="pi pi-times" class="p-button-text action-button secondary-button" @click="isChangePasswordModalVisible = false" />
+        <Button type="submit" label="Cambiar Contraseña" icon="pi pi-save" class="action-button primary-button" :loading="isSubmittingChangePassword" />
+      </div>
+    </form>
+  </Dialog>
+
+  <Toast />
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
+import Toast from 'primevue/toast';
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import Password from 'primevue/password';
 import axios from 'axios';
 import {useRouter} from "vue-router";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode, type JwtPayload } from "jwt-decode";
+import {useToast} from "primevue/usetoast";
+import { authService } from '@/services/AuthService';
 
 interface UserData {
   nombre: string;
+  apellidos?: string;
   email: string;
   curso: string;
   avatar?: string;
 }
 
+interface DecodedToken extends JwtPayload {
+  sub: string;
+}
+
 export default defineComponent({
   nombre: "Profile",
-  components: { AdminMenuBar },
+  components: { AdminMenuBar, Toast, Dialog, Button, Password },
   data() {
     return {
       nombre: '',
       email: '',
       curso: '',
       avatar: 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
-      datos: null
+      loading: true,
+      isChangePasswordModalVisible: false,
+      changePasswordForm: {
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      },
+      changePasswordErrors: {
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+        general: '',
+      },
+      isSubmittingChangePassword: false,
     };
   },
-  setup() {
+  setup: function () {
     const router = useRouter();
-
-    const logout = () => {
-      console.log("Cerrando sesión...");
-      localStorage.removeItem("token");
-      router.push("/");
-    };
-
-    return { logout };
+    const toast = useToast();
+    return {router, toast};
   },
   mounted() {
     this.obtenerDatos();
@@ -105,7 +153,7 @@ export default defineComponent({
             },
           });
 
-          this.nombre = response.data.nombre;
+          this.nombre = response.data.apellidos ? `${response.data.nombre} ${response.data.apellidos}` : response.data.nombre;
           this.email = response.data.email;
           this.curso = response.data.curso;
           if (response.data.avatar) {
@@ -116,147 +164,369 @@ export default defineComponent({
         }
       }
     },
-    async saveProfile() {
-      try {
-        const updatedUser = {
-          nombre: this.nombre,
-          email: this.email,
-        };
-
-        const response = await axios.put('/students/2f935f49-4088-4d35-8b5f-246e27ccd12e', updatedUser);
-        console.log('Perfil actualizado con éxito:', response.data);
-      } catch (error) {
-        console.error('Error al guardar el perfil:', error);
+    logout() {
+      console.log("Cerrando sesión...");
+      localStorage.removeItem("token");
+      this.$router.push("/");
+    },
+    changeAvatar() {
+      const newAvatarUrl = prompt("Introduce la URL de tu nuevo avatar:", this.avatar);
+      if (newAvatarUrl) {
+        this.avatar = newAvatarUrl;
+        this.toast.add({ severity: 'info', summary: 'Avatar Actualizado', detail: 'El avatar se ha actualizado (simulación).', life: 3000 });
       }
     },
+    resetChangePasswordForm() {
+      this.changePasswordForm.oldPassword = '';
+      this.changePasswordForm.newPassword = '';
+      this.changePasswordForm.confirmNewPassword = '';
+      this.changePasswordErrors.oldPassword = '';
+      this.changePasswordErrors.newPassword = '';
+      this.changePasswordErrors.confirmNewPassword = '';
+      this.changePasswordErrors.general = '';
+      this.isSubmittingChangePassword = false;
+    },
+    openChangePasswordModal() {
+      this.resetChangePasswordForm();
+      this.isChangePasswordModalVisible = true;
+    },
 
-    changeAvatar() {
-      console.log('Cambiar avatar');
+    async handleChangePassword() {
+      let isValid = true;
+      this.changePasswordErrors = { oldPassword: '', newPassword: '', confirmNewPassword: '', general: '' };
+
+      if (!this.changePasswordForm.oldPassword) {
+        this.changePasswordErrors.oldPassword = 'La contraseña antigua es obligatoria.';
+        isValid = false;
+      }
+      if (!this.changePasswordForm.newPassword) {
+        this.changePasswordErrors.newPassword = 'La nueva contraseña es obligatoria.';
+        isValid = false;
+      } else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.changePasswordForm.newPassword)) {
+        this.changePasswordErrors.newPassword = 'La contraseña debe cumplir los siguientes requisitos:\n- Mínimo 8 caracteres.\n- Al menos una mayúscula.\n- Al menos una minúscula.\n- Al menos un dígito.\n- Al menos un carácter especial.';
+        isValid = false;
+      }
+      if (!this.changePasswordForm.confirmNewPassword) {
+        this.changePasswordErrors.confirmNewPassword = 'Por favor, confirma la nueva contraseña.';
+        isValid = false;
+      } else if (this.changePasswordForm.newPassword && this.changePasswordForm.newPassword !== this.changePasswordForm.confirmNewPassword) {
+        this.changePasswordErrors.confirmNewPassword = 'Las nuevas contraseñas no coinciden.';
+        isValid = false;
+      }
+      if (this.changePasswordForm.oldPassword && this.changePasswordForm.newPassword && this.changePasswordForm.oldPassword === this.changePasswordForm.newPassword) {
+        this.changePasswordErrors.newPassword = 'La nueva contraseña no puede ser igual a la antigua.';
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      this.isSubmittingChangePassword = true;
+      try {
+        await authService.changePassword({
+          currentPassword: this.changePasswordForm.oldPassword,
+          newPassword: this.changePasswordForm.newPassword,
+        });
+        this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Contraseña actualizada correctamente.', life: 3000 });
+        this.isChangePasswordModalVisible = false;
+      } catch (error: any) {
+        console.error('Error al cambiar la contraseña:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'No se pudo cambiar la contraseña.';
+        this.changePasswordErrors.general = errorMessage;
+        this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
+      } finally {
+        this.isSubmittingChangePassword = false;
+      }
     },
   },
 });
 </script>
 
 <style scoped>
-.profile-container {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 20px;
-  padding: 20px;
-  margin-top: 30%;
-  width: 100%;
+.page-container.profile-page {
+  padding: 80px 30px 40px 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.avatar {
+.profile-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.1);
+  width: 140%;
+  box-sizing: border-box;
+  margin-left: 33%;
+}
+
+.profile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--color-neutral-medium);
+}
+
+.profile-card-header h2 {
+  color: var(--color-primary);
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.header-icon {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  opacity: 0.7;
+}
+
+.profile-card-body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 30px;
+  align-items: flex-start;
+  padding-top: 20px;
+}
+
+.avatar-section {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  margin-right: 20px;
-  margin-left: -50%;
-  margin-top: -50%;
-  width: 200px;
+  align-items: center;
+  gap: 15px;
 }
 
-.avatar img {
+.avatar-image {
   border-radius: 50%;
   width: 150px;
   height: 150px;
   object-fit: cover;
-  margin-bottom: 40px;
+  border: 3px solid var(--color-neutral-medium);
 }
 
-.avatar button {
-  background-color: #d6621e;
-  color: white;
-  border: none;
-  padding: 5px;
-  cursor: pointer;
-  width: 100%;
+.user-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.avatar button:hover {
-  background-color: #a14916;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.user-details {
-  padding-left: 20px;
-  margin-left: 40%;
-  margin-top: -50%;
+.form-group label {
+  font-size: 0.85rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+  text-transform: uppercase;
+  opacity: 0.8;
 }
 
-.user-details label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.user-details input {
-  border-radius: 30px;
-  padding: 8px;
-  border: 1px solid #d1d3e2;
-  width: 100%;
-  margin-bottom: 18px;
-  transition: border 0.3s ease;
-  outline: none;
-}
-
-.user-details input:focus {
-  border-color: #d6621e;
-}
-
-.side-menu {
-  width: 250px;
-  position: fixed;
-  right: 5%;
-  top: 20%;
-  background-color: #fff;
+.readonly-field {
+  padding: 10px 12px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--color-text-dark);
+  background-color: var(--color-background-main);
+  border: 1px solid var(--color-neutral-medium);
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  z-index: 10;
-}
-
-.side-menu-item {
-  text-decoration: none;
+  min-height: 44px;
+  height: 44px;
+  box-sizing: border-box;
+  width: 100%;
   display: flex;
   align-items: center;
-  padding: 10px;
+  word-wrap: break-word;
+}
+
+.profile-card-footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-medium);
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.action-button {
+  padding: 10px 20px;
   border-radius: 8px;
-  transition: all 0.3s ease;
-  margin-left: -15%
-}
-
-.side-menu-item a {
-  text-decoration: none;
-  color: #14124f;
-}
-
-.side-menu-item a:hover {
-  color: #d6621e;
-  padding-left: 22px;
-}
-
-.side-menu-item i,
-.logout-button i {
-  margin-right: 0.5rem;
-}
-
-.logout-button {
-  background-color: #d61e1e;
-  color: white;
   border: none;
-  padding: 5px;
-  border-radius: 30px;
-  width: 100%;
-  text-align: center;
-  transition: all 0.3s ease-in-out;
-  margin-left: 1%
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-decoration: none;
+  line-height: 1.2;
 }
 
-.logout-button:hover {
-  background-color: #9b1616;
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgb(214, 30, 30);
+.action-button:active {
+  transform: scale(0.98);
+}
+
+.change-password-button {
+  background-color: var(--color-interactive);
+  color: white;
+  margin-right: 43%;
+}
+
+.change-password-button:hover {
+  background-color: var(--color-interactive-darker);
+}
+
+.logout-button-tabs {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.logout-button-tabs:hover {
+  background-color: var(--color-error);
+}
+
+.avatar-button {
+  background-color: var(--color-interactive);
+  color: white;
+  width: auto;
+}
+.avatar-button:hover {
+  background-color: var(--color-interactive-darker);
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.modal-form .input-label {
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+}
+
+.modal-form :deep(.p-password.input-field .p-inputtext) {
+  border-radius: 8px !important;
+  border: 1px solid var(--color-neutral-medium) !important;
+  padding: 10px 12px !important;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+.modal-form :deep(.p-password.input-field .p-inputtext:focus) {
+  border-color: var(--color-interactive) !important;
+  box-shadow: 0 0 0 2px rgba(var(--color-interactive-rgb), 0.2) !important;
+}
+
+.error-message.p-error {
+  color: var(--color-error);
+  font-size: 0.85rem;
+}
+.error-message.general-error {
+  text-align: center;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.dialog-footer-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-medium);
+}
+
+.action-button.primary-button {
+  background-color: var(--color-interactive);
+  color: white;
+  border: 1px solid var(--color-interactive);
+}
+.action-button.primary-button:hover {
+  background-color: var(--color-interactive-darker);
+  color: white;
+}
+
+.action-button.secondary-button {
+  background-color: transparent;
+  color: var(--color-interactive);
+  border: 1px solid var(--color-interactive);
+}
+.action-button.secondary-button:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.05);
+}
+
+:deep(.p-dialog .p-dialog-header) {
+  background-color: var(--color-background-main);
+  color: var(--color-primary);
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-neutral-medium);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+:deep(.p-dialog .p-dialog-header .p-dialog-title) {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+:deep(.p-dialog .p-dialog-header .p-dialog-header-icon) {
+  color: var(--color-text-dark) !important;
+}
+:deep(.p-dialog .p-dialog-header .p-dialog-header-icon:hover) {
+  color: var(--color-primary) !important;
+  background-color: rgba(var(--color-primary-rgb), 0.1) !important;
+}
+:deep(.p-dialog .p-dialog-content) {
+  background-color: white;
+  padding: 1.5rem;
+  font-family: 'Montserrat', sans-serif;
+}
+
+@media (max-width: 992px) {
+  .profile-card-body {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .avatar-section {
+    align-items: center;
+  }
+  .user-info-section {
+    text-align: left;
+  }
+  .profile-tabs-container.internal-tabs ul {
+    flex-wrap: wrap;
+  }
+  .profile-tabs-container.internal-tabs .tab-link {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+}
+@media (max-width: 768px) {
+  .page-container.profile-page {
+    padding: 70px 20px 30px 20px;
+  }
+  .profile-card-header h2 {
+    font-size: 1.4rem;
+  }
+  .header-icon {
+    font-size: 2rem;
+  }
+  .profile-card-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .action-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>

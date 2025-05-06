@@ -3,29 +3,63 @@
     <div class="brand-and-nav">
       <h1><a :href="getHomeRoute()">LoanTech</a></h1>
       <nav class="main-nav">
-        <a :href="getHomeRoute()">Inicio</a>
-        <a href="/admin/dashboard/prestamos">Préstamos</a>
-        <a href="/admin/dashboard/dispositivos">Dispositivos</a>
-        <a href="/admin/dashboard/usuarios">Usuarios</a>
-        <a href="/admin/dashboard/incidencias">Incidencias</a>
-        <a href="/admin/dashboard/sanciones">Sanciones</a>
-        <a href="/admin/dashboard/storage">Almacenamiento</a>
+        <router-link :to="getHomeRoute()" class="nav-link">
+          <i class="pi pi-home nav-link-icon"></i> Inicio
+        </router-link>
+
+        <template v-if="isAdmin">
+          <Button
+              text
+              class="nav-button admin-dropdown-trigger"
+              :class="{ 'admin-section-active': isInAdminSection }"
+          @click="toggleAdminMenu($event)"
+          aria-haspopup="true"
+          aria-controls="admin_menu"
+          >
+          <i class="pi pi-sliders-h nav-link-icon"></i>
+          Administración <i class="pi pi-angle-down" style="margin-left: 5px;"></i>
+          </Button>
+        </template>
+
+        <router-link v-for="link in userSpecificLinks" :key="link.label" :to="link.url" class="nav-link">
+          <i v-if="link.icon" :class="link.icon + ' nav-link-icon'"></i>
+          {{ link.label }}
+        </router-link>
       </nav>
     </div>
 
-    <Button class="user-info" @click="toggleMenu($event)" text>
+    <Button class="user-info" @click="toggleUserMenu($event)" text aria-haspopup="true" aria-controls="user_profile_menu">
       <p class="username">{{ username || "Usuario" }}</p>
       <Avatar :image="avatarUrl || 'https://placehold.co/400'" shape="circle" class="avatar" />
     </Button>
 
-    <Menu ref="menu" class="user-menu" :model="items" :popup="true">
+    <Menu ref="userMenu" id="user_profile_menu" class="user-menu" :model="userMenuItems" :popup="true">
       <template #item="{ item, props }">
-        <a :href="item.url" class="menu-item-link" v-bind="props.action" @click="item.command">
+        <a v-if="item.url" :href="item.url" class="menu-item-link" v-bind="props.action">
           <i v-if="item.icon" :class="item.icon + ' menu-item-icon'"></i>
           <span class="menu-item-label">{{ item.label }}</span>
         </a>
+        <div v-else-if="item.separator" class="menu-separator"></div>
+        <button v-else class="menu-item-link button-link" v-bind="props.action" @click="item.command">
+          <i v-if="item.icon" :class="item.icon + ' menu-item-icon'"></i>
+          <span class="menu-item-label">{{ item.label }}</span>
+        </button>
       </template>
     </Menu>
+
+    <Menu v-if="isAdmin" ref="adminMenu" id="admin_menu" class="admin-menu" :model="adminNavItems" :popup="true">
+      <template #item="{ item, props }">
+        <a v-if="item.url" :href="item.url" class="menu-item-link" v-bind="props.action">
+          <i v-if="item.icon" :class="item.icon + ' menu-item-icon'"></i>
+          <span class="menu-item-label">{{ item.label }}</span>
+        </a>
+        <button v-else class="menu-item-link button-link" v-bind="props.action" @click="item.command">
+          <i v-if="item.icon" :class="item.icon + ' menu-item-icon'"></i>
+          <span class="menu-item-label">{{ item.label }}</span>
+        </button>
+      </template>
+    </Menu>
+
   </div>
 </template>
 
@@ -33,7 +67,7 @@
 import Avatar from "primevue/avatar";
 import Menu from "primevue/menu";
 import Button from "primevue/button";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
@@ -45,82 +79,112 @@ export default {
     Menu,
     Button
   },
-  data() {
-    return {
-      items: [
-        {
-          label: 'Perfil',
-          icon: 'pi pi-user',
-          command: () => this.goToProfile()
-        },
-        {
-          separator: true
-        },
-        {
-          label: 'Cerrar sesión',
-          icon: 'pi pi-sign-out',
-          command: () => this.logout()
-        }
-      ],
-      username: "",
-      avatarUrl: "",
-      rol: "",
-    };
-  },
   setup() {
-    const menu = ref();
+    const userMenu = ref();
+    const adminMenu = ref();
     const router = useRouter();
+    const rol = ref("");
+    const username = ref("");
+    const avatarUrl = ref("https://placehold.co/400");
 
-    const toggleMenu = (event: Event) => {
-      menu.value?.toggle(event);
+    const isAdmin = computed(() => rol.value === "ADMIN");
+
+    const toggleUserMenu = (event: Event) => {
+      userMenu.value?.toggle(event);
     };
 
-    const goToProfile = () => {
-      router.push("/profile");
+    const isInAdminSection = computed(() => {
+      return router.currentRoute.value.path.startsWith('/admin/dashboard/');
+    });
+
+    const toggleAdminMenu = (event: Event) => {
+      if (isAdmin.value) {
+        adminMenu.value?.toggle(event);
+      }
     };
 
-    const logout = () => {
-      console.log("Cerrando sesión...");
-      localStorage.removeItem("token");
-      router.push("/");
-    };
+    const userMenuItems = ref([
+      {
+        label: 'Perfil',
+        icon: 'pi pi-user',
+        command: () => router.push("/profile")
+      },
+      {
+        separator: true
+      },
+      {
+        label: 'Cerrar sesión',
+        icon: 'pi pi-sign-out',
+        command: () => {
+          console.log("Cerrando sesión...");
+          localStorage.removeItem("token");
+          router.push("/");
+        }
+      }
+    ]);
 
-    return { menu, toggleMenu, goToProfile, logout  };
-  },
-  mounted() {
-    this.loadUserData();
-  },
-  methods: {
-    async loadUserData() {
+    const adminNavItems = ref([
+      { label: 'Préstamos Admin', icon: 'pi pi-arrow-right-arrow-left', command: () => router.push('/admin/dashboard/prestamos') },
+      { label: 'Dispositivos Admin', icon: 'pi pi-desktop', command: () => router.push('/admin/dashboard/dispositivos') },
+      { label: 'Usuarios Admin', icon: 'pi pi-users', command: () => router.push('/admin/dashboard/usuarios') },
+      { label: 'Incidencias Admin', icon: 'pi pi-flag-fill', command: () => router.push('/admin/dashboard/incidencias') },
+      { label: 'Sanciones Admin', icon: 'pi pi-ban', command: () => router.push('/admin/dashboard/sanciones') },
+      { label: 'Almacenamiento', icon: 'pi pi-database', command: () => router.push('/admin/dashboard/storage') },
+    ]);
+
+    const userSpecificLinks = ref([
+      { label: 'Mis Préstamos', url: '/prestamo/me', icon: 'pi pi-arrow-right-arrow-left' },
+      { label: 'Mis Incidencias', url: '/incidencias/me', icon: 'pi pi-flag-fill' },
+      { label: 'Notificaciones', url: '/notificaciones', icon: 'pi pi-bell' },
+    ]);
+
+    const loadUserData = async () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
           const decodedToken: any = jwtDecode(token);
           const email = decodedToken.sub;
-          this.rol = decodedToken.rol;
+          rol.value = decodedToken.rol; // Asignar a rol reactivo
 
-          const response = await axios.get(`http://localhost:8080/users/email/${email}`, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
+          const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/users/email/${email}`, {
+            headers: { Authorization: `Bearer ${token}` }
           });
-
           const userData = response.data;
-
-          this.username = userData.nombre || "Usuario";
-          this.avatarUrl = userData.avatarUrl || "https://placehold.co/400";
+          username.value = userData.nombre || "Usuario";
+          avatarUrl.value = userData.avatarUrl || "https://placehold.co/400";
         } catch (error) {
           console.error("Error al obtener la información del usuario:", error);
+          username.value = "Usuario";
+          avatarUrl.value = "https://placehold.co/400";
+          rol.value = "";
         }
-      }
-    },
-    getHomeRoute(): string {
-      if (this.rol === "ADMIN") {
-        return "/admin/dashboard";
       } else {
-        return "/profile";
+        username.value = "Usuario";
+        avatarUrl.value = "https://placehold.co/400";
+        rol.value = "";
       }
-    },
+    };
+
+    const getHomeRoute = () => {
+      return isAdmin.value ? "/admin/dashboard" : "/profile";
+    };
+
+    loadUserData();
+
+    return {
+      userMenu,
+      adminMenu,
+      toggleUserMenu,
+      toggleAdminMenu,
+      userMenuItems,
+      adminNavItems,
+      userSpecificLinks,
+      username,
+      avatarUrl,
+      isAdmin,
+      isInAdminSection,
+      getHomeRoute,
+    };
   },
 };
 </script>
@@ -145,6 +209,7 @@ export default {
 .brand-and-nav {
   display: flex;
   align-items: center;
+  flex-grow: 1;
 }
 
 .menubar h1 {
@@ -165,36 +230,68 @@ export default {
 
 .main-nav {
   display: flex;
-  gap: 25px;
+  align-items: center;
+  gap: 20px;
 }
 
-.main-nav a {
+.nav-link, .nav-button {
   color: var(--color-primary);
   text-decoration: none;
   font-size: 1rem;
-  padding: 5px 0;
+  padding: 8px 10px;
   position: relative;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  border-radius: 6px;
 }
 
-.main-nav a:hover {
+.nav-link:hover, .nav-button:hover,
+.nav-link:focus, .nav-button:focus{
+  background-color: rgba(var(--color-interactive-rgb), 0.1) !important;
+  color: var(--color-interactive-darker) !important;
+}
+
+.nav-link.router-link-exact-active{
+  background-color: rgba(var(--color-interactive-rgb), 0.1) !important;
+  color: var(--color-interactive-darker) !important;
+}
+
+.admin-dropdown-trigger.p-button {
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--color-primary) !important;
+  padding: 8px 10px !important;
+  font-size: 1rem !important;
+  font-weight: normal !important;
+  box-shadow: none !important;
+}
+
+.admin-dropdown-trigger.p-button:hover,
+.admin-dropdown-trigger.p-button:focus {
+  background-color: rgba(var(--color-interactive-rgb), 0.1) !important;
+  color: var(--color-interactive-darker) !important;
+}
+
+.admin-dropdown-trigger .p-button-label {
   color: var(--color-primary);
 }
 
-.main-nav a::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--color-interactive);
-  transition: width 0.3s ease;
+.admin-dropdown-trigger:hover .p-button-label {
+  color: var(--color-interactive-darker);
 }
 
-.main-nav a:hover::after {
-  width: 100%;
+.admin-dropdown-trigger.admin-section-active .p-button-label,
+.admin-dropdown-trigger.admin-section-active .nav-link-icon,
+.admin-dropdown-trigger.admin-section-active .pi-angle-down,
+.admin-dropdown-trigger.admin-section-active{
+  color: var(--color-interactive-darker) !important;
+}
+
+.admin-dropdown-trigger.admin-section-active{
+  background-color: rgba(var(--color-interactive-rgb), 0.1) !important;
+}
+
+.nav-link-icon {
+  margin-right: 6px;
 }
 
 .user-info.p-button {
@@ -202,21 +299,19 @@ export default {
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  background-color: var(--color-background-main) !important;
-  color: var(--color-text-dark) !important;
+  background-color: transparent !important;
+  color: var(--color-primary) !important;
   border: 1px solid transparent !important;
   padding: 5px 10px !important;
-  border-radius: 20px;
-  transition: border-color 0.3s ease, background-color 0.3s ease;
+  border-radius: 25px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
   height: auto;
-  margin-left: -25%;
-  width: 15%;
 }
 
 .user-info.p-button:hover,
 .user-info.p-button:focus {
-  border-color: var(--color-interactive) !important;
-  background-color: var(--color-neutral-medium) !important;
+  background-color: rgba(var(--color-primary-rgb), 0.05) !important;
+  border-color: rgba(var(--color-primary-rgb), 0.2) !important;
   box-shadow: none !important;
 }
 
@@ -224,6 +319,7 @@ export default {
   font-size: 0.95rem;
   font-weight: 500;
   margin: 0;
+  color: var(--color-primary);
 }
 
 .avatar {
@@ -238,27 +334,41 @@ export default {
   transform: scale(1.1);
 }
 
-:global(.p-menu.user-menu) {
-  background-color: var(--color-background-main) !important;
+:global(.p-menu.user-menu),
+:global(.p-menu.admin-menu) {
+  background-color: var(--color-text-on-dark-hover, white) !important;
   border: 1px solid var(--color-neutral-medium) !important;
-  border-radius: 6px !important;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
-  padding: 5px 0 !important;
-  min-width: 150px;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 8px 0 !important;
+  min-width: 200px;
 }
 
 .menu-item-link {
+  font-family: 'Montserrat', sans-serif !important;
   display: flex !important;
   align-items: center !important;
   padding: 10px 15px !important;
   color: var(--color-text-dark) !important;
   text-decoration: none !important;
   transition: background-color 0.2s ease, color 0.2s ease;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  margin: 0 5px;
+}
+
+.menu-item-link.button-link {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }
 
 .menu-item-icon {
-  margin-right: 10px !important;
+  margin-right: 12px !important;
   color: var(--color-text-dark);
+  font-size: 1.1rem;
 }
 
 .menu-item-label {
@@ -266,26 +376,49 @@ export default {
 }
 
 .menu-item-link:hover {
-  background-color: var(--color-accent-soft) !important;
-  color: var(--color-primary) !important;
+  background-color: var(rgba(var(--color-interactive-rgb), 0.1)) !important;
+  color: var(--color-interactive-darker) !important;
 }
 
 .menu-item-link:hover .menu-item-icon {
-  color: var(--color-primary) !important;
+  color: var(--color-interactive-darker) !important;
 }
 
 .menu-separator {
   height: 1px;
   background-color: var(--color-neutral-medium);
-  margin: 5px 0;
+  margin: 8px 0;
 }
+
+@media (max-width: 1100px) {
+  .main-nav {
+    gap: 10px;
+  }
+  .nav-link, .nav-button.admin-dropdown-trigger {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+  .menubar h1 {
+    margin-right: 20px;
+  }
+}
+
 
 @media (max-width: 992px) {
   .main-nav {
     display: none;
   }
+
+  .brand-and-nav {
+    flex-grow: 0;
+  }
+
   .menubar {
     padding: 10px 15px;
+  }
+
+  .user-info.p-button {
+    margin-left: auto;
   }
 }
 
@@ -293,11 +426,9 @@ export default {
   .menubar h1 a {
     font-size: 1.5rem;
   }
-
   .username {
     display: none;
   }
-
   .user-info.p-button {
     padding: 5px !important;
     border-radius: 50%;
