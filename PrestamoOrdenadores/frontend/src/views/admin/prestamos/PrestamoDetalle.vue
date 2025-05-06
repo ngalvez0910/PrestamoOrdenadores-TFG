@@ -11,7 +11,7 @@
     <div class="prestamo-details" v-if="prestamoData">
       <div class="details-header">
         <h2>Detalles del Préstamo</h2>
-        <i class="pi pi-list-check header-icon"></i>
+        <i class="pi pi-arrow-right-arrow-left header-icon"></i>
       </div>
 
       <div class="details-grid">
