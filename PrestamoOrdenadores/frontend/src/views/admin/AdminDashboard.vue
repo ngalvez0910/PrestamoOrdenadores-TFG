@@ -2,7 +2,7 @@
   <MenuBar />
   <div class="dashboard">
     <router-link to="/admin/dashboard/prestamos" class="dashboard-box">
-      <i class="pi pi-list-check icon"></i>
+      <i class="pi pi-arrow-right-arrow-left icon"></i>
       <p>Ver préstamos</p>
     </router-link>
 
@@ -17,7 +17,7 @@
     </router-link>
 
     <router-link to="/admin/dashboard/incidencias" class="dashboard-box">
-      <i class="pi pi-exclamation-triangle icon"></i>
+      <i class="pi pi-flag-fill icon"></i>
       <p>Ver incidencias</p>
     </router-link>
 
@@ -48,7 +48,7 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 25px;
   max-width: 1000px;
-  margin-left: 20%;
+  margin-left: 25%;
   margin-top: 5%;
 }
 
