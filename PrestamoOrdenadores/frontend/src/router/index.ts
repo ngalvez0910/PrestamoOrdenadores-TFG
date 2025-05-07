@@ -114,9 +114,9 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['ADMIN'] },
     },
     {
-      path: '/cambioContrasena',
-      name: 'CambioContrasena',
-      component: () => import('../views/user/CambioContrasena.vue'),
+      path: '/notificaciones',
+      name: 'Notificaciones',
+      component: () => import('../views/user/Notificaciones.vue'),
       meta: { requiresAuth: true, roles: ['ADMIN', 'ALUMNO', 'PROFESOR'] },
     },
     {
