@@ -190,7 +190,6 @@ export default defineComponent({
       this.resetChangePasswordForm();
       this.isChangePasswordModalVisible = true;
     },
-
     async handleChangePassword() {
       let isValid = true;
       this.changePasswordErrors = { oldPassword: '', newPassword: '', confirmNewPassword: '', general: '' };
@@ -220,19 +219,36 @@ export default defineComponent({
 
       if (!isValid) return;
 
+      const token = localStorage.getItem("token");
+      if (!token) {
+        this.changePasswordErrors.general = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+        this.toast.add({ severity: 'error', summary: 'Error de sesión', detail: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', life: 5000 });
+        setTimeout(() => {
+          this.logout();
+        }, 2000);
+        return;
+      }
+
       this.isSubmittingChangePassword = true;
       try {
         await authService.changePassword({
-          currentPassword: this.changePasswordForm.oldPassword,
+          oldPassword: this.changePasswordForm.oldPassword,
           newPassword: this.changePasswordForm.newPassword,
+          confirmPassword: this.changePasswordForm.confirmNewPassword
         });
         this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Contraseña actualizada correctamente.', life: 3000 });
         this.isChangePasswordModalVisible = false;
       } catch (error: any) {
         console.error('Error al cambiar la contraseña:', error);
-        const errorMessage = error.response?.data?.message || error.message || 'No se pudo cambiar la contraseña.';
+        const errorMessage = error.message || 'No se pudo cambiar la contraseña.';
         this.changePasswordErrors.general = errorMessage;
         this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
+
+        if (errorMessage.includes('sesión') || errorMessage.includes('No hay sesión activa')) {
+          setTimeout(() => {
+            this.logout();
+          }, 2000);
+        }
       } finally {
         this.isSubmittingChangePassword = false;
       }

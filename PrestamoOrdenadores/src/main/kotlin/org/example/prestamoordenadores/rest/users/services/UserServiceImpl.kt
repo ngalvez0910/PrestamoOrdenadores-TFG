@@ -12,10 +12,12 @@ import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -27,6 +29,9 @@ class UserServiceImpl(
     private val repository : UserRepository,
     private val mapper: UserMapper,
 ): UserService {
+    @Autowired
+    private lateinit var passwordEncoder: PasswordEncoder
+
     override fun getAllUsers(page: Int, size: Int): Result<PagedResponse<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
 
@@ -96,24 +101,28 @@ class UserServiceImpl(
         guid: String,
         user: UserPasswordResetRequest
     ): Result<UserResponse?, UserError> {
-        logger.debug { "Cambiando contraseña de usuario con GUID: $guid" }
+        logger.debug { "Intentando cambiar contraseña para usuario con GUID: $guid" }
 
-        val userValidado = user.validate()
-        if (userValidado.isErr) {
-            return Err(UserError.UserValidationError("Usuario inválido"))
+        try {
+            val existingUser = repository.findByGuid(guid)
+                ?: return Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+
+            val userValidado = user.validate()
+            if (userValidado.isErr) {
+                return Err(UserError.UserValidationError("Datos de entrada inválidos"))
+            }
+
+            existingUser.campoPassword = passwordEncoder.encode(user.newPassword)
+            existingUser.updatedDate = LocalDateTime.now()
+            existingUser.lastPasswordResetDate = LocalDateTime.now()
+
+            val savedUser = repository.save(existingUser)
+            return Ok(mapper.toUserResponse(savedUser))
+
+        } catch (e: Exception) {
+            logger.error { "Error al cambiar contraseña: ${e.message}" }
+            return Err(UserError.UserValidationError("Error interno al cambiar la contraseña"))
         }
-
-        val existingUser = repository.findByGuid(guid)
-        if (existingUser == null) {
-            return Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
-        }
-
-        existingUser.campoPassword = user.newPassword
-        existingUser.updatedDate = LocalDateTime.now()
-        existingUser.lastPasswordResetDate = LocalDateTime.now()
-
-        val savedUser = repository.save(existingUser)
-        return Ok(mapper.toUserResponse(savedUser))
     }
 
     @Cacheable(key = "#curso")
