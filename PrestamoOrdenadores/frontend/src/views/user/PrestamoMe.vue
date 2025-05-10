@@ -117,7 +117,6 @@ export default defineComponent({
           try {
             const prestamoResponse = await createPrestamo();
             if (prestamoResponse) {
-              toast.add({ severity: 'success', summary: 'Éxito', detail: `Préstamo realizado.`, life: 3000 });
               await fetchPrestamos();
               console.log('Llamando a descargarPdfPrestamo con GUID:', prestamoResponse);
               await descargarPdfPrestamo(prestamoResponse);
