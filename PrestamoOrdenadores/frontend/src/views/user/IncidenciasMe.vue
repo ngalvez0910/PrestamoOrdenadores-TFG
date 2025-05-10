@@ -140,7 +140,6 @@ export default defineComponent({
       try {
         const response = await createIncidencia(nuevaIncidencia.value);
         if (response) {
-          toast.add({ severity: 'success', summary: 'Éxito', detail: 'Incidencia reportada correctamente.', life: 3000 });
           isReportarModalVisible.value = false;
           await fetchIncidencias();
         } else {

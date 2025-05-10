@@ -9,9 +9,14 @@ data class NotificationDto(
     val fecha: LocalDateTime,
     var leida: Boolean,
     val tipo: NotificationTypeDto?,
-    val enlace: String?
+    val enlace: String?,
+    val severidadSugerida: NotificationSeverityDto? = NotificationSeverityDto.INFO
 )
 
 enum class NotificationTypeDto {
     INFO, PRESTAMO, INCIDENCIA, SISTEMA, ADVERTENCIA, ERROR, SANCION
+}
+
+enum class NotificationSeverityDto {
+    SUCCESS, INFO, WARNING, ERROR
 }

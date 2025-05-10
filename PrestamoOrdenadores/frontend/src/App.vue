@@ -13,15 +13,17 @@ import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import { authService } from "@/services/AuthService";
 
-type NotificationType = 'info' | 'prestamo' | 'incidencia' | 'sistema' | 'advertencia' | 'error' | 'sancion';
+type ToastSeverity = 'success' | 'info' | 'warn' | 'error';
+type NotificationEntityType = 'info' | 'prestamo' | 'incidencia' | 'sistema' | 'advertencia' | 'error' | 'sancion';
 interface Notificacion {
   id: string;
   titulo: string;
   mensaje?: string;
   fecha: Date | string;
   leida: boolean;
-  tipo?: NotificationType;
+  tipo?: NotificationEntityType;
   enlace?: string;
+  severidadSugerida?: ToastSeverity;
 }
 
 export default defineComponent({
@@ -47,24 +49,58 @@ export default defineComponent({
     let keepAliveIntervalId: number | null = null;
 
     const parseBackendNotificationForApp = (backendNotif: any): Notificacion => {
+      let severidad: ToastSeverity = 'info';
+
+      if (backendNotif.severidadSugerida) {
+        const lowerCaseSeverity = backendNotif.severidadSugerida.toLowerCase();
+        if (['success', 'info', 'warn', 'error'].includes(lowerCaseSeverity)) {
+          severidad = lowerCaseSeverity as ToastSeverity;
+        } else {
+          console.warn(`[App.vue parseBackend] Severidad desconocida recibida: ${backendNotif.severidadSugerida}, usando 'info' por defecto.`);
+        }
+      }
+
       return {
-        ...backendNotif,
+        id: backendNotif.id,
+        titulo: backendNotif.titulo,
+        mensaje: backendNotif.mensaje,
         fecha: new Date(backendNotif.fecha),
-        tipo: backendNotif.tipo?.toLowerCase() as NotificationType,
+        leida: backendNotif.leida,
+        tipo: backendNotif.tipo?.toLowerCase() as NotificationEntityType,
+        enlace: backendNotif.enlace,
+        severidadSugerida: severidad,
       };
     };
 
     const handleGlobalNewNotification = (backendNotificationData: any) => {
       const nuevaNotificacion = parseBackendNotificationForApp(backendNotificationData);
       console.log("[App.vue WebSocket] Nueva notificación global procesada:", nuevaNotificacion);
+
       lastReceivedNotification.value = nuevaNotificacion;
+
+      let toastSeverity: 'success' | 'info' | 'warn' | 'error';
+
+      switch (nuevaNotificacion.severidadSugerida?.toLowerCase()) {
+        case 'success':
+          toastSeverity = 'success';
+          break;
+        case 'warning':
+          toastSeverity = 'warn';
+          break;
+        case 'error':
+          toastSeverity = 'error';
+          break;
+        case 'info':
+        default:
+          toastSeverity = 'info';
+          break;
+      }
+
       toast.add({
-        severity: (nuevaNotificacion.tipo === 'error' || nuevaNotificacion.tipo === 'advertencia' || nuevaNotificacion.tipo === 'sancion')
-            ? 'error'
-            : (nuevaNotificacion.tipo === 'sistema' ? 'warn' : 'info'),
-        summary: `Notificación: ${nuevaNotificacion.titulo}`,
+        severity: toastSeverity,
+        summary: `${nuevaNotificacion.titulo}`,
         detail: nuevaNotificacion.mensaje?.substring(0, 100) + ((nuevaNotificacion.mensaje?.length || 0) > 100 ? '...' : ''),
-        life: 7000,
+        life: (toastSeverity === 'success' || toastSeverity === 'info') ? 3000 : 7000,
       });
     };
 

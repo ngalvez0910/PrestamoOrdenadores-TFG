@@ -303,7 +303,7 @@ export default {
 
 .status-vencido {
   background-color: rgba(var(--color-success-rgb), 0.15);
-  color: var(--color-success);
+  color: var(--color-warning);
 }
 
 .status-unknown {

@@ -1,14 +1,13 @@
 package org.example.prestamoordenadores.rest.incidencias.services
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.WebSocketService
-import org.example.prestamoordenadores.config.websockets.models.Notification
 import org.example.prestamoordenadores.config.websockets.models.NotificationDto
+import org.example.prestamoordenadores.config.websockets.models.NotificationSeverityDto
 import org.example.prestamoordenadores.config.websockets.models.NotificationTypeDto
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
@@ -42,7 +41,6 @@ class IncidenciaServiceImpl(
     private val repository: IncidenciaRepository,
     private val mapper: IncidenciaMapper,
     private val userRepository: UserRepository,
-    private val objectMapper: ObjectMapper,
     @Qualifier("webSocketIncidenciasHandler") private val webSocketHandler: WebSocketHandler,
     private val webService : WebSocketService
 ) : IncidenciaService {
@@ -100,6 +98,13 @@ class IncidenciaServiceImpl(
 
     @CachePut(key = "#result.guid")
     override fun updateIncidencia(guid: String, incidencia: IncidenciaUpdateRequest): Result<IncidenciaResponse?, IncidenciaError> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val emailAdmin = authentication.name
+        val adminUpdating = userRepository.findByEmail(emailAdmin)
+        if (adminUpdating == null) {
+            return Err(IncidenciaError.UserNotFound("No se encontró el usuario con email: $emailAdmin"))
+        }
+
         val existingIncidencia = repository.findIncidenciaByGuid(guid)
         if (existingIncidencia == null) {
             return Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
@@ -117,12 +122,19 @@ class IncidenciaServiceImpl(
 
         repository.save(existingIncidencia)
 
-        onChangeAdmin(Notification.Tipo.UPDATE, existingIncidencia)
+        sendNotificationActualizacionIncidencia(existingIncidencia, adminUpdating)
         return Ok(mapper.toIncidenciaResponse(existingIncidencia))
     }
 
     @CachePut(key = "#guid")
     override fun deleteIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val emailAdmin = authentication.name
+        val adminDeleting = userRepository.findByEmail(emailAdmin)
+        if (adminDeleting == null) {
+            return Err(IncidenciaError.UserNotFound("No se encontró el usuario con email: $emailAdmin"))
+        }
+
         logger.debug { "Eliminando incidencia con GUID: $guid" }
 
         val incidencia = repository.findIncidenciaByGuid(guid)
@@ -132,7 +144,7 @@ class IncidenciaServiceImpl(
 
         repository.delete(incidencia)
 
-        onChangeAdmin(Notification.Tipo.DELETE, incidencia)
+        sendNotificationEliminacionIncidencia(incidencia, adminDeleting)
         return Ok(mapper.toIncidenciaResponse(incidencia))
     }
 
@@ -166,44 +178,6 @@ class IncidenciaServiceImpl(
         return Ok(mapper.toIncidenciaResponseList(incidencias))
     }
 
-    fun onChangeAdmin(tipo: Notification.Tipo?, incidencia: Incidencia) {
-        logger.info { "Servicio de Incidencias onChange con tipo: $tipo e incidencia GUID: ${incidencia.guid}" }
-
-        try {
-            val incidenciaResponse = mapper.toIncidenciaResponse(incidencia)
-            val notificacion = Notification(
-                "INCIDENCIAS",
-                tipo,
-                incidenciaResponse,
-                LocalDateTime.now().toString()
-            )
-
-            val json = objectMapper.writeValueAsString(notificacion)
-
-            val adminUsername = getAdminUsername()
-            sendMessageUser(adminUsername, json)
-        } catch (e: JsonProcessingException) {
-            logger.error { "Error al convertir la notificación a JSON" }
-        }
-    }
-
-    private fun getAdminUsername(): String? {
-        return userRepository.findUsersByRol(Role.ADMIN).firstOrNull()?.getUsername()
-    }
-
-    private fun sendMessageUser(userName: String?, json: String?) {
-        logger.info { "Enviando mensaje WebSocket al usuario: $userName" }
-        if (!userName.isNullOrBlank() && !json.isNullOrBlank()) {
-            try {
-                webSocketHandler.sendMessageToUser(userName, json)
-            } catch (e: Exception) {
-                logger.error { "Error al enviar el mensaje WebSocket al usuario $userName" }
-            }
-        } else {
-            logger.warn { "No se puede enviar el mensaje WebSocket. Nombre de usuario o JSON nulo/vacío." }
-        }
-    }
-
     private fun sendNotificationNuevaIncidencia(incidencia: Incidencia, user: User) {
         val notificacionParaUser = NotificationDto(
             id = UUID.randomUUID().toString(),
@@ -212,7 +186,8 @@ class IncidenciaServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.INCIDENCIA,
-            enlace = "/incidencias/detalle/${incidencia.guid}"
+            enlace = "/incidencias/detalle/${incidencia.guid}",
+            severidadSugerida = NotificationSeverityDto.SUCCESS
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
 
@@ -227,11 +202,101 @@ class IncidenciaServiceImpl(
                     fecha = LocalDateTime.now(),
                     leida = false,
                     tipo = NotificationTypeDto.INCIDENCIA,
-                    enlace = "/admin/incidencias/ver/${incidencia.guid}"
+                    enlace = "/admin/incidencia/detalle/${incidencia.guid}",
+                    severidadSugerida = NotificationSeverityDto.INFO
                 )
                 webService.createAndSendNotification(admin?.email ?: "", notificacionParaAdmin)
             }
         }
     }
 
+    private fun sendNotificationActualizacionIncidencia(incidencia: Incidencia, user: User) {
+        val reportante = incidencia.user
+
+        val notificacionParaUser = NotificationDto(
+            id = UUID.randomUUID().toString(),
+            titulo = "¡Hemos Resuelto la Incidencia que Reportaste!",
+            mensaje = "La incidencia '${incidencia.asunto}' que reportaste ha sido resuelta. ¡Gracias!",
+            fecha = LocalDateTime.now(),
+            leida = false,
+            tipo = NotificationTypeDto.SISTEMA,
+            enlace = "/incidencias/detalle/${incidencia.guid}",
+            severidadSugerida = NotificationSeverityDto.INFO
+        )
+        webService.createAndSendNotification(reportante.email, notificacionParaUser)
+
+        val notificacionParaAdminQueResolvio = NotificationDto(
+            id = UUID.randomUUID().toString(),
+            titulo = "Resolviste Incidencia: ${incidencia.guid}",
+            mensaje = "Has marcado como resuelta la incidencia '${incidencia.asunto}'.",
+            fecha = LocalDateTime.now(),
+            leida = false,
+            tipo = NotificationTypeDto.INCIDENCIA,
+            enlace = "/admin/incidencia/detalle/${incidencia.guid}",
+            severidadSugerida = NotificationSeverityDto.SUCCESS
+        )
+        logger.debug { "Preparando notificación de confirmación de resolución para admin (${user.email}): $notificacionParaAdminQueResolvio" }
+        webService.createAndSendNotification(user.email, notificacionParaAdminQueResolvio)
+
+
+        val administradores = userRepository.findUsersByRol(Role.ADMIN).filter { it?.email != user.email }
+
+        if (administradores.isNotEmpty()) {
+            logger.info { "Se encontraron ${administradores.size} otros administradores para notificar sobre la resolución." }
+            administradores.forEach { otroAdmin ->
+                if (otroAdmin != null) {
+                    val notificacionParaOtroAdmin = NotificationDto(
+                        id = UUID.randomUUID().toString(),
+                        titulo = "Incidencia Resuelta por: ${incidencia.guid}",
+                        mensaje = "La incidencia '${incidencia.asunto}' fue marcada como resuelta por ${user.nombre} ${user.apellidos}.",
+                        fecha = LocalDateTime.now(),
+                        leida = false,
+                        tipo = NotificationTypeDto.INCIDENCIA,
+                        enlace = "/admin/incidencia/detalle/${incidencia.guid}",
+                        severidadSugerida = NotificationSeverityDto.INFO
+                    )
+                    logger.debug { "Preparando notificación informativa de resolución para otro admin (${otroAdmin.email}): $notificacionParaOtroAdmin" }
+                    webService.createAndSendNotification(otroAdmin.email, notificacionParaOtroAdmin)
+                }
+            }
+        }
+    }
+
+    private fun sendNotificationEliminacionIncidencia(incidencia: Incidencia, user: User) {
+        val notificacionAdminElimina = NotificationDto(
+            id = UUID.randomUUID().toString(),
+            titulo = "Eliminaste Incidencia: ${incidencia.guid}",
+            mensaje = "Has eliminado correctamente la incidencia '${incidencia.asunto}'.",
+            fecha = LocalDateTime.now(),
+            leida = false,
+            tipo = NotificationTypeDto.SISTEMA,
+            enlace = "/admin/incidencia/detalle/${incidencia.guid}",
+            severidadSugerida = NotificationSeverityDto.SUCCESS
+        )
+        logger.debug { "Preparando notificación de confirmación de eliminacion para admin (${user.email}): $notificacionAdminElimina" }
+        webService.createAndSendNotification(user.email, notificacionAdminElimina)
+
+
+        val administradores = userRepository.findUsersByRol(Role.ADMIN).filter { it?.email != user.email }
+
+        if (administradores.isNotEmpty()) {
+            logger.info { "Se encontraron ${administradores.size} otros administradores para notificar sobre la resolución." }
+            administradores.forEach { otroAdmin ->
+                if (otroAdmin != null) {
+                    val notificacionParaOtroAdmin = NotificationDto(
+                        id = UUID.randomUUID().toString(),
+                        titulo = "Incidencia Eliminada por: ${incidencia.guid}",
+                        mensaje = "La incidencia '${incidencia.asunto}' fue eliminada por ${user.nombre} ${user.apellidos}.",
+                        fecha = LocalDateTime.now(),
+                        leida = false,
+                        tipo = NotificationTypeDto.SISTEMA,
+                        enlace = "/admin/incidencia/detalle/${incidencia.guid}",
+                        severidadSugerida = NotificationSeverityDto.INFO
+                    )
+                    logger.debug { "Preparando notificación informativa de eliminaicon para otro admin (${otroAdmin.email}): $notificacionParaOtroAdmin" }
+                    webService.createAndSendNotification(otroAdmin.email, notificacionParaOtroAdmin)
+                }
+            }
+        }
+    }
 }
