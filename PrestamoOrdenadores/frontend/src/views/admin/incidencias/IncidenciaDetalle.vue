@@ -124,9 +124,7 @@ export default defineComponent({
         return;
       }
 
-      const hasChanged = this.incidenciaData.asunto !== this.originalData.asunto ||
-          this.incidenciaData.descripcion !== this.originalData.descripcion ||
-          this.incidenciaData.estadoIncidencia !== this.originalData.estadoIncidencia;
+      const hasChanged = this.incidenciaData.estadoIncidencia !== this.originalData.estadoIncidencia;
 
       if (hasChanged) {
         try {
@@ -142,7 +140,6 @@ export default defineComponent({
             this.originalData = JSON.parse(JSON.stringify(incidenciaActualizada));
             this.incidenciaData = JSON.parse(JSON.stringify(incidenciaActualizada));
 
-            this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Incidencia actualizada.', life: 3000 });
             this.editable = false;
           } else {
             throw new Error("La actualización no devolvió datos válidos.");

@@ -101,6 +101,13 @@ class IncidenciaServiceImpl(
 
     @CachePut(key = "#result.guid")
     override fun updateIncidencia(guid: String, incidencia: IncidenciaUpdateRequest): Result<IncidenciaResponse?, IncidenciaError> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val emailDelAdmin = authentication.name
+        val adminQueActualiza = userRepository.findByEmail(emailDelAdmin)
+        if (adminQueActualiza == null) {
+            return Err(IncidenciaError.UserNotFound("No se encontró el usuario con email: $emailDelAdmin"))
+        }
+
         val existingIncidencia = repository.findIncidenciaByGuid(guid)
         if (existingIncidencia == null) {
             return Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
@@ -118,7 +125,7 @@ class IncidenciaServiceImpl(
 
         repository.save(existingIncidencia)
 
-        onChangeAdmin(Notification.Tipo.UPDATE, existingIncidencia)
+        sendNotificationActualizacionIncidencia(existingIncidencia, adminQueActualiza)
         return Ok(mapper.toIncidenciaResponse(existingIncidencia))
     }
 
@@ -233,6 +240,58 @@ class IncidenciaServiceImpl(
                     severidadSugerida = NotificationSeverityDto.INFO
                 )
                 webService.createAndSendNotification(admin?.email ?: "", notificacionParaAdmin)
+            }
+        }
+    }
+
+    private fun sendNotificationActualizacionIncidencia(incidencia: Incidencia, user: User) {
+        val reportante = incidencia.user
+
+        val notificacionParaUser = NotificationDto(
+            id = UUID.randomUUID().toString(),
+            titulo = "¡Hemos Resuelto la Incidencia que Reportaste!",
+            mensaje = "La incidencia '${incidencia.asunto}' que reportaste ha sido resuelta. ¡Gracias!",
+            fecha = LocalDateTime.now(),
+            leida = false,
+            tipo = NotificationTypeDto.SISTEMA,
+            enlace = "/incidencias/detalle/${incidencia.guid}",
+            severidadSugerida = NotificationSeverityDto.INFO
+        )
+        webService.createAndSendNotification(reportante.email, notificacionParaUser)
+
+        val notificacionParaAdminQueResolvio = NotificationDto(
+            id = UUID.randomUUID().toString(),
+            titulo = "Resolviste Incidencia: ${incidencia.guid}",
+            mensaje = "Has marcado como resuelta la incidencia '${incidencia.asunto}'.",
+            fecha = LocalDateTime.now(),
+            leida = false,
+            tipo = NotificationTypeDto.INCIDENCIA,
+            enlace = "/admin/incidencia/detalle/${incidencia.guid}",
+            severidadSugerida = NotificationSeverityDto.SUCCESS
+        )
+        logger.debug { "Preparando notificación de confirmación de resolución para admin (${user.email}): $notificacionParaAdminQueResolvio" }
+        webService.createAndSendNotification(user.email, notificacionParaAdminQueResolvio)
+
+
+        val administradores = userRepository.findUsersByRol(Role.ADMIN).filter { it?.email != user.email }
+
+        if (administradores.isNotEmpty()) {
+            logger.info { "Se encontraron ${administradores.size} otros administradores para notificar sobre la resolución." }
+            administradores.forEach { otroAdmin ->
+                if (otroAdmin != null) {
+                    val notificacionParaOtroAdmin = NotificationDto(
+                        id = UUID.randomUUID().toString(),
+                        titulo = "Incidencia Resuelta por Colega: ${incidencia.guid}",
+                        mensaje = "La incidencia '${incidencia.asunto}' fue marcada como resuelta por ${user.nombre} ${user.apellidos}.",
+                        fecha = LocalDateTime.now(),
+                        leida = false,
+                        tipo = NotificationTypeDto.INCIDENCIA,
+                        enlace = "/admin/incidencia/detalle/${incidencia.guid}",
+                        severidadSugerida = NotificationSeverityDto.INFO
+                    )
+                    logger.debug { "Preparando notificación informativa de resolución para otro admin (${otroAdmin.email}): $notificacionParaOtroAdmin" }
+                    webService.createAndSendNotification(otroAdmin.email, notificacionParaOtroAdmin)
+                }
             }
         }
     }
