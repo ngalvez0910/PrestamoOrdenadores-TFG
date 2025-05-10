@@ -9,6 +9,7 @@ import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.config.websockets.models.Notification
 import org.example.prestamoordenadores.config.websockets.models.NotificationDto
+import org.example.prestamoordenadores.config.websockets.models.NotificationSeverityDto
 import org.example.prestamoordenadores.config.websockets.models.NotificationTypeDto
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
@@ -212,7 +213,8 @@ class IncidenciaServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.INCIDENCIA,
-            enlace = "/incidencias/detalle/${incidencia.guid}"
+            enlace = "/incidencias/detalle/${incidencia.guid}",
+            severidadSugerida = NotificationSeverityDto.SUCCESS
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
 
@@ -227,7 +229,8 @@ class IncidenciaServiceImpl(
                     fecha = LocalDateTime.now(),
                     leida = false,
                     tipo = NotificationTypeDto.INCIDENCIA,
-                    enlace = "/admin/incidencias/ver/${incidencia.guid}"
+                    enlace = "/admin/incidencia/detalle/${incidencia.guid}",
+                    severidadSugerida = NotificationSeverityDto.INFO
                 )
                 webService.createAndSendNotification(admin?.email ?: "", notificacionParaAdmin)
             }
