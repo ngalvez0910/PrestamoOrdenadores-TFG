@@ -165,6 +165,7 @@ export default defineComponent({
       }
     },
     logout() {
+      console.trace("Logout desde:");
       console.log("Cerrando sesión...");
       localStorage.removeItem("token");
       this.$router.push("/");

@@ -66,12 +66,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted, computed } from 'vue';
+import {defineComponent, ref, onMounted, computed, inject, watch, type Ref} from 'vue';
 import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import ProgressSpinner from 'primevue/progressspinner';
 import Tooltip from 'primevue/tooltip';
+import axios from 'axios';
 
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
@@ -93,61 +94,82 @@ export default defineComponent({
   components: { AdminMenuBar, Button, Toast, ProgressSpinner },
   directives: { Tooltip },
   setup() {
+    const API_BASE_URL = inject<string>('API_BASE_URL', 'http://localhost:8080');
+
     const notifications = ref<Notificacion[]>([]);
     const loading = ref(true);
     const markingAllAsRead = ref(false);
     const toast = useToast();
     const router = useRouter();
+    const lastReceivedNotification = inject<Readonly<Ref<Notificacion | null>>>('lastReceivedNotification');
 
-    const handleNewNotification = (nuevaNotificacion: Notificacion) => {
-      notifications.value.unshift({
-        ...nuevaNotificacion,
-        fecha: new Date(nuevaNotificacion.fecha)
-      });
-      toast.add({ severity: (nuevaNotificacion.tipo === 'error' || nuevaNotificacion.tipo === 'advertencia') ? nuevaNotificacion.tipo : 'info', summary: 'Nueva Notificación', detail: nuevaNotificacion.titulo, life: 5000 });
+    const parseBackendNotificationForPage = (backendNotif: any): Notificacion => {
+      return {
+        ...backendNotif,
+        fecha: new Date(backendNotif.fecha),
+        tipo: backendNotif.tipo?.toLowerCase() as NotificationType,
+      };
     };
 
-    const connectWebSockets = () => {
-      console.log("Conectando a WebSockets para notificaciones...");
+    const addNotificationToList = (nuevaNotificacionData: Notificacion) => {
+      console.log("[Notificaciones.vue addNotificationToList] Intentando añadir:", JSON.parse(JSON.stringify(nuevaNotificacionData)));
+      console.log("[Notificaciones.vue addNotificationToList] Lista actual ANTES:", JSON.parse(JSON.stringify(notifications.value)));
 
-      setTimeout(() => {
-        if (notifications.value.length === 0 && loading.value) {
-          loading.value = false;
+      if (!notifications.value.some(n => n.id === nuevaNotificacionData.id)) {
+        notifications.value.unshift(nuevaNotificacionData);
+        console.log("[Notificaciones.vue] Notificación AÑADIDA a la lista local (unshift):", nuevaNotificacionData.id);
+      } else {
+        const index = notifications.value.findIndex(n => n.id === nuevaNotificacionData.id);
+        if (index !== -1) {
+          notifications.value[index] = { ...notifications.value[index], ...nuevaNotificacionData };
+          console.log("[Notificaciones.vue] Notificación ACTUALIZADA en la lista local:", nuevaNotificacionData.id);
         }
-        handleNewNotification({ id: 'sim1', titulo: 'Préstamo Aprobado', mensaje: 'Tu solicitud de préstamo para el Dell XPS ha sido aprobada.', fecha: new Date(), leida: false, tipo: 'prestamo', enlace: '/prestamo/me' });
-      }, 5000);
-      setTimeout(() => {
-        handleNewNotification({ id: 'sim2', titulo: 'Mantenimiento Programado', mensaje: 'Habrá un mantenimiento del sistema esta noche a las 2 AM.', fecha: new Date(), leida: true, tipo: 'sistema' });
-      }, 8000);
+      }
+      console.log("[Notificaciones.vue addNotificationToList] Lista actual DESPUÉS:", JSON.parse(JSON.stringify(notifications.value)));
     };
 
-    const disconnectWebSockets = () => {
-      console.log("Desconectando WebSockets...");
-      // disconnectNotificationsWebSocket();
-    };
+    if (lastReceivedNotification) {
+      watch(lastReceivedNotification, (newNotificationPayload) => {
+        if (newNotificationPayload) {
+          console.log("[Notificaciones.vue Watcher] Nueva notificación global detectada:", newNotificationPayload);
+          addNotificationToList(newNotificationPayload);
+        }
+      });
+    } else {
+      console.warn("[Notificaciones.vue] No se pudo inyectar 'lastReceivedNotification'. Las actualizaciones en tiempo real podrían no funcionar en esta página.");
+    }
 
     const fetchInitialNotifications = async () => {
       loading.value = true;
+      console.log("[Notificaciones.vue:fetchInitialNotifications] Iniciando carga...");
       try {
-        notifications.value = [
-          { id: '1', titulo: 'Actualización de Perfil Requerida', mensaje: 'Por favor, revisa y actualiza tus datos de contacto en tu perfil.', fecha: new Date(Date.now() - 1000 * 60 * 60 * 2), leida: false, tipo: 'info', enlace: '/profile' },
-          { id: '2', titulo: 'Incidencia Resuelta', mensaje: 'La incidencia #123 sobre el proyector ha sido marcada como resuelta.', fecha: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), leida: true, tipo: 'incidencia' },
-          { id: '3', titulo: 'Recordatorio: Devolución Pendiente', mensaje: 'Recuerda devolver el portátil Lenovo antes del 10/05/2025.', fecha: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), leida: false, tipo: 'advertencia' },
-        ];
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn("[Notificaciones.vue:fetchInitialNotifications] No hay token. Abortando.");
+          notifications.value = [];
+          loading.value = false;
+          return;
+        }
+        const response = await axios.get<Notificacion[]>(`${API_BASE_URL}/notificaciones`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.data && Array.isArray(response.data)) {
+          notifications.value = response.data.map(parseBackendNotificationForPage);
+        } else {
+          notifications.value = [];
+        }
       } catch (error: any) {
+        console.error("[Notificaciones.vue:fetchInitialNotifications] Error:", error.response?.data || error.message);
+        notifications.value = [];
         toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las notificaciones.', life: 3000 });
       } finally {
         loading.value = false;
+        console.log(`[Notificaciones.vue:fetchInitialNotifications] Carga finalizada. Total: ${notifications.value.length}`);
       }
     };
 
     onMounted(() => {
       fetchInitialNotifications();
-      connectWebSockets();
-    });
-
-    onUnmounted(() => {
-      disconnectWebSockets();
     });
 
     const sortedNotifications = computed(() => {
@@ -162,25 +184,62 @@ export default defineComponent({
     const unreadCount = computed(() => notifications.value.filter(n => !n.leida).length);
 
     const markAsRead = async (notification: Notificacion) => {
+      const originalLeidaState = notification.leida;
       const index = notifications.value.findIndex(n => n.id === notification.id);
-      if (index !== -1) {
+
+      if (index !== -1 && !notifications.value[index].leida) {
         notifications.value[index].leida = true;
+      } else if (index === -1){
+        return;
       }
-      toast.add({ severity: 'success', summary: 'Leída', detail: 'Notificación marcada como leída.', life: 1500 });
+
+      try {
+        await axios.post(`${API_BASE_URL}/notificaciones/${notification.id}/read`, {}, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        toast.add({ severity: 'success', summary: 'Leída', detail: 'Notificación marcada como leída.', life: 1500 });
+      } catch (error) {
+        if (index !== -1) {
+          notifications.value[index].leida = originalLeidaState;
+        }
+        console.error("Error al marcar como leída:", error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo marcar como leída.', life: 3000 });
+      }
     };
 
     const markAllAsRead = async () => {
       markingAllAsRead.value = true;
-      // await notificationService.markAllAsRead();
+      const originalNotificationsState = JSON.parse(JSON.stringify(notifications.value));
       notifications.value.forEach(n => n.leida = true);
-      markingAllAsRead.value = false;
-      toast.add({ severity: 'success', summary: 'Leídas', detail: 'Todas las notificaciones marcadas como leídas.', life: 2000 });
+
+      try {
+        await axios.post(`${API_BASE_URL}/notificaciones/read-all`, {}, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        toast.add({ severity: 'success', summary: 'Leídas', detail: 'Todas las notificaciones marcadas como leídas.', life: 2000 });
+      } catch (error) {
+        notifications.value = originalNotificationsState.map(parseBackendNotificationForPage);
+        console.error("Error al marcar todas como leídas:", error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron marcar todas como leídas.', life: 3000 });
+      } finally {
+        markingAllAsRead.value = false;
+      }
     };
 
     const deleteNotification = async (notification: Notificacion) => {
-      // await notificationService.deleteNotification(notification.id);
+      const originalNotifications = [...notifications.value];
       notifications.value = notifications.value.filter(n => n.id !== notification.id);
-      toast.add({ severity: 'warn', summary: 'Eliminada', detail: 'Notificación eliminada.', life: 1500 });
+
+      try {
+        await axios.delete(`${API_BASE_URL}/notificaciones/${notification.id}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        toast.add({ severity: 'warn', summary: 'Eliminada', detail: 'Notificación eliminada.', life: 1500 });
+      } catch (error) {
+        notifications.value = originalNotifications;
+        console.error("Error al eliminar notificación:", error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar la notificación.', life: 3000 });
+      }
     };
 
     const handleNotificationClick = (notification: Notificacion) => {
@@ -226,7 +285,6 @@ export default defineComponent({
       if (!text) return '';
       return text.length > length ? text.substring(0, length) + "..." : text;
     };
-
 
     return {
       notifications,

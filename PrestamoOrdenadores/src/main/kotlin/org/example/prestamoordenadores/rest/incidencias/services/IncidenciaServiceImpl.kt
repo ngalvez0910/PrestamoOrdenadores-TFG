@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import org.example.prestamoordenadores.config.websockets.WebSocketConfig
 import org.example.prestamoordenadores.config.websockets.WebSocketHandler
+import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.config.websockets.models.Notification
+import org.example.prestamoordenadores.config.websockets.models.NotificationDto
+import org.example.prestamoordenadores.config.websockets.models.NotificationTypeDto
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
@@ -17,6 +19,7 @@ import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.rest.users.models.Role
+import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
@@ -29,6 +32,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.UUID
 
 private val logger = logging()
 
@@ -38,9 +42,9 @@ class IncidenciaServiceImpl(
     private val repository: IncidenciaRepository,
     private val mapper: IncidenciaMapper,
     private val userRepository: UserRepository,
-    private val webSocketConfig: WebSocketConfig,
     private val objectMapper: ObjectMapper,
-    @Qualifier("webSocketIncidenciasHandler") private val webSocketHandler: WebSocketHandler
+    @Qualifier("webSocketIncidenciasHandler") private val webSocketHandler: WebSocketHandler,
+    private val webService : WebSocketService
 ) : IncidenciaService {
     override fun getAllIncidencias(page: Int, size: Int): Result<PagedResponse<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo todas las incidencias" }
@@ -89,7 +93,8 @@ class IncidenciaServiceImpl(
         repository.save(newIncidencia)
 
         val incidenciaResponse = mapper.toIncidenciaResponse(newIncidencia)
-        onChange(Notification.Tipo.CREATE, newIncidencia)
+        sendNotificationNuevaIncidencia(newIncidencia, user)
+
         return Ok(incidenciaResponse)
     }
 
@@ -161,30 +166,6 @@ class IncidenciaServiceImpl(
         return Ok(mapper.toIncidenciaResponseList(incidencias))
     }
 
-    fun onChange(tipo: Notification.Tipo?, incidencia: Incidencia) {
-        logger.info { "Servicio de Incidencias onChange con tipo: $tipo e incidencia GUID: ${incidencia.guid}" }
-
-        try {
-            val incidenciaResponse = mapper.toIncidenciaResponse(incidencia)
-            val notificacion = Notification(
-                "INCIDENCIAS",
-                tipo,
-                incidenciaResponse,
-                LocalDateTime.now().toString()
-            )
-
-            val json = objectMapper.writeValueAsString(notificacion)
-
-            val creatorUsername = incidencia.user.username
-            sendMessageUser(creatorUsername, json)
-
-            val adminUsername = getAdminUsername()
-            sendMessageUser(adminUsername, json)
-        } catch (e: JsonProcessingException) {
-            logger.error { "Error al convertir la notificación a JSON" }
-        }
-    }
-
     fun onChangeAdmin(tipo: Notification.Tipo?, incidencia: Incidencia) {
         logger.info { "Servicio de Incidencias onChange con tipo: $tipo e incidencia GUID: ${incidencia.guid}" }
 
@@ -222,4 +203,35 @@ class IncidenciaServiceImpl(
             logger.warn { "No se puede enviar el mensaje WebSocket. Nombre de usuario o JSON nulo/vacío." }
         }
     }
+
+    private fun sendNotificationNuevaIncidencia(incidencia: Incidencia, user: User) {
+        val notificacionParaUser = NotificationDto(
+            id = UUID.randomUUID().toString(),
+            titulo = "Incidencia Recibida: ${incidencia.guid}",
+            mensaje = "Hemos recibido tu reporte sobre '${incidencia.asunto}'. Gracias por informarnos.",
+            fecha = LocalDateTime.now(),
+            leida = false,
+            tipo = NotificationTypeDto.INCIDENCIA,
+            enlace = "/incidencias/detalle/${incidencia.guid}"
+        )
+        webService.createAndSendNotification(user.email, notificacionParaUser)
+
+        val administradores = userRepository.findUsersByRol(Role.ADMIN)
+
+        administradores.forEach { admin ->
+            if (admin?.email != user.email) {
+                val notificacionParaAdmin = NotificationDto(
+                    id = UUID.randomUUID().toString(),
+                    titulo = "Nueva Incidencia Reportada: ${incidencia.guid}",
+                    mensaje = "El usuario ${user.nombre} ${user.apellidos} ha reportado: '${incidencia.asunto}'.",
+                    fecha = LocalDateTime.now(),
+                    leida = false,
+                    tipo = NotificationTypeDto.INCIDENCIA,
+                    enlace = "/admin/incidencias/ver/${incidencia.guid}"
+                )
+                webService.createAndSendNotification(admin?.email ?: "", notificacionParaAdmin)
+            }
+        }
+    }
+
 }

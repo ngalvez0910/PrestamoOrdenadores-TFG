@@ -34,10 +34,7 @@ class JwtAuthenticationFilter
         @NonNull request: HttpServletRequest,
         @NonNull response: HttpServletResponse, @NonNull filterChain: FilterChain
     ) {
-        log.info { "Iniciando el filtro de autenticación" }
-        val authHeader = request.getHeader("Authorization")
-        var userDetails: UserDetails?
-        var userName: String?
+        log.info { "Iniciando el filtro de autenticación para URI: ${request.requestURI}" }
 
         if (request.servletPath.equals("/auth/signin") || request.servletPath.equals("/auth/signup")) {
             log.info { "Petición a ruta de autenticación/registro, se ignora el filtro JWT" }
@@ -45,37 +42,51 @@ class JwtAuthenticationFilter
             return
         }
 
-        if (!StringUtils.hasText(authHeader) || !StringUtils.startsWithIgnoreCase(authHeader, "Bearer ")) {
-            log.info { "No se ha encontrado cabecera de autenticación, se ignora" }
+        var jwt: String? = null
+        val authHeader = request.getHeader("Authorization")
+
+        if (StringUtils.hasText(authHeader) && StringUtils.startsWithIgnoreCase(authHeader, "Bearer ")) {
+            log.info { "Token encontrado en encabezado 'Authorization'." }
+            jwt = authHeader.substring(7)
+        } else {
+            val tokenParam = request.getParameter("token")
+            if (StringUtils.hasText(tokenParam) && request.requestURI.startsWith("/ws/")) {
+                log.info { "Token encontrado en parámetro de query 'token' para URI WebSocket: ${request.requestURI}" }
+                jwt = tokenParam
+            }
+        }
+
+        if (!StringUtils.hasText(jwt)) {
+            log.info { "No se encontró token JWT en header ni en parámetro de query (si aplica para WS). Continuando cadena de filtros." }
             filterChain.doFilter(request, response)
             return
         }
 
-        log.info { "Se ha encontrado cabecera de autenticación, se procesa" }
-        val jwt = authHeader.substring(7)
+        log.info { "Token JWT encontrado (de header o query param), se procesa." }
+        var userName: String?
         try {
-            userName = jwtService.extractUserName(jwt)
+            userName = jwtService.extractUserName(jwt!!)
         } catch (e: Exception) {
-            log.warn { "Token no válido" }
+            log.warn { "Token JWT no válido o expirado: ${e.message}" }
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token no autorizado o no válido")
             return
         }
-        log.info { "Usuario autenticado: $userName" }
-        if (StringUtils.hasText(userName)
-            && SecurityContextHolder.getContext().authentication == null
-        ) {
-            log.info { "Comprobando usuario y token" }
+
+        if (StringUtils.hasText(userName) && SecurityContextHolder.getContext().authentication == null) {
+            log.info { "Usuario '$userName' extraído del token. SecurityContext está vacío, procediendo a cargar UserDetails." }
+            val userDetails: UserDetails
             try {
                 userDetails = authUsersService.loadUserByUsername(userName!!)
             } catch (e: Exception) {
-                log.warn { "Usuario no encontrado: $userName" }
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Usuario no autorizado")
+                log.warn { "Usuario no encontrado por UserDetailsService: $userName. Error: ${e.message}" }
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Usuario no autorizado o no encontrado")
                 return
             }
-            authUsersService.loadUserByUsername(userName)
-            log.info { "Usuario encontrado: $userDetails" }
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                log.info { "JWT válido" }
+
+            log.info { "UserDetails encontrado para '$userName': ${userDetails.username}, Authorities: ${userDetails.authorities}" }
+
+            if (jwtService.isTokenValid(jwt!!, userDetails)) {
+                log.info { "Token JWT es válido para usuario '$userName'." }
                 val context: SecurityContext = SecurityContextHolder.createEmptyContext()
                 val authToken = UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.authorities
@@ -83,8 +94,15 @@ class JwtAuthenticationFilter
                 authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
                 context.authentication = authToken
                 SecurityContextHolder.setContext(context)
+                log.info { "SecurityContext actualizado con la autenticación para '$userName'." }
+            } else {
+                log.warn { "Validación del token JWT falló para usuario '$userName'." }
             }
+        } else if (SecurityContextHolder.getContext().authentication != null) {
+            log.info { "SecurityContext ya contiene una autenticación para '${SecurityContextHolder.getContext().authentication.name}'. No se procesará el token JWT de nuevo en esta petición." }
         }
+
+
         filterChain.doFilter(request, response)
     }
 }

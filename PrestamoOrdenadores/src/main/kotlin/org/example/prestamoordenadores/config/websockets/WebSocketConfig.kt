@@ -19,6 +19,9 @@ class WebSocketConfig : WebSocketConfigurer {
             .addInterceptors(WebSocketInterceptor());
         registry.addHandler(webSocketPrestamosHandler(), "/ws/prestamos")
             .addInterceptors(WebSocketInterceptor());
+        registry.addHandler(webSocketGlobalHandler(), "/ws/notificaciones")
+            .addInterceptors(WebSocketInterceptor())
+            .setAllowedOrigins("*");
 
         log.info { "WebSocket handlers registrados con éxito" }
     }
@@ -36,5 +39,10 @@ class WebSocketConfig : WebSocketConfigurer {
     @Bean
     fun webSocketPrestamosHandler(): WebSocketHandler {
         return WebSocketHandler("Prestamos")
+    }
+
+    @Bean
+    fun webSocketGlobalHandler(): WebSocketHandler {
+        return WebSocketHandler("NotificacionesGlobales")
     }
 }
