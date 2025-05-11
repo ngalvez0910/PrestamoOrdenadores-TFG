@@ -38,8 +38,8 @@
         </div>
 
         <div class="form-group">
-          <label>Usuario (GUID)</label>
-          <div class="readonly-field">{{ sancionData.user?.guid || sancionData.userGuid || '-' }}</div>
+          <label for="user">Usuario</label>
+          <div class="readonly-field">{{ sancionData.user?.numeroIdentificacion || sancionData.userGuid || '-' }}</div>
         </div>
 
         <div class="form-group">

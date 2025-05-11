@@ -20,9 +20,9 @@
           class="p-datatable-custom"
       >
         <Column field="guid" header="GUID" style="min-width: 150px;"></Column>
-        <Column field="user.guid" header="Usuario GUID" style="min-width: 150px;">
+        <Column field="user.numeroIdentificacion" header="Usuario" style="min-width: 150px;">
           <template #body="slotProps">
-            {{ slotProps.data.user?.guid || 'N/A' }}
+            {{ slotProps.data.user?.numeroIdentificacion || 'N/A' }}
           </template>
         </Column>
         <Column field="tipoSancion" header="Tipo" style="min-width: 150px;">
