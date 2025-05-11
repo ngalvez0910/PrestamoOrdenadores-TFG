@@ -1,20 +1,55 @@
 <template>
   <MenuBar />
   <div class="prestamos-container">
-    <div class="filters">
-      <label for="search-input">Buscar:</label>
-      <input id="search-input" type="text" v-model="search" placeholder="Buscar por GUID, Usuario, Dispositivo..." @input="handleSearchInput" />
+    <div class="filters-container">
+      <div class="unified-search">
+        <label for="search-input">Buscar:</label>
+        <div class="search-input-container">
+          <input
+              id="search-input"
+              type="text"
+              v-model="search"
+              placeholder="GUID, Usuario, Dispositivo..."
+              @input="handleFilterChange"
+          />
+          <div class="calendar-icon-container" @click="toggleCalendar">
+            <i class="pi pi-calendar"></i>
+            <span v-if="selectedDate" class="selected-date-indicator"></span>
+          </div>
+          <div v-if="showCalendar" class="calendar-dropdown">
+            <Calendar
+                id="date-filter-input"
+                v-model="selectedDate"
+                dateFormat="dd/mm/yy"
+                placeholder="Selecciona una fecha"
+                :showClear="true"
+                @date-select="handleDateSelect"
+                @clear="handleClearDate"
+                inline
+                class="p-calendar-custom"
+            />
+          </div>
+        </div>
+        <div v-if="selectedDate" class="active-filter-badge" @click="handleClearDate">
+          {{ formatSelectedDate(selectedDate) }} <i class="pi pi-times"></i>
+        </div>
+      </div>
     </div>
 
     <div class="table-wrapper">
       <DataTable
           :value="datos"
           paginator
-          :rows="5"
-          :rowsPerPageOptions="[5, 10, 20]" :totalRecords="totalRecords"
-          :loading="loading" lazy @page="onPage"
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} préstamos"
-          responsiveLayout="scroll" class="p-datatable-custom" >
+          :rows="pageSize"
+          :rowsPerPageOptions="[5, 10, 20]"
+          :totalRecords="totalRecords"
+          :loading="loading"
+          lazy
+          @page="onPage"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} préstamos"
+          responsiveLayout="scroll"
+          class="p-datatable-custom">
         <Column field="guid" header="GUID"></Column>
         <Column field="user.numeroIdentificacion" header="Usuario">
           <template #body="slotProps">
@@ -62,6 +97,8 @@
 
 <script lang="ts">
 import MenuBar from "@/components/AdminMenuBar.vue";
+import Calendar from 'primevue/calendar';
+import Button from 'primevue/button';
 import axios from 'axios';
 
 interface Prestamo {
@@ -74,8 +111,6 @@ interface Prestamo {
   estado: string;
   fechaPrestamo: string;
   fechaDevolucion: string;
-  createdDate: string;
-  updatedDate: string;
 }
 
 interface PagedResponse {
@@ -85,11 +120,13 @@ interface PagedResponse {
 
 export default {
   name: 'PrestamoDashboard',
-  components: { MenuBar },
+  components: { MenuBar, Calendar, Button },
   emits: ['input-change'],
   data() {
     return {
       search: '',
+      selectedDate: null as Date | null,
+      showCalendar: false,
       datos: [] as Prestamo[],
       todosLosDatos: [] as Prestamo[],
       totalRecords: 0,
@@ -102,6 +139,10 @@ export default {
     console.log("Componente montado. Llamando a obtenerDatos inicial...");
     await this.loadData();
     console.log("Datos iniciales y totalRecords cargados.");
+    document.addEventListener('click', this.clickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.clickOutside);
   },
   methods: {
     formatEstado(estadoPrestamo: 'VENCIDO' | 'EN_CURSO' | 'CANCELADO' | 'DEVUELTO'): string {
@@ -141,8 +182,7 @@ export default {
         });
 
         this.todosLosDatos = responseAll.data.content;
-        this.totalRecords = this.todosLosDatos.length;
-        this.paginar();
+        this.filtrarYPaginar();
 
       } catch (error) {
         console.error("Error obteniendo datos:", error);
@@ -150,48 +190,57 @@ export default {
         this.loading = false;
       }
     },
-    filtrarPorTexto(query: string): Prestamo[] {
-      if (!query) {
-        return this.todosLosDatos;
+    filtrarYPaginar() {
+      this.loading = true;
+      let resultadosFiltrados = this.todosLosDatos;
+
+      if (this.search) {
+        const q = this.search.toLowerCase();
+        resultadosFiltrados = resultadosFiltrados.filter(prestamo => {
+          const guidMatch = prestamo.guid?.toLowerCase().startsWith(q) ?? false;
+          const userMatch = prestamo.user?.numeroIdentificacion?.toLowerCase().startsWith(q) ?? false;
+          const dispositivoMatch = prestamo.dispositivo?.numeroSerie?.toLowerCase().startsWith(q) ?? false;
+          const estadoFormateado = this.formatEstado(prestamo.estadoPrestamo);
+          const estadoMatch = estadoFormateado?.toLowerCase().startsWith(q) ?? false;
+          const fechaPrestamoMatch = prestamo.fechaPrestamo?.includes(q) ?? false;
+          const fechaDevolucionMatch = prestamo.fechaDevolucion?.includes(q) ?? false;
+
+          return guidMatch || userMatch || dispositivoMatch || estadoMatch ||
+              fechaPrestamoMatch || fechaDevolucionMatch;
+        });
       }
 
-      const q = query.toLowerCase();
+      if (this.selectedDate) {
+        const day = this.selectedDate.getDate().toString().padStart(2, '0');
+        const month = (this.selectedDate.getMonth() + 1).toString().padStart(2, '0');
+        const year = this.selectedDate.getFullYear();
+        const selectedDateStringDdMmYyyy = `${day}-${month}-${year}`;
 
-      return this.todosLosDatos.filter(prestamo => {
-        const guidMatch = prestamo.guid?.toLowerCase().startsWith(q) ?? false;
+        resultadosFiltrados = resultadosFiltrados.filter(prestamo => {
+          const fechaPrestamoMatch = prestamo.fechaPrestamo === selectedDateStringDdMmYyyy;
+          const fechaDevolucionMatch = prestamo.fechaDevolucion === selectedDateStringDdMmYyyy;
+          return fechaPrestamoMatch || fechaDevolucionMatch;
+        });
+      }
 
-        const userGuidMatch = prestamo.user?.numeroIdentificacion?.toLowerCase().startsWith(q) ?? false;
-
-        const dispositivoGuidMatch = prestamo.dispositivo?.numeroSerie?.toLowerCase().startsWith(q) ?? false;
-
-        const estadoFormateado = this.formatEstado(prestamo.estadoPrestamo);
-        const estadoMatch = estadoFormateado?.toLowerCase().startsWith(q) ?? false;
-
-        const fechaPrestamoMatch = prestamo.fechaPrestamo?.includes(q) ?? false;
-
-        const fechaDevolucionMatch = prestamo.fechaDevolucion?.includes(q) ?? false;
-
-        return guidMatch || userGuidMatch || dispositivoGuidMatch || estadoMatch || fechaPrestamoMatch || fechaDevolucionMatch;
-      });
-    },
-    paginar() {
-      const resultadosFiltrados = this.filtrarPorTexto(this.search);
       this.totalRecords = resultadosFiltrados.length;
-
       const inicio = this.currentPage * this.pageSize;
       const fin = inicio + this.pageSize;
       this.datos = resultadosFiltrados.slice(inicio, fin);
+      this.loading = false;
     },
-    handleSearchInput() {
+    handleFilterChange() {
       this.currentPage = 0;
-      this.paginar();
+      this.filtrarYPaginar();
+    },
+    handleClearDate() {
+      this.selectedDate = null;
+      this.handleFilterChange();
     },
     onPage(event: any) {
-      this.loading = true;
       this.currentPage = event.page;
       this.pageSize = event.rows;
-      this.paginar();
-      this.loading = false;
+      this.filtrarYPaginar();
     },
     verPrestamo(prestamo: Prestamo) {
       console.log("Navegando a detalle de prestamo con estos datos:", prestamo);
@@ -199,6 +248,29 @@ export default {
         name: 'PrestamoDetalle',
         params: { guid: prestamo.guid }
       });
+    },
+    deletePrestamo(prestamo: Prestamo) {
+      console.log("Eliminar préstamo:", prestamo);
+    },
+    toggleCalendar() {
+      this.showCalendar = !this.showCalendar;
+    },
+    handleDateSelect() {
+      this.handleFilterChange();
+      this.showCalendar = false;
+    },
+    formatSelectedDate(date: Date): string {
+      if (!date) return '';
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    },
+    clickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.calendar-dropdown') && !target.closest('.calendar-icon-container')) {
+        this.showCalendar = false;
+      }
     }
   },
 };
@@ -212,33 +284,180 @@ export default {
   box-sizing: border-box;
 }
 
-.filters {
+.filters-container {
   display: flex;
-  align-items: center;
   gap: 10px;
   margin-bottom: 25px;
-  max-width: 400px;
-  margin-top: -80%;
+  max-width: 300px;
+  justify-content: flex-start;
+  margin-top: -73%;
 }
 
-.filters label {
+.unified-search {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  max-width: 500px;
+}
+
+.unified-search label {
   font-weight: 500;
   color: var(--color-text-dark);
   white-space: nowrap;
+  margin-right: 8px;
 }
 
-.filters input {
-  flex-grow: 1;
-  padding: 10px 15px;
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-container input {
+  padding: 10px 35px 10px 15px;
   border: 1px solid var(--color-neutral-medium);
   border-radius: 8px;
   font-size: 1rem;
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  min-width: 250%;
+  min-width: 235%;
+  box-sizing: border-box;
 }
 
-.filters input:focus {
+.search-input-container input:focus {
+  border-color: var(--color-interactive);
+  box-shadow: 0 0 0 3px rgba(var(--color-interactive-rgb), 0.2);
+}
+
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom.p-datepicker-inline) {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 0.8rem;
+}
+
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-header) {
+  padding: 0.4rem 0.2rem;
+  font-family: 'Montserrat', sans-serif !important;
+}
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-title select),
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-title button) {
+  font-size: 0.8rem;
+  font-family: 'Montserrat', sans-serif !important;
+  padding: 0.2rem 0.3rem;
+}
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-prev),
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-next) {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-prev .p-icon),
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-next .p-icon) {
+  font-size: 0.7rem;
+}
+
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-calendar th) {
+  padding: 0.3rem 0.2rem;
+  font-size: 0.75rem;
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-calendar td) {
+  padding: 0.1rem;
+}
+
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-calendar td > span) {
+  width: 2rem;
+  height: 2rem;
+  line-height: 2rem;
+  font-size: 0.75rem;
+  font-family: 'Montserrat', sans-serif !important;
+  border-radius: 4px;
+}
+
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-calendar td > span.p-highlight) {
+  background-color: var(--color-interactive) !important;
+  color: white !important;
+}
+
+.calendar-dropdown :deep(.p-calendar.p-calendar-custom .p-datepicker-calendar td > span.p-datepicker-today) {
+  background-color: rgba(var(--color-interactive-rgb), 0.1) !important;
+  color: var(--color-interactive-darker) !important;
+}
+
+.calendar-icon-container {
+  position: absolute;
+  right: -325px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  color: var(--color-text-dark);
+  opacity: 0.7;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  z-index: 2;
+}
+
+.calendar-icon-container:hover {
+  opacity: 1;
+  color: var(--color-interactive);
+}
+
+.selected-date-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-interactive);
+  border-radius: 50%;
+}
+
+.calendar-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: -400px;
+  z-index: 1000;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  border: 1px solid var(--color-neutral-medium);
+}
+
+.active-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-accent-soft);
+  border: 1px solid var(--color-interactive);
+  color: var(--color-interactive-darker);
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 350px;
+  margin-top: 5px;
+  z-index: 5;
+}
+
+.active-filter-badge:hover {
+  background-color: var(--color-text-on-dark);
+}
+
+.active-filter-badge i {
+  margin-left: 6px;
+  font-size: 0.8rem;
+}
+
+.filters :deep(.p-calendar.p-calendar-w-btn .p-inputtext:focus) {
   border-color: var(--color-interactive);
   box-shadow: 0 0 0 3px rgba(var(--color-interactive-rgb), 0.2);
 }
@@ -250,8 +469,7 @@ export default {
   border: 1px solid var(--color-neutral-medium);
   border-radius: 8px;
   background-color: white;
-  margin-left: -21%;
-  margin-top: 1%;
+  margin-left: -20%;
 }
 
 :deep(.p-datatable-custom .p-datatable-thead > tr > th) {
@@ -410,18 +628,26 @@ export default {
   .prestamos-container {
     padding: 70px 15px 30px 15px;
   }
+
   .filters {
-    max-width: none;
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
+
+  .search-filter, .date-filter {
+    max-width: none;
+  }
+
   .filters label {
     margin-bottom: 5px;
   }
+
   :deep(.p-datatable-custom .p-datatable-thead > tr > th),
   :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
     padding: 0.75rem 0.75rem;
   }
+
   .action-buttons {
     flex-wrap: wrap;
   }
