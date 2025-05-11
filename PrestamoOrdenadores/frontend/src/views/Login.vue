@@ -21,16 +21,23 @@
 
       <div class="form-group">
         <label for="password" class="input-label">Contraseña</label>
-        <input
-            type="password"
-            id="password"
-            name="password"
-            class="input-field"
-            placeholder="Introduce tu contraseña"
-            v-model="form.password"
-            :aria-invalid="errors.password ? 'true' : 'false'"
-            aria-describedby="password-error"
-        >
+        <div class="password-input-wrapper">
+          <input
+              :type="passwordFieldType"
+              id="password"
+              name="password"
+              class="input-field"
+              placeholder="Introduce tu contraseña"
+              v-model="form.password"
+              :aria-invalid="errors.password ? 'true' : 'false'"
+              aria-describedby="password-error"
+          >
+          <i
+              :class="['pi', passwordFieldType === 'password' ? 'pi-eye' : 'pi-eye-slash', 'password-toggle-icon']"
+              @click="togglePasswordVisibility"
+              title="Mostrar/Ocultar contraseña"
+          ></i>
+        </div>
         <p id="password-error" class="error-message" v-if="errors.password">{{ errors.password }}</p>
       </div>
 
@@ -70,7 +77,8 @@ export default {
       errors: {
         email: '',
         password: ''
-      }
+      },
+      passwordFieldType: 'password',
     };
   },
   methods: {
@@ -126,6 +134,9 @@ export default {
           styleClass: 'custom-toast-error'
         });
       }
+    },
+    togglePasswordVisibility() {
+      this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
     },
   },
 };
@@ -266,5 +277,24 @@ form {
 :global(.p-toast .p-toast-message-error .p-toast-summary),
 :global(.p-toast .p-toast-message-error .p-toast-detail) {
   color: #B91C1C !important;
+}
+
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--color-neutral-medium);
+  transition: color 0.2s ease;
+}
+
+.password-toggle-icon:hover {
+  color: var(--color-interactive);
 }
 </style>
