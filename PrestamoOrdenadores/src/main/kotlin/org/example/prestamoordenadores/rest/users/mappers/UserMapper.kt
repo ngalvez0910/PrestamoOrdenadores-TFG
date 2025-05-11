@@ -13,6 +13,7 @@ import java.time.LocalDateTime
 class UserMapper {
     fun toUserResponse(user: User): UserResponse{
         return UserResponse(
+            numeroIdentificacion = user.numeroIdentificacion,
             guid = user.guid,
             email = user.email,
             nombre = user.nombre,
