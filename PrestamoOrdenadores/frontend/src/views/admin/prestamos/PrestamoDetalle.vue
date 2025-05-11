@@ -20,6 +20,11 @@
       <div class="details-grid">
 
         <div class="form-group">
+          <label for="guid">GUID</label>
+          <input readonly type="text" id="guid" class="input-field" v-model="prestamoData.guid" />
+        </div>
+
+        <div class="form-group">
           <label for="user">Usuario</label>
           <input readonly type="text" id="userNumIdentificacion" class="input-field" v-model="prestamoData.user.numeroIdentificacion"/>
         </div>
