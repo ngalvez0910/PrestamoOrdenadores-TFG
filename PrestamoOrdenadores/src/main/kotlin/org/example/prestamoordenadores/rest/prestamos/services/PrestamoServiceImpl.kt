@@ -38,6 +38,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -131,13 +132,25 @@ class PrestamoServiceImpl(
         return if (prestamoEncontrado == null) {
             Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
         } else {
-            prestamoEncontrado.estadoPrestamo = EstadoPrestamo.valueOf(prestamo.estadoPrestamo.uppercase())
+            val nuevoEstadoPrestamo = EstadoPrestamo.valueOf(prestamo.estadoPrestamo.uppercase())
+
+            if (nuevoEstadoPrestamo == EstadoPrestamo.DEVUELTO) {
+                prestamoEncontrado.dispositivo.estadoDispositivo = EstadoDispositivo.DISPONIBLE
+            }
+
+            prestamoEncontrado.estadoPrestamo = nuevoEstadoPrestamo
             prestamoEncontrado.updatedDate = LocalDateTime.now()
 
-            prestamoRepository.save(prestamoEncontrado)
+            try {
+                val prestamoGuardado = prestamoRepository.save(prestamoEncontrado)
+                logger.info { "Préstamo GUID: ${prestamoGuardado?.guid} actualizado a estado: ${prestamoGuardado?.estadoPrestamo}" }
 
-            sendNotificationActualizacionPrestamo(prestamoEncontrado, prestamo.estadoPrestamo)
-            Ok(mapper.toPrestamoResponse(prestamoEncontrado))
+                sendNotificationActualizacionPrestamo(prestamoGuardado!!, prestamoGuardado?.estadoPrestamo?.name!!)
+                Ok(mapper.toPrestamoResponse(prestamoGuardado))
+            } catch (e: Exception) {
+                logger.error { "Error al guardar el préstamo $guid: ${e.message}" }
+                Err(PrestamoError.PrestamoValidationError("Error al guardar la actualización del préstamo"))
+            }
         }
     }
 
@@ -259,6 +272,18 @@ class PrestamoServiceImpl(
                 severidad = NotificationSeverityDto.ERROR
                 logger.info { "Enviando notificación de préstamo VENCIDO GUID: ${prestamo.guid} a ${prestamo.user.email}" }
             }
+            "DEVUELTO" -> {
+                tituloNotificacion = "Préstamo Devuelto"
+                mensajeNotificacion = "El préstamo para el dispositivo '${prestamo.dispositivo.numeroSerie}' ha sido devuelto."
+                severidad = NotificationSeverityDto.SUCCESS
+                logger.info { "Enviando notificación de préstamo DEVUELTO GUID: ${prestamo.guid} a ${prestamo.user.email}" }
+            }
+            "CANCELADO" -> {
+                tituloNotificacion = "Préstamo Cancelado"
+                mensajeNotificacion = "El préstamo para el dispositivo '${prestamo.dispositivo.numeroSerie}' ha sido cancelado."
+                severidad = NotificationSeverityDto.INFO
+                logger.info { "Enviando notificación de préstamo CANCELADO GUID: ${prestamo.guid} a ${prestamo.user.email}" }
+            }
             else -> {
                 logger.warn { "Tipo de notificación de estado de préstamo desconocido: '$tipoNotificacion' para préstamo GUID: ${prestamo.guid}." }
                 return
@@ -276,6 +301,25 @@ class PrestamoServiceImpl(
             severidadSugerida = severidad
         )
         webService.createAndSendNotification(prestamo.user.email, notificacionParaUser)
+
+        if (tipoNotificacion == "DEVUELTO" || tipoNotificacion == "CANCELADO") {
+            val administradores = userRepository.findUsersByRol(Role.ADMIN)
+            administradores.forEach { admin ->
+                if (admin?.email != null) {
+                    val notificacionParaAdmin = NotificationDto(
+                        id = UUID.randomUUID().toString(),
+                        titulo = tituloNotificacion,
+                        mensaje = mensajeNotificacion,
+                        fecha = LocalDateTime.now(),
+                        leida = false,
+                        tipo = NotificationTypeDto.SISTEMA,
+                        enlace = enlaceNotificacion,
+                        severidadSugerida = severidad
+                    )
+                    webService.createAndSendNotification(admin.email, notificacionParaAdmin)
+                }
+            }
+        }
     }
 
     private fun sendNotificationEliminacionPrestamo(prestamo: Prestamo, user: User) {
@@ -345,5 +389,41 @@ class PrestamoServiceImpl(
         }
 
         logger.info { "Tarea programada: Gestionar Caducidad y Recordatorios de Préstamos finalizada." }
+    }
+
+    @CachePut(cacheNames = ["prestamos"], key = "#result.value.guid", condition = "#result.isOk && #result.value != null")
+    @Transactional
+    override fun cancelarPrestamo(guid: String): Result<PrestamoResponse?, PrestamoError> {
+        logger.debug { "Cancelando préstamo con GUID: $guid" }
+
+        val prestamoEncontrado = prestamoRepository.findByGuid(guid)
+
+        return if (prestamoEncontrado == null) {
+            logger.warn { "Préstamo con GUID: $guid no encontrado para cancelar." }
+            Err(PrestamoError.PrestamoNotFound("Préstamo con GUID: $guid no encontrado"))
+        } else {
+            if (prestamoEncontrado.estadoPrestamo == EstadoPrestamo.CANCELADO || prestamoEncontrado.estadoPrestamo == EstadoPrestamo.DEVUELTO) {
+                logger.info { "El préstamo GUID: $guid ya está en estado ${prestamoEncontrado.estadoPrestamo}. No se requiere acción." }
+                prestamoEncontrado.dispositivo.estadoDispositivo = EstadoDispositivo.DISPONIBLE
+                return Ok(mapper.toPrestamoResponse(prestamoEncontrado))
+            }
+
+            prestamoEncontrado.estadoPrestamo = EstadoPrestamo.CANCELADO
+            prestamoEncontrado.updatedDate = LocalDateTime.now()
+
+            try {
+                val prestamoGuardado = prestamoRepository.save(prestamoEncontrado)
+                if (prestamoGuardado == null) {
+                    return Err(PrestamoError.PrestamoValidationError("Error al guardar la cancelación del préstamo"))
+                }
+                logger.info { "Préstamo GUID: ${prestamoGuardado.guid} actualizado a estado: CANCELADO" }
+
+                sendNotificationActualizacionPrestamo(prestamoGuardado, "CANCELADO")
+                Ok(mapper.toPrestamoResponse(prestamoGuardado))
+            } catch (e: Exception) {
+                logger.error { "Error al guardar el préstamo $guid durante la cancelación: ${e.message}"}
+                Err(PrestamoError.PrestamoValidationError("Error al guardar la cancelación del préstamo"))
+            }
+        }
     }
 }

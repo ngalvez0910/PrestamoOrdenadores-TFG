@@ -22,8 +22,8 @@
     </router-link>
 
     <router-link to="/admin/dashboard/storage" class="dashboard-box">
-      <i class="pi pi-file icon"></i>
-      <p>Ver informes</p>
+      <i class="pi pi-database icon"></i>
+      <p>Ver almacenamiento</p>
     </router-link>
 
     <router-link to="/admin/dashboard/sanciones" class="dashboard-box">

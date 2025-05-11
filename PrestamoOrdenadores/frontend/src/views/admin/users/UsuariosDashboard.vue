@@ -19,6 +19,7 @@
           responsiveLayout="scroll"
           class="p-datatable-custom"
       >
+        <Column field="numeroIdentificacion" header="Número Identificación" style="min-width: 200px;"></Column>
         <Column field="email" header="Email" style="min-width: 200px;"></Column>
         <Column header="Nombre Completo" style="min-width: 200px;">
           <template #body="slotProps">
@@ -180,6 +181,8 @@ export default {
       const q = query.toLowerCase();
 
       return this.todosLosDatos.filter(user => {
+        const numeroIdentificacionMatch = user.numeroIdentificacion?.toLowerCase().startsWith(q) ?? false;
+
         const nombreMatch = user.nombre?.toLowerCase().startsWith(q) ?? false;
 
         const apellidosMatch = user.apellidos?.toLowerCase().startsWith(q) ?? false;
@@ -192,7 +195,7 @@ export default {
 
         const rolMatch = user.rol?.toLowerCase().startsWith(q) ?? false;
 
-        return nombreMatch || apellidosMatch || emailMatch || cursoMatch || tutorMatch || rolMatch;
+        return numeroIdentificacionMatch || nombreMatch || apellidosMatch || emailMatch || cursoMatch || tutorMatch || rolMatch;
       });
     },
     verUsuario(usuario: User) {

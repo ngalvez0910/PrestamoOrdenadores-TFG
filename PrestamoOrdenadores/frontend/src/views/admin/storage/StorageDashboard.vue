@@ -16,7 +16,7 @@
     </div>
 
     <div class="dashboard-box">
-      <i class="pi pi-exclamation-triangle icon"></i>
+      <i class="pi pi-flag-fill icon"></i>
       <p>Incidencias</p>
       <div class="box-action-wrapper">
         <button class="box-action-button" @click="descargarCsvIncidencias">Descargar CSV</button>
@@ -24,7 +24,7 @@
     </div>
 
     <div class="dashboard-box">
-      <i class="pi pi-file icon"></i>
+      <i class="pi pi-arrow-right-arrow-left icon"></i>
       <p>Préstamos</p>
       <div class="box-action-wrapper">
         <button class="box-action-button" @click="descargarCsvPrestamos">Descargar CSV</button>

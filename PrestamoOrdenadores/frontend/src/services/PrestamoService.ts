@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { UserData } from "@/services/AuthService.ts";
 import { jwtDecode } from "jwt-decode";
+import type {Incidencia} from "@/services/IncidenciaService.ts";
 
 export interface Dispositivo {
     guid: string;
@@ -11,7 +12,7 @@ export interface Prestamo {
     guid: string;
     dispositivo?: Dispositivo;
     dispositivoGuid?: string;
-    user?: { guid: string; };
+    user?: { guid: string; numeroIdentificacion: string; };
     userGuid?: string;
     estadoPrestamo: string;
     fechaPrestamo: string;
@@ -38,9 +39,9 @@ export const getPrestamoByGuid = async (guid: string): Promise<Prestamo | null> 
 
         const prestamo: Prestamo = {
             ...response.data,
-            user: response.data.user ? { guid: response.data.user.guid } : null,
+            user: response.data.user ? { numeroIdentificacion: response.data.user.numeroIdentificacion } : null,
             userGuid: response.data.user ? response.data.user.guid : null,
-            dispositivo: response.data.dispositivo ? { guid: response.data.dispositivo.guid } : null,
+            dispositivo: response.data.dispositivo ? { numeroSerie: response.data.dispositivo.numeroSerie } : null,
             dispositivoGuid: response.data.dispositivo ? response.data.dispositivo.guid : null,
         };
 
@@ -214,5 +215,52 @@ export const descargarPdfPrestamo = async (guid: string): Promise<void | null> =
     } catch (error: any) {
         console.error('descargarPdfPrestamo - Error al descargar el PDF:', error.response?.data || error.message);
         return null;
+    }
+};
+
+export const actualizarPrestamo = async (
+    guid: string,
+    data: { estadoPrestamo: string }
+): Promise<Prestamo | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.patch(`http://localhost:8080/prestamos/${guid}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        return response.data || null;
+    } catch (error) {
+        console.error('Error al actualizar el préstamo:', error);
+        return null;
+    }
+};
+
+export const cancelarPrestamo = async (
+    guid: string
+): Promise<Prestamo | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.patch(`http://localhost:8080/prestamos/cancelar/${guid}`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        return response.data || null;
+    } catch (error: any) {
+        console.error('Error al cancelar el préstamo (servicio):', error.response?.data || error.message);
+        throw error;
     }
 };

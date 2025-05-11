@@ -16,14 +16,14 @@
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} préstamos"
           responsiveLayout="scroll" class="p-datatable-custom" >
         <Column field="guid" header="GUID"></Column>
-        <Column field="user.guid" header="Usuario">
+        <Column field="user.numeroIdentificacion" header="Usuario">
           <template #body="slotProps">
-            {{ slotProps.data.user?.guid || 'N/A' }}
+            {{ slotProps.data.user?.numeroIdentificacion || 'N/A' }}
           </template>
         </Column>
-        <Column field="dispositivo.guid" header="Dispositivo">
+        <Column field="dispositivo.numeroSerie" header="Dispositivo">
           <template #body="slotProps">
-            {{ slotProps.data.dispositivo?.guid || 'N/A' }}
+            {{ slotProps.data.dispositivo?.numeroSerie || 'N/A' }}
           </template>
         </Column>
         <Column field="estadoPrestamo" header="Estado">
@@ -66,11 +66,11 @@ import axios from 'axios';
 
 interface Prestamo {
   guid: string;
-  user: { guid: string } | null;
+  user: { guid: string, numeroIdentificacion: string } | null;
   userGuid: string;
-  dispositivo: { guid: string } | null;
+  dispositivo: { guid: string, numeroSerie: string } | null;
   dispositivoGuid: string;
-  estadoPrestamo: "VENCIDO" | "EN_CURSO" | "CANCELADO";
+  estadoPrestamo: "VENCIDO" | "EN_CURSO" | "CANCELADO" | "DEVUELTO";
   estado: string;
   fechaPrestamo: string;
   fechaDevolucion: string;
@@ -104,7 +104,7 @@ export default {
     console.log("Datos iniciales y totalRecords cargados.");
   },
   methods: {
-    formatEstado(estadoPrestamo: 'VENCIDO' | 'EN_CURSO' | 'CANCELADO'): string {
+    formatEstado(estadoPrestamo: 'VENCIDO' | 'EN_CURSO' | 'CANCELADO' | 'DEVUELTO'): string {
       return estadoPrestamo.replace(/_/g, ' ');
     },
     getStatusClass(estado: string): string {
@@ -113,6 +113,7 @@ export default {
         case 'EN_CURSO': return 'status-en-curso';
         case 'VENCIDO': return 'status-vencido';
         case 'CANCELADO': return 'status-cancelado';
+        case 'DEVUELTO': return 'status-devuelto';
         default: return 'status-unknown';
       }
     },
@@ -159,9 +160,9 @@ export default {
       return this.todosLosDatos.filter(prestamo => {
         const guidMatch = prestamo.guid?.toLowerCase().startsWith(q) ?? false;
 
-        const userGuidMatch = prestamo.user?.guid?.toLowerCase().startsWith(q) ?? false;
+        const userGuidMatch = prestamo.user?.numeroIdentificacion?.toLowerCase().startsWith(q) ?? false;
 
-        const dispositivoGuidMatch = prestamo.dispositivo?.guid?.toLowerCase().startsWith(q) ?? false;
+        const dispositivoGuidMatch = prestamo.dispositivo?.numeroSerie?.toLowerCase().startsWith(q) ?? false;
 
         const estadoFormateado = this.formatEstado(prestamo.estadoPrestamo);
         const estadoMatch = estadoFormateado?.toLowerCase().startsWith(q) ?? false;
@@ -304,6 +305,11 @@ export default {
 .status-vencido {
   background-color: rgba(var(--color-success-rgb), 0.15);
   color: var(--color-warning);
+}
+
+.status-devuelto {
+  background-color: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-success);
 }
 
 .status-unknown {

@@ -2,9 +2,12 @@
   <MenuBar />
   <div class="detalle-container">
 
-    <div class="boton-atras-wrapper">
-      <button @click="goBack" class="back-button" title="Volver a Préstamos">
+    <div class="detalle-header-actions">
+      <button @click="goBack" class="back-button" title="Volver a Prestamos">
         <i class="pi pi-arrow-left"></i>
+      </button>
+      <button class="action-button edit-button" @click="toggleEdit" title="Editar Préstamo">
+        <i :class="editable ? 'pi pi-times' : 'pi pi-pencil'"></i> {{ editable ? 'Cancelar' : 'Editar' }}
       </button>
     </div>
 
@@ -17,13 +20,18 @@
       <div class="details-grid">
 
         <div class="form-group">
-          <label for="userGuid">GUID Usuario</label>
-          <input readonly type="text" id="userGuid" class="input-field" v-model="prestamoData.userGuid"/>
+          <label for="guid">GUID</label>
+          <input readonly type="text" id="guid" class="input-field" v-model="prestamoData.guid" />
         </div>
 
         <div class="form-group">
-          <label for="dispositivoGuid">GUID Dispositivo</label>
-          <input readonly type="text" id="dispositivoGuid" class="input-field" v-model="prestamoData.dispositivoGuid"/>
+          <label for="user">Usuario</label>
+          <input readonly type="text" id="userNumIdentificacion" class="input-field" v-model="prestamoData.user.numeroIdentificacion"/>
+        </div>
+
+        <div class="form-group">
+          <label for="dispositivo">Dispositivo</label>
+          <input readonly type="text" id="dispositivo" class="input-field" v-model="prestamoData.dispositivo.numeroSerie"/>
         </div>
 
         <div class="form-group">
@@ -32,6 +40,7 @@
             <option value="VENCIDO">VENCIDO</option>
             <option value="EN_CURSO">EN CURSO</option>
             <option value="CANCELADO">CANCELADO</option>
+            <option value="DEVUELTO">DEVUELTO</option>
           </select>
           <div v-else>
                 <span :class="['status-badge', getStatusClass(prestamoData.estadoPrestamo)]">
@@ -51,6 +60,12 @@
         </div>
 
       </div>
+
+      <div v-if="editable" class="update-button-wrapper">
+        <button class="action-button update-button" @click="actualizarPrestamo">
+          Actualizar Préstamo
+        </button>
+      </div>
     </div>
     <div v-else>
       <p>Cargando detalles del préstamo...</p>
@@ -63,7 +78,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import MenuBar from "@/components/AdminMenuBar.vue";
-import {getPrestamoByGuid} from "@/services/PrestamoService.ts";
+import {actualizarPrestamo, cancelarPrestamo, getPrestamoByGuid, type Prestamo} from "@/services/PrestamoService.ts";
 import {useToast} from "primevue/usetoast";
 
 export default defineComponent({
@@ -86,14 +101,20 @@ export default defineComponent({
       const guid = this.$route.params.guid;
       const guidString = Array.isArray(guid) ? guid[0] : guid;
       const prestamo = await getPrestamoByGuid(guidString);
-      this.prestamoData = prestamo;
-      console.log(prestamo)
+      if (prestamo) {
+        this.prestamoData = JSON.parse(JSON.stringify(prestamo));
+        this.originalData = JSON.parse(JSON.stringify(prestamo));
+        console.log("Datos del préstamo cargados:", this.prestamoData);
+      } else {
+        console.error(`No se encontró el préstamo con GUID: ${guidString}`);
+        this.toast.add({ severity: 'error', summary: 'Error', detail: 'Préstamo no encontrado.', life: 3000 });
+      }
     } catch (error) {
       console.error("Error al obtener los detalles de la prestamo:", error);
     }
   },
   methods: {
-    formatEstado(estadoPrestamo: 'VENCIDO' | 'EN_CURSO' | 'CANCELADO' | undefined): string {
+    formatEstado(estadoPrestamo: 'VENCIDO' | 'EN_CURSO' | 'CANCELADO' | 'DEVUELTO' | undefined): string {
       if (!estadoPrestamo) {
         return '';
       }
@@ -111,7 +132,73 @@ export default defineComponent({
         case 'EN_CURSO': return 'status-en-curso';
         case 'VENCIDO': return 'status-vencido';
         case 'CANCELADO': return 'status-cancelado';
+        case 'DEVUELTO': return 'status-devuelto';
         default: return 'status-unknown';
+      }
+    },
+    async actualizarPrestamo() {
+      if (!this.prestamoData || !this.originalData) {
+        console.warn("Datos del préstamo no disponibles para guardar cambios.");
+        this.toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Datos no disponibles.', life: 3000 });
+        return;
+      }
+
+      const nuevoEstado = this.prestamoData.estadoPrestamo;
+      const estadoOriginal = this.originalData.estadoPrestamo;
+
+      if (nuevoEstado === estadoOriginal) {
+        console.log("No se detectaron cambios en el estado del préstamo.");
+        this.toast.add({ severity: 'info', summary: 'Info', detail: 'No se realizaron cambios en el estado.', life: 3000 });
+        this.editable = false;
+        return;
+      }
+
+      try {
+        let prestamoResultado: Prestamo | null = null;
+
+        console.log(`Intentando cambiar estado de préstamo ${this.prestamoData.guid} de ${estadoOriginal} a ${nuevoEstado}`);
+
+        if (nuevoEstado === "CANCELADO") {
+          this.toast.add({ severity: 'info', summary: 'Procesando', detail: 'Cancelando préstamo...', life: 2000 });
+          prestamoResultado = await cancelarPrestamo(this.prestamoData.guid);
+        } else {
+          const updatePayload = {
+            estadoPrestamo: nuevoEstado,
+          };
+          this.toast.add({ severity: 'info', summary: 'Procesando', detail: 'Actualizando préstamo...', life: 2000 });
+          prestamoResultado = await actualizarPrestamo(this.prestamoData.guid, updatePayload);
+        }
+
+        if (prestamoResultado && prestamoResultado.guid) {
+          this.originalData = JSON.parse(JSON.stringify(prestamoResultado));
+          this.prestamoData = JSON.parse(JSON.stringify(prestamoResultado));
+          this.editable = false;
+        } else {
+          throw new Error("La operación no devolvió datos válidos o fue abortada (token ausente).");
+        }
+
+      } catch (error: any) {
+        console.error('Error al guardar cambios del préstamo (vista):', error);
+        const backendError = error.response?.data;
+        let detailMessage = 'No se pudo guardar los cambios del préstamo.';
+
+        if (backendError) {
+          if (typeof backendError.message === 'string') {
+            detailMessage = backendError.message;
+          } else if (backendError.error && typeof backendError.error === 'string') {
+            detailMessage = backendError.error;
+          } else if (Array.isArray(backendError.errors) && backendError.errors.length > 0) {
+            detailMessage = backendError.errors.map((e: any) => e.defaultMessage || e.message).join(', ');
+          }
+        } else if (error.message) {
+          detailMessage = error.message;
+        }
+
+        this.toast.add({ severity: 'error', summary: 'Error', detail: detailMessage, life: 5000 });
+
+        if (this.originalData) {
+          this.prestamoData = JSON.parse(JSON.stringify(this.originalData));
+        }
       }
     },
   }
@@ -126,8 +213,10 @@ export default defineComponent({
   box-sizing: border-box;
 }
 
-
-.boton-atras-wrapper {
+.detalle-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 25px;
   margin-top: 5%;
   margin-left: 40%;
@@ -154,6 +243,37 @@ export default defineComponent({
   background-color: var(--color-interactive-darker);
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.action-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.action-button:active {
+  transform: scale(0.98);
+}
+
+.action-button i {
+  font-size: 1rem;
+}
+
+.edit-button {
+  background-color: var(--color-interactive);
+  color: white;
+  margin-right: -400px;
+}
+
+.edit-button:hover {
+  background-color: var(--color-interactive-darker);
 }
 
 .prestamo-details {
@@ -271,11 +391,33 @@ input.input-field[readonly]:focus {
 
 .status-vencido {
   background-color: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-warning);
+}
+
+.status-devuelto {
+  background-color: rgba(var(--color-success-rgb), 0.15);
   color: var(--color-success);
 }
 
 .status-unknown {
   background-color: var(--color-neutral-medium);
   color: var(--color-text-dark);
+}
+
+.update-button-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-medium);
+}
+
+.update-button {
+  background-color: var(--color-interactive);
+  color: white;
+}
+
+.update-button:hover {
+  background-color: var(--color-interactive-darker);
 }
 </style>

@@ -19,12 +19,13 @@
       <div class="details-grid">
 
         <div class="form-group">
-          <label>Número de Serie</label>
-          <div class="readonly-field">{{ dispositivoData.numeroSerie }}</div> </div>
+          <label for="numeroSerie">Número de Serie</label>
+          <input readonly type="text" id="numeroSerie" class="input-field" v-model="dispositivoData.numeroSerie"/>
+        </div>
 
         <div class="form-group">
           <label for="componentes">Componentes</label>
-          <input :readonly="!editable" type="text" id="componentes" class="input-field" v-model="dispositivoData.componentes"/>
+          <input readonly type="text" id="componentes" class="input-field" v-model="dispositivoData.componentes"/>
         </div>
 
         <div class="form-group">

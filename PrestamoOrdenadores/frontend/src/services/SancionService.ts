@@ -1,10 +1,9 @@
 import axios from 'axios';
-import type {Incidencia} from "@/services/IncidenciaService.ts";
 
 interface Sancion {
     guid: string;
     tipo: string;
-    user: { guid: string; };
+    user: { guid: string; numeroIdentificacion: string; };
     userGuid: string;
     fechaSancion: string;
     createdDate: string;
@@ -31,7 +30,7 @@ export const getSancionByGuid = async (guid: string): Promise<Sancion | null> =>
 
         const sancion: Sancion = {
             ...response.data,
-            user: response.data.user ? { guid: response.data.user.guid } : null,
+            user: response.data.user ? { numeroIdentificacion: response.data.user.numeroIdentificacion } : null,
             userGuid: response.data.user ? response.data.user.guid : null,
         };
 
