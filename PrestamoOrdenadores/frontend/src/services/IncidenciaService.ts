@@ -7,7 +7,7 @@ export interface Incidencia {
     asunto: string;
     descripcion: string;
     estado: string;
-    user: { guid: string; };
+    user: { guid: string; numeroIdentificacion: string; };
     userGuid: string;
     createdDate: string;
     updatedDate: string;
@@ -38,7 +38,7 @@ export const getIncidenciaByGuid = async (guid: string): Promise<Incidencia | nu
 
         const incidencia: Incidencia = {
             ...response.data,
-            user: response.data.user ? { guid: response.data.user.guid } : null,
+            user: response.data.user ? { numeroIdentificacion: response.data.user.numeroIdentificacion } : null,
             userGuid: response.data.user ? response.data.user.guid : null,
         };
 

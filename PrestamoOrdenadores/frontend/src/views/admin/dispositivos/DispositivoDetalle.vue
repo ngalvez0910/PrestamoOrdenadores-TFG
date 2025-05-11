@@ -22,7 +22,7 @@
           <label for="numeroSerie">Número de Serie</label>
           <input readonly type="text" id="numeroSerie" class="input-field" v-model="dispositivoData.numeroSerie"/>
         </div>
-        
+
         <div class="form-group">
           <label for="componentes">Componentes</label>
           <input readonly type="text" id="componentes" class="input-field" v-model="dispositivoData.componentes"/>

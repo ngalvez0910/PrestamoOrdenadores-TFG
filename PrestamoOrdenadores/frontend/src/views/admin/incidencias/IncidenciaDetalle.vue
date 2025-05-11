@@ -41,8 +41,8 @@
         </div>
 
         <div class="form-group">
-          <label for="usuarioGuid">Usuario (GUID)</label>
-          <div class="readonly-field">{{ incidenciaData.user?.guid || incidenciaData.userGuid || 'N/A' }}</div>
+          <label for="userNumIdentificacion">Usuario</label>
+          <div class="readonly-field">{{ incidenciaData.user?.numeroIdentificacion || incidenciaData.userGuid || 'N/A' }}</div>
         </div>
 
         <div class="form-group">
