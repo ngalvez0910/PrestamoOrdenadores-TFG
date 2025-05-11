@@ -18,4 +18,5 @@ interface PrestamoService {
     fun getByFechaPrestamo(fechaPrestamo: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
     fun getByFechaDevolucion(fechaDevolucion: LocalDate): Result<List<PrestamoResponse>, PrestamoError>
     fun getPrestamoByUserGuid(userGuid: String) : Result<List<PrestamoResponse>, PrestamoError>
+    fun cancelarPrestamo(guid: String) : Result<PrestamoResponse?, PrestamoError>
 }

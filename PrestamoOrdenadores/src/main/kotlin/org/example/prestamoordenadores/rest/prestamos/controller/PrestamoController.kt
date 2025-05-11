@@ -144,4 +144,18 @@ class PrestamoController
 
         return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
+
+    @PatchMapping("/cancelar/{guid}")
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
+    fun cancelarPrestamo(@PathVariable guid: String): ResponseEntity<Any>{
+        return prestamoService.cancelarPrestamo(guid).mapBoth(
+            success = { ResponseEntity.status(200).body(it) },
+            failure = { error ->
+                when(error) {
+                    is PrestamoNotFound -> ResponseEntity.status(404).body("Préstamo no encontrado")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
 }
