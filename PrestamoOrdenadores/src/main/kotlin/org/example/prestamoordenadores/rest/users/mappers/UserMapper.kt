@@ -19,7 +19,8 @@ class UserMapper {
             nombre = user.nombre,
             apellidos = user.apellidos,
             curso = user.curso ?:"",
-            tutor = user.tutor ?:""
+            tutor = user.tutor ?:"",
+            avatar = user.avatar,
         )
     }
 

@@ -11,7 +11,7 @@
         <div class="profile-card-body">
           <div class="avatar-section">
             <img :src="avatar" alt="Avatar" class="avatar-image" />
-            <button @click="changeAvatar" class="action-button avatar-button">
+            <button @click="openAvatarDialog" class="action-button avatar-button">
               <i class="pi pi-camera"></i> Cambiar Avatar
             </button>
           </div>
@@ -75,6 +75,30 @@
     </form>
   </Dialog>
 
+  <Dialog header="Seleccionar Avatar" v-model:visible="isAvatarDialogVisible" modal
+          :style="{ width: 'clamp(400px, 70vw, 650px)' }"
+          :draggable="false" @hide="resetAvatarSelection">
+    <p v-if="!availableAvatars.length">No hay avatares disponibles.</p>
+    <div class="avatar-selection-grid" v-else>
+      <div v-for="avatarUrl in availableAvatars" :key="avatarUrl"
+           class="avatar-option"
+           :class="{ 'selected': avatarUrl === selectedAvatarInDialog }"
+           @click="selectAvatar(avatarUrl)"
+           role="button"
+           tabindex="0"
+           @keydown.enter="selectAvatar(avatarUrl)"
+           @keydown.space="selectAvatar(avatarUrl)">
+        <img :src="avatarUrl" alt="Opción de avatar" class="avatar-option-image" />
+        <i v-if="avatarUrl === selectedAvatarInDialog" class="pi pi-check-circle selected-icon"></i>
+      </div>
+    </div>
+
+    <template #footer>
+      <Button label="Cancelar" icon="pi pi-times" class="p-button-text action-button secondary-button" @click="isAvatarDialogVisible = false" />
+      <Button label="Confirmar Selección" icon="pi pi-check" class="action-button primary-button" @click="confirmAvatarChange" :disabled="!selectedAvatarInDialog || selectedAvatarInDialog === avatar" :loading="isUpdatingAvatar" />
+    </template>
+  </Dialog>
+
   <Toast />
 </template>
 
@@ -89,8 +113,10 @@ import {useRouter} from "vue-router";
 import { jwtDecode } from "jwt-decode";
 import {useToast} from "primevue/usetoast";
 import { authService } from '@/services/AuthService';
+import {updateAvatar} from "@/services/UsuarioService.ts";
 
 interface UserData {
+  guid: string;
   nombre: string;
   apellidos?: string;
   email: string;
@@ -103,6 +129,7 @@ export default defineComponent({
   components: { Toast, Dialog, Button, Password },
   data() {
     return {
+      guid: null as string | null,
       nombre: '',
       email: '',
       curso: '',
@@ -121,6 +148,23 @@ export default defineComponent({
         general: '',
       },
       isSubmittingChangePassword: false,
+      isAvatarDialogVisible: false,
+      availableAvatars: [
+        '/assets/avatars/avatarCapibara.jpg',
+        '/assets/avatars/avatarDinosaurio.avif',
+        '/assets/avatars/avatarGato.jpg',
+        '/assets/avatars/avatarHelloKitty.jpg',
+        '/assets/avatars/avatarPato.jpg',
+        '/assets/avatars/avatarRana.jpg',
+        '/assets/avatars/avatarAzul.png',
+        '/assets/avatars/avatarVerde.png',
+        '/assets/avatars/avatarRojo.png',
+        '/assets/avatars/avatarMorado.png',
+        '/assets/avatars/avatarRosa.png',
+        '/assets/avatars/avatarRatonHada.jpg',
+      ],
+      selectedAvatarInDialog: null as string | null,
+      isUpdatingAvatar: false,
     };
   },
   setup: function () {
@@ -147,6 +191,7 @@ export default defineComponent({
             },
           });
 
+          this.guid = response.data.guid;
           this.nombre = response.data.apellidos ? `${response.data.nombre} ${response.data.apellidos}` : response.data.nombre;
           this.email = response.data.email;
           this.curso = response.data.curso;
@@ -171,11 +216,47 @@ export default defineComponent({
         this.$router.push("/");
       }
     },
-    changeAvatar() {
-      const newAvatarUrl = prompt("Introduce la URL de tu nuevo avatar:", this.avatar);
-      if (newAvatarUrl) {
-        this.avatar = newAvatarUrl;
-        this.toast.add({ severity: 'info', summary: 'Avatar Actualizado', detail: 'El avatar se ha actualizado (simulación).', life: 3000 });
+    openAvatarDialog() {
+      this.selectedAvatarInDialog = this.avatar;
+      this.isAvatarDialogVisible = true;
+    },
+    resetAvatarSelection() {
+      this.selectedAvatarInDialog = null;
+      console.log('Diálogo cerrado, selección actual:', this.selectedAvatarInDialog);
+    },
+    selectAvatar(avatarUrl: string) {
+      this.selectedAvatarInDialog = avatarUrl;
+    },
+    async confirmAvatarChange() {
+      if (!this.selectedAvatarInDialog) {
+        this.toast.add({ severity: 'warn', summary: 'Selección Requerida', detail: 'Por favor, selecciona un avatar.', life: 3000 });
+        return;
+      }
+      if (this.selectedAvatarInDialog === this.avatar) {
+        this.toast.add({ severity: 'info', summary: 'Sin Cambios', detail: 'Has seleccionado el mismo avatar que ya tenías.', life: 3000 });
+        this.isAvatarDialogVisible = false;
+        return;
+      }
+
+      if (!this.guid) {
+        this.toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo identificar al usuario para la actualización.', life: 3000 });
+        return;
+      }
+
+      this.isUpdatingAvatar = true;
+
+      try {
+        await updateAvatar(this.guid, this.selectedAvatarInDialog);
+
+        this.avatar = this.selectedAvatarInDialog;
+        this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Avatar actualizado correctamente.', life: 3000 });
+        this.isAvatarDialogVisible = false;
+
+      } catch (error: any) {
+        console.error("Error al confirmar cambio de avatar:", error);
+        this.toast.add({ severity: 'error', summary: 'Error al Actualizar', detail: error.message || 'No se pudo actualizar el avatar.', life: 5000 });
+      } finally {
+        this.isUpdatingAvatar = false;
       }
     },
     resetChangePasswordForm() {
@@ -506,6 +587,62 @@ export default defineComponent({
   background-color: white;
   padding: 1.5rem;
   font-family: 'Montserrat', sans-serif;
+}
+
+.avatar-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 15px;
+  padding: 10px 0;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.avatar-option {
+  position: relative;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out, transform 0.1s ease;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1 / 1;
+  background-color: #f4f4f4;
+}
+
+.avatar-option:hover,
+.avatar-option:focus {
+  border-color: var(--color-interactive, #ccc);
+  outline: none;
+  transform: scale(1.03);
+}
+
+.avatar-option.selected {
+  border-color: var(--color-interactive, #007bff);
+  box-shadow: 0 0 8px rgba(var(--color-interactive-rgb), 0.5);
+  transform: scale(1.05);
+}
+
+.avatar-option-image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.selected-icon {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: 1.5rem;
+  color: var(--color-interactive, #007bff);
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  padding: 2px;
+  line-height: 1;
 }
 
 @media (max-width: 992px) {
