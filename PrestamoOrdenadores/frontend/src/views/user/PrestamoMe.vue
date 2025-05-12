@@ -1,6 +1,4 @@
 <template>
-  <AdminMenuBar/>
-
   <div class="page-container prestamos-me-page">
     <div class="page-header">
       <div class="header-left">
@@ -60,7 +58,6 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
@@ -75,7 +72,7 @@ import { useConfirm } from 'primevue/useconfirm';
 
 export default defineComponent({
   name: "PrestamoMe",
-  components: { AdminMenuBar, DataTable, Column, Button, ConfirmDialog, Toast },
+  components: { DataTable, Column, Button, ConfirmDialog, Toast },
   directives: { Tooltip },
   setup() {
     const prestamos = ref<Prestamo[]>([]);

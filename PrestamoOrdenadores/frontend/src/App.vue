@@ -6,7 +6,7 @@
     <main class="main-content">
       <router-view />
     </main>
-    <NuevoFooter />
+    <Footer />
     <Toast />
   </div>
 </template>
@@ -19,6 +19,7 @@ import Toast from 'primevue/toast';
 import { authService } from "@/services/AuthService";
 import Footer from "@/components/Footer.vue";
 import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
+import MenuBar from "@/components/MenuBar.vue";
 
 type ToastSeverity = 'success' | 'info' | 'warn' | 'error';
 type NotificationEntityType = 'info' | 'prestamo' | 'incidencia' | 'sistema' | 'advertencia' | 'error' | 'sancion';
@@ -37,7 +38,8 @@ export default defineComponent({
   name: 'App',
   components: {
     MenuBarNoSession,
-    NuevoFooter: Footer,
+    MenuBar,
+    Footer,
     Login,
     Toast
   },

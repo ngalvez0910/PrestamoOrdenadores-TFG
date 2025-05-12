@@ -1,6 +1,4 @@
 <template>
-  <MenuBarNoSession />
-
   <div class="register-page-container"> <div class="register-box">
     <h2>Registro</h2> <Dialog :header="modalTitle" v-model:visible="isInfoModalVisible" modal :style="{ width: '50vw', fontFamily: 'Montserrat' }" :breakpoints="{'960px': '75vw', '641px': '100vw'}">
     <div class="dialog-content" v-html="modalBody"></div>
@@ -136,7 +134,6 @@
 </template>
 
 <script lang="ts">
-import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -145,7 +142,7 @@ import { authService } from '@/services/AuthService.ts';
 
 export default {
   name: 'Register',
-  components: { MenuBarNoSession, Toast, Button, Dialog },
+  components: { Toast, Button, Dialog },
   setup() {
     const toast = useToast();
     return { toast };

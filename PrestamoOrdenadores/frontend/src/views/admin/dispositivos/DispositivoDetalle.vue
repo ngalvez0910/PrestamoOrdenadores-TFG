@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="detalle-container">
     <div class="detalle-header-actions">
       <button @click="goBack" class="back-button" title="Volver a Dispositivos">
@@ -67,7 +66,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import MenuBar from '@/components/AdminMenuBar.vue';
 import {actualizarDispositivo, getDispositivoByGuid,} from '@/services/DispositivoService.ts';
 import {useToast} from "primevue/usetoast";
 
@@ -75,7 +73,6 @@ type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
 
 export default defineComponent({
   name: 'DispositivoDetalle',
-  components: { MenuBar },
   inheritAttrs: false,
   setup() {
     const toast = useToast();

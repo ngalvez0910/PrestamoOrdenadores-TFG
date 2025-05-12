@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="detalle-container">
     <div class="detalle-header-actions">
       <button @click="goBack" class="back-button" title="Volver a Incidencias">
@@ -68,7 +67,6 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import MenuBar from "@/components/AdminMenuBar.vue";
 import {getIncidenciaByGuid, actualizarIncidencia} from "@/services/IncidenciaService.ts";
 import {useToast} from "primevue/usetoast";
 
@@ -76,7 +74,6 @@ type IncidenceState = 'PENDIENTE' | 'RESUELTO';
 
 export default defineComponent({
   name: "IncidenciaDetalle",
-  components: {MenuBar},
   inheritAttrs: false,
   setup() {
     const toast = useToast();

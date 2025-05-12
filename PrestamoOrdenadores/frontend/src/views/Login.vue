@@ -52,16 +52,15 @@
 </template>
 
 <script lang="ts">
-import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 import Toast from "primevue/toast";
 import Button from "primevue/button";
 import { useToast } from "primevue/usetoast";
 import axios from 'axios';
-import * as jwt_decode from 'jwt-decode';
+import {authService} from "@/services/AuthService.ts";
 
 export default {
   name: 'Login',
-  components: { MenuBarNoSession, Toast, Button },
+  components: { Toast, Button },
   setup() {
     const toast = useToast();
     return { toast };
@@ -81,53 +80,76 @@ export default {
   },
   methods: {
     async login() {
-      this.errors = {
-        email: '',
-        password: ''
-      };
-
+      this.errors = { email: '', password: '' };
       let formIsValid = true;
-
       if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
         this.errors.email = 'Correo electrónico inválido';
         formIsValid = false;
       }
-      if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
+      if (this.form.password.length < 8 /* || !/^(?=.*[A-Z])... */) {
         this.errors.password = 'Contraseña incorrecta';
         formIsValid = false;
       }
 
       if (formIsValid) {
         try {
+          this.toast.add({ severity: 'info', summary: 'Iniciando sesión...', detail: 'Por favor espera.', life: 1500 });
+
           const response = await axios.post('http://localhost:8080/auth/signin', this.form);
+          const receivedToken = response.data.token;
 
-          localStorage.setItem('token', response.data.token);
-          const decodedToken: any = jwt_decode.jwtDecode(response.data.token);
-          const rol = decodedToken.rol;
+          if (receivedToken) {
+            authService.setToken(receivedToken);
+            try {
+              await authService.fetchUser();
+              console.log("[Login.vue] authService.fetchUser completado.");
 
-          console.log("Rol del usuario:", rol);
+              const userRoleFromService = authService.role;
+              console.log("[Login.vue] Rol obtenido DESDE authService:", userRoleFromService);
 
-          if (rol === 'ADMIN') {
-            this.$router.push('/admin/dashboard');
+              if (!userRoleFromService) {
+                console.error("[Login.vue] No se encontró el rol en authService.user después de fetchUser.");
+                this.toast.add({ severity: 'error', summary: 'Error de Datos', detail: 'No se pudo verificar el rol del usuario.', life: 3000 });
+                await authService.logout();
+                return;
+              }
+
+              this.toast.add({ severity: 'success', summary: '¡Éxito!', detail: 'Sesión iniciada.', life: 2000 });
+
+              if (userRoleFromService === 'ADMIN') {
+                this.$router.push('/admin/dashboard');
+              } else {
+                this.$router.push('/profile');
+              }
+
+            } catch (fetchError) {
+              console.error("[Login.vue] Error durante fetchUser post-login:", fetchError);
+              this.toast.add({ severity: 'warn', summary: 'Info Parcial', detail: 'Sesión iniciada pero no se pudieron cargar detalles completos.', life: 3000 });
+              if (authService.token) {
+                this.$router.push('/profile');
+              } else {
+                this.$router.push('/');
+              }
+            }
           } else {
-            this.$router.push('/profile');
+            console.error("[Login.vue] Respuesta OK de API pero sin token.");
+            this.toast.add({ severity: 'error', summary: 'Error de Respuesta', detail: 'No se recibió token del servidor.', life: 3000 });
+            await authService.logout();
           }
-
         } catch (error) {
-          console.error('Error al iniciar sesión:', error);
+          console.error('[Login.vue] Error inesperado en el método login:', error);
           this.toast.add({
             severity: 'error',
-            summary: 'Error en el inicio de sesión',
-            detail: 'Usuario o contraseña incorrectos.',
+            summary: 'Error Inesperado',
+            detail: 'Ocurrió un problema al intentar iniciar sesión.',
             life: 3000,
-            styleClass: 'custom-toast-error'
           });
         }
       } else {
         this.toast.add({
           severity: 'error',
-          summary: 'Error en el inicio de sesión',
-          detail: 'Por favor, corrija los errores y vuelva a intentarlo.',
+          summary: 'Error en el formulario',
+          detail: 'Por favor, corrija los errores indicados.',
           life: 3000,
           styleClass: 'custom-toast-error'
         });

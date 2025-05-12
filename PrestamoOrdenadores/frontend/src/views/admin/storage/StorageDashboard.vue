@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="storage-container"> <div class="dashboard"> <div class="dashboard-box"> <i class="pi pi-desktop icon"></i>
     <p>Dispositivos</p>
     <div class="box-action-wrapper">
@@ -73,7 +72,6 @@
 </template>
 
 <script lang="ts">
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import { descargarCsvDispositivos } from "@/services/DispositivoService.ts";
 import {descargarCsvUsers} from "@/services/UsuarioService.ts";
 import {descargarCsvIncidencias} from "@/services/IncidenciaService.ts";
@@ -83,7 +81,6 @@ import { createBackup, listBackups, restoreBackup, type BackupInfo } from "@/ser
 
 export default {
   name: "StorageDashboard",
-  components: { MenuBar: AdminMenuBar },
   data() {
     return {
       backupsDisponibles: [] as BackupInfo[],

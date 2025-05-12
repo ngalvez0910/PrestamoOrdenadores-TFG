@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="detalle-container">
 
     <div class="detalle-header-actions">
@@ -77,13 +76,11 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import MenuBar from "@/components/AdminMenuBar.vue";
 import {actualizarPrestamo, cancelarPrestamo, getPrestamoByGuid, type Prestamo} from "@/services/PrestamoService.ts";
 import {useToast} from "primevue/usetoast";
 
 export default defineComponent({
   name: "PrestamoDetalle",
-  components: {MenuBar},
   inheritAttrs: false,
   setup() {
     const toast = useToast();

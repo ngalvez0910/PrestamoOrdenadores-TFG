@@ -1,6 +1,4 @@
 <template>
-  <MenuBarNoSession />
-
   <div class="page-container policy-page">
     <div class="policy-header-actions"> <button @click="goBack" class="back-button" title="Volver">
       <i class="pi pi-arrow-left"></i>
@@ -108,12 +106,9 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
-import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 
 export default defineComponent({
   name: "PoliticaPrivacidad",
-  components: {MenuBarNoSession, AdminMenuBar},
   methods: {
     goBack() {
       if (this.$router) {

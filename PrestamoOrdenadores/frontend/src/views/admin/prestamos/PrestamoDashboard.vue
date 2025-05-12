@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="prestamos-container">
     <div class="filters-container">
       <div class="unified-search">
@@ -96,7 +95,6 @@
 </template>
 
 <script lang="ts">
-import MenuBar from "@/components/AdminMenuBar.vue";
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
 import axios from 'axios';
@@ -120,7 +118,7 @@ interface PagedResponse {
 
 export default {
   name: 'PrestamoDashboard',
-  components: { MenuBar, Calendar, Button },
+  components: {Calendar, Button },
   emits: ['input-change'],
   data() {
     return {

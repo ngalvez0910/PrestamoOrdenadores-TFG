@@ -13,6 +13,7 @@ export interface UserData {
 interface AuthState {
     user: UserData | null;
     token: string | null;
+    roleFromToken: string | null;
 }
 
 export interface UserPasswordResetRequest {
@@ -24,6 +25,7 @@ export interface UserPasswordResetRequest {
 const state = reactive<AuthState>({
     user: null,
     token: localStorage.getItem("token"),
+    roleFromToken: null
 });
 
 export const authService = {
@@ -47,11 +49,20 @@ export const authService = {
         state.token = token;
         localStorage.setItem("token", token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        try {
+            const decoded: any = jwtDecode(token);
+            state.roleFromToken = decoded.rol || null;
+            console.log("[AuthService] Role from token set in state:", state.roleFromToken);
+        } catch (e) {
+            console.error("[AuthService] Failed to decode token in setToken:", e);
+            state.roleFromToken = null;
+        }
     },
 
     async logout(): Promise<void> {
         state.user = null;
         state.token = null;
+        state.roleFromToken = null;
         localStorage.removeItem("token");
         delete axios.defaults.headers.common['Authorization'];
     },
@@ -163,6 +174,10 @@ export const authService = {
 
     get token(): string | null {
         return state.token;
+    },
+
+    get role(): string | null {
+        return state.roleFromToken;
     },
 
     isAuthenticated(): boolean {

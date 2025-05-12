@@ -1,6 +1,4 @@
 <template>
-  <AdminMenuBar/>
-
   <div class="page-container notifications-page">
     <div class="page-header">
       <div class="header-left">
@@ -67,7 +65,6 @@
 
 <script lang="ts">
 import {defineComponent, ref, onMounted, computed, inject, watch, type Ref} from 'vue';
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import ProgressSpinner from 'primevue/progressspinner';
@@ -91,7 +88,7 @@ interface Notificacion {
 
 export default defineComponent({
   name: "Notificaciones",
-  components: { AdminMenuBar, Button, Toast, ProgressSpinner },
+  components: { Button, Toast, ProgressSpinner },
   directives: { Tooltip },
   setup() {
     const API_BASE_URL = inject<string>('API_BASE_URL', 'http://localhost:8080');

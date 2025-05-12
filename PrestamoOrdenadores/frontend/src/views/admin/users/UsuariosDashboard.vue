@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="usuarios-container"> <div class="filters">
     <label for="search-input">Buscar:</label>
     <input id="search-input" type="text" v-model="search" placeholder="Buscar por Email, Nombre, Rol..." @input="handleSearchInput" />
@@ -60,7 +59,6 @@
 </template>
 
 <script lang="ts">
-import MenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -93,7 +91,7 @@ interface PagedResponse {
 
 export default {
   name: 'UsuariosDashboard',
-  components: { MenuBar, DataTable, Column },
+  components: {DataTable, Column },
   emits: ['input-change'],
   data() {
     return {

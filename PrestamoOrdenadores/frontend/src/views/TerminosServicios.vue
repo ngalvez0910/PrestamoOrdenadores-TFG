@@ -1,6 +1,4 @@
 <template>
-  <MenuBarNoSession />
-
   <div class="page-container terms-page">
     <div class="terms-header-actions"> <button @click="goBack" class="back-button" title="Volver">
       <i class="pi pi-arrow-left"></i>
@@ -103,11 +101,9 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 
 export default defineComponent({
   name: "TerminosServicios",
-  components: {MenuBarNoSession},
   methods: {
     goBack() {
       if (this.$router) {

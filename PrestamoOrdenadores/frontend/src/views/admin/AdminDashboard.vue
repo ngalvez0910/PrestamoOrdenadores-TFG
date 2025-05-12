@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="dashboard">
     <router-link to="/admin/dashboard/prestamos" class="dashboard-box">
       <i class="pi pi-arrow-right-arrow-left icon"></i>
@@ -34,11 +33,9 @@
 </template>
 
 <script lang="ts">
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
 
 export default {
   name: "Dashboard",
-  components: { MenuBar: AdminMenuBar },
 };
 </script>
 

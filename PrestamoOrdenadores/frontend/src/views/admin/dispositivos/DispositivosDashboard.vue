@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="dispositivos-container"> <div class="filters">
     <label for="search-input">Buscar:</label>
     <input id="search-input" type="text" v-model="search" placeholder="Buscar por Nº Serie, Componentes, Estado..." @input="handleSearchInput" />
@@ -58,7 +57,6 @@
 </template>
 
 <script lang="ts">
-import MenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
 
 type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
@@ -83,7 +81,6 @@ interface PagedResponse {
 
 export default {
   name: 'DispositivosDashboard',
-  components: { MenuBar },
   emits: ['input-change'],
   data() {
     return {

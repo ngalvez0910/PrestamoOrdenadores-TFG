@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="sanciones-container">
     <div class="filters-container">
       <div class="unified-search">
@@ -93,7 +92,6 @@
 </template>
 
 <script lang="ts">
-import MenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
@@ -118,7 +116,7 @@ interface PagedResponse {
 
 export default {
   name: 'SancionDashboard',
-  components: { MenuBar, Calendar, Button },
+  components: { Calendar, Button },
   emits: ['input-change'],
   data() {
     return {

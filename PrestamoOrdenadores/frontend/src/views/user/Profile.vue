@@ -1,5 +1,4 @@
 <template>
-  <AdminMenuBar/>
   <div class="page-container profile-page">
 
     <div class="profile-card">
@@ -81,14 +80,13 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Password from 'primevue/password';
 import axios from 'axios';
 import {useRouter} from "vue-router";
-import { jwtDecode, type JwtPayload } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import {useToast} from "primevue/usetoast";
 import { authService } from '@/services/AuthService';
 
@@ -100,13 +98,9 @@ interface UserData {
   avatar?: string;
 }
 
-interface DecodedToken extends JwtPayload {
-  sub: string;
-}
-
 export default defineComponent({
   nombre: "Profile",
-  components: { AdminMenuBar, Toast, Dialog, Button, Password },
+  components: { Toast, Dialog, Button, Password },
   data() {
     return {
       nombre: '',
@@ -164,11 +158,18 @@ export default defineComponent({
         }
       }
     },
-    logout() {
-      console.trace("Logout desde:");
+    async logout() {
+      console.trace("Logout desde Profile.vue:");
       console.log("Cerrando sesión...");
-      localStorage.removeItem("token");
-      this.$router.push("/");
+      try {
+        await authService.logout();
+        console.log("[Profile.vue] authService.logout() completado.");
+        this.$router.push("/");
+      } catch (error) {
+        console.error("[Profile.vue] Error durante el logout:", error);
+        this.toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cerrar la sesión completamente.', life: 3000 });
+        this.$router.push("/");
+      }
     },
     changeAvatar() {
       const newAvatarUrl = prompt("Introduce la URL de tu nuevo avatar:", this.avatar);
