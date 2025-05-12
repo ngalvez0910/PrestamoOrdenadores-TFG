@@ -1,122 +1,108 @@
 <template>
-  <div class="footer-wrapper">
-    <div class="footer">
-      <div class="footer-content">
-        <div class="footer-brand">
-          <a href="/" class="brand-link">
-            <img src="/logo.png" alt="LoanTech Logo" class="footer-logo-img" />
-            <h1>LoanTech</h1>
-          </a>
-        </div>
-
-        <div class="footer-info">
-          <div class="contact-column">
-            <div class="contact-item">
-              <span class="icon">📧</span> <a href="mailto:contacto@loantech.com">contacto@loantech.com</a>
-            </div>
-            <div class="contact-item">
-              <span class="icon">📞</span> <a href="tel:+34000000000">+34 000 000 000</a>
-            </div>
-          </div>
-          <div class="contact-column">
-            <div class="contact-item address-item">
-              <span class="icon">📍</span> <span>C. Manzanares, 28692, Madrid</span>
-            </div>
-          </div>
-        </div>
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="copyright">
+        &copy; {{ currentYear }} LoanTech. Todos los derechos reservados.
       </div>
-      <div class="footer-bottom">
-        <p>&copy; {{ currentYear }} LoanTech. Todos los derechos reservados.</p>
-      </div>
+      <nav class="footer-nav">
+        <ul>
+          <li><a href="/politicaPrivacidad">Política de Privacidad</a></li>
+          <li><a href="/terminosServicio">Términos de Servicio</a></li>
+          <li>
+            <span class="icon">📧</span> <a href="mailto:contacto@loantech.com">contacto@loantech.com</a>
+          </li>
+          <li>
+            <span class="icon">📞</span> <a href="tel:+34910384889">+34 910 384 889</a>
+          </li>
+        </ul>
+      </nav>
     </div>
-  </div>
+  </footer>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import {defineComponent, ref} from 'vue';
 
 export default defineComponent({
-  name: "Footer",
+  name: 'Footer',
   setup() {
     const currentYear = ref(new Date().getFullYear());
+
     return {
       currentYear
-    }
+    };
   }
-})
+});
 </script>
 
 <style scoped>
-.footer-wrapper {
-  display: block;
+.app-footer {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  padding: 2rem 1rem;
+  border-top: 1px solid #e7e7e7;
+  margin-top: auto;
   width: 100%;
-  background-color: #1f2937;
-  color: #f3f4f6;
-}
-
-.footer {
-  max-width: 1200px;
-  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .footer-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.brand-link {
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #f3f4f6;
-}
-
-.footer-logo-img {
-  width: 50px;
-  height: auto;
-}
-
-.footer-info {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: flex-start;
-}
-
-.contact-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.contact-item {
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.icon {
-  font-size: 1.2rem;
-}
-
-.address-item span:last-child {
-  line-height: 1.4;
-}
-
-.footer-bottom {
-  border-top: 1px solid #374151;
-  margin-top: 2rem;
-  padding-top: 1rem;
+.copyright {
+  font-size: 0.9em;
   text-align: center;
-  font-size: 0.9rem;
-  color: #9ca3af;
+  flex-basis: 100%;
+  order: 2;
+}
+
+.footer-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-nav li {
+  display: inline-block;
+}
+
+.footer-nav a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+.footer-nav a:hover,
+.footer-nav a:focus {
+  text-decoration: underline;
+  color: #0056b3;
+}
+
+@media (min-width: 768px) {
+  .footer-content {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+
+  .copyright {
+    text-align: left;
+    flex-basis: auto;
+    order: 0;
+  }
+
+  .footer-nav ul {
+    justify-content: flex-end;
+  }
 }
 </style>

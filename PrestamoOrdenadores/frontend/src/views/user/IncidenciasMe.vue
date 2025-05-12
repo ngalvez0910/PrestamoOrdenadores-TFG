@@ -1,6 +1,4 @@
 <template>
-  <AdminMenuBar/>
-
   <div class="page-container incidencias-me-page">
     <div class="page-header">
       <div class="header-left">
@@ -64,7 +62,6 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
@@ -79,7 +76,7 @@ import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: "IncidenciasMe",
-  components: { AdminMenuBar, DataTable, Column, Button, Toast, Dialog, InputText, Textarea },
+  components: { DataTable, Column, Button, Toast, Dialog, InputText, Textarea },
   setup() {
     const incidencias = ref<Incidencia[]>([]);
     const loading = ref(true);
@@ -377,7 +374,7 @@ export default defineComponent({
   gap: 10px;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid var(--color-neutral-light);
+  border-top: 1px solid var(--color-neutral-medium);
 }
 
 .action-button.secondary-button {

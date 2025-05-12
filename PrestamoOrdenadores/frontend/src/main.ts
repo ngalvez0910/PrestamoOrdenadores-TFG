@@ -12,7 +12,7 @@ import App from './App.vue'
 import PrimeVue from 'primevue/config'
 import Menubar from 'primevue/menubar'
 import Button from 'primevue/button'
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
+import MenuBar from "@/components/MenuBar.vue";
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import router from './router'
@@ -34,7 +34,7 @@ app.use(ConfirmationService);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Menubar', Menubar)
 app.component('Button', Button)
-app.component('AdminMenuBar', AdminMenuBar)
+app.component('MenuBar', MenuBar)
 app.component('DataTable', DataTable)
 app.component('Column', Column)
 app.component('Menu', Menu)

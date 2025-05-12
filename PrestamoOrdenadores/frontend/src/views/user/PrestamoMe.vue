@@ -1,6 +1,4 @@
 <template>
-  <AdminMenuBar/>
-
   <div class="page-container prestamos-me-page">
     <div class="page-header">
       <div class="header-left">
@@ -60,7 +58,6 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-import AdminMenuBar from "@/components/AdminMenuBar.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
@@ -75,7 +72,7 @@ import { useConfirm } from 'primevue/useconfirm';
 
 export default defineComponent({
   name: "PrestamoMe",
-  components: { AdminMenuBar, DataTable, Column, Button, ConfirmDialog, Toast },
+  components: { DataTable, Column, Button, ConfirmDialog, Toast },
   directives: { Tooltip },
   setup() {
     const prestamos = ref<Prestamo[]>([]);
@@ -347,7 +344,6 @@ export default defineComponent({
 :deep(.p-toast .p-toast-message.custom-toast-warning) {
   background-color: var(--color-warning, #fffbeb) !important;
   border: 1px solid var(--color-warning, #f59e0b) !important;
-  border-width: 0 0 0 6px !important;
   color: var(--color-text-dark, #78350f) !important;
 }
 :deep(.p-toast .p-toast-message.custom-toast-warning .p-toast-message-icon),
@@ -358,7 +354,6 @@ export default defineComponent({
 :deep(.p-toast .p-toast-message.custom-toast-info) {
   background-color: var(--color-interactive, #eff6ff) !important;
   border: 1px solid var(--color-interactive, #3b82f6) !important;
-  border-width: 0 0 0 6px !important;
   color: var(--color-interactive-darker, #1e3a8a) !important;
 }
 :deep(.p-toast .p-toast-message.custom-toast-info .p-toast-message-icon),

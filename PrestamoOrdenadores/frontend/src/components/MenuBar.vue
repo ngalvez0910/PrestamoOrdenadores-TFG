@@ -69,8 +69,7 @@ import Menu from "primevue/menu";
 import Button from "primevue/button";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+import {authService, type UserData} from "@/services/AuthService.ts";
 
 export default {
   name: "MenuBar",
@@ -83,18 +82,22 @@ export default {
     const userMenu = ref();
     const adminMenu = ref();
     const router = useRouter();
-    const rol = ref("");
-    const username = ref("");
-    const avatarUrl = ref("https://placehold.co/400");
 
-    const isAdmin = computed(() => rol.value === "ADMIN");
+    const user = computed<UserData | null>(() => authService.user);
+    const token = computed<string | null>(() => authService.token);
+
+    const rol = computed(() => user.value?.rol || "");
+    const username = computed(() => user.value?.nombre || "Usuario");
+    const avatarUrl = computed(() => user.value?.avatarUrl || "https://placehold.co/400");
+    const roleFromService = computed(() => authService.role);
+    const isAdmin = computed(() => roleFromService.value === "ADMIN");
 
     const toggleUserMenu = (event: Event) => {
       userMenu.value?.toggle(event);
     };
 
     const isInAdminSection = computed(() => {
-      return router.currentRoute.value.path.startsWith('/admin/dashboard/');
+      return router.currentRoute.value.path.startsWith('/admin/');
     });
 
     const toggleAdminMenu = (event: Event) => {
@@ -115,10 +118,16 @@ export default {
       {
         label: 'Cerrar sesión',
         icon: 'pi pi-sign-out',
-        command: () => {
-          console.log("Cerrando sesión...");
-          localStorage.removeItem("token");
-          router.push("/");
+        command: async () => {
+          console.log("[MenuBar] Ejecutando comando Cerrar sesión...");
+          try {
+            await authService.logout();
+            console.log("[MenuBar] authService.logout() ejecutado.");
+            await router.push("/");
+          } catch (error) {
+            console.error("[MenuBar] Error durante logout:", error);
+            await router.push("/");
+          }
         }
       }
     ]);
@@ -138,38 +147,9 @@ export default {
       { label: 'Notificaciones', url: '/notificaciones', icon: 'pi pi-bell' },
     ]);
 
-    const loadUserData = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const decodedToken: any = jwtDecode(token);
-          const email = decodedToken.sub;
-          rol.value = decodedToken.rol; // Asignar a rol reactivo
-
-          const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/users/email/${email}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const userData = response.data;
-          username.value = userData.nombre || "Usuario";
-          avatarUrl.value = userData.avatarUrl || "https://placehold.co/400";
-        } catch (error) {
-          console.error("Error al obtener la información del usuario:", error);
-          username.value = "Usuario";
-          avatarUrl.value = "https://placehold.co/400";
-          rol.value = "";
-        }
-      } else {
-        username.value = "Usuario";
-        avatarUrl.value = "https://placehold.co/400";
-        rol.value = "";
-      }
-    };
-
     const getHomeRoute = () => {
       return isAdmin.value ? "/admin/dashboard" : "/profile";
     };
-
-    loadUserData();
 
     return {
       userMenu,

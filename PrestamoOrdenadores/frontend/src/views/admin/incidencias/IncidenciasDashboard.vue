@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="incidencias-container">
     <div class="filters-container">
       <div class="unified-search">
@@ -94,7 +93,6 @@
 </template>
 
 <script lang="ts">
-import MenuBar from "@/components/AdminMenuBar.vue";
 import axios from 'axios';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
@@ -120,7 +118,7 @@ interface PagedResponse {
 
 export default {
   name: 'IncidenciasDashboard',
-  components: { MenuBar, Calendar, Button },
+  components: { Calendar, Button },
   emits: ['input-change'],
   data() {
     return {
@@ -278,17 +276,18 @@ export default {
 .incidencias-container {
   padding: 80px 30px 40px 30px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
   box-sizing: border-box;
 }
 
 .filters-container {
   display: flex;
   gap: 10px;
-  margin-bottom: 25px;
   max-width: 300px;
-  justify-content: flex-start;
-  margin-top: -73%;
+  justify-content: center;
+  align-items: center;
+  margin: -25px auto 20px 250px;
 }
 
 .unified-search {
@@ -461,14 +460,11 @@ export default {
 }
 
 .table-wrapper {
-  position: fixed;
-  width: 90%;
+  width: 100%;
   overflow-x: auto;
   border: 1px solid var(--color-neutral-medium);
   border-radius: 8px;
   background-color: white;
-  margin-left: -21%;
-  margin-top: 1%;
 }
 
 :deep(.p-datatable-custom .p-datatable-thead > tr > th) {

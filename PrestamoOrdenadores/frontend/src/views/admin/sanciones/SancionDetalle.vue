@@ -1,5 +1,4 @@
 <template>
-  <MenuBar />
   <div class="detalle-container">
     <div class="detalle-header-actions">
       <button @click="goBack" class="back-button" title="Volver a Sanciones">
@@ -68,7 +67,6 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import MenuBar from "@/components/AdminMenuBar.vue";
 import {getSancionByGuid, actualizarSancion} from "@/services/SancionService.ts";
 import { useToast } from "primevue/usetoast";
 
@@ -76,7 +74,6 @@ type TipoSancion = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'BLOQUEO_INDEFINIDO';
 
 export default defineComponent({
   name: "SancionDetalle",
-  components: {MenuBar},
   inheritAttrs: false,
   setup() {
     const toast = useToast();
@@ -187,8 +184,6 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  margin-top: 5%;
-  margin-left: 40%;
 }
 
 .back-button {
@@ -238,7 +233,6 @@ export default defineComponent({
 .edit-button {
   background-color: var(--color-interactive);
   color: white;
-  margin-right: -135%;
 }
 
 .edit-button:hover {
@@ -267,8 +261,9 @@ export default defineComponent({
   border-radius: 12px;
   padding: 30px 40px;
   box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
-  margin-left: 55%;
-  min-width: 500px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .details-header {
