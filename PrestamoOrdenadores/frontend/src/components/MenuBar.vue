@@ -30,7 +30,7 @@
 
     <Button class="user-info" @click="toggleUserMenu($event)" text aria-haspopup="true" aria-controls="user_profile_menu">
       <p class="username">{{ username || "Usuario" }}</p>
-      <Avatar :image="avatarUrl || 'https://placehold.co/400'" shape="circle" class="avatar" />
+      <Avatar :image="avatar || 'https://placehold.co/400'" shape="circle" class="avatar" />
     </Button>
 
     <Menu ref="userMenu" id="user_profile_menu" class="user-menu" :model="userMenuItems" :popup="true">
@@ -88,7 +88,7 @@ export default {
 
     const rol = computed(() => user.value?.rol || "");
     const username = computed(() => user.value?.nombre || "Usuario");
-    const avatarUrl = computed(() => user.value?.avatarUrl || "https://placehold.co/400");
+    const avatar = computed(() => user.value?.avatar || "https://placehold.co/400");
     const roleFromService = computed(() => authService.role);
     const isAdmin = computed(() => roleFromService.value === "ADMIN");
 
@@ -160,7 +160,7 @@ export default {
       adminNavItems,
       userSpecificLinks,
       username,
-      avatarUrl,
+      avatar: avatar,
       isAdmin,
       isInAdminSection,
       getHomeRoute,

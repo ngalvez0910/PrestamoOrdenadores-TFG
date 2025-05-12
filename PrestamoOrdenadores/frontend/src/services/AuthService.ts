@@ -6,7 +6,7 @@ export interface UserData {
     guid: string;
     email: string;
     nombre: string;
-    avatarUrl: string;
+    avatar: string;
     rol: string;
 }
 
