@@ -2,6 +2,11 @@
   <MenuBarNoSession />
 
   <div class="page-container policy-page">
+    <div class="policy-header-actions"> <button @click="goBack" class="back-button" title="Volver">
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    </div>
+
     <div class="document-card">
       <article>
         <h2>Política de Privacidad – Aplicación de Préstamo de Equipos Informáticos "LoanTech"</h2>
@@ -108,43 +113,80 @@ import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 
 export default defineComponent({
   name: "PoliticaPrivacidad",
-  components: {MenuBarNoSession, AdminMenuBar}
+  components: {MenuBarNoSession, AdminMenuBar},
+  methods: {
+    goBack() {
+      if (this.$router) {
+        this.$router.back();
+      } else {
+        console.warn("Instancia de Vue Router ($router) no encontrada.");
+      }
+    }
+  }
 })
 </script>
 
 <style scoped>
-/* Estilos generales de la página (pueden heredarse si son globales) */
 .page-container.policy-page {
-  padding: 80px 30px 40px 30px; /* Padding similar a profile */
+  padding: 80px 30px 40px 30px;
   box-sizing: border-box;
 }
 
-/* Estilo de la tarjeta contenedora del documento */
+.policy-header-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 25px;
+  margin-top: -25px;
+  margin-left: 75px;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  width: 40px;
+  height: 40px;
+  line-height: 1;
+}
+
+.back-button:hover {
+  background-color: var(--color-interactive-darker);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(var(--color-primary-rgb), 0.2);
+}
+
 .document-card {
-  background-color: white; /* Fondo blanco */
-  border-radius: 12px; /* Bordes redondeados */
-  padding: 30px 40px; /* Padding interno */
-  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb, 20, 18, 79), 0.1); /* Sombra sutil (con fallback) */
-  max-width: 900px; /* Ancho máximo similar a profile */
-  margin: 0 auto; /* Centrar la tarjeta */
-  font-family: 'Montserrat', sans-serif; /* Fuente principal */
-  line-height: 1.6; /* Interlineado para legibilidad */
-  color: var(--color-text-dark, #495057); /* Color de texto (con fallback) */
+  background-color: white;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb, 20, 18, 79), 0.1);
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: 'Montserrat', sans-serif;
+  line-height: 1.6;
+  color: var(--color-text-dark, #495057);
   box-sizing: border-box;
 }
 
-/* Título principal del documento */
 .document-card h2 {
-  color: var(--color-primary, #14124f); /* Color primario (con fallback) */
+  color: var(--color-primary, #14124f);
   margin: 0 0 1.5rem 0;
-  font-size: 1.6rem; /* Tamaño similar a profile */
-  font-weight: 600; /* Peso similar a profile */
+  font-size: 1.6rem;
+  font-weight: 600;
   text-align: center;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--color-neutral-medium, #CED4DA); /* Borde inferior (con fallback) */
+  border-bottom: 1px solid var(--color-neutral-medium, #CED4DA);
 }
 
-/* Títulos de las secciones */
 .document-card h3 {
   font-size: 1.3rem;
   margin-top: 2rem;
@@ -152,18 +194,16 @@ export default defineComponent({
   color: var(--color-primary, #14124f);
   font-weight: 600;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-neutral-medium, #CED4DA); /* Borde sutil */
+  border-bottom: 1px solid var(--color-neutral-medium, #CED4DA);
 }
 
-/* Párrafos */
 .document-card p {
   margin-bottom: 1rem;
-  text-align: justify; /* Justificar texto legal */
+  text-align: justify;
 }
 
-/* Listas */
 .document-card ul {
-  margin-left: 1.5rem; /* Ajustar sangría */
+  margin-left: 1.5rem;
   margin-bottom: 1rem;
   padding-left: 0;
 }
@@ -172,25 +212,30 @@ export default defineComponent({
   margin-bottom: 0.75rem;
 }
 
-/* Texto enfatizado */
 .document-card strong {
   color: var(--color-primary, #14124f);
   font-weight: 600;
 }
 
-/* Ajustes responsivos */
 @media (max-width: 768px) {
   .page-container.policy-page {
-    padding: 70px 20px 30px 20px; /* Ajustar padding */
+    padding: 70px 20px 30px 20px;
   }
   .document-card {
-    padding: 20px 25px; /* Reducir padding interno */
+    padding: 20px 25px;
   }
   .document-card h2 {
     font-size: 1.4rem;
   }
   .document-card h3 {
     font-size: 1.2rem;
+  }
+  .policy-header-actions {
+    margin-bottom: 20px;
+  }
+  .back-button {
+    width: 36px;
+    height: 36px;
   }
 }
 </style>

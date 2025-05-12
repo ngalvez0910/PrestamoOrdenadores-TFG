@@ -261,7 +261,7 @@ export default defineComponent({
 <style scoped>
 .page-container.profile-page {
   padding: 80px 30px 40px 30px;
-  max-width: 900px;
+  max-width: 800px;
   margin: 0 auto;
   box-sizing: border-box;
 }
@@ -271,9 +271,8 @@ export default defineComponent({
   border-radius: 12px;
   padding: 30px 40px;
   box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.1);
-  width: 140%;
+  width: 100%;
   box-sizing: border-box;
-  margin-left: 33%;
 }
 
 .profile-card-header {
@@ -388,7 +387,7 @@ export default defineComponent({
 .change-password-button {
   background-color: var(--color-interactive);
   color: white;
-  margin-right: 43%;
+  margin-right: 270px;
 }
 
 .change-password-button:hover {

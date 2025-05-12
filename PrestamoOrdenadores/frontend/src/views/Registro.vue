@@ -429,8 +429,6 @@ export default {
   min-width: 700px;
   padding: 80px 20px 40px 20px;
   box-sizing: border-box;
-  margin-left: 37%;
-  margin-top: 5%;
 }
 
 .register-box {
@@ -439,7 +437,7 @@ export default {
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
   width: 100%;
-  max-width: 750px;
+  max-width: 650px;
   text-align: center;
 }
 

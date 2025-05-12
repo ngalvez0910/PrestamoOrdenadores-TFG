@@ -19,7 +19,7 @@
       <div class="details-grid">
 
         <div class="form-group">
-          <label>Número de Identificación</label>
+          <label>Número Identificación</label>
           <div class="readonly-field">{{ userData.numeroIdentificacion || 'No especificado' }}</div>
         </div>
 
@@ -73,12 +73,12 @@
         </div>
 
         <div class="form-group">
-          <label>Fecha de Creación</label>
+          <label>Fecha Creación</label>
           <div class="readonly-field">{{ userData.createdDate }}</div>
         </div>
 
         <div class="form-group">
-          <label>Fecha de Actualización</label>
+          <label>Fecha Actualización</label>
           <div class="readonly-field">{{ userData.updatedDate }}</div>
         </div>
       </div>
@@ -214,8 +214,6 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  margin-top: 5%;
-  margin-left: 10%;
 }
 
 .back-button {
@@ -265,7 +263,6 @@ export default defineComponent({
 .edit-button {
   background-color: var(--color-interactive);
   color: white;
-  margin-right: -40%;
 }
 
 .edit-button:hover {
@@ -277,8 +274,9 @@ export default defineComponent({
   border-radius: 12px;
   padding: 30px 40px;
   box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
-  margin-left: 20%;
-  min-width: 840px;
+  max-width: 850px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .details-header {

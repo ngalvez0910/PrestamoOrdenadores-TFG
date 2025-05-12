@@ -17,7 +17,7 @@ import Login from './views/Login.vue';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import { authService } from "@/services/AuthService";
-import NuevoFooter from "@/components/NuevoFooter.vue";
+import Footer from "@/components/Footer.vue";
 import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 
 type ToastSeverity = 'success' | 'info' | 'warn' | 'error';
@@ -37,7 +37,7 @@ export default defineComponent({
   name: 'App',
   components: {
     MenuBarNoSession,
-    NuevoFooter,
+    NuevoFooter: Footer,
     Login,
     Toast
   },

@@ -2,6 +2,11 @@
   <MenuBarNoSession />
 
   <div class="page-container terms-page">
+    <div class="terms-header-actions"> <button @click="goBack" class="back-button" title="Volver">
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    </div>
+
     <div class="document-card">
       <article>
         <h2>Términos y Condiciones de Uso – Servicio de Préstamo de Equipos Informáticos "LoanTech"</h2>
@@ -102,7 +107,16 @@ import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 
 export default defineComponent({
   name: "TerminosServicios",
-  components: {MenuBarNoSession}
+  components: {MenuBarNoSession},
+  methods: {
+    goBack() {
+      if (this.$router) {
+        this.$router.back();
+      } else {
+        console.warn("Instancia de Vue Router ($router) no encontrada.");
+      }
+    }
+  }
 })
 </script>
 
@@ -110,6 +124,38 @@ export default defineComponent({
 .page-container.terms-page {
   padding: 80px 30px 40px 30px;
   box-sizing: border-box;
+}
+
+.terms-header-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 25px;
+  margin-top: -25px;
+  margin-left: 75px;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  width: 40px;
+  height: 40px;
+  line-height: 1;
+}
+
+.back-button:hover {
+  background-color: var(--color-interactive-darker);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .document-card {

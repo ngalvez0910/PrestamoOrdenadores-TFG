@@ -45,10 +45,11 @@ export default {
 <style scoped>
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 25px;
-  max-width: 1000px;
-  margin-left: 25%;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  max-width: 750px;
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 5%;
 }
 
@@ -68,6 +69,8 @@ export default {
   min-height: 160px;
   transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease;
   overflow: hidden;
+  max-width: 230px;
+  width: 100%;
 }
 
 .dashboard-box:hover {
@@ -92,10 +95,6 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .dashboard-container {
-    padding: 70px 15px 30px 15px;
-  }
-
   .dashboard {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 15px;

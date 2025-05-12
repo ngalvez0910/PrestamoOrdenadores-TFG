@@ -307,11 +307,11 @@ export default defineComponent({
 <style scoped>
 .page-container.notifications-page {
   padding: 80px 30px 40px 30px;
-  min-width: 650px;
-  margin-left: 45%;
-  margin-top: 50px;
+  max-width: 650px;
   box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .page-header {
@@ -358,14 +358,14 @@ export default defineComponent({
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.1);
-  height: 600px;  /* Altura fija para el contenedor */
+  height: 600px;
   position: relative;
-  overflow: hidden;  /* Oculta el desbordamiento */
+  overflow: hidden;
 }
 
 .notifications-scroll-container {
   height: 100%;
-  overflow-y: auto;  /* Permite desplazamiento vertical */
+  overflow-y: auto;
   padding: 0;
 }
 
@@ -516,7 +516,7 @@ export default defineComponent({
   }
 
   .notifications-list-container {
-    height: 500px;  /* Altura ligeramente menor en móviles */
+    height: 500px;
   }
 
   .notification-item {

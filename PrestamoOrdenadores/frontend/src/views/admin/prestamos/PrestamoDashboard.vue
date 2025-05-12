@@ -280,17 +280,18 @@ export default {
 .prestamos-container {
   padding: 80px 30px 40px 30px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
   box-sizing: border-box;
 }
 
 .filters-container {
   display: flex;
   gap: 10px;
-  margin-bottom: 25px;
   max-width: 300px;
-  justify-content: flex-start;
-  margin-top: -73%;
+  justify-content: center;
+  align-items: center;
+  margin: -25px auto 20px 250px;
 }
 
 .unified-search {
@@ -463,13 +464,12 @@ export default {
 }
 
 .table-wrapper {
-  position: fixed;
-  width: 90%;
+  width: 100%;
   overflow-x: auto;
   border: 1px solid var(--color-neutral-medium);
   border-radius: 8px;
   background-color: white;
-  margin-left: -20%;
+  margin-left: -15px;
 }
 
 :deep(.p-datatable-custom .p-datatable-thead > tr > th) {
@@ -629,27 +629,58 @@ export default {
     padding: 70px 15px 30px 15px;
   }
 
-  .filters {
-    flex-direction: column;
+  .filters-container {
+    gap: 20px;
     align-items: stretch;
-    gap: 10px;
   }
 
-  .search-filter, .date-filter {
-    max-width: none;
+  .unified-search {
+    flex-wrap: wrap;
   }
 
-  .filters label {
-    margin-bottom: 5px;
+  .active-filter-badge {
+    margin-top: 5px;
   }
 
   :deep(.p-datatable-custom .p-datatable-thead > tr > th),
   :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
-    padding: 0.75rem 0.75rem;
+    padding: 0.8rem 0.8rem;
+    font-size: 0.9rem;
   }
 
   .action-buttons {
+    gap: 8px;
     flex-wrap: wrap;
+  }
+
+  :deep(.p-paginator .p-paginator-current) {
+    font-size: 0.9rem;
+  }
+  :deep(.p-paginator .p-dropdown .p-dropdown-label) {
+    font-size: 0.9rem;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .unified-search label {
+    font-size: 0.9rem;
+  }
+  .search-input-container input {
+    font-size: 0.9rem;
+  }
+  :deep(.p-datatable-custom .p-datatable-thead > tr > th),
+  :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  :deep(.p-paginator) {
+    font-size: 0.85rem;
+  }
+  :deep(.p-paginator .p-paginator-pages .p-paginator-page) {
+    min-width: 28px;
+    height: 28px;
   }
 }
 </style>

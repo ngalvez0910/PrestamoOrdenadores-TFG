@@ -195,8 +195,6 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  margin-top: 5%;
-  margin-left: 40%;
 }
 
 .back-button {
@@ -246,7 +244,6 @@ export default defineComponent({
 .edit-button {
   background-color: var(--color-interactive);
   color: white;
-  margin-right: -135%;
 }
 
 .edit-button:hover {
@@ -258,8 +255,9 @@ export default defineComponent({
   border-radius: 12px;
   padding: 30px 40px;
   box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
-  margin-left: 55%;
-  min-width: 500px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .details-header {

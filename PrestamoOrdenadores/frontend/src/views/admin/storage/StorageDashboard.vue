@@ -237,15 +237,14 @@ export default {
 
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 230px));
   gap: 25px;
   max-width: 1000px;
-  margin-left: 20%;
-  margin-top: 5%;
+  margin-left: 100px;
+  margin-right: auto;
 }
 
 .dashboard-box {
-  font-family: 'Montserrat', sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -260,6 +259,9 @@ export default {
   min-height: 200px;
   transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease;
   overflow: hidden;
+  max-width: 230px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dashboard-box:hover {

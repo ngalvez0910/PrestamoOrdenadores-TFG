@@ -199,7 +199,8 @@ export default {
 .dispositivos-container {
   padding: 80px 30px 40px 30px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
   box-sizing: border-box;
 }
 
@@ -207,9 +208,8 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 25px;
-  max-width: 400px;
-  margin-top: -80%;
+  max-width: 300px;
+  margin: -25px auto 40px 150px;
 }
 
 .filters label {
@@ -235,14 +235,12 @@ export default {
 }
 
 .table-wrapper {
-  position: fixed;
-  width: 90%;
+  width: 100%;
   overflow-x: auto;
   border: 1px solid var(--color-neutral-medium);
   border-radius: 8px;
   background-color: white;
-  margin-left: -21%;
-  margin-top: 1%;
+  margin-left: -15px;
 }
 
 :deep(.p-datatable-custom .p-datatable-thead > tr > th) {

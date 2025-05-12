@@ -157,7 +157,7 @@ export default {
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.15);
   width: 100%;
-  max-width: 600px !important;
+  max-width: 500px !important;
   text-align: center;
 }
 

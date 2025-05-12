@@ -377,7 +377,7 @@ export default defineComponent({
   gap: 10px;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid var(--color-neutral-light);
+  border-top: 1px solid var(--color-neutral-medium);
 }
 
 .action-button.secondary-button {
