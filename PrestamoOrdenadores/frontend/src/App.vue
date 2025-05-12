@@ -1,17 +1,24 @@
 <template>
   <div class="app">
-    <router-view />
+    <MenuBar v-if="isUserLoggedIn" />
+    <MenuBarNoSession v-else />
 
+    <main class="main-content">
+      <router-view />
+    </main>
+    <NuevoFooter />
     <Toast />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, watch, ref, onBeforeUnmount, provide, readonly } from 'vue';
+import { defineComponent, watch, ref, onBeforeUnmount, provide, readonly, computed } from 'vue';
 import Login from './views/Login.vue';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import { authService } from "@/services/AuthService";
+import NuevoFooter from "@/components/NuevoFooter.vue";
+import MenuBarNoSession from "@/components/MenuBarNoSession.vue";
 
 type ToastSeverity = 'success' | 'info' | 'warn' | 'error';
 type NotificationEntityType = 'info' | 'prestamo' | 'incidencia' | 'sistema' | 'advertencia' | 'error' | 'sancion';
@@ -29,6 +36,8 @@ interface Notificacion {
 export default defineComponent({
   name: 'App',
   components: {
+    MenuBarNoSession,
+    NuevoFooter,
     Login,
     Toast
   },
@@ -47,6 +56,8 @@ export default defineComponent({
     const isWebSocketConnecting = ref(false);
     const webSocketManuallyClosed = ref(false);
     let keepAliveIntervalId: number | null = null;
+
+    const isUserLoggedIn = computed(() => !!authService.token);
 
     const parseBackendNotificationForApp = (backendNotif: any): Notificacion => {
       let severidad: ToastSeverity = 'info';
@@ -292,6 +303,10 @@ export default defineComponent({
       console.log('[App.vue onBeforeUnmount] App.vue se va a desmontar. Desconectando WebSocket y limpiando keep-alive.');
       disconnectWebSocketsInApp(true, "Componente App.vue desmontado");
     });
+
+    return {
+      isUserLoggedIn
+    };
   }
 });
 </script>
@@ -319,17 +334,17 @@ export default defineComponent({
   --color-warning-rgb: 255, 193, 7;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Montserrat', sans-serif;
   background-color: var(--color-background-main);
   color: var(--color-text-dark);
-  margin: 0;
-  padding: 0;
   line-height: 1.5;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 a {
@@ -337,4 +352,17 @@ a {
   text-decoration: none;
   background-color: inherit !important;
 }
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 60px;
+  box-sizing: border-box;
+}
+
+.main-content {
+  flex-grow: 1;
+}
+
 </style>

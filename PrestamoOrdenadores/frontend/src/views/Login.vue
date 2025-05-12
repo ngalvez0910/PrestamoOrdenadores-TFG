@@ -1,6 +1,4 @@
 <template>
-  <MenuBarNoSession />
-
   <div class="login-page-container">
     <div class="login-box">
       <h2>Iniciar Sesión</h2> <form @submit.prevent="login" novalidate>
@@ -151,7 +149,6 @@ export default {
   min-width: 500px;
   padding: 80px 20px 40px 20px;
   box-sizing: border-box;
-  margin-left: 50%;
 }
 
 .login-box {

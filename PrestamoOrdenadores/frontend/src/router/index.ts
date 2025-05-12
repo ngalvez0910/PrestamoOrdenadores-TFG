@@ -131,6 +131,18 @@ const router = createRouter({
       component: () => import('../views/user/IncidenciasMe.vue'),
       meta: { requiresAuth: true, roles: ['ADMIN', 'ALUMNO', 'PROFESOR'] },
     },
+    {
+      path: '/politicaPrivacidad',
+      name: 'PoliticaPrivacidad',
+      component: () => import('../views/PoliticaPrivacidad.vue'),
+      meta: { requiresAuth: true, roles: ['ADMIN', 'ALUMNO', 'PROFESOR'] },
+    },
+    {
+      path: '/terminosServicio',
+      name: 'TerminosServicios',
+      component: () => import('../views/TerminosServicios.vue'),
+      meta: { requiresAuth: true, roles: ['ADMIN', 'ALUMNO', 'PROFESOR'] },
+    },
   ],
 })
 
