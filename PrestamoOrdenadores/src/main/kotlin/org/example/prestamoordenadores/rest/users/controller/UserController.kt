@@ -120,7 +120,7 @@ class UserController
     }
 
     @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
-    @PatchMapping("/password//{guid}")
+    @PatchMapping("/password/{guid}")
     fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<Any> {
         return userService.resetPassword(guid, user).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
