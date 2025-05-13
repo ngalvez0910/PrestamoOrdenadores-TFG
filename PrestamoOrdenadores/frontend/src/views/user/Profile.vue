@@ -112,7 +112,7 @@ import axios from 'axios';
 import {useRouter} from "vue-router";
 import { jwtDecode } from "jwt-decode";
 import {useToast} from "primevue/usetoast";
-import { authService } from '@/services/AuthService';
+import { authService } from '@/services/AuthService.ts';
 import {updateAvatar} from "@/services/UsuarioService.ts";
 
 interface UserData {
@@ -249,6 +249,9 @@ export default defineComponent({
         await updateAvatar(this.guid, this.selectedAvatarInDialog);
 
         this.avatar = this.selectedAvatarInDialog;
+        if (authService.user) {
+          authService.updateUserAvatar(this.selectedAvatarInDialog);
+        }
         this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Avatar actualizado correctamente.', life: 3000 });
         this.isAvatarDialogVisible = false;
 

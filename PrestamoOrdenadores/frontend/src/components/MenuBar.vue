@@ -30,7 +30,7 @@
 
     <Button class="user-info" @click="toggleUserMenu($event)" text aria-haspopup="true" aria-controls="user_profile_menu">
       <p class="username">{{ username || "Usuario" }}</p>
-      <Avatar :image="avatar || 'https://placehold.co/400'" shape="circle" class="avatar" />
+      <Avatar :image="currentAvatar" shape="circle" class="avatar" />
     </Button>
 
     <Menu ref="userMenu" id="user_profile_menu" class="user-menu" :model="userMenuItems" :popup="true">
@@ -67,7 +67,7 @@
 import Avatar from "primevue/avatar";
 import Menu from "primevue/menu";
 import Button from "primevue/button";
-import { ref, computed } from "vue";
+import {ref, computed, onMounted, watch} from "vue";
 import { useRouter } from "vue-router";
 import {authService, type UserData} from "@/services/AuthService.ts";
 
@@ -82,15 +82,43 @@ export default {
     const userMenu = ref();
     const adminMenu = ref();
     const router = useRouter();
+    const avatarUpdateKey = ref(Date.now());
+    const forceAvatarUpdate = () => {
+      avatarUpdateKey.value = Date.now();
+    };
+
+    onMounted(() => {
+      authService.syncFromStorage();
+
+      if (authService.token && !authService.user) {
+        authService.fetchUser().catch(console.error);
+      }
+    });
 
     const user = computed<UserData | null>(() => authService.user);
     const token = computed<string | null>(() => authService.token);
 
     const rol = computed(() => user.value?.rol || "");
     const username = computed(() => user.value?.nombre || "Usuario");
-    const avatar = computed(() => user.value?.avatar || "https://placehold.co/400");
+
+    const avatar = computed(() => {
+      avatarUpdateKey.value;
+      return user.value?.avatar || null;
+    });
+
+    const currentAvatar = computed(() => {
+      return avatar.value || "https://placehold.co/400";
+    });
+
     const roleFromService = computed(() => authService.role);
     const isAdmin = computed(() => roleFromService.value === "ADMIN");
+
+    watch(() => user.value, (newUser, oldUser) => {
+      if (newUser?.avatar !== oldUser?.avatar) {
+        console.log("[MenuBar] User avatar changed, forcing update");
+        forceAvatarUpdate();
+      }
+    }, { deep: true });
 
     const toggleUserMenu = (event: Event) => {
       userMenu.value?.toggle(event);
@@ -160,10 +188,11 @@ export default {
       adminNavItems,
       userSpecificLinks,
       username,
-      avatar: avatar,
+      currentAvatar,
       isAdmin,
       isInAdminSection,
       getHomeRoute,
+      forceAvatarUpdate
     };
   },
 };

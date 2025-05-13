@@ -104,7 +104,7 @@ class UserController
         )
     }
 
-    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALUMNO', 'PROFESOR')")
     @PatchMapping("/avatar/{guid}")
     fun updateAvatar(@PathVariable guid: String, @RequestBody user: UserAvatarUpdateRequest) : ResponseEntity<Any> {
         return userService.updateAvatar(guid, user).mapBoth(
@@ -119,7 +119,7 @@ class UserController
         )
     }
 
-    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALUMNO', 'PROFESOR')")
     @PatchMapping("/password/{guid}")
     fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<Any> {
         return userService.resetPassword(guid, user).mapBoth(
