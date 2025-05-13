@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch, ref, onBeforeUnmount, provide, readonly, computed } from 'vue';
+import {defineComponent, watch, ref, onBeforeUnmount, provide, readonly, computed, onMounted} from 'vue';
 import Login from './views/Login.vue';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
@@ -59,7 +59,18 @@ export default defineComponent({
     const webSocketManuallyClosed = ref(false);
     let keepAliveIntervalId: number | null = null;
 
-    const isUserLoggedIn = computed(() => !!authService.token);
+    onMounted(() => {
+      console.log('[App.vue onMounted] Sincronizando estado de autenticación desde localStorage...');
+      authService.syncFromStorage();
+      console.log('[App.vue onMounted] Estado de autenticación sincronizado. Usuario:', authService.user?.nombre);
+      console.log('[App.vue onMounted] Rol actual:', authService.role);
+    });
+
+    const isUserLoggedIn = computed(() => {
+      const isAuth = authService.isAuthenticated();
+      console.log('[App.vue computed:isUserLoggedIn] Estado de autenticación:', isAuth, 'Role:', authService.role);
+      return isAuth;
+    });
 
     const parseBackendNotificationForApp = (backendNotif: any): Notificacion => {
       let severidad: ToastSeverity = 'info';
@@ -147,6 +158,7 @@ export default defineComponent({
     };
 
     const connectWebSocketsInApp = () => {
+      authService.syncFromStorage();
       const token = authService.token;
 
       if (!token) {
@@ -250,6 +262,7 @@ export default defineComponent({
           if (!webSocketManuallyClosed.value && event.code !== 1000 && authService.token) {
             console.log("[App.vue WebSocket] Intentando reconexión en 5 segundos...");
             setTimeout(() => {
+              authService.syncFromStorage();
               if (authService.token && !webSocketManuallyClosed.value) {
                 console.log("[App.vue WebSocket] Reintentando conexión ahora...");
                 connectWebSocketsInApp();
@@ -282,6 +295,15 @@ export default defineComponent({
         }
       }, 30000);
     };
+
+    onMounted(() => {
+      console.log('[App.vue onMounted] Verificando estado de autenticación para WebSocket...');
+
+      if (authService.token) {
+        console.log('[App.vue onMounted] Token presente, conectando WebSocket...');
+        connectWebSocketsInApp();
+      }
+    });
 
     watch(
         () => authService.token,

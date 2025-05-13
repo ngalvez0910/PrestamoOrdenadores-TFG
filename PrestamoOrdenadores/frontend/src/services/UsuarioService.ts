@@ -1,5 +1,4 @@
 import axios from 'axios';
-import type {Incidencia} from "@/services/IncidenciaService.ts";
 
 interface User {
     guid: string;
@@ -10,11 +9,15 @@ interface User {
     tutor: string;
     rol: string;
     numeroIdentificacion: string;
-    fotoCarnet: string;
+    avatar: string;
     lastLoginDate: string;
     lastPasswordResetDate: string;
     createdDate: string;
     updatedDate: string;
+}
+
+interface UserAvatarUpdateRequest {
+    avatar: string;
 }
 
 export const getUserByGuidAdmin = async (guid: string): Promise<User | null> => {
@@ -77,10 +80,7 @@ export const descargarCsvUsers = async (): Promise<void | null> => {
     }
 };
 
-export const actualizarUsuario = async (
-    guid: string,
-    data: { rol: string }
-): Promise<User | null> => {
+export const actualizarUsuario = async (guid: string, data: { rol: string }): Promise<User | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -98,5 +98,38 @@ export const actualizarUsuario = async (
     } catch (error) {
         console.error('Error al actualizar el usuario:', error);
         return null;
+    }
+};
+
+export const updateAvatar = async (guid: string, avatar: string): Promise<void> => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        throw new Error("No autenticado");
+    }
+    if (!guid) {
+        throw new Error("GUID de usuario no encontrado");
+    }
+
+    const requestBody: UserAvatarUpdateRequest = {
+        avatar: avatar
+    };
+
+    try {
+        const response = await axios.patch(
+            `http://localhost:8080/users/avatar/${guid}`,
+            requestBody,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            }
+        );
+
+        console.log("Avatar actualizado en backend:", response.data)
+    } catch (error: any) {
+        console.error("Error al actualizar el avatar en el backend:", error);
+        const errorMessage = error.response?.data || error.message || "Error desconocido al actualizar avatar.";
+        throw new Error(errorMessage);
     }
 };

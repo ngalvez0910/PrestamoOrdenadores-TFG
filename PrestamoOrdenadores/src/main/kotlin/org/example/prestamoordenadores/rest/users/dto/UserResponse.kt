@@ -7,5 +7,6 @@ data class UserResponse (
     var nombre: String,
     var apellidos: String,
     var curso: String,
-    var tutor: String
+    var tutor: String,
+    var avatar: String
 )

@@ -6,7 +6,7 @@ export interface UserData {
     guid: string;
     email: string;
     nombre: string;
-    avatarUrl: string;
+    avatar: string;
     rol: string;
 }
 
@@ -22,11 +22,25 @@ export interface UserPasswordResetRequest {
     confirmPassword: string;
 }
 
+const savedUser = localStorage.getItem("user");
+const parsedUser = savedUser ? JSON.parse(savedUser) : null;
+const savedToken = localStorage.getItem("token");
+
 const state = reactive<AuthState>({
-    user: null,
-    token: localStorage.getItem("token"),
+    user: parsedUser,
+    token: savedToken,
     roleFromToken: null
 });
+
+if (savedToken) {
+    try {
+        const decoded: any = jwtDecode(savedToken);
+        state.roleFromToken = decoded.rol || null;
+        console.log("[AuthService Init] Role from token set:", state.roleFromToken);
+    } catch (e) {
+        console.error("[AuthService Init] Failed to decode token:", e);
+    }
+}
 
 export const authService = {
     async register(userData: any): Promise<string | null> {
@@ -84,7 +98,15 @@ export const authService = {
 
                 const response = await axios.get(`http://localhost:8080/users/email/${email}`);
                 state.user = response.data;
+
+                localStorage.setItem("user", JSON.stringify(state.user));
+
                 console.log("[AuthService:fetchUser] Usuario obtenido y asignado:", state.user);
+
+                if (state.user && state.user.rol) {
+                    state.roleFromToken = state.user.rol;
+                    console.log("[AuthService:fetchUser] Role sincronizado desde datos de usuario:", state.roleFromToken);
+                }
             } catch (error: any) {
                 console.error("Error DETALLADO al obtener datos del usuario (desde fetchUser):", error);
                 if (error.response) {
@@ -168,6 +190,24 @@ export const authService = {
         }
     },
 
+    async updateUserAvatar(avatarUrl: string): Promise<void> {
+        if (!state.user) {
+            console.error("[AuthService:updateUserAvatar] No hay usuario en el estado para actualizar el avatar");
+            throw new Error("No hay usuario en el estado para actualizar el avatar");
+        }
+
+        try {
+            state.user.avatar = avatarUrl;
+
+            localStorage.setItem("user", JSON.stringify(state.user));
+
+            console.log("[AuthService:updateUserAvatar] Avatar actualizado con éxito:", avatarUrl);
+        } catch (error) {
+            console.error("[AuthService:updateUserAvatar] Error al actualizar el avatar en el estado:", error);
+            throw error;
+        }
+    },
+
     get user(): UserData | null {
         return state.user;
     },
@@ -177,18 +217,44 @@ export const authService = {
     },
 
     get role(): string | null {
-        return state.roleFromToken;
+        return state.roleFromToken || (state.user ? state.user.rol : null);
     },
 
     isAuthenticated(): boolean {
         return !!state.token;
+    },
+
+    isAdmin(): boolean {
+        return this.role === 'ADMIN';
+    },
+
+    syncFromStorage(): void {
+        const storedToken = localStorage.getItem("token");
+        if (storedToken && storedToken !== state.token) {
+            this.setToken(storedToken);
+        }
+
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            try {
+                state.user = JSON.parse(storedUser);
+                if (state.user && state.user.rol) {
+                    state.roleFromToken = state.user.rol;
+                }
+            } catch (e) {
+                console.error("[AuthService] Error parsing stored user:", e);
+            }
+        }
     }
 };
 
 if (authService.token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${authService.token}`;
-    authService.fetchUser().catch(error => {
-        console.error("Error inicializando el usuario:", error);
-        authService.logout();
-    });
+
+    if (!state.user) {
+        authService.fetchUser().catch(error => {
+            console.error("Error inicializando el usuario:", error);
+            authService.logout();
+        });
+    }
 }
