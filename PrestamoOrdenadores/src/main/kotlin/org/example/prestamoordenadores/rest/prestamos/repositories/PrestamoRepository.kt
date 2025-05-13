@@ -1,5 +1,6 @@
 package org.example.prestamoordenadores.rest.prestamos.repositories
 
+import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
@@ -12,4 +13,5 @@ interface PrestamoRepository : JpaRepository<Prestamo, Long> {
     fun findByFechaPrestamo(fecha: LocalDate): List<Prestamo>
     fun findByFechaDevolucion(fecha: LocalDate): List<Prestamo>
     fun findByUserGuid(userGuid: String): List<Prestamo>
+    fun findPrestamoByEstadoPrestamo(estadoPrestamo: EstadoPrestamo): List<Prestamo>
 }

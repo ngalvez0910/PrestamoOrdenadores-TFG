@@ -1,30 +1,22 @@
 package org.example.prestamoordenadores.rest.sanciones.controller
 
 import com.github.michaelbull.result.mapBoth
-import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.SancionNotFound
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.SancionValidationError
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError.UserNotFound
 import org.example.prestamoordenadores.rest.sanciones.services.SancionService
-import org.example.prestamoordenadores.storage.csv.SancionCsvStorage
-import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.LocalDate
 
 @RestController
@@ -86,20 +78,6 @@ class SancionController
             failure = { error ->
                 when(error) {
                     is SancionNotFound -> ResponseEntity.status(404).body("Sanciones no encontradas")
-                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
-                }
-            }
-        )
-    }
-
-    @PostMapping
-    fun createSancion(@RequestBody sancion : SancionRequest): ResponseEntity<Any>{
-        return sancionService.createSancion(sancion).mapBoth(
-            success = { ResponseEntity.status(201).body(it) },
-            failure = { error ->
-                when(error) {
-                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
-                    is SancionValidationError -> ResponseEntity.status(403).body("Sanción inválida")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }

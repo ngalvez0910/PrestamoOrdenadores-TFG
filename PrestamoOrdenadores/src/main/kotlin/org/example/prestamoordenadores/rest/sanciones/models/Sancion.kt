@@ -9,6 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.utils.generators.generateSancionGuid
 import org.springframework.data.annotation.CreatedDate
@@ -28,10 +29,16 @@ class Sancion (
     @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true)
     var user : User = User(),
 
+    @OneToOne
+    @JoinColumn(name = "prestamo_id", referencedColumnName = "id", unique = true)
+    var prestamo : Prestamo = Prestamo(),
+
     @Enumerated(EnumType.STRING)
     var tipoSancion : TipoSancion = TipoSancion.ADVERTENCIA,
 
     var fechaSancion : LocalDate = LocalDate.now(),
+
+    var fechaFin : LocalDate = LocalDate.now(),
 
     @CreatedDate
     var createdDate: LocalDateTime = LocalDateTime.now(),
@@ -39,6 +46,21 @@ class Sancion (
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
 ){
-    constructor(guid: String, user: User, tipoSancion: TipoSancion, fechaSancion: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, user, tipoSancion, fechaSancion, createdDate, updatedDate)
+    constructor(guid: String, user: User, prestamo: Prestamo, tipoSancion: TipoSancion, fechaSancion: LocalDate, fechaFin: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, user, prestamo, tipoSancion, fechaSancion, fechaFin, createdDate, updatedDate)
+
+    fun isActiveNow(): Boolean {
+        val hoy = LocalDate.now()
+        return when (this.tipoSancion) {
+            TipoSancion.ADVERTENCIA -> {
+                true
+            }
+            TipoSancion.BLOQUEO_TEMPORAL -> {
+                !hoy.isAfter(this.fechaFin)
+            }
+            TipoSancion.INDEFINIDO -> {
+                true
+            }
+        }
+    }
 }

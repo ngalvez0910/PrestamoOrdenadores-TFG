@@ -218,10 +218,7 @@ export const descargarPdfPrestamo = async (guid: string): Promise<void | null> =
     }
 };
 
-export const actualizarPrestamo = async (
-    guid: string,
-    data: { estadoPrestamo: string }
-): Promise<Prestamo | null> => {
+export const actualizarPrestamo = async (guid: string, data: { estadoPrestamo: string }): Promise<Prestamo | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -242,9 +239,7 @@ export const actualizarPrestamo = async (
     }
 };
 
-export const cancelarPrestamo = async (
-    guid: string
-): Promise<Prestamo | null> => {
+export const cancelarPrestamo = async (guid: string): Promise<Prestamo | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {

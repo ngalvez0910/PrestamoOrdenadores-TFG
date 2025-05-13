@@ -250,7 +250,7 @@ export default defineComponent({
 
         this.avatar = this.selectedAvatarInDialog;
         if (authService.user) {
-          authService.updateUserAvatar(this.selectedAvatarInDialog);
+          await authService.updateUserAvatar(this.selectedAvatarInDialog);
         }
         this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Avatar actualizado correctamente.', life: 3000 });
         this.isAvatarDialogVisible = false;

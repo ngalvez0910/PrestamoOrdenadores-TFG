@@ -1,7 +1,6 @@
 package org.example.prestamoordenadores.rest.sanciones.services
 
 import com.github.michaelbull.result.Result
-import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError
@@ -13,7 +12,6 @@ import java.time.LocalDate
 interface SancionService {
     fun getAllSanciones(page: Int, size: Int): Result<PagedResponse<SancionResponse>, SancionError>
     fun getSancionByGuid(guid: String) : Result<SancionResponse?, SancionError>
-    fun createSancion(sancion: SancionRequest) : Result<SancionResponse, SancionError>
     fun updateSancion(guid: String, sancion: SancionUpdateRequest) : Result<SancionResponse?, SancionError>
     fun deleteSancionByGuid(guid: String) : Result<SancionResponse?, SancionError>
     fun getByFecha(fecha: LocalDate): Result<List<SancionResponse>, SancionError>
