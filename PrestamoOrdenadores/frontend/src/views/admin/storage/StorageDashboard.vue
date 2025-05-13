@@ -53,12 +53,12 @@
       <h2>Selecciona un backup para restaurar</h2>
       <div class="backup-list-wrapper">
         <ul v-if="backupsDisponibles && backupsDisponibles.length > 0" class="backup-list">
-          <li v-for="backup in backupsDisponibles" :key="backup.fileName" class="backup-item">
+          <li v-for="backup in backupsDisponibles" :key="backup.name" class="backup-item">
                   <span class="backup-details">
-                    <span class="backup-name" :title="backup.fileName">{{ backup.fileName }}</span>
+                    <span class="backup-name" :title="backup.name">{{ backup.name }}</span>
                     <span class="backup-date">{{ backup.date ? formatDate(backup.date) : 'Fecha no disponible' }}</span>
                   </span>
-            <button class="boton-restaurar-item" @click="restoreBackup(backup.fileName)" title="Restaurar este backup">
+            <button class="boton-restaurar-item" @click="restoreBackup(backup.name)" title="Restaurar este backup">
               <i class="pi pi-history"></i>
             </button>
           </li>
@@ -69,6 +69,8 @@
   </div>
 
   </div>
+
+  <Toast />
 </template>
 
 <script lang="ts">
@@ -78,19 +80,28 @@ import {descargarCsvIncidencias} from "@/services/IncidenciaService.ts";
 import {descargarCsvPrestamos} from "@/services/PrestamoService.ts";
 import {descargarCsvSanciones} from "@/services/SancionService.ts";
 import { createBackup, listBackups, restoreBackup, type BackupInfo } from "@/services/StorageService.ts";
+import Toast from 'primevue/toast';
 
 export default {
   name: "StorageDashboard",
+  components: {
+    Toast
+  },
   data() {
     return {
       backupsDisponibles: [] as BackupInfo[],
       mostrarModalRestauracion: false,
+      isProcessingBackup: false,
+      isProcessingRestore: false,
+      restoringFileName: null as string | null,
+      isLoadingBackups: false,
     };
   },
   methods: {
     async descargarCsvDispositivos() {
       try {
         await descargarCsvDispositivos();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de dispositivos.`, life: 3000 });
       } catch (error) {
         console.error('Error al descargar el CSV en el componente', error);
       }
@@ -98,6 +109,7 @@ export default {
     async descargarCsvUsers() {
       try {
         await descargarCsvUsers();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de usuarios.`, life: 3000 });
       } catch (error) {
         console.error('Error al descargar el CSV en el componente', error);
       }
@@ -105,6 +117,7 @@ export default {
     async descargarCsvIncidencias() {
       try {
         await descargarCsvIncidencias();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de incidencias.`, life: 3000 });
       } catch (error) {
         console.error('Error al descargar el CSV en el componente', error);
       }
@@ -112,6 +125,7 @@ export default {
     async descargarCsvPrestamos() {
       try {
         await descargarCsvPrestamos();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de préstamos.`, life: 3000 });
       } catch (error) {
         console.error('Error al descargar el CSV en el componente', error);
       }
@@ -119,43 +133,62 @@ export default {
     async descargarCsvSanciones() {
       try {
         await descargarCsvSanciones();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de sanciones.`, life: 3000 });
       } catch (error) {
         console.error('Error al descargar el CSV en el componente', error);
       }
     },
     async crearCopiaSeguridad() {
+      this.isProcessingBackup = true;
       try {
         const successMessage = await createBackup();
-        alert(successMessage);
-      } catch (error) {
-        console.error('COMPONENT: Error en handleCreateBackup:', error);
-        alert(error instanceof Error ? error.message : 'Ocurrió un error desconocido al crear el backup.');
+        this.$toast.add({ severity: 'success', summary: 'Copia de Seguridad Creada', detail: successMessage, life: 3000 });
+      } catch (error: any) {
+        console.error('COMPONENT: Error en crearCopiaSeguridad:', error);
+        const detail = error.message || 'Ocurrió un error desconocido al crear el backup.';
+        this.$toast.add({ severity: 'error', summary: 'Error al Crear Copia', detail: detail, life: 5000 });
+      } finally {
+        this.isProcessingBackup = false;
       }
     },
     async listarYMostrarBackups() {
+      this.isLoadingBackups = true;
       this.backupsDisponibles = [];
       try {
         const backups = await listBackups();
-        this.backupsDisponibles = backups;
+        if (backups) {
+          this.backupsDisponibles = backups;
+        } else {
+          this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'No se pudo obtener la lista de backups.', life: 3000 });
+        }
         if (this.backupsDisponibles.length > 0) {
           this.mostrarModalRestauracion = true;
         } else {
-          alert('No hay copias de seguridad disponibles para restaurar.');
+          this.$toast.add({ severity: 'info', summary: 'Sin Backups', detail: 'No hay copias de seguridad disponibles para restaurar.', life: 3000 });
         }
-      } catch (error) {
-        console.error('COMPONENT: Error en handleListAndShowBackups:', error);
-        alert(error instanceof Error ? error.message : 'Ocurrió un error desconocido al listar los backups.');
+      } catch (error: any) {
+        console.error('COMPONENT: Error en listarYMostrarBackups:', error);
+        const detail = error.message || 'Ocurrió un error desconocido al listar los backups.';
+        this.$toast.add({ severity: 'error', summary: 'Error al Listar Backups', detail: detail, life: 5000 });
         this.mostrarModalRestauracion = false;
+      } finally {
+        this.isLoadingBackups = false;
       }
     },
     async restoreBackup(fileName: string) {
+      this.isProcessingRestore = true;
+      this.restoringFileName = fileName;
       try {
         const successMessage = await restoreBackup(fileName);
-        alert(successMessage);
+        this.$toast.add({ severity: 'success', summary: 'Restauración Exitosa', detail: successMessage, life: 4000 });
         this.mostrarModalRestauracion = false;
-      } catch (error) {
-        console.error('COMPONENT: Error en handleRestoreBackup:', error);
-        alert(error instanceof Error ? error.message : `Ocurrió un error desconocido al restaurar ${fileName}.`);
+      } catch (error: any) {
+        console.error('COMPONENT: Error en restoreBackup:', error);
+        const detail = error.message || `Ocurrió un error desconocido al restaurar ${fileName}.`;
+        this.$toast.add({ severity: 'error', summary: 'Error al Restaurar', detail: detail, life: 5000 });
+      } finally {
+        this.isProcessingRestore = false;
+        this.restoringFileName = null;
       }
     },
     formatDate(dateInput: string | number | Date): string {
