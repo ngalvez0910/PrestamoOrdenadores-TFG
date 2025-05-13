@@ -46,8 +46,8 @@ class SecurityConfig
                     .requestMatchers("/auth/signin", "/auth/signup").permitAll()
                     .requestMatchers("/ws/**").permitAll()
                     .requestMatchers("/notificaciones/**").authenticated()
+                    .requestMatchers("/error/**").permitAll()
                     .anyRequest().authenticated()
-//                    .requestMatchers("/error/**").permitAll()
 //                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 //                    .requestMatchers("/static/**").permitAll()
             }

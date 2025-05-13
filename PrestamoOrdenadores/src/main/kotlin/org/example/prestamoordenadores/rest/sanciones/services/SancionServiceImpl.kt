@@ -269,7 +269,7 @@ class SancionServiceImpl(
 
         val bloqueosTemporalesCumplidos = repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL)
             .filter { sancion ->
-                !sancion.fechaFin.isAfter(LocalDate.now())
+                !sancion.fechaFin?.isAfter(LocalDate.now())!!
             }
 
         if (bloqueosTemporalesCumplidos.size >= 2) {

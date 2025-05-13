@@ -25,7 +25,7 @@ class SancionMapper {
             prestamo = prestamoMapper.toPrestamoResponse(sancion.prestamo),
             tipoSancion = sancion.tipoSancion.toString(),
             fechaSancion = sancion.fechaSancion.toDefaultDateString(),
-            fechaFin = sancion.fechaFin.toDefaultDateString()
+            fechaFin = sancion.fechaFin?.toDefaultDateString() ?: LocalDate.now().toDefaultDateString()
         )
     }
 

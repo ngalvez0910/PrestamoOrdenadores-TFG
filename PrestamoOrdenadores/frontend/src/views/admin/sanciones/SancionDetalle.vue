@@ -70,7 +70,7 @@ import {defineComponent} from 'vue'
 import {getSancionByGuid, actualizarSancion} from "@/services/SancionService.ts";
 import { useToast } from "primevue/usetoast";
 
-type TipoSancion = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'BLOQUEO_INDEFINIDO';
+type TipoSancion = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'INDEFINIDO';
 
 export default defineComponent({
   name: "SancionDetalle",
@@ -117,7 +117,7 @@ export default defineComponent({
       switch (tipoSancion) {
         case 'ADVERTENCIA': return 'status-advertencia';
         case 'BLOQUEO_TEMPORAL': return 'status-bloqueo-temporal';
-        case 'BLOQUEO_INDEFINIDO': return 'status-indefinido';
+        case 'INDEFINIDO': return 'status-indefinido';
         default: return 'status-unknown';
       }
     },

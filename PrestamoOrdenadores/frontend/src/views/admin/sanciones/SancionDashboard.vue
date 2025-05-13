@@ -96,7 +96,7 @@ import axios from 'axios';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
 
-type SanctionType = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'BLOQUEO_INDEFINIDO';
+type SanctionType = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'INDEFINIDO';
 
 interface Sancion {
   guid: string;
@@ -105,6 +105,7 @@ interface Sancion {
   user: { guid: string } | null;
   userGuid: string;
   fechaSancion: string;
+  fechaFin: string;
   createdDate: string;
   updatedDate: string;
 }
@@ -149,7 +150,7 @@ export default {
       switch (tipo) {
         case 'ADVERTENCIA': return 'status-advertencia';
         case 'BLOQUEO_TEMPORAL': return 'status-bloqueo';
-        case 'BLOQUEO_INDEFINIDO': return 'status-indefinido';
+        case 'INDEFINIDO': return 'status-indefinido';
         default: return 'status-unknown';
       }
     },

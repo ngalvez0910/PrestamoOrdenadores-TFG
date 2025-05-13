@@ -38,7 +38,7 @@ class Sancion (
 
     var fechaSancion : LocalDate = LocalDate.now(),
 
-    var fechaFin : LocalDate = LocalDate.now(),
+    var fechaFin : LocalDate? = LocalDate.now(),
 
     @CreatedDate
     var createdDate: LocalDateTime = LocalDateTime.now(),
