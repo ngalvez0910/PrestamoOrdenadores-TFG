@@ -4,7 +4,12 @@
       <button @click="goBack" class="back-button" title="Volver a Incidencias">
         <i class="pi pi-arrow-left"></i>
       </button>
-      <button class="action-button edit-button" @click="toggleEdit" title="Editar Incidencia">
+      <button
+          v-if="incidenciaData && incidenciaData.estadoIncidencia !== 'RESUELTO'"
+          class="action-button edit-button"
+          @click="toggleEdit"
+          title="Editar Incidencia"
+      >
         <i :class="editable ? 'pi pi-times' : 'pi pi-pencil'"></i> {{ editable ? 'Cancelar' : 'Editar' }}
       </button>
     </div>
@@ -102,6 +107,9 @@ export default defineComponent({
   methods: {
     toggleEdit() {
       this.editable = !this.editable;
+      if (!this.editable && this.originalData) {
+        this.incidenciaData = JSON.parse(JSON.stringify(this.originalData));
+      }
     },
     goBack() {
       this.$router.back();
