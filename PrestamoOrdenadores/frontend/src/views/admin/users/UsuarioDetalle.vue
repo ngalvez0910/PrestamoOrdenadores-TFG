@@ -18,32 +18,32 @@
       <div class="details-grid">
 
         <div class="form-group">
-          <label>Número Identificación</label>
+          <label for="numIdentificacion">Número Identificación</label>
           <div class="readonly-field">{{ userData.numeroIdentificacion || 'No especificado' }}</div>
         </div>
 
         <div class="form-group">
-          <label>Nombre</label>
+          <label for="nombre">Nombre</label>
           <div class="readonly-field">{{ userData.nombre }}</div>
         </div>
 
         <div class="form-group">
-          <label>Apellidos</label>
+          <label for="apellidos">Apellidos</label>
           <div class="readonly-field">{{ userData.apellidos }}</div>
         </div>
 
         <div class="form-group">
-          <label>Email</label>
+          <label for="email">Email</label>
           <div class="readonly-field">{{ userData.email }}</div>
         </div>
 
         <div class="form-group">
-          <label>Curso</label>
+          <label for="curso">Curso</label>
           <div class="readonly-field">{{ userData.curso || '-' }}</div>
         </div>
 
         <div class="form-group">
-          <label>Tutor</label>
+          <label for="tutor">Tutor</label>
           <div class="readonly-field">{{ userData.tutor || '-' }}</div>
         </div>
 
@@ -62,23 +62,36 @@
         </div>
 
         <div class="form-group">
-          <label>Último Login</label>
+          <label for="lastLogin">Último Login</label>
           <div class="readonly-field">{{ userData.lastLoginDate }}</div>
         </div>
 
         <div class="form-group">
-          <label>Último Cambio Contraseña</label>
+          <label for="lastPasswordChange">Último Cambio Contraseña</label>
           <div class="readonly-field">{{ userData.lastPasswordResetDate }}</div>
         </div>
 
         <div class="form-group">
-          <label>Fecha Creación</label>
+          <label for="createDate">Fecha Creación</label>
           <div class="readonly-field">{{ userData.createdDate }}</div>
         </div>
 
         <div class="form-group">
-          <label>Fecha Actualización</label>
+          <label for="updateDate">Fecha Actualización</label>
           <div class="readonly-field">{{ userData.updatedDate }}</div>
+        </div>
+
+        <div class="form-group">
+          <label for="isActivo">Activo</label>
+          <select v-if="editable" id="isActivo" class="input-field" v-model="userData.isActivo">
+            <option :value="true">SI</option>
+            <option :value="false">NO</option>
+          </select>
+          <div v-else class="readonly-field">
+            <span :class="userData.isActivo ? 'status-activo-si' : 'status-activo-no'">
+              {{ userData.isActivo ? 'SI' : 'NO' }}
+            </span>
+          </div>
         </div>
       </div>
 
