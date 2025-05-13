@@ -42,8 +42,18 @@
         </div>
 
         <div class="form-group">
-          <label>Fecha de Sanción</label>
+          <label for="prestamo">Préstamo</label>
+          <div class="readonly-field">{{ sancionData.prestamo?.guid || sancionData.prestamoGuid || '-' }}</div>
+        </div>
+
+        <div class="form-group">
+          <label for="fechaSancion">Fecha de Sanción</label>
           <div class="readonly-field">{{ sancionData.fechaSancion }}</div>
+        </div>
+
+        <div class="form-group">
+          <label for="fechaFin">Fecha Fin</label>
+          <div class="readonly-field">{{ sancionData.fechaFin }}</div>
         </div>
 
       </div>

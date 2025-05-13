@@ -55,6 +55,11 @@
             {{ slotProps.data.user?.numeroIdentificacion || 'N/A' }}
           </template>
         </Column>
+        <Column field="prestamo.guid" header="Préstamo" style="min-width: 150px;">
+          <template #body="slotProps">
+            {{ slotProps.data.prestamo?.guid || 'N/A' }}
+          </template>
+        </Column>
         <Column field="tipoSancion" header="Tipo" style="min-width: 150px;">
           <template #body="slotProps">
                  <span :class="['status-badge', getStatusClass(slotProps.data.tipoSancion)]">
@@ -65,6 +70,10 @@
         <Column field="fechaSancion" header="Fecha Sanción" style="min-width: 150px;">
           <template #body="slotProps">
             {{ slotProps.data.fechaSancion }} </template>
+        </Column>
+        <Column field="fechaFin" header="Fecha Fin" style="min-width: 150px;">
+          <template #body="slotProps">
+            {{ slotProps.data.fechaFin }} </template>
         </Column>
 
 
@@ -104,6 +113,8 @@ interface Sancion {
   tipo: string;
   user: { guid: string } | null;
   userGuid: string;
+  prestamo: { guid: string } | null;
+  prestamoGuid: string;
   fechaSancion: string;
   fechaFin: string;
   createdDate: string;
