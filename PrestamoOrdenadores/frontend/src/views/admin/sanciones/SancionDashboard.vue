@@ -207,10 +207,12 @@ export default {
         resultadosFiltrados = resultadosFiltrados.filter(sancion => {
           const guidMatch = sancion.guid?.toLowerCase().startsWith(q) ?? false;
           const userMatch = sancion.userGuid?.toLowerCase().startsWith(q) ?? false;
+          const prestamoMatch = sancion.prestamo?.guid?.toLowerCase().startsWith(q) ?? false;
           const tipoMatch = sancion.tipo?.toLowerCase().startsWith(q) ?? false;
           const fechaSancionMatch = sancion.fechaSancion?.includes(q) ?? false;
+          const fechaFinMatch = sancion.fechaFin?.includes(q) ?? false;
 
-          return guidMatch || userMatch || tipoMatch || fechaSancionMatch;
+          return guidMatch || userMatch || prestamoMatch || tipoMatch || fechaSancionMatch || fechaFinMatch;
         });
       }
 
@@ -222,7 +224,8 @@ export default {
 
         resultadosFiltrados = resultadosFiltrados.filter(sancion => {
           const fechaSancionMatch = sancion.fechaSancion === selectedDateStringDdMmYyyy;
-          return fechaSancionMatch;
+          const fechaFinMatch = sancion.fechaFin === selectedDateStringDdMmYyyy;
+          return fechaSancionMatch || fechaFinMatch;
         });
       }
 
