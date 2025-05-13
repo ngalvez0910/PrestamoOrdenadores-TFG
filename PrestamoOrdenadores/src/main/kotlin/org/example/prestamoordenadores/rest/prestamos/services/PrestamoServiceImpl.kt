@@ -1,13 +1,10 @@
 package org.example.prestamoordenadores.rest.prestamos.services
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.WebSocketService
-import org.example.prestamoordenadores.config.websockets.models.Notification
 import org.example.prestamoordenadores.config.websockets.models.NotificationDto
 import org.example.prestamoordenadores.config.websockets.models.NotificationSeverityDto
 import org.example.prestamoordenadores.config.websockets.models.NotificationTypeDto
@@ -53,8 +50,6 @@ class PrestamoServiceImpl(
     private val userRepository: UserRepository,
     private val dispositivoRepository: DispositivoRepository,
     private val prestamoPdfStorage: PrestamoPdfStorage,
-    private val objectMapper: ObjectMapper,
-    @Qualifier("webSocketIncidenciasHandler") private val webSocketHandler: WebSocketHandler,
     private val webService : WebSocketService,
     private val emailService: EmailService
 ): PrestamoService {
