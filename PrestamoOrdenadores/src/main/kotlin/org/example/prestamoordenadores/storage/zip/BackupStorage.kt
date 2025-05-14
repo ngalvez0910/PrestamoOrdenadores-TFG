@@ -31,6 +31,8 @@ class BackupStorage {
                 "-h", dbHost,
                 "-U", dbUser,
                 "-F", "p",
+                "--clean",
+                "--if-exists",
                 "-b",
                 "-v",
                 "-f", backupFile.absolutePath,
@@ -70,13 +72,29 @@ class BackupStorage {
 
             val exitCode = process.waitFor()
 
-            outputReaderThread.join(3000)
-            errorReaderThread.join(3000)
+            outputReaderThread.join(5000)
+            errorReaderThread.join(5000)
 
             pgpassFile?.delete()
 
             if (exitCode == 0) {
                 logger.info { "Backup exitoso en: ${backupFile.absolutePath}" }
+                try {
+                    val lines = backupFile.readLines(Charsets.UTF_8)
+
+                    val filteredLines = lines.filterNot { line ->
+                        line.trim().equals("SET transaction_timeout = 0;", ignoreCase = true)
+                    }
+
+                    if (filteredLines.size < lines.size) {
+                        backupFile.writeText(filteredLines.joinToString(System.lineSeparator()), Charsets.UTF_8)
+                        logger.info { "Archivo de backup '${backupFile.name}' filtrado para remover 'SET transaction_timeout = 0;'." }
+                    } else {
+                        logger.info { "La línea 'SET transaction_timeout = 0;' no se encontró en '${backupFile.name}'. No se realizaron cambios de filtrado." }
+                    }
+                } catch (e: Exception) {
+                    logger.error(e) { "Error al filtrar el archivo de backup para remover transaction_timeout: ${e.message}" }
+                }
                 return true
             } else {
                 logger.error { "Error al realizar el backup. Código: $exitCode" }
@@ -85,6 +103,9 @@ class BackupStorage {
         } catch (e: Exception) {
             logger.error(e) { "Error al ejecutar pg_dump: ${e.message}" }
             pgpassFile?.delete()
+            if (backupFile.exists()) {
+                backupFile.delete()
+            }
             return false
         }
     }
@@ -105,6 +126,8 @@ class BackupStorage {
         try {
             val processBuilder = ProcessBuilder(
                 "psql",
+                "-1",
+                "-v", "ON_ERROR_STOP=1",
                 "-h", dbHost,
                 "-U", dbUser,
                 "-d", dbName,
