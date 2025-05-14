@@ -1,10 +1,12 @@
 import axios from 'axios';
 
+export type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
+
 interface Dispositivo {
     guid: string;
     numeroSerie: string;
     componentes: string;
-    estado: string;
+    estado: DeviceState;
     estadoDispositivo: string;
     incidencia?: { guid: string; };
     incidenciaGuid?: string;
@@ -12,6 +14,11 @@ interface Dispositivo {
     isActivo: boolean;
     createdDate: string;
     updatedDate: string;
+}
+
+interface DispositivoCreateRequest {
+    numeroSerie: string;
+    componentes: string;
 }
 
 export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | null> => {
@@ -46,10 +53,7 @@ export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | 
     }
 };
 
-export const actualizarDispositivo = async (
-    guid: string,
-    data: { componentes: string; estadoDispositivo: string; incidenciaGuid: string | null }
-): Promise<Dispositivo | null> => {
+export const actualizarDispositivo = async (guid: string, data: { componentes: string; estadoDispositivo: string; incidenciaGuid: string | null }): Promise<Dispositivo | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -97,6 +101,28 @@ export const descargarCsvDispositivos = async (): Promise<void | null> => {
         window.URL.revokeObjectURL(url);
     } catch (error) {
         console.error('Error al descargar el CSV de dispositivos', error);
+        throw error;
+    }
+}
+
+export const addDispositivoStock = async (request: DispositivoCreateRequest): Promise<Dispositivo> => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('Intento de añadir dispositivo sin token.');
+        throw new Error('No autenticado o token no encontrado.');
+    }
+    try {
+        console.log('[DispositivoService] Añadiendo nuevo dispositivo con request:', request);
+        const response = await axios.post<Dispositivo>(`http://localhost:8080/dispositivos`, request, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log('[DispositivoService] Dispositivo añadido, respuesta:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('[DispositivoService] Error al añadir dispositivo:', error);
         throw error;
     }
 }

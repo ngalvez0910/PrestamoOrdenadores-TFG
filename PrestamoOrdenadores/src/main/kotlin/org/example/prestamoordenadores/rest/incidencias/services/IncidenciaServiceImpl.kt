@@ -1,10 +1,8 @@
 package org.example.prestamoordenadores.rest.incidencias.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.config.websockets.models.NotificationDto
 import org.example.prestamoordenadores.config.websockets.models.NotificationSeverityDto
@@ -23,7 +21,6 @@ import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
@@ -41,7 +38,6 @@ class IncidenciaServiceImpl(
     private val repository: IncidenciaRepository,
     private val mapper: IncidenciaMapper,
     private val userRepository: UserRepository,
-    @Qualifier("webSocketIncidenciasHandler") private val webSocketHandler: WebSocketHandler,
     private val webService : WebSocketService
 ) : IncidenciaService {
     override fun getAllIncidencias(page: Int, size: Int): Result<PagedResponse<IncidenciaResponse>, IncidenciaError> {

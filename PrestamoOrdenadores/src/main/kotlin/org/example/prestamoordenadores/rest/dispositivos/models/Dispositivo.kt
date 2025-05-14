@@ -10,12 +10,10 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.Table
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.utils.generators.generateGuid
-import org.example.prestamoordenadores.utils.generators.generateNumeroSerie
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDateTime
 import jakarta.persistence.OneToOne
-import jakarta.persistence.FetchType
 
 @Entity
 @Table(name = "dispositivos")
@@ -25,7 +23,7 @@ class Dispositivo(
     val id: Long = 0L,
     var guid : String = generateGuid(),
 
-    var numeroSerie : String = generateNumeroSerie(),
+    var numeroSerie : String = "",
 
     var componentes :  String = "",
 
