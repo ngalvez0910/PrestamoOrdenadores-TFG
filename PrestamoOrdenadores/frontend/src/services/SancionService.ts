@@ -6,6 +6,7 @@ interface Sancion {
     user: { guid: string; numeroIdentificacion: string; };
     userGuid: string;
     fechaSancion: string;
+    fechaFin: string;
     createdDate: string;
     updatedDate: string;
 }
@@ -41,10 +42,7 @@ export const getSancionByGuid = async (guid: string): Promise<Sancion | null> =>
     }
 };
 
-export const actualizarSancion = async (
-    guid: string,
-    data: { tipoSancion: string }
-): Promise<Sancion | null> => {
+export const actualizarSancion = async (guid: string, data: { tipoSancion: string }): Promise<Sancion | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {

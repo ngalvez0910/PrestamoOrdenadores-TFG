@@ -55,6 +55,11 @@
             {{ slotProps.data.user?.numeroIdentificacion || 'N/A' }}
           </template>
         </Column>
+        <Column field="prestamo.guid" header="Préstamo" style="min-width: 150px;">
+          <template #body="slotProps">
+            {{ slotProps.data.prestamo?.guid || 'N/A' }}
+          </template>
+        </Column>
         <Column field="tipoSancion" header="Tipo" style="min-width: 150px;">
           <template #body="slotProps">
                  <span :class="['status-badge', getStatusClass(slotProps.data.tipoSancion)]">
@@ -65,6 +70,10 @@
         <Column field="fechaSancion" header="Fecha Sanción" style="min-width: 150px;">
           <template #body="slotProps">
             {{ slotProps.data.fechaSancion }} </template>
+        </Column>
+        <Column field="fechaFin" header="Fecha Fin" style="min-width: 150px;">
+          <template #body="slotProps">
+            {{ slotProps.data.fechaFin }} </template>
         </Column>
 
 
@@ -96,7 +105,7 @@ import axios from 'axios';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
 
-type SanctionType = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'BLOQUEO_INDEFINIDO';
+type SanctionType = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'INDEFINIDO';
 
 interface Sancion {
   guid: string;
@@ -104,7 +113,10 @@ interface Sancion {
   tipo: string;
   user: { guid: string } | null;
   userGuid: string;
+  prestamo: { guid: string } | null;
+  prestamoGuid: string;
   fechaSancion: string;
+  fechaFin: string;
   createdDate: string;
   updatedDate: string;
 }
@@ -149,7 +161,7 @@ export default {
       switch (tipo) {
         case 'ADVERTENCIA': return 'status-advertencia';
         case 'BLOQUEO_TEMPORAL': return 'status-bloqueo';
-        case 'BLOQUEO_INDEFINIDO': return 'status-indefinido';
+        case 'INDEFINIDO': return 'status-indefinido';
         default: return 'status-unknown';
       }
     },
@@ -195,10 +207,12 @@ export default {
         resultadosFiltrados = resultadosFiltrados.filter(sancion => {
           const guidMatch = sancion.guid?.toLowerCase().startsWith(q) ?? false;
           const userMatch = sancion.userGuid?.toLowerCase().startsWith(q) ?? false;
+          const prestamoMatch = sancion.prestamo?.guid?.toLowerCase().startsWith(q) ?? false;
           const tipoMatch = sancion.tipo?.toLowerCase().startsWith(q) ?? false;
           const fechaSancionMatch = sancion.fechaSancion?.includes(q) ?? false;
+          const fechaFinMatch = sancion.fechaFin?.includes(q) ?? false;
 
-          return guidMatch || userMatch || tipoMatch || fechaSancionMatch;
+          return guidMatch || userMatch || prestamoMatch || tipoMatch || fechaSancionMatch || fechaFinMatch;
         });
       }
 
@@ -210,7 +224,8 @@ export default {
 
         resultadosFiltrados = resultadosFiltrados.filter(sancion => {
           const fechaSancionMatch = sancion.fechaSancion === selectedDateStringDdMmYyyy;
-          return fechaSancionMatch;
+          const fechaFinMatch = sancion.fechaFin === selectedDateStringDdMmYyyy;
+          return fechaSancionMatch || fechaFinMatch;
         });
       }
 

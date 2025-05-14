@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export interface BackupInfo {
-    fileName: string;
+    name: string;
     [key: string]: any;
 }
 
@@ -108,7 +108,7 @@ export const restoreBackup = async (fileName: string): Promise<string | null> =>
         console.log(`SERVICE: Solicitando restauración desde: ${fileName}`);
         const response = await axios.post<string>(
             `http://localhost:8080/backup/restore`,
-            null, // Body
+            null,
             {
                 params: { fileName },
                 headers: {
