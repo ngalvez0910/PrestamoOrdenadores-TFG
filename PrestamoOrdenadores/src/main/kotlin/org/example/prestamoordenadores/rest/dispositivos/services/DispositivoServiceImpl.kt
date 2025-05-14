@@ -3,15 +3,23 @@ package org.example.prestamoordenadores.rest.dispositivos.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.config.websockets.WebSocketService
+import org.example.prestamoordenadores.config.websockets.models.NotificationDto
+import org.example.prestamoordenadores.config.websockets.models.NotificationSeverityDto
+import org.example.prestamoordenadores.config.websockets.models.NotificationTypeDto
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
 import org.example.prestamoordenadores.rest.dispositivos.mappers.DispositivoMapper
+import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
+import org.example.prestamoordenadores.rest.users.models.Role
+import org.example.prestamoordenadores.rest.users.models.User
+import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
@@ -19,8 +27,11 @@ import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.UUID
 
 private val logger = logging()
 
@@ -29,7 +40,9 @@ private val logger = logging()
 class DispositivoServiceImpl(
     private val dispositivoRepository: DispositivoRepository,
     private val mapper: DispositivoMapper,
-    private val incidenciaRepository: IncidenciaRepository
+    private val incidenciaRepository: IncidenciaRepository,
+    private val userRepository: UserRepository,
+    private val webService : WebSocketService
 ) : DispositivoService {
     override fun getAllDispositivos(page: Int, size: Int): Result<PagedResponse<DispositivoResponseAdmin>, DispositivoError> {
         logger.debug { "Obteniendo todos los dispositivos" }
@@ -63,13 +76,37 @@ class DispositivoServiceImpl(
     override fun createDispositivo(dispositivo: DispositivoCreateRequest): Result<DispositivoResponse, DispositivoError> {
         logger.debug { "Guardando un nuevo dispositivo" }
 
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication == null || !authentication.isAuthenticated) {
+            logger.warn { "No hay un usuario autenticado para la creación del dispositivo." }
+            return Err(DispositivoError.AuthenticationError("Usuario no autenticado."))
+        }
+
+        val principal = authentication.principal
+        val userEmail: String = when (principal) {
+            is UserDetails -> principal.username
+            is String -> principal
+            else -> {
+                logger.warn { "El principal autenticado no es del tipo esperado: ${principal::class.simpleName}" }
+                return Err(DispositivoError.AuthenticationError("No se pudo determinar el email del usuario autenticado."))
+            }
+        }
+
+        val currentUser = userRepository.findByEmail(userEmail)
+        if (currentUser == null) {
+            logger.error { "No se pudo encontrar al usuario $userEmail en la base de datos." }
+            return Err(DispositivoError.UserNotFound("Usuario $userEmail no encontrado."))
+        }
+
         val dispositivoValidado = dispositivo.validate()
         if (dispositivoValidado.isErr) {
-            return Err(DispositivoError.DispositivoValidationError("Dispositivo inválido"))
+            return Err(DispositivoError.DispositivoValidationError("Dispositivo inválido: ${dispositivoValidado.error}"))
         }
 
         val newDispositivo = mapper.toDispositivoFromCreate(dispositivo)
         dispositivoRepository.save(newDispositivo)
+
+        sendNotificationAñadirStock(newDispositivo, currentUser)
 
         return Ok(mapper.toDispositivoResponse(newDispositivo))
     }
@@ -153,5 +190,43 @@ class DispositivoServiceImpl(
         logger.debug { "Obteniendo stock" }
 
         return Ok(dispositivoRepository.findAll().count())
+    }
+
+    private fun sendNotificationAñadirStock(dispositivo: Dispositivo, user: User) {
+        val notificacionParaAdminQueAñadió = NotificationDto(
+            id = UUID.randomUUID().toString(),
+            titulo = "Nuevo Dispositivo: ${dispositivo.numeroSerie}",
+            mensaje = "Has añadido un dispositivo con numero de serie: '${dispositivo.numeroSerie}'.",
+            fecha = LocalDateTime.now(),
+            leida = false,
+            tipo = NotificationTypeDto.INFO,
+            enlace = "/admin/dispositivo/detalle/${dispositivo.guid}",
+            severidadSugerida = NotificationSeverityDto.SUCCESS
+        )
+        logger.debug { "Preparando notificación de confirmación de adición para admin (${user.email}): $notificacionParaAdminQueAñadió" }
+        webService.createAndSendNotification(user.email, notificacionParaAdminQueAñadió)
+
+
+        val administradores = userRepository.findUsersByRol(Role.ADMIN).filter { it?.email != user.email }
+
+        if (administradores.isNotEmpty()) {
+            logger.info { "Se encontraron ${administradores.size} otros administradores para notificar sobre la resolución." }
+            administradores.forEach { otroAdmin ->
+                if (otroAdmin != null) {
+                    val notificacionParaOtroAdmin = NotificationDto(
+                        id = UUID.randomUUID().toString(),
+                        titulo = "Dispositivo Añadido: ${dispositivo.numeroSerie}",
+                        mensaje = "El dispositivo con numero de serie: '${dispositivo.numeroSerie}' fue añadido por ${user.nombre} ${user.apellidos}.",
+                        fecha = LocalDateTime.now(),
+                        leida = false,
+                        tipo = NotificationTypeDto.INFO,
+                        enlace = "/admin/dispositivo/detalle/${dispositivo.guid}",
+                        severidadSugerida = NotificationSeverityDto.INFO
+                    )
+                    logger.debug { "Preparando notificación informativa de adición para otro admin (${otroAdmin.email}): $notificacionParaOtroAdmin" }
+                    webService.createAndSendNotification(otroAdmin.email, notificacionParaOtroAdmin)
+                }
+            }
+        }
     }
 }

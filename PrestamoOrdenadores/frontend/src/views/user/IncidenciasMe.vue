@@ -84,7 +84,7 @@ export default defineComponent({
     const router = useRouter();
 
     const isReportarModalVisible = ref(false);
-    const nuevaIncidencia = ref<CreateIncidenciaDto>({
+    const nuevaIncidencia = ref({
       asunto: '',
       descripcion: '',
     });

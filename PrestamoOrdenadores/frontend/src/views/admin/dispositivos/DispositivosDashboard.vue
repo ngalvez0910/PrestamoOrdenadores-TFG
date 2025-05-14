@@ -1,8 +1,13 @@
 <template>
-  <div class="dispositivos-container"> <div class="filters">
-    <label for="search-input">Buscar:</label>
-    <input id="search-input" type="text" v-model="search" placeholder="Buscar por Nº Serie, Componentes, Estado..." @input="handleSearchInput" />
-  </div>
+  <div class="dispositivos-container">
+
+    <div class="filters">
+      <label for="search-input">Buscar:</label>
+      <input id="search-input" type="text" v-model="search" placeholder="Buscar por Nº Serie, Componentes, Estado..." @input="handleSearchInput" />
+      <button class="action-button primary-button" @click="openAddStockDialog">
+        <i class="pi pi-plus"></i> Añadir Stock
+      </button>
+    </div>
 
     <div class="table-wrapper">
       <DataTable
@@ -54,10 +59,41 @@
       </DataTable>
     </div>
   </div>
+
+  <Dialog header="Añadir Nuevo Dispositivo al Stock" v-model:visible="showAddStockDialog" :modal="true" :style="{ width: 'clamp(300px, 50vw, 500px)', fontFamily: 'Montserrat, sans-serif' }" :draggable="false" class="add-stock-dialog" @hide="resetNewDispositivoForm" >
+    <form @submit.prevent="handleAddDispositivo" class="modal-form">
+      <div class="form-group">
+        <label for="dispositivoNumSerie" class="input-label">Número de Serie</label>
+        <InputText id="dispositivoNumSerie" v-model="newDispositivoData.numeroSerie" class="input-field full-width" placeholder="Ej: 1AB123WXYZ" />
+        <small v-if="!newDispositivoData && submittedAddStock" class="error-message p-error">
+          El número de serie es requerido.
+        </small>
+      </div>
+      <div class="form-group">
+        <label for="dispositivoComponentes" class="input-label">Componentes del Dispositivo</label>
+        <InputText id="dispositivoComponentes" v-model="newDispositivoData.componentes" class="input-field full-width" placeholder="Ej: Ratón, cargador..." />
+        <small v-if="!newDispositivoData && submittedAddStock" class="error-message p-error">
+          Los componentes son requeridos.
+        </small>
+      </div>
+      <div class="dialog-footer-buttons">
+        <Button label="Cancelar" icon="pi pi-times" class="p-button-text action-button secondary-button" @click="closeAddStockDialog"/>
+        <Button type="submit" label="Añadir Dispositivo" icon="pi pi-send" class="action-button primary-button" :loading="isAddingStock" />
+      </div>
+    </form>
+  </Dialog>
+
+  <Toast />
 </template>
 
 <script lang="ts">
 import axios from 'axios';
+import {addDispositivoStock} from "@/services/DispositivoService.ts";
+import {useToast} from "primevue/usetoast";
+import Dialog from "primevue/dialog";
+import Toast from "primevue/toast";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
 
 type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
 
@@ -66,7 +102,7 @@ interface Dispositivo {
   numeroSerie: string;
   componentes: string;
   estadoDispositivo: string;
-  estado: 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
+  estado: DeviceState;
   incidencia: { guid: string } | null;
   incidenciaGuid: string | null;
   isActivo: boolean;
@@ -82,6 +118,11 @@ interface PagedResponse {
 export default {
   name: 'DispositivosDashboard',
   emits: ['input-change'],
+  components: { Dialog, Toast, Button, InputText },
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       search: '',
@@ -91,6 +132,10 @@ export default {
       loading: false,
       currentPage: 0,
       pageSize: 5,
+      showAddStockDialog: false,
+      newDispositivoData: {numeroSerie: '', componentes: ''},
+      isAddingStock: false,
+      submittedAddStock: false,
     };
   },
   async mounted() {
@@ -187,7 +232,71 @@ export default {
         name: 'DispositivoDetalle',
         params: { guid: dispositivo.guid }
       });
-    }
+    },
+    openAddStockDialog() {
+      this.resetNewDispositivoForm();
+      this.showAddStockDialog = true;
+    },
+    closeAddStockDialog() {
+      this.showAddStockDialog = false;
+    },
+    resetNewDispositivoForm() {
+      this.newDispositivoData =  { numeroSerie: '', componentes: '' };
+      this.submittedAddStock = false;
+      this.isAddingStock = false;
+    },
+    async handleAddDispositivo() {
+      this.submittedAddStock = true;
+
+      let isValid = true;
+      if (!this.newDispositivoData.numeroSerie){
+        isValid = false;
+      }
+
+      if (!this.newDispositivoData.componentes) {
+        isValid = false;
+      }
+
+      const numeroSerieRegex = /^\d[A-Z]{2}\d{3}[A-Z]{4}$/;
+      if (this.newDispositivoData.numeroSerie && !numeroSerieRegex.test(this.newDispositivoData.numeroSerie)) {
+        this.toast.add({ severity: 'error', summary: 'Error de Validación', detail: 'El formato del Número de Serie es incorrecto (Ej: 1AB123CDEF).', life: 4000 });
+        isValid = false;
+      }
+
+      if (!isValid) {
+        this.toast.add({ severity: 'warn', summary: 'Error de Validación', detail: 'Por favor, complete todos los campos requeridos correctamente.', life: 3000 });
+        return;
+      }
+
+      if (this.newDispositivoData.componentes.length > 1000) {
+        this.toast.add({ severity: 'error', summary: 'Error de Validación', detail: 'Los componentes no pueden exceder los 1000 caracteres.', life: 3000 });
+        return;
+      }
+      if (this.newDispositivoData.numeroSerie.length > 255) {
+        this.toast.add({ severity: 'error', summary: 'Error de Validación', detail: 'El Número de Serie no puede exceder los 255 caracteres.', life: 3000 });
+        return;
+      }
+
+      this.isAddingStock = true;
+      try {
+        const payload = {
+          numeroSerie: this.newDispositivoData.numeroSerie,
+          componentes: this.newDispositivoData.componentes
+        };
+
+        await addDispositivoStock(payload);
+
+        await this.loadData();
+
+        this.closeAddStockDialog();
+      } catch (error: any) {
+        console.error("Error al añadir el nuevo dispositivo:", error);
+        const errorMessage = error.response?.data?.message || error.response?.data?.error || (typeof error.response?.data === 'string' ? error.response.data : null) || 'No se pudo añadir el dispositivo.';
+        this.toast.add({ severity: 'error', summary: 'Error al Añadir', detail: String(errorMessage), life: 5000 });
+      } finally {
+        this.isAddingStock = false;
+      }
+    },
   },
 };
 </script>
@@ -204,8 +313,7 @@ export default {
 .filters {
   display: flex;
   align-items: center;
-  gap: 10px;
-  max-width: 300px;
+  gap: 15px;
   margin: -25px auto 40px 150px;
 }
 
@@ -223,7 +331,7 @@ export default {
   font-size: 1rem;
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  min-width: 250%;
+  max-width: 675px;
 }
 
 .filters input:focus {
@@ -302,7 +410,7 @@ export default {
   align-items: center;
 }
 
-.action-button {
+.action-button.edit-button, .action-button.delete-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -384,19 +492,119 @@ export default {
   box-shadow: 0 0 0 1px rgba(var(--color-interactive-rgb), 0.2) !important;
 }
 
+.action-button.primary-button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  line-height: 1.2;
+  background-color: var(--color-interactive);
+  color: var(--color-text-on-dark-hover);
+  white-space: nowrap;
+}
+.action-button.primary-button:active { transform: scale(0.98); }
+
+.action-button.primary-button:hover {
+  background-color: var(--color-interactive-darker);
+  box-shadow: 0 2px 8px rgba(var(--color-interactive-rgb), 0.3);
+}
+.action-button.primary-button i {
+  font-size: 1.1rem;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-label {
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+}
+
+.modal-form :deep(.p-inputtext.input-field),
+.modal-form :deep(.p-textarea.input-field) {
+  border-radius: 8px;
+  border: 1px solid var(--color-neutral-medium);
+  padding: 10px 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+.modal-form :deep(.p-inputtext.input-field:focus),
+.modal-form :deep(.p-textarea.input-field:focus) {
+  border-color: var(--color-interactive);
+  box-shadow: 0 0 0 2px rgba(var(--color-interactive-rgb), 0.2);
+}
+
+.error-message.p-error {
+  color: var(--color-error);
+  font-size: 0.85rem;
+}
+
+.dialog-footer-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-medium);
+}
+
+.action-button.secondary-button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  line-height: 1.2;
+  background-color: transparent;
+  color: var(--color-interactive);
+  border: 1px solid var(--color-interactive);
+}
+.action-button.secondary-button:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.05);
+}
+
 @media (max-width: 768px) {
   .dispositivos-container {
     padding: 70px 15px 30px 15px;
   }
 
   .filters {
-    max-width: none;
     flex-direction: column;
     align-items: stretch;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .filters label {
     margin-bottom: 5px;
+  }
+
+  .filters .action-button.primary-button {
+    margin-top: 10px;
   }
 
   :deep(.p-datatable-custom .p-datatable-thead > tr > th),

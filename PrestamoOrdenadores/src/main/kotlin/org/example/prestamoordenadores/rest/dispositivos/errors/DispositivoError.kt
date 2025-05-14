@@ -5,4 +5,6 @@ sealed class DispositivoError(var message: String) {
     class DispositivoAlreadyExists(message: String) : DispositivoError(message)
     class DispositivoValidationError(message: String) : DispositivoError(message)
     class IncidenciaNotFound(message: String) : DispositivoError(message)
+    class UserNotFound(message: String) : DispositivoError(message)
+    class AuthenticationError(message: String) : DispositivoError(message)
 }

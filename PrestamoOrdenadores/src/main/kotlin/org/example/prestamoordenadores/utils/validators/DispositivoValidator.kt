@@ -7,9 +7,12 @@ import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRe
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
 
 fun DispositivoCreateRequest.validate(): Result<DispositivoCreateRequest, DispositivoError>  {
-    if (this.componentes.isBlank()) {
-        return Err(DispositivoError.DispositivoValidationError("Los componentes no pueden estar vacíos"))
-    }
+    return when{
+        numeroSerie.isBlank() || !numeroSerie.matches(Regex("^\\d[A-Z]{2}\\d{3}[A-Z]{4}\$")) ->
+            Err(DispositivoError.DispositivoValidationError("Número de serie inválido"))
 
-    return Ok(this)
+        componentes.isBlank() ->
+            Err(DispositivoError.DispositivoValidationError("Los componentes no pueden estar vacíos"))
+        else -> Ok(this)
+    }
 }

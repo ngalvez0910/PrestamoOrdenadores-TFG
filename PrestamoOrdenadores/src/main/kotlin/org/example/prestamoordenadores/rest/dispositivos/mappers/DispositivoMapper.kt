@@ -19,6 +19,7 @@ class DispositivoMapper {
 
     fun toDispositivoFromCreate(dispositivo: DispositivoCreateRequest): Dispositivo {
         return Dispositivo(
+            numeroSerie = dispositivo.numeroSerie,
             componentes = dispositivo.componentes,
             createdDate = LocalDateTime.now(),
             updatedDate = LocalDateTime.now()
