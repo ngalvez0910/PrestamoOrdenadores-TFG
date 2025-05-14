@@ -186,7 +186,7 @@ class IncidenciaServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.INCIDENCIA,
-            enlace = "/incidencias/detalle/${incidencia.guid}",
+            enlace = null,
             severidadSugerida = NotificationSeverityDto.SUCCESS
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
@@ -220,7 +220,7 @@ class IncidenciaServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.SISTEMA,
-            enlace = "/incidencias/detalle/${incidencia.guid}",
+            enlace = null,
             severidadSugerida = NotificationSeverityDto.INFO
         )
         webService.createAndSendNotification(reportante.email, notificacionParaUser)

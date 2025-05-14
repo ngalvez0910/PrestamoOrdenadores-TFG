@@ -373,7 +373,6 @@ class SancionServiceImpl(
         var tituloUser: String
         var mensajeUser: String
         var severidadUser: NotificationSeverityDto
-        val enlaceUser = "/mis-sanciones/${sancion.guid}"
 
         when (sancion.tipoSancion) {
             TipoSancion.ADVERTENCIA -> {
@@ -399,7 +398,7 @@ class SancionServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.SANCION,
-            enlace = enlaceUser,
+            enlace = null,
             severidadSugerida = severidadUser
         )
 
@@ -415,7 +414,7 @@ class SancionServiceImpl(
                     fecha = LocalDateTime.now(),
                     leida = false,
                     tipo = NotificationTypeDto.SANCION,
-                    enlace = "/admin/sanciones/${sancion.guid}",
+                    enlace = "/admin/sancion/detalle/${sancion.guid}",
                     severidadSugerida = if (sancion.tipoSancion == TipoSancion.ADVERTENCIA) NotificationSeverityDto.INFO else NotificationSeverityDto.WARNING
                 )
                 webService.createAndSendNotification(admin.email, notificacionParaAdmin)
@@ -436,7 +435,7 @@ class SancionServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.INFO,
-            enlace = "/profile",
+            enlace = null,
             severidadSugerida = NotificationSeverityDto.SUCCESS
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
@@ -456,7 +455,7 @@ class SancionServiceImpl(
                     fecha = LocalDateTime.now(),
                     leida = false,
                     tipo = NotificationTypeDto.SISTEMA,
-                    enlace = "/admin/users/detalle/${user.guid}",
+                    enlace = "/admin/usuario/detalle/${user.guid}",
                     severidadSugerida = NotificationSeverityDto.INFO
                 )
                 webService.createAndSendNotification(admin.email, notificacionParaAdmin)
@@ -473,7 +472,7 @@ class SancionServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.SANCION,
-            enlace = "/mis-sanciones",
+            enlace = null,
             severidadSugerida = NotificationSeverityDto.SUCCESS
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
@@ -488,7 +487,7 @@ class SancionServiceImpl(
                     fecha = LocalDateTime.now(),
                     leida = false,
                     tipo = NotificationTypeDto.SANCION,
-                    enlace = "/admin/sanciones/dashboard",
+                    enlace = "/admin/dashboard/sanciones",
                     severidadSugerida = NotificationSeverityDto.INFO
                 )
                 webService.createAndSendNotification(admin.email, notificacionParaAdmin)
@@ -505,7 +504,7 @@ class SancionServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.SANCION,
-            enlace = "/mis-sanciones/${sancion.guid}",
+            enlace = null,
             severidadSugerida = NotificationSeverityDto.INFO
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
@@ -520,7 +519,7 @@ class SancionServiceImpl(
                     fecha = LocalDateTime.now(),
                     leida = false,
                     tipo = NotificationTypeDto.SANCION,
-                    enlace = "/admin/sanciones/detalle/${sancion.guid}",
+                    enlace = "/admin/sancion/detalle/${sancion.guid}",
                     severidadSugerida = NotificationSeverityDto.INFO
                 )
                 webService.createAndSendNotification(admin.email, notificacionParaAdmin)

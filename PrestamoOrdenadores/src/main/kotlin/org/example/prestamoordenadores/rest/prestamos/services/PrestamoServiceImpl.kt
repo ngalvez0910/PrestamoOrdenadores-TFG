@@ -224,7 +224,7 @@ class PrestamoServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.PRESTAMO,
-            enlace = "/prestamo/detalle/${prestamo.guid}",
+            enlace = null,
             severidadSugerida = NotificationSeverityDto.SUCCESS
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
@@ -252,7 +252,6 @@ class PrestamoServiceImpl(
         var tituloNotificacion: String
         var mensajeNotificacion: String
         var severidad: NotificationSeverityDto
-        val enlaceNotificacion = "/prestamos/detalle/${prestamo.guid}"
 
         when (tipoNotificacion) {
             "RECORDATORIO_CADUCIDAD" -> {
@@ -292,7 +291,7 @@ class PrestamoServiceImpl(
             fecha = LocalDateTime.now(),
             leida = false,
             tipo = NotificationTypeDto.SISTEMA,
-            enlace = enlaceNotificacion,
+            enlace = null,
             severidadSugerida = severidad
         )
         webService.createAndSendNotification(prestamo.user.email, notificacionParaUser)
@@ -308,7 +307,7 @@ class PrestamoServiceImpl(
                         fecha = LocalDateTime.now(),
                         leida = false,
                         tipo = NotificationTypeDto.SISTEMA,
-                        enlace = enlaceNotificacion,
+                        enlace = "/admin/prestamo/detalle/${prestamo.guid}",
                         severidadSugerida = severidad
                     )
                     webService.createAndSendNotification(admin.email, notificacionParaAdmin)
@@ -345,7 +344,7 @@ class PrestamoServiceImpl(
                         fecha = LocalDateTime.now(),
                         leida = false,
                         tipo = NotificationTypeDto.SISTEMA,
-                        enlace = "/admin/incidencia/detalle/${prestamo.guid}",
+                        enlace = "/admin/prestamo/detalle/${prestamo.guid}",
                         severidadSugerida = NotificationSeverityDto.INFO
                     )
                     logger.debug { "Preparando notificación informativa de eliminaicon para otro admin (${otroAdmin.email}): $notificacionParaOtroAdmin" }

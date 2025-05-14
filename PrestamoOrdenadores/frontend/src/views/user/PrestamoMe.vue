@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <ConfirmDialog />
+  <ConfirmDialog style="font-family: 'Montserrat', sans-serif;"/>
   <Toast />
 </template>
 
@@ -403,7 +403,6 @@ export default defineComponent({
   color: var(--color-primary);
 }
 :deep(.p-confirm-dialog .p-confirm-dialog-message) {
-  font-family: 'Montserrat', sans-serif;
   margin-left: 0;
 }
 :deep(.p-confirm-dialog .p-confirm-dialog-icon) {

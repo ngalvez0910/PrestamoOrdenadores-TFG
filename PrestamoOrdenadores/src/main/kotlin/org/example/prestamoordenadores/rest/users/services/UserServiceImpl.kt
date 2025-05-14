@@ -47,7 +47,6 @@ class UserServiceImpl(
         return Ok(pagedResponse)
     }
 
-
     @Cacheable(key = "#guid")
     override fun getUserByGuid(guid: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con GUID: $guid" }
@@ -97,10 +96,7 @@ class UserServiceImpl(
     }
 
     @CachePut(key = "#guid")
-    override fun resetPassword(
-        guid: String,
-        user: UserPasswordResetRequest
-    ): Result<UserResponse?, UserError> {
+    override fun resetPassword(guid: String, user: UserPasswordResetRequest): Result<UserResponse?, UserError> {
         logger.debug { "Intentando cambiar contraseña para usuario con GUID: $guid" }
 
         try {
