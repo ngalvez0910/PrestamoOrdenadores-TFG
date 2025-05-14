@@ -19,6 +19,6 @@ interface UserService {
     fun getByEmail(email: String): Result<UserResponse?, UserError>
     fun getByTutor(tutor: String) : Result<List<UserResponse?>, UserError>
     fun getUserByGuidAdmin(guid: String) : Result<UserResponseAdmin?, UserError>
-    fun updateRole(guid: String, user: UserRoleUpdateRequest) : Result<UserResponseAdmin?, UserError>
     fun getUserById(id: Long): Result<User?, UserError>
+    fun updateUser(guid: String, request: UserUpdateRequest): Result<UserResponseAdmin?, UserError>
 }

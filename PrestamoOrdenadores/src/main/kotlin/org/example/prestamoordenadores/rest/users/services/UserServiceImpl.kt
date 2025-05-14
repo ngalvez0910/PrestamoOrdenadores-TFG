@@ -181,37 +181,6 @@ class UserServiceImpl(
         }
     }
 
-    @CachePut(key = "#result.guid")
-    override fun updateRole(guid: String, user: UserRoleUpdateRequest): Result<UserResponseAdmin?, UserError> {
-        logger.debug { "Actualizando rol del usuario con GUID: $guid" }
-
-        val userValidado = user.validate()
-        if (userValidado.isErr) {
-            return Err(UserError.UserValidationError("Usuario inválido"))
-        }
-
-        var userEncontrado = repository.findByGuid(guid)
-        if (userEncontrado == null) {
-            return Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
-        }
-
-        val rolNormalizado = user.rol.replace(" ", "_").uppercase()
-        userEncontrado.rol = Role.valueOf(rolNormalizado)
-
-        if (userEncontrado.rol == Role.PROFESOR){
-            userEncontrado.tutor = ""
-        } else if (userEncontrado.rol == Role.ADMIN){
-            userEncontrado.curso = ""
-            userEncontrado.tutor = ""
-        }
-
-        userEncontrado.updatedDate = LocalDateTime.now()
-
-        repository.save(userEncontrado)
-
-        return Ok(mapper.toUserResponseAdmin(userEncontrado))
-    }
-
     @Cacheable(key = "#id")
     override fun getUserById(id: Long): Result<User?, UserError> {
         logger.debug { "Obteniendo usuario con ID: $id" }
@@ -222,5 +191,38 @@ class UserServiceImpl(
         } else {
             Ok(user)
         }
+    }
+
+    @CachePut(key = "#result.guid")
+    override fun updateUser(guid: String, request: UserUpdateRequest): Result<UserResponseAdmin?, UserError> {
+        val datosValidados = request.validate()
+        if (datosValidados.isErr) {
+            return Err(UserError.UserValidationError("Datos inválidos"))
+        }
+
+        val user = repository.findByGuid(guid)
+        if (user == null) {
+            return Err(UserError.UserNotFound("Usuario con GUID $guid no encontrado"))
+        }
+
+        if (request.rol != null) {
+            val nuevoRol = request.rol
+            val rolEnum = Role.valueOf(nuevoRol.uppercase())
+            if (user.rol != rolEnum) {
+                user.rol = rolEnum
+            }
+        }
+
+        if (request.isActivo != null) {
+            val nuevoIsActivo = request.isActivo
+            if (user.isActivo != nuevoIsActivo) {
+                user.isActivo = nuevoIsActivo
+                user.updatedDate = LocalDateTime.now()
+                val savedUser = repository.save(user)
+                return Ok(mapper.toUserResponseAdmin(savedUser))
+            }
+        }
+
+        return Ok(mapper.toUserResponseAdmin(user))
     }
 }

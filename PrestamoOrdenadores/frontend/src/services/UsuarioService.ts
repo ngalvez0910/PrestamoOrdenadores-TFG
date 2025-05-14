@@ -12,6 +12,7 @@ interface User {
     avatar: string;
     lastLoginDate: string;
     lastPasswordResetDate: string;
+    isActivo: boolean;
     createdDate: string;
     updatedDate: string;
 }
@@ -19,6 +20,17 @@ interface User {
 interface UserAvatarUpdateRequest {
     avatar: string;
 }
+
+interface UserIsActivoUpdateRequest {
+    isActivo: boolean;
+}
+
+export interface UserUpdateRequest {
+    rol?: UserRole | string;
+    isActivo?: boolean;
+}
+
+type UserRole = 'ADMIN' | 'USER' | 'PROFESOR';
 
 export const getUserByGuidAdmin = async (guid: string): Promise<User | null> => {
     try {
@@ -80,27 +92,6 @@ export const descargarCsvUsers = async (): Promise<void | null> => {
     }
 };
 
-export const actualizarUsuario = async (guid: string, data: { rol: string }): Promise<User | null> => {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.error("No se encontró el token de autenticación.");
-            return null;
-        }
-
-        const response = await axios.patch(`http://localhost:8080/users/rol/${guid}`, data, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-
-        return response.data || null;
-    } catch (error) {
-        console.error('Error al actualizar el usuario:', error);
-        return null;
-    }
-};
-
 export const updateAvatar = async (guid: string, avatar: string): Promise<void> => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -133,3 +124,26 @@ export const updateAvatar = async (guid: string, avatar: string): Promise<void> 
         throw new Error(errorMessage);
     }
 };
+
+export const actualizarUsuario = async (guid: string, payload: UserUpdateRequest): Promise<any> => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('Intento de actualizar usuario sin token.');
+        throw new Error('No autenticado o token no encontrado.');
+    }
+    try {
+        console.log(`[UsuarioService] Actualizando usuario ${guid} con payload:`, payload);
+
+        const response = await axios.put(`http://localhost:8080/users/${guid}`, payload, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(`[UsuarioService] Usuario ${guid} actualizado, respuesta:`, response.data);
+        return response.data;
+    } catch (error) {
+        console.error(`[UsuarioService] Error al actualizar usuario ${guid}:`, error);
+        throw error;
+    }
+}
