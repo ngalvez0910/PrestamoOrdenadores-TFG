@@ -166,45 +166,47 @@ export default defineComponent({
     },
     async actualizarUsuario() {
       if (!this.userData || !this.originalData) {
-        console.warn("Datos del usuario no disponibles para actualizar.");
-        this.toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Datos no disponibles.', life: 3000 });
+        this.toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Datos del usuario no disponibles.', life: 3000 });
         return;
       }
 
-      const hasChanged = this.userData.rol !== this.originalData.rol;
+      const rolChanged = this.userData.rol !== this.originalData.rol;
+      const isActivoChanged = this.userData.isActivo !== this.originalData.isActivo;
 
-      if (hasChanged) {
-        try {
-          const updatePayload = {
-            rol: this.userData.rol,
-          };
-
-          console.log("Actualizando usuario con payload:", updatePayload);
-
-          const usuarioActualizado = await actualizarUsuario(this.userData.guid, updatePayload);
-
-          if (usuarioActualizado) {
-            this.originalData = JSON.parse(JSON.stringify(usuarioActualizado));
-            this.userData = JSON.parse(JSON.stringify(usuarioActualizado));
-
-            this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado.', life: 3000 });
-            this.editable = false;
-          } else {
-            throw new Error("La actualización no devolvió datos válidos.");
-          }
-
-        } catch (error: any) {
-          console.error('Error al actualizar el usuario:', error);
-          const errorMessage = error.response?.data?.message || error.message || 'No se pudo actualizar el usuario.';
-          this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
-          if (this.originalData) {
-            this.userData = JSON.parse(JSON.stringify(this.originalData));
-          }
-        }
-      } else {
-        console.log("No se detectaron cambios.");
+      if (!rolChanged && !isActivoChanged) {
         this.toast.add({ severity: 'info', summary: 'Info', detail: 'No se realizaron cambios.', life: 3000 });
         this.editable = false;
+        return;
+      }
+
+      const updatePayload = {
+        rol: this.userData.rol,
+        isActivo: this.userData.isActivo,
+      };
+
+      console.log("Actualizando usuario con payload:", updatePayload);
+
+      try {
+        const usuarioActualizado = await actualizarUsuario(this.userData.guid, updatePayload);
+
+        if (usuarioActualizado) {
+          usuarioActualizado.isActivo = (usuarioActualizado.isActivo === true || String(usuarioActualizado.isActivo).toLowerCase() === 'true');
+
+          this.originalData = JSON.parse(JSON.stringify(usuarioActualizado));
+          this.userData = JSON.parse(JSON.stringify(usuarioActualizado));
+
+          this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado correctamente.', life: 3000 });
+          this.editable = false;
+        } else {
+          throw new Error("La actualización no devolvió datos válidos del usuario.");
+        }
+      } catch (error: any) {
+        console.error('Error al actualizar el usuario:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'No se pudo actualizar el usuario.';
+        this.toast.add({ severity: 'error', summary: 'Error de Actualización', detail: errorMessage, life: 5000 });
+        if (this.originalData) {
+          this.userData = JSON.parse(JSON.stringify(this.originalData));
+        }
       }
     },
   }

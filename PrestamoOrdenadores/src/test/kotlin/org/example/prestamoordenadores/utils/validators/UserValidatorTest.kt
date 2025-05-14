@@ -4,7 +4,6 @@ import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.auth.dto.UserLoginRequest
 import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
-import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

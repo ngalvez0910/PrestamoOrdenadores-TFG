@@ -21,45 +21,73 @@
         <ProgressSpinner strokeWidth="4" animationDuration=".5s" style="width: 50px; height: 50px" />
         <p>Cargando notificaciones...</p>
       </div>
-      <template v-else-if="notifications.length > 0">
-        <div
-            v-for="notificacion in sortedNotifications"
-            :key="notificacion.id"
-            class="notification-item"
-            :class="{ 'is-unread': !notificacion.leida }"
-            @click="handleNotificationClick(notificacion)"
-        >
-          <div class="notification-icon-area">
-            <i :class="getNotificationIcon(notificacion.tipo)" class="notification-icon"></i>
-            <span v-if="!notificacion.leida" class="unread-dot" title="No leída"></span>
+      <div v-else class="notifications-scroll-container">
+        <template v-if="sortedNotifications.length > 0">
+          <div
+              v-for="notificacion in sortedNotifications"
+              :key="notificacion.id"
+              class="notification-item"
+              :class="{ 'is-unread': !notificacion.leida }"
+              @click="handleNotificationClick(notificacion)"
+          >
+            <div class="notification-icon-area">
+              <i :class="getNotificationIcon(notificacion.tipo)" class="notification-icon"></i>
+              <span v-if="!notificacion.leida" class="unread-dot" title="No leída"></span>
+            </div>
+            <div class="notification-details">
+              <h5 class="notification-title">{{ notificacion.titulo }}</h5>
+              <p v-if="notificacion.mensaje" class="notification-message-preview">{{ truncate(notificacion.mensaje, 120) }}</p>
+              <small class="notification-timestamp">{{ formatRelativeTime(notificacion.fecha) }}</small>
+            </div>
+            <div class="notification-actions">
+              <Button
+                  v-if="!notificacion.leida"
+                  icon="pi pi-eye"
+                  class="p-button-rounded p-button-text action-button-table"
+                  @click.stop="markAsRead(notificacion)"
+                  v-tooltip.top="'Marcar como leída'"
+              />
+              <Button
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-text p-button-danger action-button-table"
+                  @click.stop="deleteNotification(notificacion)"
+                  v-tooltip.top="'Eliminar notificación'"
+              />
+            </div>
           </div>
-          <div class="notification-details">
-            <h5 class="notification-title">{{ notificacion.titulo }}</h5>
-            <p v-if="notificacion.mensaje" class="notification-message-preview">{{ truncate(notificacion.mensaje, 120) }}</p>
-            <small class="notification-timestamp">{{ formatRelativeTime(notificacion.fecha) }}</small>
-          </div>
-          <div class="notification-actions">
-            <Button
-                v-if="!notificacion.leida"
-                icon="pi pi-eye"
-                class="p-button-rounded p-button-text action-button-table"
-                @click.stop="markAsRead(notificacion)"
-                v-tooltip.top="'Marcar como leída'"
-            />
-            <Button
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-text p-button-danger action-button-table"
-                @click.stop="deleteNotification(notificacion)"
-                v-tooltip.top="'Eliminar notificación'"
-            />
-          </div>
-        </div>
-      </template>
-      <p v-else class="no-data-message">
-        No tienes notificaciones nuevas.
-      </p>
+        </template>
+        <p v-else-if="!loading && notifications.length === 0" class="no-data-message">
+          No tienes notificaciones nuevas.
+        </p>
+      </div>
     </div>
   </div>
+  <Dialog
+      v-if="selectedNotificationForDialog"
+      v-model:visible="isDialogVisible"
+      modal
+      :header="selectedNotificationForDialog.titulo"
+      class="notification-dialog"
+      :style="{ width: '90vw', maxWidth: '600px' }"
+      :breakpoints="{'640px': '95vw'}"
+      @hide="selectedNotificationForDialog = null"
+  >
+    <div class="dialog-content">
+      <div class="dialog-header-info">
+        <i :class="getNotificationIcon(selectedNotificationForDialog.tipo)" class="dialog-notification-icon"></i>
+        <small class="dialog-timestamp">{{ formatRelativeTime(selectedNotificationForDialog.fecha) }}</small>
+      </div>
+      <p v-if="selectedNotificationForDialog.mensaje" class="dialog-message">
+        {{ selectedNotificationForDialog.mensaje }}
+      </p>
+      <p v-else class="dialog-message no-message">
+        <em>Esta notificación no tiene un mensaje detallado.</em>
+      </p>
+    </div>
+    <template #footer>
+      <Button label="Ir al enlace" icon="pi pi-link" class="p-button-text" v-if="selectedNotificationForDialog.enlace" @click="navigateFromDialog" />
+    </template>
+  </Dialog>
   <Toast />
 </template>
 
@@ -73,6 +101,7 @@ import axios from 'axios';
 
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
+import Dialog from "primevue/dialog";
 
 type NotificationType = 'info' | 'prestamo' | 'incidencia' | 'sistema' | 'advertencia' | 'error' | 'sancion';
 
@@ -88,7 +117,7 @@ interface Notificacion {
 
 export default defineComponent({
   name: "Notificaciones",
-  components: { Button, Toast, ProgressSpinner },
+  components: { Button, Toast, ProgressSpinner, Dialog },
   directives: { Tooltip },
   setup() {
     const API_BASE_URL = inject<string>('API_BASE_URL', 'http://localhost:8080');
@@ -99,6 +128,9 @@ export default defineComponent({
     const toast = useToast();
     const router = useRouter();
     const lastReceivedNotification = inject<Readonly<Ref<Notificacion | null>>>('lastReceivedNotification');
+
+    const isDialogVisible = ref(false);
+    const selectedNotificationForDialog = ref<Notificacion | null>(null);
 
     const parseBackendNotificationForPage = (backendNotif: any): Notificacion => {
       return {
@@ -180,24 +212,40 @@ export default defineComponent({
 
     const unreadCount = computed(() => notifications.value.filter(n => !n.leida).length);
 
-    const markAsRead = async (notification: Notificacion) => {
+    const markAsRead = async (notification: Notificacion, fromDialog: boolean = false) => {
       const originalLeidaState = notification.leida;
       const index = notifications.value.findIndex(n => n.id === notification.id);
 
+      let notificationToUpdateInDialog = false;
+      if (selectedNotificationForDialog.value && selectedNotificationForDialog.value.id === notification.id) {
+        notificationToUpdateInDialog = true;
+      }
+
       if (index !== -1 && !notifications.value[index].leida) {
         notifications.value[index].leida = true;
-      } else if (index === -1){
+        if (notificationToUpdateInDialog) {
+          selectedNotificationForDialog.value!.leida = true;
+        }
+      } else if (index === -1 && !fromDialog) {
         return;
+      } else if (fromDialog && selectedNotificationForDialog.value && !selectedNotificationForDialog.value.leida) {
+        selectedNotificationForDialog.value.leida = true;
+        if (index !== -1) notifications.value[index].leida = true;
       }
 
       try {
         await axios.post(`${API_BASE_URL}/notificaciones/${notification.id}/read`, {}, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
-        toast.add({ severity: 'success', summary: 'Leída', detail: 'Notificación marcada como leída.', life: 1500 });
+        if (!fromDialog) {
+          toast.add({ severity: 'success', summary: 'Leída', detail: 'Notificación marcada como leída.', life: 1500 });
+        }
       } catch (error) {
         if (index !== -1) {
           notifications.value[index].leida = originalLeidaState;
+        }
+        if (notificationToUpdateInDialog && selectedNotificationForDialog.value) { // Revertir en el diálogo
+          selectedNotificationForDialog.value.leida = originalLeidaState;
         }
         console.error("Error al marcar como leída:", error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo marcar como leída.', life: 3000 });
@@ -240,12 +288,15 @@ export default defineComponent({
     };
 
     const handleNotificationClick = (notification: Notificacion) => {
+      selectedNotificationForDialog.value = { ...notification, fecha: new Date(notification.fecha) };
+      isDialogVisible.value = true;
       if (!notification.leida) {
-        markAsRead(notification);
+        markAsRead(notification, true);
       }
-      if (notification.enlace) {
-        router.push(notification.enlace);
-      }
+      // La navegación se puede mover a un botón dentro del diálogo si se desea
+      // if (notification.enlace) {
+      // router.push(notification.enlace);
+      // }
     };
 
     const getNotificationIcon = (tipo?: NotificationType): string => {
@@ -283,6 +334,17 @@ export default defineComponent({
       return text.length > length ? text.substring(0, length) + "..." : text;
     };
 
+    const closeNotificationDialog = () => {
+      isDialogVisible.value = false;
+    };
+
+    const navigateFromDialog = () => {
+      if (selectedNotificationForDialog.value && selectedNotificationForDialog.value.enlace) {
+        router.push(selectedNotificationForDialog.value.enlace);
+        closeNotificationDialog();
+      }
+    };
+
     return {
       notifications,
       loading,
@@ -296,6 +358,10 @@ export default defineComponent({
       getNotificationIcon,
       formatRelativeTime,
       truncate,
+      isDialogVisible,
+      selectedNotificationForDialog,
+      closeNotificationDialog,
+      navigateFromDialog
     };
   },
 });
@@ -357,11 +423,12 @@ export default defineComponent({
   box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.1);
   height: 600px;
   position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .notifications-scroll-container {
-  height: 100%;
+  flex-grow: 1;
   overflow-y: auto;
   padding: 0;
 }
@@ -371,9 +438,9 @@ export default defineComponent({
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 40px;
   height: 100%;
-  color: var(--color-text-on-dark);
+  width: 100%;
+  color: var(--color-text-dark);
 }
 
 .loading-indicator p {
@@ -385,7 +452,7 @@ export default defineComponent({
   display: flex;
   align-items: flex-start;
   padding: 15px 20px;
-  border-bottom: 1px solid var(--color-neutral-medium);
+  border-bottom: 1px solid var(--color-neutral-medium, #e9ecef);
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
@@ -399,7 +466,7 @@ export default defineComponent({
 }
 
 .notification-item.is-unread {
-  background-color: var(--color-text-on-dark, #eff6ff);
+  background-color: var(--color-text-on-dark, #e0f2fe);
 }
 
 .notification-item.is-unread .notification-title {
@@ -422,7 +489,7 @@ export default defineComponent({
 .notification-icon.pi-flag-fill { color: var(--color-text-dark); }
 .notification-icon.pi-cog { color: var(--color-primary); }
 .notification-icon.pi-bell { color: var(--color-primary); }
-.notification-icon.pi-times-circle { color: var(--color-error); }
+.notification-icon.pi-times-circle, .notification-icon.pi-ban { color: var(--color-error); }
 .notification-icon.pi-info-circle { color: var(--color-interactive-darker); }
 
 .unread-dot {
@@ -490,6 +557,70 @@ export default defineComponent({
   padding: 40px 20px;
   color: var(--color-text-dark);
   font-style: italic;
+}
+
+.notification-dialog .dialog-content {
+  padding-top: 0.5rem;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.dialog-header-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.dialog-notification-icon {
+  font-size: 1.8rem;
+}
+
+.dialog-timestamp {
+  font-size: 0.8rem;
+  color: var(--color-text-dark);
+}
+
+.dialog-message {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-dark);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.dialog-message.no-message {
+  font-style: italic;
+  color: var(--color-text-dark);
+}
+
+:global(.notification-dialog .p-dialog-header) {
+  background-color: #f0f0f0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+:global(.notification-dialog .p-dialog-title){
+  max-width: calc(100% - 3rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.notification-dialog .p-button-text {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--color-text-dark);
+}
+
+.notification-dialog .p-button-text:hover {
+  color: var(--color-interactive);
+  background-color: transparent !important;
 }
 
 @media (max-width: 768px) {

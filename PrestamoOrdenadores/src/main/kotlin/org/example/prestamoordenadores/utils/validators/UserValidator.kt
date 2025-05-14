@@ -7,7 +7,7 @@ import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.auth.dto.UserLoginRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
-import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
+import org.example.prestamoordenadores.rest.users.dto.UserUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.models.Role
 import java.time.LocalDate
@@ -51,8 +51,8 @@ fun UserAvatarUpdateRequest.validate(): Result<UserAvatarUpdateRequest, UserErro
     return Ok(this)
 }
 
-fun UserRoleUpdateRequest.validate(): Result<UserRoleUpdateRequest, UserError> {
-    if (this.rol.isBlank() || this.rol.uppercase() !in Role.entries.map { it.name }) {
+fun UserUpdateRequest.validate(): Result<UserUpdateRequest, UserError> {
+    if (this.rol?.isBlank() == true || this.rol?.uppercase() !in Role.entries.map { it.name }) {
         return Err(UserError.UserValidationError("El rol no puede estar vacío o no es válido"))
     }
 

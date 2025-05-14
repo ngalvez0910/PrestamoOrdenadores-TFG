@@ -10,7 +10,6 @@ import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
-import org.example.prestamoordenadores.rest.users.dto.UserRoleUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
 import org.example.prestamoordenadores.rest.users.models.Role
