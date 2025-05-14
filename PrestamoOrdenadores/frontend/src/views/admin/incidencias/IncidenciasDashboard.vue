@@ -15,7 +15,7 @@
             <i class="pi pi-calendar"></i>
             <span v-if="selectedDate" class="selected-date-indicator"></span>
           </div>
-          <div v-if="showCalendar" class="calendar-dropdown">
+          <div v-if="showCalendar" class="calendar-dropdown" ref="calendarDropdown">
             <Calendar
                 id="date-filter-input"
                 v-model="selectedDate"
@@ -137,10 +137,10 @@ export default {
     console.log("Componente montado. Llamando a obtenerDatos inicial...");
     await this.loadData();
     console.log("Datos iniciales y totalRecords cargados.");
-    document.addEventListener('click', this.clickOutside);
+    document.addEventListener('mousedown', this.handleDocumentClick);
   },
   beforeUnmount() {
-    document.removeEventListener('click', this.clickOutside);
+    document.removeEventListener('mousedown', this.handleDocumentClick);
   },
   methods: {
     formatEstado(estado: IncidenceState | undefined): string {
@@ -262,12 +262,21 @@ export default {
       const year = date.getFullYear();
       return `${day}/${month}/${year}`;
     },
-    clickOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.calendar-dropdown') && !target.closest('.calendar-icon-container')) {
-        this.showCalendar = false;
+    handleDocumentClick(event: MouseEvent) {
+      if (!this.showCalendar) return;
+
+      const calendarDropdown = this.$refs.calendarDropdown as HTMLElement;
+
+      if (calendarDropdown && !calendarDropdown.contains(event.target as Node)) {
+        const isCalendarIconClick = (event.target as HTMLElement).closest('.calendar-icon-container') !== null;
+
+        if (!isCalendarIconClick) {
+          this.$nextTick(() => {
+            this.showCalendar = false;
+          });
+        }
       }
-    }
+    },
   },
 };
 </script>
