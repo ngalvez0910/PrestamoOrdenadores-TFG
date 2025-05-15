@@ -33,7 +33,7 @@ class DispositivoMapper {
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
             incidencia = dispositivo.incidencia,
-            isActivo = dispositivo.isActivo
+            isDeleted = dispositivo.isDeleted
         )
     }
 

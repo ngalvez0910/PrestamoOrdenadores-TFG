@@ -8,5 +8,5 @@ data class DispositivoResponseAdmin (
     var componentes: String,
     var estado: String,
     var incidencia: Incidencia?,
-    var isActivo: Boolean
+    var isDeleted: Boolean
 )

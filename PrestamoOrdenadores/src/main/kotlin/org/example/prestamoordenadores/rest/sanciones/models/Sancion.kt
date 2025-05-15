@@ -45,9 +45,11 @@ class Sancion (
 
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
+
+    var isDeleted: Boolean = false
 ){
-    constructor(guid: String, user: User, prestamo: Prestamo, tipoSancion: TipoSancion, fechaSancion: LocalDate, fechaFin: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, user, prestamo, tipoSancion, fechaSancion, fechaFin, createdDate, updatedDate)
+    constructor(guid: String, user: User, prestamo: Prestamo, tipoSancion: TipoSancion, fechaSancion: LocalDate, fechaFin: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime, isDeleted: Boolean = false) :
+            this(0, guid, user, prestamo, tipoSancion, fechaSancion, fechaFin, createdDate, updatedDate, isDeleted)
 
     fun isActiveNow(): Boolean {
         val hoy = LocalDate.now()

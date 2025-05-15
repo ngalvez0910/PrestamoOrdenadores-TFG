@@ -38,8 +38,10 @@ class Incidencia(
     var createdDate: LocalDateTime = LocalDateTime.now(),
 
     @LastModifiedDate
-    var updatedDate: LocalDateTime = LocalDateTime.now()
+    var updatedDate: LocalDateTime = LocalDateTime.now(),
+
+    var isDeleted: Boolean = false
 ) {
-    constructor(guid: String, asunto: String, descripcion: String, estadoIncidencia: EstadoIncidencia, user: User, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, asunto, descripcion, estadoIncidencia, user, createdDate, updatedDate)
+    constructor(guid: String, asunto: String, descripcion: String, estadoIncidencia: EstadoIncidencia, user: User, createdDate: LocalDateTime, updatedDate: LocalDateTime, isDeleted: Boolean) :
+            this(0, guid, asunto, descripcion, estadoIncidencia, user, createdDate, updatedDate, isDeleted)
 }
