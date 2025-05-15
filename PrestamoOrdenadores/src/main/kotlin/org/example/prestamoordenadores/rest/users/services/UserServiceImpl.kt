@@ -25,7 +25,6 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 private val logger = logging()
@@ -91,7 +90,7 @@ class UserServiceImpl(
     }
 
     @CachePut(key = "#guid")
-    override fun deleteUserByGuid(guid: String): Result<UserResponse?, UserError> {
+    override fun deleteUserByGuid(guid: String): Result<UserResponseAdmin?, UserError> {
         logger.debug { "Eliminando usuario con GUID: $guid" }
 
         var user = repository.findByGuid(guid)
@@ -100,10 +99,11 @@ class UserServiceImpl(
         }
 
         user.isActivo = false
+        user.isDeleted = true
         user.updatedDate = LocalDateTime.now()
         repository.save(user)
 
-        return Ok(mapper.toUserResponse(user))
+        return Ok(mapper.toUserResponseAdmin(user))
     }
 
     @CachePut(key = "#guid")
@@ -303,20 +303,5 @@ class UserServiceImpl(
 
         logger.info { "Proceso de borrado (Derecho al Olvido) completado para el usuario GUID: $userGuid" }
         return Ok(Unit)
-    }
-
-    @Transactional
-    fun marcarUserParaBorrado(userGuid: String): Result<User, UserError> {
-        logger.info { "Marcando usuario GUID: $userGuid para borrado (Derecho al Olvido)" }
-        val user = repository.findByGuid(userGuid)
-            ?: return Err(UserError.UserNotFound("Usuario no encontrado con GUID: $userGuid"))
-
-        user.isOlvidado = true
-        user.isActivo = false
-        user.isDeleted = true
-        val updatedUser = repository.save(user)
-        logger.debug { "Usuario GUID: ${user.guid} marcado como olvidado." }
-
-        return Ok(updatedUser)
     }
 }

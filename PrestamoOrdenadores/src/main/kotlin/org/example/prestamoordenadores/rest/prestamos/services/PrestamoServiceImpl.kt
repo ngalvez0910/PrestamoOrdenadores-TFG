@@ -150,7 +150,7 @@ class PrestamoServiceImpl(
     }
 
     @CachePut(key = "#guid")
-    override fun deletePrestamoByGuid(guid: String): Result<PrestamoResponse, PrestamoError> {
+    override fun deletePrestamoByGuid(guid: String): Result<Prestamo, PrestamoError> {
         val authentication = SecurityContextHolder.getContext().authentication
         val email = authentication.name
 
@@ -161,16 +161,17 @@ class PrestamoServiceImpl(
         logger.debug { "Cancelando prestamo con GUID: $guid" }
 
         val prestamoEncontrado = prestamoRepository.findByGuid(guid)
-
-        return if (prestamoEncontrado == null) {
-            Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
-        } else {
-            prestamoEncontrado.estadoPrestamo = EstadoPrestamo.CANCELADO
-            prestamoRepository.save(prestamoEncontrado)
-
-            sendNotificationEliminacionPrestamo(prestamoEncontrado, user)
-            Ok(mapper.toPrestamoResponse(prestamoEncontrado))
+        if (prestamoEncontrado == null) {
+            return Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
         }
+
+        prestamoEncontrado.isDeleted = true
+        prestamoEncontrado.updatedDate = LocalDateTime.now()
+
+        prestamoRepository.save(prestamoEncontrado)
+
+        sendNotificationEliminacionPrestamo(prestamoEncontrado, user)
+        return Ok(prestamoEncontrado)
     }
 
     @Cacheable(key = "#fechaPrestamo")
