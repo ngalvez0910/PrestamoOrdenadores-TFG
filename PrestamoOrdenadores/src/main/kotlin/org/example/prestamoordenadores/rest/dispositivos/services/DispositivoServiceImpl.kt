@@ -132,7 +132,7 @@ class DispositivoServiceImpl(
 
         dispositivo.componentes?.let { existingDispositivo.componentes = it }
         dispositivo.estadoDispositivo?.let { existingDispositivo.estadoDispositivo = EstadoDispositivo.valueOf(it) }
-        dispositivo.isActivo?.let { existingDispositivo.isActivo = it }
+        dispositivo.isDeleted?.let { existingDispositivo.isDeleted = it }
 
         dispositivoRepository.save(existingDispositivo)
 
@@ -149,7 +149,7 @@ class DispositivoServiceImpl(
         }
 
         dispositivo.estadoDispositivo = EstadoDispositivo.NO_DISPONIBLE
-        dispositivo.isActivo = false
+        dispositivo.isDeleted = true
         dispositivo.updatedDate = LocalDateTime.now()
 
         dispositivoRepository.save(dispositivo)

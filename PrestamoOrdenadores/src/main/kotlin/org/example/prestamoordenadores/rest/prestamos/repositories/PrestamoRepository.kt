@@ -14,4 +14,5 @@ interface PrestamoRepository : JpaRepository<Prestamo, Long> {
     fun findByFechaDevolucion(fecha: LocalDate): List<Prestamo>
     fun findByUserGuid(userGuid: String): List<Prestamo>
     fun findPrestamoByEstadoPrestamo(estadoPrestamo: EstadoPrestamo): List<Prestamo>
+    fun findPrestamosByUserId(userId: Long): List<Prestamo?>
 }

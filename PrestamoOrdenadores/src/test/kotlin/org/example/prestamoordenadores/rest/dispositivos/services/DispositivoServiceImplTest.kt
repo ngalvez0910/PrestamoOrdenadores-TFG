@@ -106,7 +106,7 @@ class DispositivoServiceImplTest {
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
             incidencia = dispositivo.incidencia,
-            isActivo = dispositivo.isActivo
+            isDeleted = dispositivo.isActivo
         )
 
         val responses = listOf(dispositivoAdmin)
@@ -127,7 +127,7 @@ class DispositivoServiceImplTest {
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
             incidencia = dispositivo.incidencia,
-            isActivo = dispositivo.isActivo
+            isDeleted = dispositivo.isActivo
         )
 
         every { repository.findDispositivoByGuid("guidTestD01") } returns dispositivo
@@ -192,7 +192,7 @@ class DispositivoServiceImplTest {
             incidenciaGuid = null,
             componentes = "RAM 16GB",
             estadoDispositivo = "DISPONIBLE",
-            isActivo = true
+            isDeleted = true
         )
 
         val existingDispositivo = mockk<Dispositivo>(relaxed = true)
@@ -220,7 +220,7 @@ class DispositivoServiceImplTest {
             incidenciaGuid = null,
             componentes = null,
             estadoDispositivo = null,
-            isActivo = null
+            isDeleted = null
         )
 
         every { repository.findDispositivoByGuid(guid) } returns null
@@ -242,7 +242,7 @@ class DispositivoServiceImplTest {
             incidenciaGuid = "inc-guid",
             componentes = null,
             estadoDispositivo = null,
-            isActivo = null
+            isDeleted = null
         )
 
         val existingDispositivo = mockk<Dispositivo>(relaxed = true)

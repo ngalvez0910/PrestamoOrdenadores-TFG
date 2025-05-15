@@ -45,7 +45,9 @@ class Prestamo(
 
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
+
+    var isDeleted: Boolean = false
 ) {
-    constructor(guid: String, user: User, dispositivo: Dispositivo, estadoPrestamo: EstadoPrestamo, fechaPrestamo: LocalDate, fechaDevolucion: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, user, dispositivo, estadoPrestamo, fechaPrestamo, fechaDevolucion, createdDate, updatedDate)
+    constructor(guid: String, user: User, dispositivo: Dispositivo, estadoPrestamo: EstadoPrestamo, fechaPrestamo: LocalDate, fechaDevolucion: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime, isDeleted: Boolean) :
+            this(0, guid, user, dispositivo, estadoPrestamo, fechaPrestamo, fechaDevolucion, createdDate, updatedDate, isDeleted)
 }

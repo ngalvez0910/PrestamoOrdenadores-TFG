@@ -38,7 +38,7 @@ class DispositivoCsvStorage(
                         dispositivo.componentes,
                         dispositivo.estadoDispositivo.name,
                         dispositivo.incidencia?.guid ?:"",
-                        dispositivo.isActivo.toString()
+                        dispositivo.isDeleted.toString()
                     ),
                     false
                 )

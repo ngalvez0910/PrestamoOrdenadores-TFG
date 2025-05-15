@@ -173,4 +173,17 @@ class UserController
             }
         )
     }
+
+    @DeleteMapping("/derechoOlvido/{userGuid}")
+    fun derechoAlOlvido(@PathVariable userGuid: String): ResponseEntity<Any> {
+        return userService.derechoAlOlvido(userGuid).mapBoth(
+            success = { ResponseEntity.status(200).body(it) },
+            failure = { error ->
+                when (error) {
+                    is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
 }

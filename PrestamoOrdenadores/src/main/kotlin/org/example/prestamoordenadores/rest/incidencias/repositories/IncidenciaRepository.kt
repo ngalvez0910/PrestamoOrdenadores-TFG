@@ -10,4 +10,5 @@ interface IncidenciaRepository : JpaRepository<Incidencia, Long> {
     fun findIncidenciaByGuid(guid: String) : Incidencia?
     fun findIncidenciasByEstadoIncidencia(estadoIncidencia: EstadoIncidencia) : List<Incidencia>
     fun findIncidenciasByUserGuid(userGuid: String) : List<Incidencia>
+    fun findIncidenciasByUserId(userId: Long) : List<Incidencia?>
 }

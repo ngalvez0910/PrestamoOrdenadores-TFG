@@ -3,6 +3,11 @@ package org.example.prestamoordenadores.rest.users.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
+import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
+import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
+import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
+import org.example.prestamoordenadores.rest.sanciones.repositories.SancionRepository
 import org.example.prestamoordenadores.rest.users.dto.*
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
@@ -14,11 +19,13 @@ import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 private val logger = logging()
@@ -28,6 +35,10 @@ private val logger = logging()
 class UserServiceImpl(
     private val repository : UserRepository,
     private val mapper: UserMapper,
+    private val incidenciaRepository: IncidenciaRepository,
+    private val prestamoRepository: PrestamoRepository,
+    private val sancionRepository: SancionRepository,
+    private val dispositivoRepository: DispositivoRepository,
 ): UserService {
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
@@ -224,5 +235,88 @@ class UserServiceImpl(
         }
 
         return Ok(mapper.toUserResponseAdmin(user))
+    }
+
+    @CacheEvict(cacheNames = ["users"], key = "#userGuid")
+    override fun derechoAlOlvido(userGuid: String): Result<Unit, UserError> {
+        logger.info { "Iniciando proceso de borrado (Derecho al Olvido) para el usuario GUID: $userGuid" }
+
+        val user = repository.findByGuid(userGuid)
+            ?: return Err(UserError.UserNotFound("Usuario no encontrado con GUID: $userGuid"))
+
+        val userId = user.id
+
+        try {
+            val userSanciones = sancionRepository.findSancionsByUserId(userId)
+            if (userSanciones.isNotEmpty()) {
+                sancionRepository.deleteAll(userSanciones)
+                logger.debug { "Eliminadas ${userSanciones.size} sanciones para el usuario ID: $userId" }
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error al eliminar sanciones para el usuario ID: $userId" }
+            return Err(UserError.DataBaseError("Error inesperado al eliminar sanciones: ${e.localizedMessage}"))
+        }
+
+        try {
+            val userPrestamos = prestamoRepository.findPrestamosByUserId(userId)
+            if (userPrestamos.isNotEmpty()) {
+                prestamoRepository.deleteAll(userPrestamos)
+                logger.debug { "Eliminados ${userPrestamos.size} préstamos para el usuario ID: $userId" }
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error al eliminar préstamos para el usuario ID: $userId" }
+            return Err(UserError.DataBaseError("Error inesperado al eliminar prestamos: ${e.localizedMessage}"))
+        }
+
+        try {
+            val userIncidencias = incidenciaRepository.findIncidenciasByUserId(userId)
+            if (userIncidencias.isNotEmpty()) {
+                val userIncidenciaIds = userIncidencias.mapNotNull { it?.id }
+                if (userIncidenciaIds.isNotEmpty()) {
+                    val dispositivosToUpdate = dispositivoRepository.findByIncidenciaIdIn(userIncidenciaIds)
+                    if (dispositivosToUpdate.isNotEmpty()) {
+                        dispositivosToUpdate.forEach { dispositivo ->
+                            dispositivo.incidencia = null
+                            if (dispositivo.estadoDispositivo == EstadoDispositivo.NO_DISPONIBLE) {
+                                dispositivo.estadoDispositivo = EstadoDispositivo.DISPONIBLE
+                            }
+                        }
+                        dispositivoRepository.saveAll(dispositivosToUpdate)
+                        logger.debug { "Desvinculados ${dispositivosToUpdate.size} dispositivos de incidencias del usuario ID: $userId" }
+                    }
+                }
+                incidenciaRepository.deleteAll(userIncidencias)
+                logger.debug { "Eliminadas ${userIncidencias.size} incidencias para el usuario ID: $userId" }
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error al procesar incidencias y dispositivos para el usuario ID: $userId" }
+            return Err(UserError.DataBaseError("Error inesperado al eliminar incidencias: ${e.localizedMessage}"))
+        }
+
+        try {
+            repository.delete(user)
+            logger.info { "Usuario ID: $userId (GUID: ${user.guid}) eliminado físicamente." }
+        } catch (e: Exception) {
+            logger.error(e) { "Error al eliminar el usuario ID: $userId" }
+            return Err(UserError.DataBaseError("Error inesperado al eliminar usuarios: ${e.localizedMessage}"))
+        }
+
+        logger.info { "Proceso de borrado (Derecho al Olvido) completado para el usuario GUID: $userGuid" }
+        return Ok(Unit)
+    }
+
+    @Transactional
+    fun marcarUserParaBorrado(userGuid: String): Result<User, UserError> {
+        logger.info { "Marcando usuario GUID: $userGuid para borrado (Derecho al Olvido)" }
+        val user = repository.findByGuid(userGuid)
+            ?: return Err(UserError.UserNotFound("Usuario no encontrado con GUID: $userGuid"))
+
+        user.isOlvidado = true
+        user.isActivo = false
+        user.isDeleted = true
+        val updatedUser = repository.save(user)
+        logger.debug { "Usuario GUID: ${user.guid} marcado como olvidado." }
+
+        return Ok(updatedUser)
     }
 }

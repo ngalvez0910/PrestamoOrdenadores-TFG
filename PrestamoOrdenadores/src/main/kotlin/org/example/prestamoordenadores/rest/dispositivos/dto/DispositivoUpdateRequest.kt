@@ -7,5 +7,5 @@ data class DispositivoUpdateRequest (
     var componentes: String? = null,
     var estadoDispositivo: String? = null,
     var incidenciaGuid: String? = null,
-    var isActivo: Boolean? = null
+    var isDeleted: Boolean? = null
 )

@@ -11,4 +11,5 @@ interface DispositivoRepository : JpaRepository<Dispositivo, Long> {
     fun findByEstadoDispositivo(estadoDispositivo: EstadoDispositivo): List<Dispositivo>
     fun findDispositivoByGuid(guid: String): Dispositivo?
     fun findDispositivoByIncidenciaGuid(incidenciaGuid: String): Dispositivo?
+    fun findByIncidenciaIdIn(incidenciaIds: List<Long>): List<Dispositivo>
 }

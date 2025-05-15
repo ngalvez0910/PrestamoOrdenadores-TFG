@@ -21,4 +21,5 @@ interface UserService {
     fun getUserByGuidAdmin(guid: String) : Result<UserResponseAdmin?, UserError>
     fun getUserById(id: Long): Result<User?, UserError>
     fun updateUser(guid: String, request: UserUpdateRequest): Result<UserResponseAdmin?, UserError>
+    fun derechoAlOlvido(userGuid: String): Result<Unit, UserError>
 }

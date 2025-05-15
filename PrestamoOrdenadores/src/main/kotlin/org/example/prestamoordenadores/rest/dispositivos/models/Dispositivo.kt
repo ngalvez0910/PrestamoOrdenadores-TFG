@@ -34,14 +34,14 @@ class Dispositivo(
     @JoinColumn(name = "incidencia_id", referencedColumnName = "id", unique = true)
     var incidencia: Incidencia? = null,
 
-    var isActivo: Boolean = true,
-
     @CreatedDate
     var createdDate: LocalDateTime = LocalDateTime.now(),
 
     @LastModifiedDate
     var updatedDate: LocalDateTime = LocalDateTime.now(),
+
+    var isDeleted: Boolean = false
 ) {
-    constructor(guid: String, numeroSerie: String, componentes: String, estadoDispositivo: EstadoDispositivo, incidencia: Incidencia?, isActivo: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
-            this(0, guid, numeroSerie, componentes, estadoDispositivo, incidencia, isActivo, createdDate, updatedDate)
+    constructor(guid: String, numeroSerie: String, componentes: String, estadoDispositivo: EstadoDispositivo, incidencia: Incidencia?, isDeleted: Boolean, createdDate: LocalDateTime, updatedDate: LocalDateTime) :
+            this(0, guid, numeroSerie, componentes, estadoDispositivo, incidencia, createdDate, updatedDate, isDeleted)
 }

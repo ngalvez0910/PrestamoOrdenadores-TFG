@@ -17,4 +17,5 @@ interface SancionRepository : JpaRepository<Sancion, Long> {
     fun existsByPrestamoGuidAndTipoSancion(prestamoGuid: String, tipoSancion: TipoSancion): Boolean
     fun findByTipoSancionAndFechaFinLessThanEqualAndUserIsActivoIsFalse(tipoSancion: TipoSancion, fecha: LocalDate): List<Sancion>
     fun findSancionsByUserAndTipoSancionIn(user: User, tipos: List<TipoSancion>): List<Sancion>
+    fun findSancionsByUserId(userId: Long): List<Sancion?>
 }
