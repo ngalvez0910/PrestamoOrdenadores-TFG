@@ -109,7 +109,7 @@ class SancionServiceImpl(
     }
 
     @CachePut(key = "#guid")
-    override fun deleteSancionByGuid(guid: String): Result<SancionResponse?, SancionError> {
+    override fun deleteSancionByGuid(guid: String): Result<Sancion?, SancionError> {
         logger.debug { "Buscando sancion" }
 
         val existingSancion = repository.findByGuid(guid)
@@ -118,10 +118,13 @@ class SancionServiceImpl(
         }
 
         logger.debug { "Eliminando sancion" }
-        repository.delete(existingSancion)
+        existingSancion.isDeleted = true
+        existingSancion.updatedDate = LocalDateTime.now()
+
+        repository.save(existingSancion)
 
         sendNotificationSancionEliminada(existingSancion)
-        return Ok(mapper.toSancionResponse(existingSancion))
+        return Ok(existingSancion)
     }
 
     @Cacheable(key = "#fecha")

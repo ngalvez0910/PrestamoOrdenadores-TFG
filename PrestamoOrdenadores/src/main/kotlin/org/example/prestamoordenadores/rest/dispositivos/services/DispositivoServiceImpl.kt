@@ -140,7 +140,7 @@ class DispositivoServiceImpl(
     }
 
     @CachePut(key = "#guid")
-    override fun deleteDispositivoByGuid(guid: String): Result<DispositivoResponse, DispositivoError> {
+    override fun deleteDispositivoByGuid(guid: String): Result<DispositivoResponseAdmin, DispositivoError> {
         logger.debug { "Eliminando dispositivo con GUID: $guid" }
 
         val dispositivo = dispositivoRepository.findDispositivoByGuid(guid)
@@ -154,7 +154,7 @@ class DispositivoServiceImpl(
 
         dispositivoRepository.save(dispositivo)
 
-        return Ok(mapper.toDispositivoResponse(dispositivo))
+        return Ok(mapper.toDispositivoResponseAdmin(dispositivo))
     }
 
     @Cacheable(key = "#numeroSerie")

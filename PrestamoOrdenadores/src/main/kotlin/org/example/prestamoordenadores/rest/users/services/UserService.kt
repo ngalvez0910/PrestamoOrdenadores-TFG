@@ -12,7 +12,7 @@ interface UserService {
     fun getAllUsers(page: Int, size: Int): Result<PagedResponse<UserResponseAdmin>, UserError>
     fun getUserByGuid(guid: String) : Result<UserResponse?, UserError>
     fun updateAvatar(guid: String, user: UserAvatarUpdateRequest) : Result<UserResponse?, UserError>
-    fun deleteUserByGuid(guid: String) : Result<UserResponse?, UserError>
+    fun deleteUserByGuid(guid: String) : Result<UserResponseAdmin?, UserError>
     fun resetPassword(guid: String, user: UserPasswordResetRequest) : Result<UserResponse?, UserError>
     fun getByCurso(curso: String): Result<List<UserResponse?>, UserError>
     fun getByNombre(nombre: String): Result<UserResponse?, UserError>

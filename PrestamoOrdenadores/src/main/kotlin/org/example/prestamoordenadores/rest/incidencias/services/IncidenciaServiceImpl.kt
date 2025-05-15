@@ -123,7 +123,7 @@ class IncidenciaServiceImpl(
     }
 
     @CachePut(key = "#guid")
-    override fun deleteIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
+    override fun deleteIncidenciaByGuid(guid: String): Result<Incidencia?, IncidenciaError> {
         val authentication = SecurityContextHolder.getContext().authentication
         val emailAdmin = authentication.name
         val adminDeleting = userRepository.findByEmail(emailAdmin)
@@ -138,10 +138,13 @@ class IncidenciaServiceImpl(
             return Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
         }
 
-        repository.delete(incidencia)
+        incidencia.isDeleted = true
+        incidencia.updatedDate = LocalDateTime.now()
+
+        repository.save(incidencia)
 
         sendNotificationEliminacionIncidencia(incidencia, adminDeleting)
-        return Ok(mapper.toIncidenciaResponse(incidencia))
+        return Ok(incidencia)
     }
 
     @Cacheable(key = "#estado")

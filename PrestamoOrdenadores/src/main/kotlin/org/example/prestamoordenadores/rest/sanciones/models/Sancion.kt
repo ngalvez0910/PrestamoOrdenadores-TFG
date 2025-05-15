@@ -52,6 +52,10 @@ class Sancion (
             this(0, guid, user, prestamo, tipoSancion, fechaSancion, fechaFin, createdDate, updatedDate, isDeleted)
 
     fun isActiveNow(): Boolean {
+        if (this.isDeleted) {
+            return false
+        }
+
         val hoy = LocalDate.now()
         return when (this.tipoSancion) {
             TipoSancion.ADVERTENCIA -> {
