@@ -88,10 +88,20 @@
             <option :value="false">NO</option>
           </select>
           <div v-else class="readonly-field">
-            <span :class="userData.isActivo ? 'status-activo-si' : 'status-activo-no'">
+            <span :class="userData.isActivo">
               {{ userData.isActivo ? 'SI' : 'NO' }}
             </span>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label for="isDeleted">Marcado Borrado</label>
+          <div class="readonly-field">{{ userData.isDeleted ? 'SI' : 'NO' }}</div>
+        </div>
+
+        <div class="form-group">
+          <label for="isOlvidado">Marcado Olvido</label>
+          <div class="readonly-field">{{ userData.isOlvidado ? 'SI' : 'NO' }}</div>
         </div>
       </div>
 
@@ -105,45 +115,70 @@
     <div v-else class="loading-message">
       <p>Cargando detalles del usuario...</p>
     </div>
-
   </div>
+
+  <button
+      class="action-button delete-button"
+      @click="handleDerechoAlOlvido"
+      title="Ejecutar Derecho al Olvido (Borrado Físico)"
+      :disabled="!userData"
+  >
+    <i class="pi pi-trash"></i> Derecho al Olvido
+  </button>
+
+  <Dialog
+      v-model:visible="showDeleteConfirmationDialog"
+      modal
+      header="Confirmar Borrado de Usuario"
+      :style="{ width: '50vw', fontFamily: 'Montserrat, sans-serif' }"
+      :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+  >
+    <div class="confirmation-dialog-content">
+      <p>
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--color-error);"></i>
+        <br>
+        <span>¿Estás seguro de ejecutar el <strong>Derecho al Olvido</strong> para el usuario <strong>{{ userData?.email }}</strong> (Numero de Serie: <strong>{{ userData.numeroIdentificacion }}</strong>)?</span>
+        <br><br>
+        <span style="color: var(--color-error)">Esta acción eliminará PERMANENTEMENTE todos sus datos (incidencias, préstamos, sanciones, etc.) y <strong>NO SE PUEDE DESHACER</strong>.</span></p>
+    </div>
+    <template #footer>
+      <Button label="Cancelar" icon="pi pi-times" class="p-button-text action-button secondary-button" @click="showDeleteConfirmationDialog = false" />
+      <Button label="Borrar Permanentemente" class="action-button primary-button" severity="danger" @click="confirmDeletion" />
+    </template>
+  </Dialog>
 
   <Toast />
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {actualizarUsuario, getUserByGuidAdmin} from "@/services/UsuarioService.ts";
+import {actualizarUsuario, derechoAlOlvido, getUserByGuidAdmin} from "@/services/UsuarioService.ts";
 import {useToast} from "primevue/usetoast";
+import {useRouter} from "vue-router";
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
 
 type UserRole = 'ADMIN' | 'USER' | 'PROFESOR';
 
 export default defineComponent({
   name: "UsuarioDetalle",
   inheritAttrs: false,
+  components: {Dialog, Button},
   setup() {
     const toast = useToast();
-    return { toast };
+    const router = useRouter();
+    return { toast, router };
   },
   data() {
     return {
       userData: null as any,
       originalData: null as any,
       editable: false,
+      showDeleteConfirmationDialog: false,
     };
   },
   async mounted() {
-    try {
-      const guid = this.$route.params.guid;
-      const guidString = Array.isArray(guid) ? guid[0] : guid;
-      const user = await getUserByGuidAdmin(guidString);
-      this.userData = user;
-      this.originalData = JSON.parse(JSON.stringify(user));
-      console.log(user)
-    } catch (error) {
-      console.error("Error al obtener los detalles del usuario:", error);
-      this.toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el usuario.', life: 3000 });
-    }
+    await this.loadUserData();
   },
   methods: {
     goBack() {
@@ -153,6 +188,32 @@ export default defineComponent({
       this.editable = !this.editable;
       if (!this.editable && this.originalData) {
         this.userData = JSON.parse(JSON.stringify(this.originalData));
+      }
+    },
+    async loadUserData() {
+      try {
+        const guid = this.$route.params.guid;
+        const guidString = Array.isArray(guid) ? guid[0] : guid;
+        const user = await getUserByGuidAdmin(guidString);
+
+        if (user) {
+          user.isActivo = (user.isActivo === true || String(user.isActivo).toLowerCase() === 'true');
+          if (user.hasOwnProperty('isOlvidado')) {
+            user.isOlvidado = (user.isOlvidado === true || String(user.isOlvidado).toLowerCase() === 'true');
+          }
+          if (user.hasOwnProperty('isDeleted')) {
+            user.isDeleted = (user.isDeleted === true || String(user.isDeleted).toLowerCase() === 'true');
+          }
+        }
+
+
+        this.userData = user;
+        this.originalData = JSON.parse(JSON.stringify(user));
+        console.log("Datos de usuario cargados:", user);
+      } catch (error) {
+        console.error("Error al obtener los detalles del usuario:", error);
+        const errorMessage = (error as any).message || 'No se pudo cargar el usuario.';
+        this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
       }
     },
     getRolClass(rol: UserRole | undefined): string {
@@ -209,6 +270,29 @@ export default defineComponent({
         }
       }
     },
+    handleDerechoAlOlvido() {
+      if (!this.userData || !this.userData.guid) {
+        this.toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'No se pudo identificar al usuario.', life: 3000 });
+        return;
+      }
+      this.showDeleteConfirmationDialog = true;
+    },
+    async confirmDeletion() {
+      this.showDeleteConfirmationDialog = false;
+
+      try {
+        await derechoAlOlvido(this.userData.guid);
+
+        this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario y datos eliminados correctamente.', life: 3000 });
+
+        await this.router.push('/admin/dashboard');
+
+      } catch (error: any) {
+        console.error('Error al ejecutar Derecho al Olvido:', error);
+        const errorMessage = error.message || 'No se pudo completar el proceso de Derecho al Olvido.';
+        this.toast.add({ severity: 'error', summary: 'Error de Borrado', detail: errorMessage, life: 5000 });
+      }
+    }
   }
 })
 </script>
@@ -299,12 +383,14 @@ export default defineComponent({
   padding-bottom: 15px;
   border-bottom: 1px solid var(--color-neutral-medium);
 }
+
 .details-header h2 {
   color: var(--color-primary);
   margin: 0;
   font-size: 1.6rem;
   font-weight: 600;
 }
+
 .header-icon {
   font-size: 2.5rem;
   color: var(--color-primary);
@@ -321,8 +407,8 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 8px;
-
 }
+
 .form-group label {
   font-size: 0.85rem;
   color: var(--color-text-dark);
@@ -346,8 +432,7 @@ export default defineComponent({
   width: 100%;
 }
 
-input.input-field,
-select.input-field {
+input.input-field, select.input-field {
   border-radius: 8px;
   padding: 10px 12px;
   border: 1px solid var(--color-neutral-medium);
@@ -377,8 +462,7 @@ input.input-field[readonly]:focus {
   box-shadow: none;
 }
 
-input.input-field:not([readonly]):focus,
-select.input-field:focus {
+input.input-field:not([readonly]):focus, select.input-field:focus {
   border-color: var(--color-interactive);
   box-shadow: 0 0 0 3px rgba(var(--color-interactive-rgb), 0.2);
 }
@@ -435,6 +519,63 @@ select.input-field:focus {
 
 .update-button:hover {
   background-color: var(--color-interactive-darker);
+}
+
+.delete-button {
+  background-color: var(--color-error);
+  color: white;
+  margin-bottom: 35px;
+  margin-left: 910px;
+}
+
+.delete-button:hover {
+  background-color: #B91C1C;
+}
+
+.delete-button:disabled {
+  background-color: var(--color-neutral-medium);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.confirmation-dialog-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.confirmation-dialog-content i {
+  flex-shrink: 0;
+}
+
+.confirmation-dialog-content span {
+  flex-grow: 1;
+}
+
+.action-button.secondary-button {
+  background-color: transparent;
+  color: var(--color-interactive);
+  border: 1px solid var(--color-interactive);
+}
+
+.action-button.secondary-button:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.05);
+}
+
+.action-button.primary-button {
+  background-color: var(--color-error);
+  color: var(--color-text-on-dark-hover);
+}
+
+.action-button.primary-button:hover {
+  background-color: #B91C1C;
+  box-shadow: 0 2px 8px rgba(var(--color-interactive-rgb), 0.3);
+}
+
+.action-button.primary-button i {
+  font-size: 1.1rem;
 }
 
 @media (max-width: 992px) {

@@ -15,14 +15,12 @@ interface User {
     isActivo: boolean;
     createdDate: string;
     updatedDate: string;
+    isDeleted: boolean;
+    isOlvidado: boolean;
 }
 
 interface UserAvatarUpdateRequest {
     avatar: string;
-}
-
-interface UserIsActivoUpdateRequest {
-    isActivo: boolean;
 }
 
 export interface UserUpdateRequest {
@@ -146,4 +144,31 @@ export const actualizarUsuario = async (guid: string, payload: UserUpdateRequest
         console.error(`[UsuarioService] Error al actualizar usuario ${guid}:`, error);
         throw error;
     }
-}
+};
+
+export const derechoAlOlvido = async (userGuid: string): Promise<void> => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('Intento de actualizar usuario sin token.');
+        throw new Error('No autenticado o token no encontrado.');
+    }
+
+    try {
+        await axios.delete(`http://localhost:8080/users/derechoOlvido/${userGuid}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        console.log(`Derecho al Olvido ejecutado con éxito para el usuario: ${userGuid}`);
+
+    } catch (error) {
+        console.error(`Error al ejecutar Derecho al Olvido para el usuario ${userGuid}:`, error);
+
+        const errorMessage = axios.isAxiosError(error) && error.response?.data?.error
+            ? error.response.data.error
+            : (axios.isAxiosError(error) ? error.message : 'Error desconocido al conectar con el servidor.');
+
+        throw new Error(errorMessage);
+    }
+};
