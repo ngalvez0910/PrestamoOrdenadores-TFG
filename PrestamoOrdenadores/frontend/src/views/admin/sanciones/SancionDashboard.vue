@@ -119,6 +119,7 @@ interface Sancion {
   fechaFin: string;
   createdDate: string;
   updatedDate: string;
+  isDeleted: boolean;
 }
 
 interface PagedResponse {

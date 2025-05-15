@@ -109,6 +109,7 @@ interface Incidencia {
   userGuid: string;
   createdDate: string;
   updatedDate: string;
+  isDeleted: boolean;
 }
 
 interface PagedResponse {
