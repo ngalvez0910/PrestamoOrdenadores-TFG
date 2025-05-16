@@ -1,5 +1,12 @@
 package org.example.prestamoordenadores.rest.sanciones.mappers
 
+import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
+import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
+import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
+import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
+import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
+import org.example.prestamoordenadores.rest.sanciones.dto.SancionAdminResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.models.Sancion
@@ -34,14 +41,41 @@ class SancionMapperTest {
         LocalDateTime.now()
     )
 
-    private val sancion = Sancion(
+    private val dispositivo = Dispositivo(
+        1,
+        "guidTest123",
+        "5CD1234XYZ",
+        "raton, cargador",
+        EstadoDispositivo.DISPONIBLE,
+        null,
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        false
+    )
+
+    private val prestamo = Prestamo(
         1,
         "guidTest123",
         user,
-        TipoSancion.ADVERTENCIA,
+        dispositivo,
+        EstadoPrestamo.EN_CURSO,
+        LocalDate.now(),
         LocalDate.now(),
         LocalDateTime.now(),
         LocalDateTime.now()
+    )
+
+    private val sancion = Sancion(
+        1L,
+        "guidTest123",
+        user,
+        prestamo,
+        TipoSancion.ADVERTENCIA,
+        LocalDate.now(),
+        LocalDate.now(),
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        false
     )
 
     private val userRepository = mock(UserRepository::class.java)
@@ -50,19 +84,87 @@ class SancionMapperTest {
     @Test
     fun toSancionResponse() {
         val userResponse = UserResponse(
-            "guidTest123",
-            "email",
-            "name",
-            "apellido",
-            "curso",
-            "tutor"
+            numeroIdentificacion = user.numeroIdentificacion,
+            guid = user.guid,
+            email = user.email,
+            nombre = user.nombre,
+            apellidos = user.apellidos,
+            curso = user.curso!!,
+            tutor = user.tutor!!,
+            avatar = user.avatar
+        )
+
+        val dispositivoResponse = DispositivoResponse(
+            guid = "guidTestD02",
+            numeroSerie = "4JT8695OPQ",
+            componentes = "cargador"
+        )
+
+        val prestamoResponse = PrestamoResponse(
+            guid = prestamo.guid,
+            user = userResponse,
+            dispositivo = dispositivoResponse,
+            estadoPrestamo = prestamo.estadoPrestamo.toString(),
+            fechaPrestamo = prestamo.fechaPrestamo.toString(),
+            fechaDevolucion = prestamo.fechaDevolucion.toString()
         )
 
         val sancionResponse = SancionResponse(
             "guidTest123",
             userResponse,
+            prestamoResponse,
             TipoSancion.ADVERTENCIA.toString(),
             LocalDate.now().toString(),
+            LocalDate.now().toString()
+        )
+
+        val response = mapper.toSancionResponse(sancion)
+
+        assertAll(
+            { assertEquals(sancionResponse.guid, response.guid) },
+            { assertEquals(sancionResponse.user.guid, response.user.guid) },
+            { assertEquals(sancionResponse.tipoSancion, response.tipoSancion.toString()) }
+        )
+    }
+
+    @Test
+    fun toSancionResponseAdmin() {
+        val userResponse = UserResponse(
+            numeroIdentificacion = user.numeroIdentificacion,
+            guid = user.guid,
+            email = user.email,
+            nombre = user.nombre,
+            apellidos = user.apellidos,
+            curso = user.curso!!,
+            tutor = user.tutor!!,
+            avatar = user.avatar
+        )
+
+        val dispositivoResponse = DispositivoResponse(
+            guid = "guidTestD02",
+            numeroSerie = "4JT8695OPQ",
+            componentes = "cargador"
+        )
+
+        val prestamoResponse = PrestamoResponse(
+            guid = prestamo.guid,
+            user = userResponse,
+            dispositivo = dispositivoResponse,
+            estadoPrestamo = prestamo.estadoPrestamo.toString(),
+            fechaPrestamo = prestamo.fechaPrestamo.toString(),
+            fechaDevolucion = prestamo.fechaDevolucion.toString()
+        )
+
+        val sancionResponse = SancionAdminResponse(
+            "guidTest123",
+            userResponse,
+            prestamoResponse,
+            TipoSancion.ADVERTENCIA.toString(),
+            LocalDate.now().toString(),
+            LocalDate.now().toString(),
+            LocalDate.now().toString(),
+            LocalDate.now().toString(),
+            false
         )
 
         val response = mapper.toSancionResponse(sancion)

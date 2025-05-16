@@ -12,6 +12,15 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import org.example.prestamoordenadores.config.websockets.WebSocketHandler
+import org.example.prestamoordenadores.config.websockets.WebSocketService
+import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
+import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
+import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
+import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
+import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
+import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
+import org.example.prestamoordenadores.rest.sanciones.dto.SancionAdminResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
@@ -50,10 +59,10 @@ class SancionServiceImplTest {
     lateinit var userRepository: UserRepository
 
     @MockK
-    lateinit var webSocketHandler: WebSocketHandler
+    lateinit var prestamoRepository: PrestamoRepository
 
     @MockK
-    lateinit var objectMapper: ObjectMapper
+    lateinit var webService: WebSocketService
 
     @MockK
     lateinit var createRequest: SancionRequest
@@ -66,18 +75,35 @@ class SancionServiceImplTest {
     var user = User()
     var sancion = Sancion()
     var userResponse = UserResponse(
+        numeroIdentificacion = user.numeroIdentificacion,
         guid = user.guid,
         email = user.email,
         nombre = user.nombre,
         apellidos = user.apellidos,
         curso = user.curso!!,
-        tutor = user.tutor!!
+        tutor = user.tutor!!,
+        avatar = user.avatar
+    )
+    val dispositivoResponse = DispositivoResponse(
+        "guidTest123",
+        "5CD1234XYZ",
+        "raton, cargador",
+    )
+    val prestamoResponse = PrestamoResponse(
+        "guidTest123",
+        userResponse,
+        dispositivoResponse,
+        "EN_CURSO",
+        LocalDate.now().toString(),
+        LocalDate.now().toString(),
     )
     var response = SancionResponse(
         guid = sancion.guid,
         user = userResponse,
+        prestamo = prestamoResponse,
         tipoSancion = sancion.tipoSancion.toString(),
-        fechaSancion = sancion.fechaSancion.toString()
+        fechaSancion = sancion.fechaSancion.toString(),
+        fechaFin = sancion.fechaFin.toString(),
     )
 
     @BeforeEach
@@ -115,8 +141,8 @@ class SancionServiceImplTest {
             repository,
             mapper,
             userRepository,
-            objectMapper,
-            webSocketHandler
+            prestamoRepository,
+            webService
         )
     }
 
@@ -165,69 +191,42 @@ class SancionServiceImplTest {
     }
 
     @Test
-    fun createSancion() {
-        val createRequest = SancionRequest(
-            userGuid = sancion.user.guid,
-            tipoSancion = sancion.tipoSancion.toString()
+    fun getSancionByGuidAdmin() {
+        var responseAdmin = SancionAdminResponse(
+            guid = sancion.guid,
+            user = userResponse,
+            prestamo = prestamoResponse,
+            tipoSancion = sancion.tipoSancion.toString(),
+            fechaSancion = sancion.fechaSancion.toString(),
+            fechaFin = sancion.fechaFin.toString(),
+            createdDate = sancion.createdDate.toString(),
+            updatedDate = sancion.updatedDate.toString(),
+            isDeleted = sancion.isDeleted
         )
 
-        mockkStatic("org.example.prestamoordenadores.utils.validators.SancionValidatorKt")
-        every { createRequest.validate() } returns Ok(createRequest)
+        every { repository.findByGuid(sancion.guid) } returns sancion
+        every { mapper.toSancionAdminResponse(sancion) } returns responseAdmin
 
-        every { userRepository.findByGuid(user.guid) } returns user
-        every { mapper.toSancionFromRequest(createRequest, userRepository) } returns sancion
-        every { repository.save(sancion) } returns sancion
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
-        every { userRepository.findByEmail(user.email) } returns user
-        every { mapper.toSancionResponse(sancion) } returns response
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(user.email, any()) } just Runs
-
-        mockkStatic(SecurityContextHolder::class)
-        val auth = mockk<Authentication>()
-        every { auth.name } returns user.email
-        every { SecurityContextHolder.getContext().authentication } returns auth
-
-        val result = service.createSancion(createRequest)
+        val result = service.getSancionByGuidAdmin(sancion.guid)
 
         assertAll(
             { assertTrue(result.isOk) },
-            { assertEquals(response, result.value) },
-            { verify { createRequest.validate() } },
-            { verify { mapper.toSancionFromRequest(createRequest, userRepository) } },
-            { verify { repository.save(sancion) } },
-            { verify { mapper.toSancionResponse(sancion) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(user.email, any()) } },
+            { assertEquals(responseAdmin, result.value) },
+            { verify { repository.findByGuid(sancion.guid) } },
+            { verify { mapper.toSancionAdminResponse(sancion) } }
         )
     }
 
     @Test
-    fun `createSancion returns error if validation fails`() {
-        every { createRequest.validate() } returns Err(SancionError.SancionValidationError("Sanción inválida"))
-        every { createRequest.userGuid } returns ""
+    fun `getSancionByGuidAdmin returns Err when sancion no existe`() {
+        every { repository.findByGuid("sancion-guid") } returns null
 
-        val result = service.createSancion(createRequest)
-
-        assertAll(
-            { assertTrue(result.isErr) },
-            { assertTrue(result.error is SancionError.SancionValidationError) },
-            { verify { createRequest.validate() } }
-        )
-    }
-
-    @Test
-    fun `createSancion returns Err when user no existe`() {
-        every { userRepository.findByGuid("user-guid") } returns null
-        every { createRequest.userGuid } returns "user-guid"
-        every { createRequest.tipoSancion } returns "BLOQUEO_TEMPORAL"
-
-        val result = service.createSancion(createRequest)
+        val result = service.getSancionByGuidAdmin("sancion-guid")
 
         assertAll(
             { assertTrue(result.isErr) },
-            { assertTrue(result.error is SancionError.UserNotFound) },
-            { verify { userRepository.findByGuid("user-guid") } }
+            { assertTrue(result.error is SancionError.SancionNotFound) },
+            { verify { repository.findByGuid("sancion-guid") } }
         )
     }
 
@@ -238,8 +237,6 @@ class SancionServiceImplTest {
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
         every { repository.save(any()) } returns sancion
         every { mapper.toSancionResponse(any()) } returns response
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
         every { updateRequest.tipoSancion } returns "bloqueo_temporal"
 
         val result = service.updateSancion(sancion.guid, updateRequest)
@@ -251,8 +248,6 @@ class SancionServiceImplTest {
             { verify { updateRequest.validate() } },
             { verify { repository.save(any()) } },
             { verify { mapper.toSancionResponse(any()) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(any(), any()) } }
         )
     }
 
@@ -291,8 +286,6 @@ class SancionServiceImplTest {
         every { repository.delete(sancion) } just Runs
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
         every { mapper.toSancionResponse(any()) } returns response
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
 
         val result = service.deleteSancionByGuid("SANC0001")
 
@@ -301,8 +294,6 @@ class SancionServiceImplTest {
             { verify { repository.findByGuid("SANC0001") } },
             { verify { repository.delete(sancion) } },
             { verify { mapper.toSancionResponse(any()) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(any(), any()) } }
         )
     }
 
@@ -393,5 +384,179 @@ class SancionServiceImplTest {
             { assertTrue(result.error is SancionError.UserNotFound) },
             { verify { userRepository.findByGuid("user-guid") } }
         )
+    }
+
+    @Test
+    fun gestionarAdvertencias() {
+        val dispositivo = Dispositivo(
+            1,
+            "guidTest123",
+            "5CD1234XYZ",
+            "raton, cargador",
+            EstadoDispositivo.DISPONIBLE,
+            null,
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            false
+        )
+        val vencidoHace4Dias = LocalDateTime.now().minusDays(4)
+        val prestamo = Prestamo(
+            1,
+            "guidTest123",
+            user,
+            dispositivo,
+            EstadoPrestamo.VENCIDO,
+            LocalDate.now(),
+            LocalDate.now(),
+            LocalDateTime.now(),
+            vencidoHace4Dias
+        )
+
+        every { prestamoRepository.findPrestamoByEstadoPrestamo(EstadoPrestamo.VENCIDO) } returns listOf(prestamo)
+        every { repository.existsByPrestamoGuidAndTipoSancion(prestamo.guid, TipoSancion.ADVERTENCIA) } returns false
+        every { repository.save(any()) } returns Sancion(user = user, tipoSancion = TipoSancion.ADVERTENCIA, prestamo = prestamo)
+        every { service.evaluarPasoABloqueo(user) } just Runs
+
+        service.gestionarAdvertencias()
+
+        verify { repository.save(match { it.tipoSancion == TipoSancion.ADVERTENCIA && it.prestamo == prestamo }) }
+        verify { service.evaluarPasoABloqueo(user) }
+    }
+
+    @Test
+    fun gestionarReactivacionYPosibleEscaladaAIndefinido() {
+        val sancionExpirada = Sancion(
+            guid = "sancion-guid",
+            user = user,
+            tipoSancion = TipoSancion.BLOQUEO_TEMPORAL,
+            fechaFin = LocalDate.now().minusDays(1)
+        )
+
+        every {
+            repository.findByTipoSancionAndFechaFinLessThanEqualAndUserIsActivoIsFalse(
+                TipoSancion.BLOQUEO_TEMPORAL, any()
+            )
+        } returns listOf(sancionExpirada)
+
+        every {
+            repository.findSancionsByUserAndTipoSancionIn(user, listOf(TipoSancion.BLOQUEO_TEMPORAL, TipoSancion.INDEFINIDO))
+        } returns listOf(sancionExpirada)
+
+        every { userRepository.save(user) } returns user
+        every { service.evaluarPasoAIndefinido(user) } just Runs
+
+        service.gestionarReactivacionYPosibleEscaladaAIndefinido()
+
+        verify { userRepository.save(match { it.isActivo }) }
+        verify { service.evaluarPasoAIndefinido(user) }
+    }
+
+    @Test
+    fun evaluarPasoAIndefinido() {
+        val bloqueo1 = Sancion(fechaFin = LocalDate.now().minusDays(5))
+        val bloqueo2 = Sancion(fechaFin = LocalDate.now().minusDays(10))
+
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.INDEFINIDO) } returns emptyList()
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL) } returns listOf(bloqueo1, bloqueo2)
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.INDEFINIDO) } returns emptyList()
+        every { service.crearBloqueoIndefinido(user, any()) } just Runs
+
+        service.evaluarPasoAIndefinido(user)
+
+        verify { service.crearBloqueoIndefinido(user, match { it.contains("2 bloqueos") }) }
+    }
+
+    @Test
+    fun evaluarPasoAIndefinido_NoEscalaSiYaTieneUnaActiva() {
+        val sancionActiva = mockk<Sancion>()
+        every { sancionActiva.isActiveNow() } returns true
+
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.INDEFINIDO) } returns listOf(sancionActiva)
+
+        service.evaluarPasoAIndefinido(user)
+
+        verify(exactly = 0) { repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL) }
+        verify(exactly = 0) { service.crearBloqueoIndefinido(any(), any()) }
+    }
+
+    @Test
+    fun evaluarPasoAIndefinido_NoEscalaSiYaTieneUnIndefinido() {
+        val indefinidaHoy = Sancion(fechaSancion = LocalDate.now())
+        val bloqueo1 = Sancion(fechaFin = LocalDate.now().minusDays(10))
+        val bloqueo2 = Sancion(fechaFin = LocalDate.now().minusDays(20))
+
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.INDEFINIDO) } returns listOf(indefinidaHoy)
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL) } returns listOf(bloqueo1, bloqueo2)
+
+        service.evaluarPasoAIndefinido(user)
+
+        verify(exactly = 0) { service.crearBloqueoIndefinido(any(), any()) }
+    }
+
+    @Test
+    fun evaluarPasoABloqueo() {
+        val prestamo = mockk<Prestamo>()
+        val adv1 = Sancion(fechaSancion = LocalDate.now(), prestamo = prestamo)
+        val adv2 = Sancion(fechaSancion = LocalDate.now().minusDays(1), prestamo = prestamo)
+
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL) } returns emptyList()
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.ADVERTENCIA) } returns listOf(adv1, adv2)
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL) } returns emptyList()
+
+        every { service.crearBloqueoTemporal(user, any(), prestamo) } just Runs
+
+        service.evaluarPasoABloqueo(user)
+
+        verify { service.crearBloqueoTemporal(user, match { it.contains("advertencias") }, prestamo) }
+    }
+
+    @Test
+    fun evaluarPasoABloqueo_NoEscalaSiYaTieneUnActivo() {
+        val bloqueoActivo = mockk<Sancion>()
+        every { bloqueoActivo.isActiveNow() } returns true
+
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL) } returns listOf(bloqueoActivo)
+
+        service.evaluarPasoABloqueo(user)
+
+        verify(exactly = 0) { repository.findByUserAndTipoSancion(user, TipoSancion.ADVERTENCIA) }
+    }
+
+    @Test
+    fun evaluarPasoABloqueo_NoEscalaSiTieneMenosDeDosAdvertencias() {
+        val advertencia = Sancion(fechaSancion = LocalDate.now(), prestamo = mockk())
+
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL) } returns emptyList()
+        every { repository.findByUserAndTipoSancion(user, TipoSancion.ADVERTENCIA) } returns listOf(advertencia)
+
+        service.evaluarPasoABloqueo(user)
+
+        verify(exactly = 0) { service.crearBloqueoTemporal(any(), any(), any()) }
+    }
+
+    @Test
+    fun crearBloqueoTemporal() {
+        val prestamo = mockk<Prestamo>()
+
+        every { userRepository.save(user) } returns user
+        every { repository.save(any()) } returns mockk()
+
+        service.crearBloqueoTemporal(user, "motivo de test", prestamo)
+
+        assertFalse(user.isActivo)
+        verify { userRepository.save(user) }
+        verify { repository.save(match { it.tipoSancion == TipoSancion.BLOQUEO_TEMPORAL }) }
+    }
+
+    @Test
+    fun crearBloqueoIndefinido() {
+        every { userRepository.save(user) } returns user
+        every { repository.save(any()) } returns mockk()
+
+        service.crearBloqueoIndefinido(user, "motivo indefinido")
+
+        assertFalse(user.isActivo)
+        verify { userRepository.save(user) }
+        verify { repository.save(match { it.tipoSancion == TipoSancion.INDEFINIDO }) }
     }
 }
