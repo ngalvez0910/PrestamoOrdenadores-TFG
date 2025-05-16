@@ -16,4 +16,6 @@ data class UserResponseAdmin (
     var updatedDate: String,
     var lastLoginDate: String,
     var lastPasswordResetDate: String,
+    var isDeleted: Boolean,
+    var isOlvidado: Boolean
 )

@@ -172,3 +172,22 @@ export const derechoAlOlvido = async (userGuid: string): Promise<void> => {
         throw new Error(errorMessage);
     }
 };
+
+export const deleteUser = async (guid: string): Promise<void | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error("No autenticado");
+        }
+
+        const url = `http://localhost:8080/users/delete/${guid}`;
+        await axios.patch(url, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    } catch (error) {
+        console.error('Error obteniendo usuario por GUID:', error);
+        return null;
+    }
+};

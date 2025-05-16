@@ -98,11 +98,6 @@
           <label for="isDeleted">Marcado Borrado</label>
           <div class="readonly-field">{{ userData.isDeleted ? 'SI' : 'NO' }}</div>
         </div>
-
-        <div class="form-group">
-          <label for="isOlvidado">Marcado Olvido</label>
-          <div class="readonly-field">{{ userData.isOlvidado ? 'SI' : 'NO' }}</div>
-        </div>
       </div>
 
       <div v-if="editable" class="update-button-wrapper">
