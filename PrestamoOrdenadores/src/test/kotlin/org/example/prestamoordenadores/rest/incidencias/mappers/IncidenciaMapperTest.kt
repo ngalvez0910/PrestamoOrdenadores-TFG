@@ -50,14 +50,14 @@ class IncidenciaMapperTest {
     @Test
     fun toIncidenciaResponse() {
         val userResponse = UserResponse(
-            "2020LT475",
-            "guidTest123",
-            "email",
-            "name",
-            "apellido",
-            "curso",
-            "tutor",
-            "avatar"
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         val incidenciaResponse = IncidenciaResponse(
@@ -83,14 +83,14 @@ class IncidenciaMapperTest {
     @Test
     fun toIncidenciaResponseAdmin() {
         val userResponse = UserResponse(
-            "2020LT475",
-            "guidTest123",
-            "email",
-            "name",
-            "apellido",
-            "curso",
-            "tutor",
-            "avatar"
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         val incidenciaResponse = IncidenciaResponseAdmin(
