@@ -238,9 +238,7 @@ export default {
       console.log(`Confirmado eliminar usuario con GUID: ${this.userToDelete.guid}`);
       try {
         await deleteUser(this.userToDelete.guid)
-
-        this.todosLosDatos = this.todosLosDatos.filter(u => u.guid !== this.userToDelete!.guid);
-
+        
         this.paginar();
 
       } catch (error: any) {
