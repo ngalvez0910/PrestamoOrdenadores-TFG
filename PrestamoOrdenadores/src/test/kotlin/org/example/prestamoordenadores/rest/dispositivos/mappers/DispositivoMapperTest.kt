@@ -74,7 +74,6 @@ class DispositivoMapperTest {
             { assertEquals(dispositivoResponseAdmin.componentes, response.componentes) },
             { assertEquals(dispositivoResponseAdmin.estado, response.estado) },
             { assertEquals(dispositivoResponseAdmin.incidencia, response.incidencia) },
-            { assertEquals(dispositivoResponseAdmin.isDeleted, response.isDeleted) }
         )
     }
 

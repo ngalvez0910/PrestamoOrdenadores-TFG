@@ -127,7 +127,9 @@ class DispositivoServiceImplTest {
         val result = service.getAllDispositivos(0, 10)
 
         assertTrue(result.isOk)
-        assertEquals(responses, result.value)
+        val paged = result.value
+        assertEquals(1, paged.totalElements)
+        assertEquals(responses, paged.content)
     }
 
     @Test
@@ -295,11 +297,11 @@ class DispositivoServiceImplTest {
     fun deleteDispositivoByGuid() {
         val guid = "device-guid"
         val dispositivo = mockk<Dispositivo>(relaxed = true)
-        val expectedResponse = mockk<DispositivoResponse>()
+        val expectedResponse = mockk<DispositivoResponseAdmin>()
 
         every { repository.findDispositivoByGuid(guid) } returns dispositivo
         every { repository.save(dispositivo) } returns dispositivo
-        every { mapper.toDispositivoResponse(dispositivo) } returns expectedResponse
+        every { mapper.toDispositivoResponseAdmin(dispositivo) } returns expectedResponse
 
         val result = service.deleteDispositivoByGuid(guid)
 
@@ -308,7 +310,7 @@ class DispositivoServiceImplTest {
             { assertEquals(expectedResponse, result.value) },
             { verify { repository.findDispositivoByGuid(guid) } },
             { verify { repository.save(dispositivo) } },
-            { verify { mapper.toDispositivoResponse(dispositivo) } }
+            { verify { mapper.toDispositivoResponseAdmin(dispositivo) } }
         )
     }
 
