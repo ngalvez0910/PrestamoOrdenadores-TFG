@@ -2,6 +2,7 @@ package org.example.prestamoordenadores.rest.incidencias.mappers
 
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
+import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponseAdmin
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
@@ -22,6 +23,21 @@ class IncidenciaMapper {
             estadoIncidencia = incidencia.estadoIncidencia.toString(),
             user = userMapper.toUserResponse(incidencia.user),
             createdDate = incidencia.createdDate.toDefaultDateTimeString()
+        )
+    }
+
+    fun toIncidenciaResponseAdmin(incidencia: Incidencia) : IncidenciaResponseAdmin{
+        val userMapper = UserMapper()
+
+        return IncidenciaResponseAdmin(
+            guid = incidencia.guid,
+            asunto = incidencia.asunto,
+            descripcion = incidencia.descripcion,
+            estadoIncidencia = incidencia.estadoIncidencia.toString(),
+            user = userMapper.toUserResponse(incidencia.user),
+            createdDate = incidencia.createdDate.toDefaultDateTimeString(),
+            updatedDate = incidencia.updatedDate.toDefaultDateTimeString(),
+            isDeleted = incidencia.isDeleted
         )
     }
 

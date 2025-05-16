@@ -9,6 +9,7 @@ import org.example.prestamoordenadores.config.websockets.models.NotificationSeve
 import org.example.prestamoordenadores.config.websockets.models.NotificationTypeDto
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
+import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponseAdmin
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
 import org.example.prestamoordenadores.rest.incidencias.mappers.IncidenciaMapper
@@ -22,6 +23,7 @@ import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
@@ -65,6 +67,19 @@ class IncidenciaServiceImpl(
             Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
         } else {
             Ok(mapper.toIncidenciaResponse(incidencia))
+        }
+    }
+
+    @Cacheable(key = "#guid")
+    override fun getIncidenciaByGuidAdmin(guid: String): Result<IncidenciaResponseAdmin?, IncidenciaError> {
+        logger.debug { "Obteniendo incidencia con GUID: $guid" }
+
+        val incidencia = repository.findIncidenciaByGuid(guid)
+
+        return if (incidencia == null) {
+            Err(IncidenciaError.IncidenciaNotFound("Incidencia no encontrada"))
+        } else {
+            Ok(mapper.toIncidenciaResponseAdmin(incidencia))
         }
     }
 
@@ -122,8 +137,8 @@ class IncidenciaServiceImpl(
         return Ok(mapper.toIncidenciaResponse(existingIncidencia))
     }
 
-    @CachePut(key = "#guid")
-    override fun deleteIncidenciaByGuid(guid: String): Result<Incidencia?, IncidenciaError> {
+    @CacheEvict
+    override fun deleteIncidenciaByGuid(guid: String): Result<IncidenciaResponseAdmin?, IncidenciaError> {
         val authentication = SecurityContextHolder.getContext().authentication
         val emailAdmin = authentication.name
         val adminDeleting = userRepository.findByEmail(emailAdmin)
@@ -144,7 +159,7 @@ class IncidenciaServiceImpl(
         repository.save(incidencia)
 
         sendNotificationEliminacionIncidencia(incidencia, adminDeleting)
-        return Ok(incidencia)
+        return Ok(mapper.toIncidenciaResponseAdmin(incidencia))
     }
 
     @Cacheable(key = "#estado")
