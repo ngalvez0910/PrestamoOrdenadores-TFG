@@ -2,14 +2,26 @@ package org.example.prestamoordenadores.rest.users.services
 
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.mockk
 import io.mockk.verify
+import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
+import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
+import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
+import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
+import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
+import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
+import org.example.prestamoordenadores.rest.sanciones.models.Sancion
+import org.example.prestamoordenadores.rest.sanciones.repositories.SancionRepository
 import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.dto.UserResponseAdmin
+import org.example.prestamoordenadores.rest.users.dto.UserUpdateRequest
 import org.example.prestamoordenadores.rest.users.errors.UserError
 import org.example.prestamoordenadores.rest.users.mappers.UserMapper
 import org.example.prestamoordenadores.rest.users.models.Role
@@ -32,6 +44,18 @@ class UserServiceImplTest {
     lateinit var repository: UserRepository
 
     @MockK
+    lateinit var prestamoRepository: PrestamoRepository
+
+    @MockK
+    lateinit var incidenciaRepository: IncidenciaRepository
+
+    @MockK
+    lateinit var dispositivoRepository: DispositivoRepository
+
+    @MockK
+    lateinit var sancionRepository: SancionRepository
+
+    @MockK
     lateinit var mapper: UserMapper
 
     @MockK
@@ -41,7 +65,7 @@ class UserServiceImplTest {
     lateinit var request2: UserPasswordResetRequest
 
     @MockK
-    lateinit var request3: UserRoleUpdateRequest
+    lateinit var request3: UserUpdateRequest
 
     lateinit var service: UserServiceImpl
 
@@ -68,11 +92,11 @@ class UserServiceImplTest {
             updatedDate = LocalDateTime.now()
         )
 
-        service = UserServiceImpl(repository, mapper)
+        service = UserServiceImpl(repository, mapper, incidenciaRepository, prestamoRepository, sancionRepository, dispositivoRepository)
     }
 
     @Test
-    fun `getAllUsers should return paged response`() {
+    fun getAllUsers() {
         val page = 0
         val size = 1
         val userList = listOf(user
@@ -92,7 +116,9 @@ class UserServiceImplTest {
                 user.createdDate.toString(),
                 user.updatedDate.toString(),
                 user.lastLoginDate.toString(),
-                user.lastPasswordResetDate.toString()
+                user.lastPasswordResetDate.toString(),
+                false,
+                false
             )
         )
 
@@ -118,12 +144,14 @@ class UserServiceImplTest {
     @Test
     fun getUserByGuid() {
         val expectedResponse = UserResponse(
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         every { repository.findByGuid(user.guid) } returns user
@@ -157,12 +185,14 @@ class UserServiceImplTest {
     @Test
     fun updateAvatar() {
         val expectedResponse = UserResponse(
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         every { request.validate() } returns Ok(request)
@@ -220,7 +250,7 @@ class UserServiceImplTest {
 
     @Test
     fun deleteUserByGuid() {
-        var user2 = User(
+        val user2 = User(
             id = 2,
             guid = "guidTestU02",
             email = "email2@loantech.com",
@@ -240,12 +270,14 @@ class UserServiceImplTest {
         )
 
         val expectedResponse = UserResponse(
-            guid = user2.guid,
-            email = user2.email,
-            nombre = user2.nombre,
-            apellidos = user2.apellidos,
-            curso = user2.curso!!,
-            tutor = user2.tutor!!
+            user2.numeroIdentificacion,
+            user2.guid,
+            user2.email,
+            user2.nombre,
+            user2.apellidos,
+            user2.curso!!,
+            user2.tutor!!,
+            user2.avatar
         )
 
         every { repository.findByGuid(user2.guid) } returns user2
@@ -283,12 +315,14 @@ class UserServiceImplTest {
     @Test
     fun resetPassword() {
         val expectedResponse = UserResponse(
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         every { request2.validate() } returns Ok(request2)
@@ -378,12 +412,14 @@ class UserServiceImplTest {
         val curso = "curso"
         val users = listOf(user)
         val userResponse = UserResponse(
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
         val expectedResponse = listOf(userResponse)
 
@@ -422,12 +458,14 @@ class UserServiceImplTest {
     @Test
     fun getByNombre() {
         val expectedResponse = UserResponse(
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         every { repository.findByNombre(expectedResponse.nombre) } returns user
@@ -465,12 +503,14 @@ class UserServiceImplTest {
     @Test
     fun getByEmail() {
         val expectedResponse = UserResponse(
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         every { repository.findByEmail(expectedResponse.email) } returns user
@@ -511,12 +551,14 @@ class UserServiceImplTest {
         val userList = listOf(user)
         val responseList = listOf(
             UserResponse(
-                guid = user.guid,
-                email = user.email,
-                nombre = user.nombre,
-                apellidos = user.apellidos,
-                curso = user.curso!!,
-                tutor = user.tutor!!
+                user.numeroIdentificacion,
+                user.guid,
+                user.email,
+                user.nombre,
+                user.apellidos,
+                user.curso!!,
+                user.tutor!!,
+                user.avatar
             )
         )
 
@@ -567,7 +609,9 @@ class UserServiceImplTest {
             user.createdDate.toString(),
             user.updatedDate.toString(),
             user.lastLoginDate.toString(),
-            user.lastPasswordResetDate.toString()
+            user.lastPasswordResetDate.toString(),
+            false,
+            false
         )
 
         every { repository.findByGuid(expectedResponse.guid) } returns user
@@ -603,144 +647,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    fun updateRole_ALUMNO() {
-        every { request3.validate() } returns Ok(request3)
-        every { request3.rol } returns "ALUMNO"
-
-        val expectedUser = User(rol = Role.ALUMNO)
-        val expectedResponse = UserResponseAdmin(
-            numeroIdentificacion = user.numeroIdentificacion,
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!,
-            rol = Role.ALUMNO,
-            isActivo = true,
-            createdDate = user.createdDate.toString(),
-            updatedDate = user.updatedDate.toString(),
-            lastLoginDate = user.lastLoginDate.toString(),
-            lastPasswordResetDate = user.lastPasswordResetDate.toString()
-        )
-
-        every { repository.findByGuid(user.guid) } returns user
-        every { repository.save(any()) } returns expectedUser
-        every { mapper.toUserResponseAdmin(user) } returns expectedResponse
-
-        val result = service.updateRole(user.guid, request3)
-
-        assertAll(
-            { assertTrue(result.isOk) },
-            { assertEquals(expectedResponse, result.value) },
-            { assertEquals(Role.ALUMNO, user.rol) },
-            { verify { repository.findByGuid(user.guid) } },
-            { verify { repository.save(user) } },
-            { verify { mapper.toUserResponseAdmin(user) } }
-        )
-    }
-
-    @Test
-    fun updateRole_PROFESOR() {
-        every { request3.validate() } returns Ok(request3)
-        every { request3.rol } returns "PROFESOR"
-
-        val expectedUser = User(rol = Role.PROFESOR)
-        val expectedResponse = UserResponseAdmin(
-            numeroIdentificacion = user.numeroIdentificacion,
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!,
-            rol = Role.PROFESOR,
-            isActivo = true,
-            createdDate = user.createdDate.toString(),
-            updatedDate = user.updatedDate.toString(),
-            lastLoginDate = user.lastLoginDate.toString(),
-            lastPasswordResetDate = user.lastPasswordResetDate.toString()
-        )
-
-        every { repository.findByGuid(user.guid) } returns user
-        every { repository.save(any()) } returns expectedUser
-        every { mapper.toUserResponseAdmin(user) } returns expectedResponse
-
-        val result = service.updateRole(user.guid, request3)
-
-        assertAll(
-            { assertTrue(result.isOk) },
-            { assertEquals(expectedResponse, result.value) },
-            { assertEquals(Role.PROFESOR, user.rol) },
-            { verify { repository.findByGuid(user.guid) } },
-            { verify { repository.save(user) } },
-            { verify { mapper.toUserResponseAdmin(user) } }
-        )
-    }
-
-    @Test
-    fun updateRole_ADMIN() {
-        every { request3.validate() } returns Ok(request3)
-        every { request3.rol } returns "ADMIN"
-
-        val expectedUser = User(rol = Role.ADMIN)
-        val expectedResponse = UserResponseAdmin(
-            numeroIdentificacion = user.numeroIdentificacion,
-            guid = user.guid,
-            email = user.email,
-            nombre = user.nombre,
-            apellidos = user.apellidos,
-            curso = user.curso!!,
-            tutor = user.tutor!!,
-            rol = Role.ADMIN,
-            isActivo = true,
-            createdDate = user.createdDate.toString(),
-            updatedDate = user.updatedDate.toString(),
-            lastLoginDate = user.lastLoginDate.toString(),
-            lastPasswordResetDate = user.lastPasswordResetDate.toString()
-        )
-
-        every { repository.findByGuid(user.guid) } returns user
-        every { repository.save(any()) } returns expectedUser
-        every { mapper.toUserResponseAdmin(user) } returns expectedResponse
-
-        val result = service.updateRole(user.guid, request3)
-
-        assertAll(
-            { assertTrue(result.isOk) },
-            { assertEquals(expectedResponse, result.value) },
-            { assertEquals(Role.ADMIN, user.rol) },
-            { verify { repository.findByGuid(user.guid) } },
-            { verify { repository.save(user) } },
-            { verify { mapper.toUserResponseAdmin(user) } }
-        )
-    }
-
-    @Test
-    fun `updateRole returns Err when user no existe`() {
-        every { request3.validate() } returns Ok(request3)
-        every { request3.rol } returns "ADMIN"
-
-        every { repository.findByGuid("guidNE") } returns null
-
-        val result = service.updateRole("guidNE", request3)
-
-        assertTrue(result.isErr)
-        assertTrue(result.error is UserError.UserNotFound)
-    }
-
-    @Test
-    fun `updateRole returns Err when request es invalido`() {
-        every { request3.validate() } returns Err(UserError.UserValidationError("Usuario inválido"))
-        every { request3.rol } returns "ADMINISTRADOR"
-
-        val result = service.updateRole(user.guid, request3)
-
-        assertTrue(result.isErr)
-        assertTrue(result.error is UserError.UserValidationError)
-    }
-
-    @Test
     fun getUserById() {
         every { repository.findById(1L) } returns Optional.of(user)
 
@@ -762,4 +668,121 @@ class UserServiceImplTest {
         assertEquals("Usuario con ID 44 no encontrado", (result.error as UserError.UserNotFound).message)
         verify { repository.findById(44L) }
     }
+
+    @Test
+    fun updateUser() {
+        val request = mockk<UserUpdateRequest>()
+        every { request.validate() } returns Ok(request)
+        every { request.rol } returns "ADMIN"
+        every { request.isActivo } returns false
+
+        every { repository.findByGuid(user.guid) } returns user
+        every { repository.save(any()) } returns user
+        every { mapper.toUserResponseAdmin(user) } returns mockk()
+
+        val result = service.updateUser(user.guid, request)
+
+        assertAll(
+            { assertTrue(result.isOk) },
+            { assertEquals(Role.ADMIN, user.rol) },
+            { assertFalse(user.isActivo) },
+            { verify { repository.findByGuid(user.guid) } },
+            { verify { repository.save(user) } },
+            { verify { mapper.toUserResponseAdmin(user) } }
+        )
+    }
+
+    @Test
+    fun `updateUser returns Err when es invalido`() {
+        val request = mockk<UserUpdateRequest>()
+        every { request.validate() } returns Err(UserError.UserValidationError("Datos inválidos"))
+
+        val result = service.updateUser("guidTestU01", request)
+
+        assertAll(
+            { assertTrue(result.isErr) },
+            { assertTrue(result.error is UserError.UserValidationError) },
+            { assertEquals("Datos inválidos", (result.error as UserError.UserValidationError).message) },
+            { verify { request.validate() } },
+            { verify(exactly = 0) { repository.findByGuid(any()) } }
+        )
+    }
+
+    @Test
+    fun `updateUser returns Err when user no existe`() {
+        val request = mockk<UserUpdateRequest>()
+        every { request.validate() } returns Ok(request)
+        every { repository.findByGuid("no-guid") } returns null
+
+        val result = service.updateUser("no-guid", request)
+
+        assertAll(
+            { assertTrue(result.isErr) },
+            { assertTrue(result.error is UserError.UserNotFound) },
+            { assertEquals("Usuario con GUID no-guid no encontrado", result.error.message) },
+            { verify { repository.findByGuid("no-guid") } }
+        )
+    }
+
+    @Test
+    fun derechoAlOlvido() {
+        val sanciones = listOf(mockk<Sancion>())
+        val prestamos = listOf(mockk<Prestamo>())
+        val incidencia = mockk<Incidencia> {
+            every { id } returns 1L
+        }
+        val incidencias = listOf(incidencia)
+        val dispositivo = mockk<Dispositivo>(relaxed = true)
+        val dispositivos = listOf(dispositivo)
+
+        every { repository.findByGuid(user.guid) } returns user
+        every { sancionRepository.findSancionsByUserId(user.id) } returns sanciones
+        every { prestamoRepository.findPrestamosByUserId(user.id) } returns prestamos
+        every { incidenciaRepository.findIncidenciasByUserId(user.id) } returns incidencias
+        every { dispositivoRepository.findByIncidenciaIdIn(any()) } returns dispositivos
+        every { incidenciaRepository.deleteAll(incidencias) } just Runs
+        every { prestamoRepository.deleteAll(prestamos) } just Runs
+        every { sancionRepository.deleteAll(sanciones) } just Runs
+        every { repository.delete(user) } just Runs
+
+        val result = service.derechoAlOlvido(user.guid)
+
+        assertAll(
+            { assertTrue(result.isOk) },
+            { verify { sancionRepository.deleteAll(sanciones) } },
+            { verify { prestamoRepository.deleteAll(prestamos) } },
+            { verify { incidenciaRepository.deleteAll(incidencias) } },
+            { verify { dispositivoRepository.saveAll(dispositivos) } },
+            { verify { repository.delete(user) } }
+        )
+    }
+
+    @Test
+    fun `derechoAlOlvido returns Err when user no existe`() {
+        every { repository.findByGuid("guid404") } returns null
+
+        val result = service.derechoAlOlvido("guid404")
+
+        assertAll(
+            { assertTrue(result.isErr) },
+            { assertTrue(result.error is UserError.UserNotFound) },
+            { assertEquals("Usuario no encontrado con GUID: guid404", result.error.message) },
+            { verify { repository.findByGuid("guid404") } }
+        )
+    }
+
+    @Test
+    fun `derechoAlOlvido returns Err when excepción en sanciones`() {
+        every { repository.findByGuid(user.guid) } returns user
+        every { sancionRepository.findSancionsByUserId(user.id) } throws RuntimeException("DB error")
+
+        val result = service.derechoAlOlvido(user.guid)
+
+        assertAll(
+            { assertTrue(result.isErr) },
+            { assertTrue(result.error is UserError.DataBaseError) },
+            { assertTrue(result.error.message.contains("sanciones")) }
+        )
+    }
+
 }

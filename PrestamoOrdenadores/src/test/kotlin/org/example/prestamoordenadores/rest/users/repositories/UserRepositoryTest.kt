@@ -23,16 +23,17 @@ class UserRepositoryTest {
     private lateinit var userRepository: UserRepository
 
     private val user1 = User(
-        "guid1",
-        "email1@example.com",
+        1,
+        "guidTest123",
+        "email",
         "password",
         Role.ALUMNO,
-        "123",
-        "John",
-        "Doe",
-        "1A",
-        "Teacher A",
-        "avatar1",
+        "numIdent",
+        "name",
+        "apellido",
+        "curso",
+        "tutor",
+        "avatar",
         true,
         LocalDateTime.now(),
         LocalDateTime.now(),
@@ -41,6 +42,7 @@ class UserRepositoryTest {
     )
 
     private val user2 = User(
+        2L,
         "guid2",
         "email2@example.com",
         "password",
@@ -59,6 +61,7 @@ class UserRepositoryTest {
     )
 
     private val user3 = User(
+        3L,
         "guid3",
         "email3@example.com",
         "password",
@@ -188,5 +191,20 @@ class UserRepositoryTest {
     fun existsUserByNombreAndApellidosAndCurso_CursoNoCoincide() {
         val notExists = userRepository.existsUserByNombreAndApellidosAndCurso("John", "Doe", "2B")
         assertFalse(notExists)
+    }
+
+    @Test
+    fun findUsersByRol() {
+        val estudiantes = userRepository.findUsersByRol(Role.ALUMNO)
+
+        assertEquals(2, estudiantes.size)
+        assertTrue(estudiantes.all { it?.rol == Role.ALUMNO })
+    }
+
+    @Test
+    fun findUsersByRol_IsEmpty() {
+        val resultado = userRepository.findUsersByRol(Role.ADMIN)
+
+        assertTrue(resultado.isEmpty())
     }
 }

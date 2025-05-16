@@ -34,12 +34,14 @@ class UserMapperTest {
     @Test
     fun toUserResponse() {
         val userResponse = UserResponse(
-            "guidTest123",
-            "email",
-            "name",
-            "apellido",
-            "curso",
-            "tutor"
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         val response = mapper.toUserResponse(user)
@@ -67,7 +69,9 @@ class UserMapperTest {
             LocalDateTime.now().toString(),
             LocalDateTime.now().toString(),
             LocalDateTime.now().toString(),
-            LocalDateTime.now().toString()
+            LocalDateTime.now().toString(),
+            false,
+            false
         )
 
         val response = mapper.toUserResponseAdmin(user)
@@ -149,5 +153,4 @@ class UserMapperTest {
 
         assertTrue(responses.isEmpty())
     }
-
 }

@@ -1,6 +1,5 @@
 package org.example.prestamoordenadores.rest.sanciones.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import io.mockk.Runs
@@ -11,7 +10,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
@@ -21,7 +19,6 @@ import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionAdminResponse
-import org.example.prestamoordenadores.rest.sanciones.dto.SancionRequest
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError
@@ -41,8 +38,6 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -63,9 +58,6 @@ class SancionServiceImplTest {
 
     @MockK
     lateinit var webService: WebSocketService
-
-    @MockK
-    lateinit var createRequest: SancionRequest
 
     @MockK
     lateinit var updateRequest: SancionUpdateRequest
