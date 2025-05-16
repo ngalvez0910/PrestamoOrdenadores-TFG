@@ -40,15 +40,15 @@ class PrestamoCsvStorageTest {
     @BeforeEach
     fun setUp() {
         dispositivo = Dispositivo(
-            id = 1,
-            guid = "guidTestD01",
-            numeroSerie = "2ZY098ABCD",
-            componentes = "ratón",
-            estadoDispositivo = EstadoDispositivo.DISPONIBLE,
-            incidencia = null,
-            isActivo = true,
-            createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            1,
+            "guidTest123",
+            "5CD1234XYZ",
+            "raton, cargador",
+            EstadoDispositivo.DISPONIBLE,
+            null,
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            false
         )
 
         user = User(
@@ -93,7 +93,7 @@ class PrestamoCsvStorageTest {
 
         val expectedCsvData = """
             Guid;Usuario;Dispositivo;Estado;Fecha Préstamo;Fecha Devolución
-            guidTestP01;guidTestU99;guidTestD01;EN_CURSO;${prestamo.fechaPrestamo.toDefaultDateString()};${prestamo.fechaDevolucion.toDefaultDateString()}
+            guidTestP01;guidTestU99;guidTest123;EN_CURSO;${prestamo.fechaPrestamo.toDefaultDateString()};${prestamo.fechaDevolucion.toDefaultDateString()}
         """.trimIndent() + "\n"
 
         val expectedCsvDataBytes = expectedCsvData.toByteArray()

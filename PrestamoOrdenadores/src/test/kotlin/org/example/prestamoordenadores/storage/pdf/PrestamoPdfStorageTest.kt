@@ -63,15 +63,15 @@ class PrestamoPdfStorageTest {
         )
 
         dispositivo = Dispositivo(
-            id = 1,
-            guid = "guidTestD01",
-            numeroSerie = "2ZY098ABCD",
-            componentes = "ratón",
-            estadoDispositivo = EstadoDispositivo.DISPONIBLE,
-            incidencia = null,
-            isActivo = true,
-            createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            1,
+            "guidTest123",
+            "5CD1234XYZ",
+            "raton, cargador",
+            EstadoDispositivo.DISPONIBLE,
+            null,
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            false
         )
 
         prestamo = Prestamo(
