@@ -10,6 +10,7 @@ import org.example.prestamoordenadores.config.websockets.models.NotificationType
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
+import org.example.prestamoordenadores.rest.sanciones.dto.SancionAdminResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError
@@ -24,6 +25,7 @@ import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
@@ -73,6 +75,19 @@ class SancionServiceImpl(
         }
     }
 
+    @Cacheable(key = "#guid")
+    override fun getSancionByGuidAdmin(guid: String): Result<SancionAdminResponse?, SancionError> {
+        logger.debug { "Obteniendo sancion con GUID: $guid" }
+
+        val sancion = repository.findByGuid(guid)
+
+        return if (sancion == null) {
+            Err(SancionError.SancionNotFound(guid))
+        } else {
+            Ok(mapper.toSancionAdminResponse(sancion))
+        }
+    }
+
     @CachePut(key = "#guid")
     @Transactional
     override fun updateSancion(guid: String, sancionUpdateDto: SancionUpdateRequest): Result<SancionResponse?, SancionError> {
@@ -108,8 +123,8 @@ class SancionServiceImpl(
         }
     }
 
-    @CachePut(key = "#guid")
-    override fun deleteSancionByGuid(guid: String): Result<Sancion?, SancionError> {
+    @CacheEvict
+    override fun deleteSancionByGuid(guid: String): Result<SancionAdminResponse?, SancionError> {
         logger.debug { "Buscando sancion" }
 
         val existingSancion = repository.findByGuid(guid)
@@ -124,7 +139,7 @@ class SancionServiceImpl(
         repository.save(existingSancion)
 
         sendNotificationSancionEliminada(existingSancion)
-        return Ok(existingSancion)
+        return Ok(mapper.toSancionAdminResponse(existingSancion))
     }
 
     @Cacheable(key = "#fecha")

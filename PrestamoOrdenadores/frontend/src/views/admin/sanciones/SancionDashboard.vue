@@ -98,12 +98,28 @@
       </DataTable>
     </div>
   </div>
+
+  <Toast/>
+
+  <Dialog v-model:visible="showDeleteDialog" header="Confirmar Eliminación" modal :draggable="false" :style="{ width: '50vw', fontFamily: 'Montserrat, sans-serif' }">
+    <div v-if="sancionToDelete">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem;"/><br>
+      <span>¿Está seguro de que desea eliminar la sanción con guid <strong>{{ sancionToDelete.guid }}</strong> del usuario <strong>{{ sancionToDelete.user?.numeroIdentificacion || 'N/A' }}</strong>? Esta acción no se puede deshacer.</span>
+    </div>
+    <template #footer>
+      <Button label="Cancelar" icon="pi pi-times" class="p-button-text action-button-dialog secondary-button" @click="showDeleteDialog = false" />
+      <Button label="Eliminar" class="action-button-dialog primary-button" severity="danger" @click="confirmDelete" />
+    </template>
+  </Dialog>
 </template>
 
 <script lang="ts">
 import axios from 'axios';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
+import Toast from 'primevue/toast';
+import Dialog from "primevue/dialog";
+import {deleteSancion} from "@/services/SancionService.ts";
 
 type SanctionType = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'INDEFINIDO';
 
@@ -129,7 +145,7 @@ interface PagedResponse {
 
 export default {
   name: 'SancionDashboard',
-  components: { Calendar, Button },
+  components: { Calendar, Button, Dialog, Toast },
   emits: ['input-change'],
   data() {
     return {
@@ -142,6 +158,8 @@ export default {
       loading: false,
       currentPage: 0,
       pageSize: 5,
+      showDeleteDialog: false,
+      sancionToDelete: null as Sancion | null
     };
   },
   async mounted() {
@@ -285,6 +303,45 @@ export default {
         }
       }
     },
+    deleteSancion(sancion: Sancion) {
+      this.sancionToDelete = sancion;
+      this.showDeleteDialog = true;
+      console.log(`Preparando para eliminar sancion con GUID: ${sancion.guid}. Mostrando diálogo.`);
+    },
+    async confirmDelete() {
+      if (!this.sancionToDelete) {
+        console.error("No sancion selected for deletion.");
+        this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No sancion selected for deletion.', life: 3000 });
+        this.showDeleteDialog = false;
+        return;
+      }
+
+      console.log(`Confirmado eliminar sancion con GUID: ${this.sancionToDelete.guid}`);
+      try {
+        await deleteSancion(this.sancionToDelete.guid)
+
+        this.filtrarYPaginar();
+
+      } catch (error: any) {
+        console.error("Error eliminando sancion:", error);
+        let errorMessage = 'Error al eliminar el sancion.';
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
+          if (typeof error.response.data === 'string') {
+            errorMessage = error.response.data;
+          } else if (error.response.data && typeof error.response.data.message === 'string') {
+            errorMessage = error.response.data.message;
+          } else {
+            errorMessage = 'Error desconocido al eliminar sancion.';
+          }
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        this.$toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+      } finally {
+        this.showDeleteDialog = false;
+        this.sancionToDelete = null;
+      }
+    }
   },
 };
 </script>
@@ -629,6 +686,47 @@ export default {
 :deep(.p-dropdown:not(.p-disabled).p-focus) {
   border-color: var(--color-interactive) !important;
   box-shadow: 0 0 0 1px rgba(var(--color-interactive-rgb), 0.2) !important;
+}
+
+.action-button-dialog {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.action-button-dialog:active {
+  transform: scale(0.98);
+}
+
+.action-button-dialog.secondary-button {
+  background-color: transparent;
+  color: var(--color-interactive);
+  border: 1px solid var(--color-interactive);
+}
+
+.action-button-dialog.secondary-button:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.05);
+}
+
+.action-button-dialog.primary-button {
+  background-color: var(--color-error);
+  color: var(--color-text-on-dark-hover);
+}
+
+.action-button-dialog.primary-button:hover {
+  background-color: #B91C1C;
+  box-shadow: 0 2px 8px rgba(var(--color-interactive-rgb), 0.3);
+}
+
+.action-button-dialog.primary-button i {
+  font-size: 1.1rem;
 }
 
 @media (max-width: 768px) {
