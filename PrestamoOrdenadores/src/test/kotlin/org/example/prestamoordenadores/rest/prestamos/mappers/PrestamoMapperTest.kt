@@ -64,14 +64,14 @@ class PrestamoMapperTest {
     @Test
     fun toPrestamoResponse() {
         val userResponse = UserResponse(
-            "2020LT475",
-            "guidTest123",
-            "email",
-            "name",
-            "apellido",
-            "curso",
-            "tutor",
-            "avatar"
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         val dispositivoResponse = DispositivoResponse(
@@ -101,14 +101,14 @@ class PrestamoMapperTest {
     @Test
     fun toPrestamoResponseAdmin() {
         val userResponse = UserResponse(
-            "2020LT475",
-            "guidTest123",
-            "email",
-            "name",
-            "apellido",
-            "curso",
-            "tutor",
-            "avatar"
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         val dispositivoResponse = DispositivoResponse(
