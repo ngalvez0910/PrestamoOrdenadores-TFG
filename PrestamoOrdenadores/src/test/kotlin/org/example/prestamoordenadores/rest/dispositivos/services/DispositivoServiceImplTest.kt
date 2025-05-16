@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
+import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
@@ -20,6 +21,7 @@ import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
+import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.validators.validate
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -42,6 +44,12 @@ class DispositivoServiceImplTest {
 
     @MockK
     lateinit var createRequest: DispositivoCreateRequest
+
+    @MockK
+    lateinit var userRepository: UserRepository
+
+    @MockK
+    lateinit var webService: WebSocketService
 
     lateinit var service: DispositivoServiceImpl
 
@@ -67,7 +75,9 @@ class DispositivoServiceImplTest {
             lastLoginDate = LocalDateTime.now(),
             lastPasswordResetDate = LocalDateTime.now(),
             createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            updatedDate = LocalDateTime.now(),
+            isDeleted = false,
+            isOlvidado = false
         )
 
         incidencia = Incidencia(
@@ -78,7 +88,8 @@ class DispositivoServiceImplTest {
             estadoIncidencia = EstadoIncidencia.PENDIENTE,
             user = user,
             createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            updatedDate = LocalDateTime.now(),
+            isDeleted = false
         )
 
         dispositivo = Dispositivo(
@@ -88,12 +99,12 @@ class DispositivoServiceImplTest {
             componentes = "ratón",
             estadoDispositivo = EstadoDispositivo.DISPONIBLE,
             incidencia = incidencia,
-            isActivo = true,
+            isDeleted = false,
             createdDate = LocalDateTime.now(),
             updatedDate = LocalDateTime.now()
         )
 
-        service = DispositivoServiceImpl(repository, mapper, incidenciasRepository)
+        service = DispositivoServiceImpl(repository, mapper, incidenciasRepository, userRepository, webService)
     }
 
     @Test
@@ -106,7 +117,7 @@ class DispositivoServiceImplTest {
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
             incidencia = dispositivo.incidencia,
-            isDeleted = dispositivo.isActivo
+            isDeleted = dispositivo.isDeleted
         )
 
         val responses = listOf(dispositivoAdmin)
@@ -127,7 +138,7 @@ class DispositivoServiceImplTest {
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
             incidencia = dispositivo.incidencia,
-            isDeleted = dispositivo.isActivo
+            isDeleted = dispositivo.isDeleted
         )
 
         every { repository.findDispositivoByGuid("guidTestD01") } returns dispositivo
@@ -184,6 +195,25 @@ class DispositivoServiceImplTest {
             { verify { mapper.toDispositivoResponse(dispositivo) } }
         )
     }
+
+    @Test
+    fun `createDispositivo returns Err when user no existe`() {
+        every { repository.save(any()) } returns dispositivo
+        every { createRequest.validate() } returns Ok(createRequest)
+        every { mapper.toDispositivoFromCreate(createRequest) } returns dispositivo
+        every { mapper.toDispositivoResponse(dispositivo) } returns mockk()
+
+        every { userRepository.findByEmail("email99@loantech.com") } returns null
+
+        val result = service.createDispositivo(createRequest)
+
+        assertAll(
+            { assertTrue(result.isErr) },
+            { assertTrue(result.error is DispositivoError.UserNotFound) },
+            { assertEquals("Usuario email99@loantech.com no encontrado.", result.error.message) }
+        )
+    }
+
 
     @Test
     fun updateDispositivo() {
