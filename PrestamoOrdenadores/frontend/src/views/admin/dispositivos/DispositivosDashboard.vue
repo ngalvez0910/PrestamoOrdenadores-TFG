@@ -84,16 +84,28 @@
   </Dialog>
 
   <Toast />
+
+  <Dialog v-model:visible="showDeleteDialog" header="Confirmar Eliminación" modal :draggable="false" :style="{ width: '50vw', fontFamily: 'Montserrat, sans-serif' }">
+    <div v-if="dispositivoToDelete">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem;"/><br>
+      <span>¿Está seguro de que desea eliminar el dispositivo con numero de serie <strong>{{ dispositivoToDelete.numeroSerie }}</strong>? Esta acción no se puede deshacer.</span>
+    </div>
+    <template #footer>
+      <Button label="Cancelar" icon="pi pi-times" class="p-button-text action-button-dialog secondary-button" @click="showDeleteDialog = false" />
+      <Button label="Eliminar" class="action-button-dialog primary-button" severity="danger" @click="confirmDelete" />
+    </template>
+  </Dialog>
 </template>
 
 <script lang="ts">
 import axios from 'axios';
-import {addDispositivoStock} from "@/services/DispositivoService.ts";
+import {addDispositivoStock, deleteDispositivo} from "@/services/DispositivoService.ts";
 import {useToast} from "primevue/usetoast";
 import Dialog from "primevue/dialog";
 import Toast from "primevue/toast";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
+import {deleteUser} from "@/services/UsuarioService.ts";
 
 type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
 
@@ -108,6 +120,7 @@ interface Dispositivo {
   isActivo: boolean;
   createdDate: string;
   updatedDate: string;
+  isDeleted: boolean;
 }
 
 interface PagedResponse {
@@ -136,6 +149,8 @@ export default {
       newDispositivoData: {numeroSerie: '', componentes: ''},
       isAddingStock: false,
       submittedAddStock: false,
+      showDeleteDialog: false,
+      dispositivoToDelete: null as Dispositivo | null,
     };
   },
   async mounted() {
@@ -297,6 +312,45 @@ export default {
         this.isAddingStock = false;
       }
     },
+    deleteDispositivo(dispositivo: Dispositivo) {
+      this.dispositivoToDelete = dispositivo;
+      this.showDeleteDialog = true;
+      console.log(`Preparando para eliminar dispositivo con numero de serie: ${dispositivo.numeroSerie}. Mostrando diálogo.`);
+    },
+    async confirmDelete() {
+      if (!this.dispositivoToDelete) {
+        console.error("No dispositivo selected for deletion.");
+        this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No user selected for deletion.', life: 3000 });
+        this.showDeleteDialog = false;
+        return;
+      }
+
+      console.log(`Confirmado eliminar dispositivo con numero de serie: ${this.dispositivoToDelete.numeroSerie}`);
+      try {
+        await deleteDispositivo(this.dispositivoToDelete.guid)
+
+        this.paginar();
+
+      } catch (error: any) {
+        console.error("Error eliminando dispositivo:", error);
+        let errorMessage = 'Error al eliminar el dispositivo.';
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
+          if (typeof error.response.data === 'string') {
+            errorMessage = error.response.data;
+          } else if (error.response.data && typeof error.response.data.message === 'string') {
+            errorMessage = error.response.data.message;
+          } else {
+            errorMessage = 'Error desconocido al eliminar dispositivo.';
+          }
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        this.$toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+      } finally {
+        this.showDeleteDialog = false;
+        this.dispositivoToDelete = null;
+      }
+    }
   },
 };
 </script>
@@ -585,6 +639,47 @@ export default {
 }
 .action-button.secondary-button:hover {
   background-color: rgba(var(--color-interactive-rgb), 0.05);
+}
+
+.action-button-dialog {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.action-button-dialog:active {
+  transform: scale(0.98);
+}
+
+.action-button-dialog.secondary-button {
+  background-color: transparent;
+  color: var(--color-interactive);
+  border: 1px solid var(--color-interactive);
+}
+
+.action-button-dialog.secondary-button:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.05);
+}
+
+.action-button-dialog.primary-button {
+  background-color: var(--color-error);
+  color: var(--color-text-on-dark-hover);
+}
+
+.action-button-dialog.primary-button:hover {
+  background-color: #B91C1C;
+  box-shadow: 0 2px 8px rgba(var(--color-interactive-rgb), 0.3);
+}
+
+.action-button-dialog.primary-button i {
+  font-size: 1.1rem;
 }
 
 @media (max-width: 768px) {

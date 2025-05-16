@@ -24,6 +24,7 @@ import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
 import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
@@ -139,7 +140,7 @@ class DispositivoServiceImpl(
         return Ok(mapper.toDispositivoResponseAdmin(existingDispositivo))
     }
 
-    @CachePut(key = "#guid")
+    @CacheEvict
     override fun deleteDispositivoByGuid(guid: String): Result<DispositivoResponseAdmin, DispositivoError> {
         logger.debug { "Eliminando dispositivo con GUID: $guid" }
 

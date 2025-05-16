@@ -14,6 +14,7 @@ interface Dispositivo {
     isActivo: boolean;
     createdDate: string;
     updatedDate: string;
+    isDeleted: boolean;
 }
 
 interface DispositivoCreateRequest {
@@ -103,7 +104,7 @@ export const descargarCsvDispositivos = async (): Promise<void | null> => {
         console.error('Error al descargar el CSV de dispositivos', error);
         throw error;
     }
-}
+};
 
 export const addDispositivoStock = async (request: DispositivoCreateRequest): Promise<Dispositivo> => {
     const token = localStorage.getItem('token');
@@ -125,4 +126,23 @@ export const addDispositivoStock = async (request: DispositivoCreateRequest): Pr
         console.error('[DispositivoService] Error al añadir dispositivo:', error);
         throw error;
     }
-}
+};
+
+export const deleteDispositivo = async (guid: string): Promise<void | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error("No autenticado");
+        }
+
+        const url = `http://localhost:8080/dispositivos/delete/${guid}`;
+        await axios.patch(url, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    } catch (error) {
+        console.error('Error obteniendo dispositivo por GUID:', error);
+        return null;
+    }
+};
