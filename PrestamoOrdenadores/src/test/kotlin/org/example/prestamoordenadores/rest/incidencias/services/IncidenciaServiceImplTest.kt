@@ -13,6 +13,7 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import org.example.prestamoordenadores.config.websockets.WebSocketConfig
 import org.example.prestamoordenadores.config.websockets.WebSocketHandler
+import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
@@ -51,13 +52,7 @@ class IncidenciaServiceImplTest {
     lateinit var userRepository: UserRepository
 
     @MockK
-    lateinit var webSocketConfig: WebSocketConfig
-
-    @MockK
-    lateinit var webSocketHandler: WebSocketHandler
-
-    @MockK
-    lateinit var objectMapper: ObjectMapper
+    lateinit var webService: WebSocketService
 
     @MockK
     lateinit var createRequest: IncidenciaCreateRequest
@@ -70,12 +65,14 @@ class IncidenciaServiceImplTest {
     var user = User()
     var incidencia = Incidencia()
     var userResponse = UserResponse(
+        numeroIdentificacion = user.numeroIdentificacion,
         guid = user.guid,
         email = user.email,
         nombre = user.nombre,
         apellidos = user.apellidos,
         curso = user.curso!!,
-        tutor = user.tutor!!
+        tutor = user.tutor!!,
+        avatar = user.avatar
     )
     var incidenciaResponse = IncidenciaResponse(
         guid = incidencia.guid,
@@ -122,9 +119,7 @@ class IncidenciaServiceImplTest {
             repository,
             mapper,
             userRepository,
-            webSocketConfig,
-            objectMapper,
-            webSocketHandler
+            webService
         )
     }
 
@@ -174,6 +169,28 @@ class IncidenciaServiceImplTest {
     }
 
     @Test
+    fun getIncidenciaByGuidAdmin() {
+        every { repository.findIncidenciaByGuid("INC000000") } returns incidencia
+        every { mapper.toIncidenciaResponseAdmin(incidencia) } returns mockk()
+
+        val result = service.getIncidenciaByGuidAdmin("INC000000")
+
+        assertTrue(result.isOk)
+        verify { repository.findIncidenciaByGuid("INC000000") }
+        verify { mapper.toIncidenciaResponseAdmin(incidencia) }
+    }
+
+    @Test
+    fun `getIncidenciaByGuidAdmin returns Err when incidencia no existe`() {
+        every { repository.findIncidenciaByGuid("INC000001") } returns null
+
+        val result = service.getIncidenciaByGuidAdmin("INC000001")
+
+        assertTrue(result.isErr)
+        assertTrue(result.error is IncidenciaError.IncidenciaNotFound)
+    }
+
+    @Test
     fun createIncidencia() {
         every { createRequest.validate() } returns Ok(createRequest)
         every { createRequest.asunto } returns "asunto"
@@ -183,8 +200,6 @@ class IncidenciaServiceImplTest {
         every { mapper.toIncidenciaFromCreate(createRequest, user) } returns incidencia
         every { repository.save(incidencia) } returns incidencia
         every { mapper.toIncidenciaResponse(incidencia) } returns incidenciaResponse
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(user.email, any()) } just Runs
 
         mockkStatic(SecurityContextHolder::class)
         val auth = mockk<Authentication>()
@@ -200,8 +215,6 @@ class IncidenciaServiceImplTest {
             { verify { mapper.toIncidenciaFromCreate(createRequest, user) } },
             { verify { repository.save(incidencia) } },
             { verify { mapper.toIncidenciaResponse(incidencia) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(user.email, any()) } },
         )
     }
 
@@ -228,8 +241,6 @@ class IncidenciaServiceImplTest {
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
         every { repository.save(any()) } returns incidencia
         every { mapper.toIncidenciaResponse(any()) } returns incidenciaResponse
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
         every { updateRequest.estadoIncidencia } returns "pendiente"
 
         val result = service.updateIncidencia("INC0001", updateRequest)
@@ -241,8 +252,6 @@ class IncidenciaServiceImplTest {
             { verify { updateRequest.validate() } },
             { verify { repository.save(any()) } },
             { verify { mapper.toIncidenciaResponse(any()) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(any(), any()) } }
         )
     }
 
@@ -266,8 +275,6 @@ class IncidenciaServiceImplTest {
         every { repository.delete(incidencia) } just Runs
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
         every { mapper.toIncidenciaResponse(any()) } returns incidenciaResponse
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
 
         val result = service.deleteIncidenciaByGuid("INC0001")
 
@@ -276,8 +283,6 @@ class IncidenciaServiceImplTest {
             { verify { repository.findIncidenciaByGuid("INC0001") } },
             { verify { repository.delete(incidencia) } },
             { verify { mapper.toIncidenciaResponse(any()) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(any(), any()) } }
         )
     }
 
@@ -293,5 +298,46 @@ class IncidenciaServiceImplTest {
             { assertEquals("Incidencia no encontrada", result.error.message) },
             { verify { repository.findIncidenciaByGuid("INC0001") } }
         )
+    }
+
+    @Test
+    fun getIncidenciaByEstado() {
+        every { repository.findIncidenciasByEstadoIncidencia(EstadoIncidencia.PENDIENTE) } returns listOf(incidencia)
+        every { mapper.toIncidenciaResponseList(any()) } returns listOf(incidenciaResponse)
+
+        val result = service.getIncidenciaByEstado("pendiente")
+
+        assertTrue(result.isOk)
+        assertEquals(1, result.value.size)
+    }
+
+    @Test
+    fun `getIncidenciaByEstado returns Err when estado invalido`() {
+        val result = service.getIncidenciaByEstado("inexistente")
+
+        assertTrue(result.isErr)
+        assertTrue(result.error is IncidenciaError.IncidenciaNotFound)
+    }
+
+    @Test
+    fun getIncidenciasByUserGuid() {
+        every { userRepository.findByGuid(user.guid) } returns user
+        every { repository.findIncidenciasByUserGuid(user.guid) } returns listOf(incidencia)
+        every { mapper.toIncidenciaResponseList(any()) } returns listOf(incidenciaResponse)
+
+        val result = service.getIncidenciasByUserGuid(user.guid)
+
+        assertTrue(result.isOk)
+        assertEquals(1, result.value.size)
+    }
+
+    @Test
+    fun `getIncidenciasByUserGuid returns Err when user no existe`() {
+        every { userRepository.findByGuid("user-fake") } returns null
+
+        val result = service.getIncidenciasByUserGuid("user-fake")
+
+        assertTrue(result.isErr)
+        assertTrue(result.error is IncidenciaError.UserNotFound)
     }
 }

@@ -25,6 +25,7 @@ class IncidenciaRepositoryTest {
     private lateinit var incidenciaRepository: IncidenciaRepository
 
     private val user1 = User(
+        1L,
         "userGuid1",
         "email1",
         "password",
@@ -43,6 +44,7 @@ class IncidenciaRepositoryTest {
     )
 
     private val incidencia1 = Incidencia(
+        1L,
         "guidTest123",
         "Asunto",
         "Descripcion",
@@ -100,5 +102,20 @@ class IncidenciaRepositoryTest {
     fun findIncidenciasByUserGuid_NotFound() {
         val nonExistentUserIncidencias = incidenciaRepository.findIncidenciasByUserGuid("nonExistentUserGuid")
         assertTrue(nonExistentUserIncidencias.isEmpty())
+    }
+
+    @Test
+    fun findIncidenciasByUserId() {
+        val result = incidenciaRepository.findIncidenciasByUserId(user1.id)
+
+        assertEquals(1, result.size)
+        assertTrue(result.all { it?.id == user1.id })
+    }
+
+    @Test
+    fun findIncidenciasByUserId_EmptyList() {
+        val result = incidenciaRepository.findIncidenciasByUserId(999L)
+
+        assertTrue(result.isEmpty())
     }
 }
