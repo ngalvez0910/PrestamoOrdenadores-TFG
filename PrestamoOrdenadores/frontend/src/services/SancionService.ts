@@ -9,9 +9,10 @@ interface Sancion {
     fechaFin: string;
     createdDate: string;
     updatedDate: string;
+    isDeleted: boolean;
 }
 
-export const getSancionByGuid = async (guid: string): Promise<Sancion | null> => {
+export const getSancionByGuidAdmin = async (guid: string): Promise<Sancion | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -19,7 +20,7 @@ export const getSancionByGuid = async (guid: string): Promise<Sancion | null> =>
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/sanciones/${guid}`, {
+        const response = await axios.get(`http://localhost:8080/sanciones/admin/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -92,4 +93,23 @@ export const descargarCsvSanciones = async (): Promise<void | null> => {
         console.error('Error al descargar el CSV de sanciones', error);
         throw error;
     }
-}
+};
+
+export const deleteSancion = async (guid: string): Promise<void | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error("No autenticado");
+        }
+
+        const url = `http://localhost:8080/sanciones/delete/${guid}`;
+        await axios.patch(url, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    } catch (error) {
+        console.error('Error obteniendo sancion por GUID:', error);
+        return null;
+    }
+};

@@ -89,7 +89,7 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponse(userEncontrado))
     }
 
-    @CachePut(key = "#guid")
+    @CacheEvict
     override fun deleteUserByGuid(guid: String): Result<UserResponseAdmin?, UserError> {
         logger.debug { "Eliminando usuario con GUID: $guid" }
 

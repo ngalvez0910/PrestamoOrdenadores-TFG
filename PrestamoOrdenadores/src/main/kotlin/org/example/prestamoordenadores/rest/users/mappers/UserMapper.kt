@@ -39,6 +39,8 @@ class UserMapper {
             updatedDate = user.updatedDate.toDefaultDateTimeString(),
             lastLoginDate = user.lastLoginDate.toDefaultDateTimeString(),
             lastPasswordResetDate = user.lastPasswordResetDate.toDefaultDateTimeString(),
+            isDeleted = user.isDeleted,
+            isOlvidado = user.isOlvidado
         )
     }
 

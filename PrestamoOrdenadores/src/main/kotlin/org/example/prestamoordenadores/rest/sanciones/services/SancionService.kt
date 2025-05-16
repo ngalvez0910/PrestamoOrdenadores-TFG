@@ -1,10 +1,10 @@
 package org.example.prestamoordenadores.rest.sanciones.services
 
 import com.github.michaelbull.result.Result
+import org.example.prestamoordenadores.rest.sanciones.dto.SancionAdminResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionResponse
 import org.example.prestamoordenadores.rest.sanciones.dto.SancionUpdateRequest
 import org.example.prestamoordenadores.rest.sanciones.errors.SancionError
-import org.example.prestamoordenadores.rest.sanciones.models.Sancion
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -13,8 +13,9 @@ import java.time.LocalDate
 interface SancionService {
     fun getAllSanciones(page: Int, size: Int): Result<PagedResponse<SancionResponse>, SancionError>
     fun getSancionByGuid(guid: String) : Result<SancionResponse?, SancionError>
+    fun getSancionByGuidAdmin(guid: String) : Result<SancionAdminResponse?, SancionError>
     fun updateSancion(guid: String, sancion: SancionUpdateRequest) : Result<SancionResponse?, SancionError>
-    fun deleteSancionByGuid(guid: String) : Result<Sancion?, SancionError>
+    fun deleteSancionByGuid(guid: String) : Result<SancionAdminResponse?, SancionError>
     fun getByFecha(fecha: LocalDate): Result<List<SancionResponse>, SancionError>
     fun getByTipo(tipo: String): Result<List<SancionResponse>, SancionError>
     fun getSancionByUserGuid(userGuid: String) : Result<List<SancionResponse>, SancionError>

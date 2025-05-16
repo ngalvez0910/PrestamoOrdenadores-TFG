@@ -11,6 +11,7 @@ export interface Incidencia {
     userGuid: string;
     createdDate: string;
     updatedDate: string;
+    isDeleted: boolean;
 }
 
 export interface IncidenciaCreateRequest {
@@ -18,7 +19,7 @@ export interface IncidenciaCreateRequest {
     descripcion: string;
 }
 
-export const getIncidenciaByGuid = async (guid: string): Promise<Incidencia | null> => {
+export const getIncidenciaByGuidAdmin = async (guid: string): Promise<Incidencia | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -26,7 +27,7 @@ export const getIncidenciaByGuid = async (guid: string): Promise<Incidencia | nu
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/incidencias/${guid}`, {
+        const response = await axios.get(`http://localhost:8080/incidencias/admin/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -87,10 +88,7 @@ export const getIncidenciasByUserGuid = async (): Promise<Incidencia[]> => {
     }
 };
 
-export const actualizarIncidencia = async (
-    guid: string,
-    data: { estadoIncidencia: string }
-): Promise<Incidencia | null> => {
+export const actualizarIncidencia = async (guid: string, data: { estadoIncidencia: string }): Promise<Incidencia | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -182,6 +180,25 @@ export const createIncidencia = async (incidenciaData: IncidenciaCreateRequest):
         return response.data;
     } catch (error: any) {
         console.error('Error al crear la incidencia:', error.response?.data || error.message);
+        return null;
+    }
+};
+
+export const deleteIncidencia = async (guid: string): Promise<void | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error("No autenticado");
+        }
+
+        const url = `http://localhost:8080/incidencias/delete/${guid}`;
+        await axios.patch(url, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    } catch (error) {
+        console.error('Error obteniendo usuario por GUID:', error);
         return null;
     }
 };

@@ -135,7 +135,7 @@ class UserController
         )
     }
 
-    @DeleteMapping("/{guid}")
+    @PatchMapping("/delete/{guid}")
     fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.deleteUserByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).build() },

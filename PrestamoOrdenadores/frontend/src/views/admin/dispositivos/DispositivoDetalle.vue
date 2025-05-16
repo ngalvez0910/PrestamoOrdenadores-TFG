@@ -46,6 +46,11 @@
           <input :readonly="!editable" type="text" id="incidencias" class="input-field" v-model="dispositivoData.incidenciaGuid"/>
         </div>
 
+        <div class="form-group">
+          <label for="isDeleted">Marcado Borrado</label>
+          <input class="input-field" readonly :value="dispositivoData.isDeleted ? 'SI' : 'NO'"/>
+        </div>
+
       </div>
 
       <div v-if="editable" class="update-button-wrapper">

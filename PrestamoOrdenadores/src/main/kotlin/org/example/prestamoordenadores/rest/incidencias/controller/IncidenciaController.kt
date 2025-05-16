@@ -12,7 +12,6 @@ import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -32,10 +31,7 @@ class IncidenciaController
     private val incidenciaPdfStorage: IncidenciaPdfStorage
 )  {
     @GetMapping
-    fun getAllIncidencias(
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "5") size: Int
-    ): ResponseEntity<Any> {
+    fun getAllIncidencias(@RequestParam(defaultValue = "0") page: Int, @RequestParam(defaultValue = "5") size: Int): ResponseEntity<Any> {
         return incidenciaService.getAllIncidencias(page, size).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -45,6 +41,19 @@ class IncidenciaController
     @GetMapping("/{guid}")
     fun getIncidenciaByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return incidenciaService.getIncidenciaByGuid(guid).mapBoth(
+            success = { ResponseEntity.status(200).body(it) },
+            failure = { error ->
+                when(error) {
+                    is IncidenciaNotFound -> ResponseEntity.status(404).body("Incidencia no encontrada")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
+
+    @GetMapping("/admin/{guid}")
+    fun getIncidenciaByGuidAdmin(@PathVariable guid: String) : ResponseEntity<Any>{
+        return incidenciaService.getIncidenciaByGuidAdmin(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
                 when(error) {
@@ -110,7 +119,7 @@ class IncidenciaController
         )
     }
 
-    @DeleteMapping("/{guid}")
+    @PatchMapping("/delete/{guid}")
     fun deleteIncidencia(@PathVariable guid: String): ResponseEntity<Any>{
         return incidenciaService.deleteIncidenciaByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },

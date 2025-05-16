@@ -53,6 +53,11 @@
           <label for="fechaCreacion">Fecha Creación</label>
           <div class="readonly-field">{{ incidenciaData.createdDate }}</div>
         </div>
+
+        <div class="form-group">
+          <label for="isDeleted">Marcado Borrado</label>
+          <div class="readonly-field">{{ incidenciaData.isDeleted ? 'SI' : 'NO' }}</div>
+        </div>
       </div>
 
       <div v-if="editable" class="update-button-wrapper">
@@ -72,7 +77,7 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {getIncidenciaByGuid, actualizarIncidencia} from "@/services/IncidenciaService.ts";
+import {getIncidenciaByGuidAdmin, actualizarIncidencia} from "@/services/IncidenciaService.ts";
 import {useToast} from "primevue/usetoast";
 
 type IncidenceState = 'PENDIENTE' | 'RESUELTO';
@@ -95,7 +100,7 @@ export default defineComponent({
     try {
       const guid = this.$route.params.guid;
       const guidString = Array.isArray(guid) ? guid[0] : guid;
-      const incidencia = await getIncidenciaByGuid(guidString);
+      const incidencia = await getIncidenciaByGuidAdmin(guidString);
       this.incidenciaData = incidencia;
       this.originalData = JSON.parse(JSON.stringify(incidencia));
       console.log(incidencia)

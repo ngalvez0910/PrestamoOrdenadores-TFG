@@ -56,6 +56,10 @@
           <div class="readonly-field">{{ sancionData.fechaFin }}</div>
         </div>
 
+        <div class="form-group">
+          <label for="isDeleted">Marcado Borrado</label>
+          <div class="readonly-field">{{ sancionData.isDeleted ? 'SI' : 'NO' }}</div>
+        </div>
       </div>
 
       <div v-if="editable" class="update-button-wrapper">
@@ -77,7 +81,7 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {getSancionByGuid, actualizarSancion} from "@/services/SancionService.ts";
+import {getSancionByGuidAdmin, actualizarSancion} from "@/services/SancionService.ts";
 import { useToast } from "primevue/usetoast";
 
 type TipoSancion = 'ADVERTENCIA' | 'BLOQUEO_TEMPORAL' | 'INDEFINIDO';
@@ -101,7 +105,7 @@ export default defineComponent({
       const guid = this.$route.params.guid;
       const guidString = Array.isArray(guid) ? guid[0] : guid;
 
-      const sancion = await getSancionByGuid(guidString);
+      const sancion = await getSancionByGuidAdmin(guidString);
 
       this.sancionData = sancion;
       this.originalData = JSON.parse(JSON.stringify(sancion));

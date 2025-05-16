@@ -28,10 +28,7 @@ class DispositivoController
     private val dispositivoService: DispositivoService,
 )  {
     @GetMapping
-    fun getAllDispositivos(
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "5") size: Int
-    ): ResponseEntity<Any> {
+    fun getAllDispositivos(@RequestParam(defaultValue = "0") page: Int, @RequestParam(defaultValue = "5") size: Int): ResponseEntity<Any> {
         return dispositivoService.getAllDispositivos(page, size).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -104,7 +101,7 @@ class DispositivoController
         )
     }
 
-    @DeleteMapping("/{guid}")
+    @PatchMapping("/delete/{guid}")
     fun deleteDispositivo(@PathVariable guid: String): ResponseEntity<Any>{
         return dispositivoService.deleteDispositivoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },

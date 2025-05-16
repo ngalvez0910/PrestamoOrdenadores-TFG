@@ -9,7 +9,6 @@ import org.example.prestamoordenadores.rest.sanciones.services.SancionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,10 +26,7 @@ class SancionController
     private val sancionService: SancionService,
 ) {
     @GetMapping
-    fun getAllSanciones(
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "5") size: Int
-    ): ResponseEntity<Any> {
+    fun getAllSanciones(@RequestParam(defaultValue = "0") page: Int, @RequestParam(defaultValue = "5") size: Int): ResponseEntity<Any> {
         return sancionService.getAllSanciones(page, size).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -40,6 +36,19 @@ class SancionController
     @GetMapping("/{guid}")
     fun getSancionByGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return sancionService.getSancionByGuid(guid).mapBoth(
+            success = { ResponseEntity.status(200).body(it) },
+            failure = { error ->
+                when(error) {
+                    is SancionNotFound -> ResponseEntity.status(404).body("Sanción no encontrada")
+                    else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
+                }
+            }
+        )
+    }
+
+    @GetMapping("/admin/{guid}")
+    fun getSancionByGuidAdmin(@PathVariable guid: String) : ResponseEntity<Any>{
+        return sancionService.getSancionByGuidAdmin(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },
             failure = { error ->
                 when(error) {
@@ -98,7 +107,7 @@ class SancionController
         )
     }
 
-    @DeleteMapping("/{guid}")
+    @PatchMapping("/delete/{guid}")
     fun deleteSancion(@PathVariable guid: String): ResponseEntity<Any>{
         return sancionService.deleteSancionByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },

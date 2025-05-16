@@ -58,6 +58,10 @@
           <input readonly type="text" id="fechaDevolucion" class="input-field" :value="prestamoData.fechaDevolucion || 'Pendiente'"/>
         </div>
 
+        <div class="form-group">
+          <label for="isDeleted">Marcado Borrado</label>
+          <input readonly class="input-field" :value="prestamoData.isDeleted ? 'SI' : 'NO'" />
+        </div>
       </div>
 
       <div v-if="editable" class="update-button-wrapper">
