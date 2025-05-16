@@ -35,10 +35,7 @@ class PrestamoController
     private val prestamoPdfStorage: PrestamoPdfStorage,
 ) {
     @GetMapping
-    fun getAllPrestamos(
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "5") size: Int
-    ): ResponseEntity<Any> {
+    fun getAllPrestamos(@RequestParam(defaultValue = "0") page: Int, @RequestParam(defaultValue = "5") size: Int): ResponseEntity<Any> {
         return prestamoService.getAllPrestamos(page, size).mapBoth(
             success = { ResponseEntity.ok(it) },
             failure = { ResponseEntity.status(422).body("Se ha producido un error en la solicitud") }
@@ -119,7 +116,7 @@ class PrestamoController
         )
     }
 
-    @DeleteMapping("/{guid}")
+    @PatchMapping("/delete/{guid}")
     fun deletePrestamo(@PathVariable guid: String): ResponseEntity<Any>{
         return prestamoService.deletePrestamoByGuid(guid).mapBoth(
             success = { ResponseEntity.status(200).body(it) },

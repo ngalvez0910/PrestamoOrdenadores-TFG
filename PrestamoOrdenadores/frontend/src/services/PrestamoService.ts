@@ -1,7 +1,6 @@
 import axios from 'axios';
 import type { UserData } from "@/services/AuthService.ts";
 import { jwtDecode } from "jwt-decode";
-import type {Incidencia} from "@/services/IncidenciaService.ts";
 
 export interface Dispositivo {
     guid: string;
@@ -17,6 +16,7 @@ export interface Prestamo {
     estadoPrestamo: string;
     fechaPrestamo: string;
     fechaDevolucion: string;
+    isDeleted: boolean;
 }
 
 export const getPrestamoByGuid = async (guid: string): Promise<Prestamo | null> => {
@@ -109,7 +109,9 @@ export const getPrestamosByUserGuid = async (): Promise<Prestamo[]> => {
                 estadoPrestamo: prestamo.estadoPrestamo,
                 fechaPrestamo: prestamo.fechaPrestamo,
                 fechaDevolucion: prestamo.fechaDevolucion,
-            });        }
+                isDeleted: prestamo.isDeleted
+            });
+        }
 
         return resultados;
 
@@ -257,5 +259,24 @@ export const cancelarPrestamo = async (guid: string): Promise<Prestamo | null> =
     } catch (error: any) {
         console.error('Error al cancelar el préstamo (servicio):', error.response?.data || error.message);
         throw error;
+    }
+};
+
+export const deletePrestamo = async (guid: string): Promise<void | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error("No autenticado");
+        }
+
+        const url = `http://localhost:8080/prestamos/delete/${guid}`;
+        await axios.patch(url, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    } catch (error) {
+        console.error('Error obteniendo prestamo por GUID:', error);
+        return null;
     }
 };

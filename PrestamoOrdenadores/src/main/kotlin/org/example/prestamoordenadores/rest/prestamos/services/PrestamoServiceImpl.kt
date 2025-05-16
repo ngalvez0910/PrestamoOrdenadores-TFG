@@ -3,7 +3,6 @@ package org.example.prestamoordenadores.rest.prestamos.services
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.config.websockets.models.NotificationDto
 import org.example.prestamoordenadores.config.websockets.models.NotificationSeverityDto
@@ -12,6 +11,7 @@ import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponseAdmin
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.example.prestamoordenadores.rest.prestamos.mappers.PrestamoMapper
@@ -27,8 +27,8 @@ import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
@@ -69,7 +69,7 @@ class PrestamoServiceImpl(
     }
 
     @Cacheable(key = "#guid")
-    override fun getPrestamoByGuid(guid: String): Result<PrestamoResponse?, PrestamoError> {
+    override fun getPrestamoByGuid(guid: String): Result<PrestamoResponseAdmin?, PrestamoError> {
         logger.debug { "Obteniendo prestamo con GUID: $guid" }
 
         val prestamo = prestamoRepository.findByGuid(guid)
@@ -77,7 +77,7 @@ class PrestamoServiceImpl(
         return if (prestamo == null) {
             Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
         } else {
-            Ok(mapper.toPrestamoResponse(prestamo))
+            Ok(mapper.toPrestamoResponseAdmin(prestamo))
         }
     }
 
@@ -149,8 +149,8 @@ class PrestamoServiceImpl(
         }
     }
 
-    @CachePut(key = "#guid")
-    override fun deletePrestamoByGuid(guid: String): Result<Prestamo, PrestamoError> {
+    @CacheEvict
+    override fun deletePrestamoByGuid(guid: String): Result<PrestamoResponseAdmin, PrestamoError> {
         val authentication = SecurityContextHolder.getContext().authentication
         val email = authentication.name
 
@@ -171,7 +171,7 @@ class PrestamoServiceImpl(
         prestamoRepository.save(prestamoEncontrado)
 
         sendNotificationEliminacionPrestamo(prestamoEncontrado, user)
-        return Ok(prestamoEncontrado)
+        return Ok(mapper.toPrestamoResponseAdmin(prestamoEncontrado))
     }
 
     @Cacheable(key = "#fechaPrestamo")
