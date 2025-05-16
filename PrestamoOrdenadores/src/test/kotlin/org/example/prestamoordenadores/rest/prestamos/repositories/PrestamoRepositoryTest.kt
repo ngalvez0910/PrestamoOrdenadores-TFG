@@ -27,39 +27,42 @@ class PrestamoRepositoryTest {
     @Autowired
     private lateinit var prestamoRepository: PrestamoRepository
 
-    private val user1 = User(
-        "userGuid1",
-        "email1@example.com",
-        "password",
-        Role.ALUMNO,
-        "123",
-        "John",
-        "Doe",
-        "1A",
-        "Teacher A",
-        "avatar1",
-        true,
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-        LocalDateTime.now(),
-        LocalDateTime.now()
-    )
-
-    private val dispositivo1 = Dispositivo(
-        "deviceGuid1",
-        "serial1",
-        "desc1",
+    private val dispositivo = Dispositivo(
+        1,
+        "guidTest123",
+        "5CD1234XYZ",
+        "raton, cargador",
         EstadoDispositivo.DISPONIBLE,
         null,
+        LocalDateTime.now(),
+        LocalDateTime.now(),
+        false
+    )
+
+    private val user = User(
+        1,
+        "guidTest123",
+        "email",
+        "password",
+        Role.ALUMNO,
+        "numIdent",
+        "name",
+        "apellido",
+        "curso",
+        "tutor",
+        "avatar",
         true,
+        LocalDateTime.now(),
+        LocalDateTime.now(),
         LocalDateTime.now(),
         LocalDateTime.now()
     )
 
-    private val prestamo1 = Prestamo(
+    private val prestamo = Prestamo(
+        1,
         "guidTest123",
-        user1,
-        dispositivo1,
+        user,
+        dispositivo,
         EstadoPrestamo.EN_CURSO,
         LocalDate.now(),
         LocalDate.now(),
@@ -69,9 +72,9 @@ class PrestamoRepositoryTest {
 
     @BeforeEach
     fun setup() {
-        entityManager.persist(user1)
-        entityManager.persist(dispositivo1)
-        entityManager.persist(prestamo1)
+        entityManager.persist(user)
+        entityManager.persist(dispositivo)
+        entityManager.persist(prestamo)
         entityManager.flush()
     }
 
@@ -104,6 +107,7 @@ class PrestamoRepositoryTest {
         entityManager.persist(newDispositivo)
 
         val newUser = User(
+            2L,
             "newUserGuid",
             "email2@example.com",
             "password",
@@ -122,6 +126,7 @@ class PrestamoRepositoryTest {
         )
 
         val newPrestamo = Prestamo(
+            2L,
             "guidTest098",
             newUser,
             newDispositivo,
@@ -176,5 +181,31 @@ class PrestamoRepositoryTest {
     fun findByUserGuid_NotFound() {
         val nonExistentUserPrestamos = prestamoRepository.findByUserGuid("nonExistentUserGuid")
         assertTrue(nonExistentUserPrestamos.isEmpty())
+    }
+
+    @Test
+    fun findPrestamoByEstadoPrestamo() {
+        val enCursoPrestamos = prestamoRepository.findPrestamoByEstadoPrestamo(EstadoPrestamo.EN_CURSO)
+        assertEquals(1, enCursoPrestamos.size)
+        assertEquals("guidTest123", enCursoPrestamos[0].guid)
+    }
+
+    @Test
+    fun findPrestamoByEstadoPrestamo_NotFound() {
+        val finalizados = prestamoRepository.findPrestamoByEstadoPrestamo(EstadoPrestamo.valueOf("FINALIZADO"))
+        assertTrue(finalizados.isEmpty())
+    }
+
+    @Test
+    fun findPrestamosByUserId() {
+        val prestamos = prestamoRepository.findPrestamosByUserId(1L)
+        assertEquals(1, prestamos.size)
+        assertEquals("guidTest123", prestamos[0]?.guid)
+    }
+
+    @Test
+    fun findPrestamosByUserId_NotFound() {
+        val prestamos = prestamoRepository.findPrestamosByUserId(999L)
+        assertTrue(prestamos.isEmpty())
     }
 }

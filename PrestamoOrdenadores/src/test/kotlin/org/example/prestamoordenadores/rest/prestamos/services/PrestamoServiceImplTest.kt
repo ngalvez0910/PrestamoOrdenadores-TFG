@@ -1,6 +1,5 @@
 package org.example.prestamoordenadores.rest.prestamos.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import io.mockk.Runs
@@ -11,7 +10,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import org.example.prestamoordenadores.config.websockets.WebSocketHandler
+import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
@@ -60,10 +59,7 @@ class PrestamoServiceImplTest {
     lateinit var storage : PrestamoPdfStorage
 
     @MockK
-    lateinit var webSocketHandler: WebSocketHandler
-
-    @MockK
-    lateinit var objectMapper: ObjectMapper
+    lateinit var webService: WebSocketService
 
     @MockK
     lateinit var emailService: EmailService
@@ -77,12 +73,14 @@ class PrestamoServiceImplTest {
     var dispositivo = Dispositivo()
     var prestamo = Prestamo()
     var userResponse = UserResponse(
+        numeroIdentificacion = user.numeroIdentificacion,
         guid = user.guid,
         email = user.email,
         nombre = user.nombre,
         apellidos = user.apellidos,
         curso = user.curso!!,
-        tutor = user.tutor!!
+        tutor = user.tutor!!,
+        avatar = user.avatar
     )
     val dispositivoResponse = DispositivoResponse(
         guid = "guidTestD02",
@@ -120,15 +118,15 @@ class PrestamoServiceImplTest {
         )
 
         dispositivo = Dispositivo(
-            id = 1,
-            guid = "guidTestD01",
-            numeroSerie = "2ZY098ABCD",
-            componentes = "ratón",
-            estadoDispositivo = EstadoDispositivo.DISPONIBLE,
-            incidencia = null,
-            isActivo = true,
-            createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            1L,
+            "guidTest123",
+            "5CD1234XYZ",
+            "raton, cargador",
+            EstadoDispositivo.DISPONIBLE,
+            null,
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            false
         )
 
         prestamo = Prestamo(
@@ -149,8 +147,7 @@ class PrestamoServiceImplTest {
             userRepository,
             dispositivoRepository,
             storage,
-            objectMapper,
-            webSocketHandler,
+            webService,
             emailService
         )
     }
@@ -221,8 +218,6 @@ class PrestamoServiceImplTest {
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
         every { emailService.sendHtmlEmail(any(), any(), any(), any(), any(), any(), any()) } just Runs
         every { mapper.toPrestamoResponse(prestamo) } returns response
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
 
         val result = service.createPrestamo()
 
@@ -237,8 +232,6 @@ class PrestamoServiceImplTest {
             { verify { storage.generateAndSavePdf(prestamo.guid) } },
             { verify { emailService.sendHtmlEmail(any(), any(), any(), any(), any(), any(), any()) } },
             { verify { mapper.toPrestamoResponse(prestamo) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(any(), any()) } }
         )
     }
 
@@ -284,7 +277,6 @@ class PrestamoServiceImplTest {
         )
     }
 
-
     @Test
     fun updatePrestamo() {
         every { repository.findByGuid(prestamo.guid) } returns prestamo
@@ -292,8 +284,6 @@ class PrestamoServiceImplTest {
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
         every { repository.save(any()) } returns prestamo
         every { mapper.toPrestamoResponse(any()) } returns response
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
         every { updateRequest.estadoPrestamo } returns "vencido"
 
         val result = service.updatePrestamo(prestamo.guid, updateRequest)
@@ -305,8 +295,6 @@ class PrestamoServiceImplTest {
             { verify { updateRequest.validate() } },
             { verify { repository.save(any()) } },
             { verify { mapper.toPrestamoResponse(any()) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(any(), any()) } }
         )
     }
 
@@ -345,8 +333,6 @@ class PrestamoServiceImplTest {
         every { repository.save(prestamo) } returns prestamo
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
         every { mapper.toPrestamoResponse(any()) } returns response
-        every { objectMapper.writeValueAsString(any()) } returns "{}"
-        every { webSocketHandler.sendMessageToUser(any(), any()) } just Runs
 
         val result = service.deletePrestamoByGuid("9BR5JE350LA")
 
@@ -355,8 +341,6 @@ class PrestamoServiceImplTest {
             { verify { repository.save(prestamo) } },
             { verify { repository.findByGuid("9BR5JE350LA") } },
             { verify { mapper.toPrestamoResponse(any()) } },
-            { verify { objectMapper.writeValueAsString(any()) } },
-            { verify { webSocketHandler.sendMessageToUser(any(), any()) } }
         )
     }
 
