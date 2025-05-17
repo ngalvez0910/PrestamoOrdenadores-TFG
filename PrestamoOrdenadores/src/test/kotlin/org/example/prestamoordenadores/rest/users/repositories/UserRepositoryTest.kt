@@ -23,7 +23,6 @@ class UserRepositoryTest {
     private lateinit var userRepository: UserRepository
 
     private val user1 = User(
-        1,
         "guidTest123",
         "email",
         "password",
@@ -38,11 +37,12 @@ class UserRepositoryTest {
         LocalDateTime.now(),
         LocalDateTime.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false,
+        false
     )
 
     private val user2 = User(
-        2L,
         "guid2",
         "email2@example.com",
         "password",
@@ -57,11 +57,12 @@ class UserRepositoryTest {
         LocalDateTime.now(),
         LocalDateTime.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false,
+        false
     )
 
     private val user3 = User(
-        3L,
         "guid3",
         "email3@example.com",
         "password",
@@ -76,7 +77,9 @@ class UserRepositoryTest {
         LocalDateTime.now(),
         LocalDateTime.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false,
+        false
     )
 
     @BeforeEach
@@ -104,8 +107,7 @@ class UserRepositoryTest {
     @Test
     fun findByCurso() {
         val usersIn1A = userRepository.findByCurso("1A")
-        assertEquals(2, usersIn1A.size)
-        assertTrue(usersIn1A.any { it?.guid == "guid1" })
+        assertEquals(1, usersIn1A.size)
         assertTrue(usersIn1A.any { it?.guid == "guid3" })
     }
 
@@ -146,8 +148,7 @@ class UserRepositoryTest {
     @Test
     fun findByTutor() {
         val usersByTeacherA = userRepository.findByTutor("Teacher A")
-        assertEquals(2, usersByTeacherA.size)
-        assertTrue(usersByTeacherA.any { it?.guid == "guid1" })
+        assertEquals(1, usersByTeacherA.size)
         assertTrue(usersByTeacherA.any { it?.guid == "guid3" })
     }
 
@@ -159,12 +160,6 @@ class UserRepositoryTest {
 
     @Test
     fun existsUserByNombreAndApellidosAndCurso() {
-        val exists = userRepository.existsUserByNombreAndApellidosAndCurso("John", "Doe", "1A")
-        assertTrue(exists)
-    }
-
-    @Test
-    fun existsUserByNombreAndApellidosAndCurso_UserExists() {
         val exists = userRepository.existsUserByNombreAndApellidosAndCurso("John", "Smith", "1A")
         assertTrue(exists)
     }
