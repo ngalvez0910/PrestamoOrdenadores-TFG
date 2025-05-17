@@ -1,6 +1,5 @@
 package org.example.prestamoordenadores.rest.incidencias.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import io.mockk.Runs
@@ -11,11 +10,10 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import org.example.prestamoordenadores.config.websockets.WebSocketConfig
-import org.example.prestamoordenadores.config.websockets.WebSocketHandler
 import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
+import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponseAdmin
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
 import org.example.prestamoordenadores.rest.incidencias.mappers.IncidenciaMapper
@@ -27,7 +25,6 @@ import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.validators.validate
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -82,6 +79,16 @@ class IncidenciaServiceImplTest {
         user = userResponse,
         createdDate = incidencia.createdDate.toString()
     )
+    var incidenciaResponseAdmin = IncidenciaResponseAdmin(
+        guid = incidencia.guid,
+        asunto = incidencia.asunto,
+        descripcion = incidencia.descripcion,
+        estadoIncidencia = incidencia.estadoIncidencia.toString(),
+        user = userResponse,
+        createdDate = incidencia.createdDate.toString(),
+        updatedDate = incidencia.updatedDate.toString(),
+        isDeleted = false
+    )
 
     @BeforeEach
     fun setUp() {
@@ -133,7 +140,7 @@ class IncidenciaServiceImplTest {
 
         assertAll(
             { assertTrue(result.isOk) },
-            { assertEquals(listOf(incidenciaResponse), result.value) },
+            { assertEquals(listOf(incidenciaResponse), result.value.content) },
             { verify { repository.findAll(any<PageRequest>()) } },
             { verify { mapper.toIncidenciaResponseList(any()) } }
         )
@@ -205,6 +212,7 @@ class IncidenciaServiceImplTest {
         val auth = mockk<Authentication>()
         every { auth.name } returns user.email
         every { SecurityContextHolder.getContext().authentication } returns auth
+        every { webService.createAndSendNotification(any(), any()) } just Runs
 
         val result = service.createIncidencia(createRequest)
 
@@ -243,6 +251,13 @@ class IncidenciaServiceImplTest {
         every { mapper.toIncidenciaResponse(any()) } returns incidenciaResponse
         every { updateRequest.estadoIncidencia } returns "pendiente"
 
+        mockkStatic(SecurityContextHolder::class)
+        val auth = mockk<Authentication>()
+        every { auth.name } returns user.email
+        every { SecurityContextHolder.getContext().authentication } returns auth
+        every { userRepository.findByEmail(user.email) } returns user
+        every { webService.createAndSendNotification(any(), any()) } just Runs
+
         val result = service.updateIncidencia("INC0001", updateRequest)
 
         assertAll(
@@ -258,6 +273,11 @@ class IncidenciaServiceImplTest {
     @Test
     fun `updateIncidencia returns Err when incidencia no existe`() {
         every { repository.findIncidenciaByGuid("INC0001") } returns null
+        mockkStatic(SecurityContextHolder::class)
+        val auth = mockk<Authentication>()
+        every { auth.name } returns user.email
+        every { SecurityContextHolder.getContext().authentication } returns auth
+        every { userRepository.findByEmail(user.email) } returns user
 
         val result = service.updateIncidencia("INC0001", updateRequest)
 
@@ -272,23 +292,34 @@ class IncidenciaServiceImplTest {
     @Test
     fun deleteIncidenciaByGuid() {
         every { repository.findIncidenciaByGuid("INC0001") } returns incidencia
-        every { repository.delete(incidencia) } just Runs
+        every { repository.save(incidencia) } returns incidencia
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
-        every { mapper.toIncidenciaResponse(any()) } returns incidenciaResponse
+        every { mapper.toIncidenciaResponseAdmin(any()) } returns incidenciaResponseAdmin
+        mockkStatic(SecurityContextHolder::class)
+        val auth = mockk<Authentication>()
+        every { auth.name } returns user.email
+        every { SecurityContextHolder.getContext().authentication } returns auth
+        every { userRepository.findByEmail(user.email) } returns user
+        every { webService.createAndSendNotification(any(), any()) } just Runs
 
         val result = service.deleteIncidenciaByGuid("INC0001")
 
         assertAll(
             { assertTrue(result.isOk) },
             { verify { repository.findIncidenciaByGuid("INC0001") } },
-            { verify { repository.delete(incidencia) } },
-            { verify { mapper.toIncidenciaResponse(any()) } },
+            { verify { repository.save(incidencia) } },
+            { verify { mapper.toIncidenciaResponseAdmin(any()) } },
         )
     }
 
     @Test
     fun `deleteIncidenciaByGuid returns Err when incidencia no existe`() {
         every { repository.findIncidenciaByGuid("INC0001") } returns null
+        mockkStatic(SecurityContextHolder::class)
+        val auth = mockk<Authentication>()
+        every { auth.name } returns user.email
+        every { SecurityContextHolder.getContext().authentication } returns auth
+        every { userRepository.findByEmail(user.email) } returns user
 
         val result = service.deleteIncidenciaByGuid("INC0001")
 
