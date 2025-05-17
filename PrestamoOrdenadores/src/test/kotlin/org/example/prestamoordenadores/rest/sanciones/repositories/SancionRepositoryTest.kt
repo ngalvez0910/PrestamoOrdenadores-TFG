@@ -30,7 +30,6 @@ class SancionRepositoryTest {
     private lateinit var sancionRepository: SancionRepository
 
     private val user = User(
-        1,
         "guidTest123",
         "email",
         "password",
@@ -45,23 +44,23 @@ class SancionRepositoryTest {
         LocalDateTime.now(),
         LocalDateTime.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false,
+        false
     )
 
     private val dispositivo = Dispositivo(
-        1,
         "guidTest123",
         "5CD1234XYZ",
         "raton, cargador",
         EstadoDispositivo.DISPONIBLE,
         null,
+        false,
         LocalDateTime.now(),
-        LocalDateTime.now(),
-        false
+        LocalDateTime.now()
     )
 
     private val prestamo = Prestamo(
-        1,
         "guidTest123",
         user,
         dispositivo,
@@ -69,11 +68,11 @@ class SancionRepositoryTest {
         LocalDate.now(),
         LocalDate.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false
     )
 
     private val sancion = Sancion(
-        1L,
         "guidTest123",
         user,
         prestamo,
@@ -88,6 +87,8 @@ class SancionRepositoryTest {
     @BeforeEach
     fun setup() {
         entityManager.persist(user)
+        entityManager.persist(dispositivo)
+        entityManager.persist(prestamo)
         entityManager.persist(sancion)
         entityManager.flush()
     }
@@ -134,7 +135,7 @@ class SancionRepositoryTest {
 
     @Test
     fun findByUserGuid_shouldReturnListOfSancionesForMatchingUserGuid() {
-        val user1Sanciones = sancionRepository.findByUserGuid("userGuid1")
+        val user1Sanciones = sancionRepository.findByUserGuid("guidTest123")
         assertEquals(1, user1Sanciones.size)
         assertTrue(user1Sanciones.any { it.guid == "guidTest123" })
     }
@@ -172,17 +173,20 @@ class SancionRepositoryTest {
 
     @Test
     fun findByTipoSancionAndFechaFinLessThanEqualAndUserIsActivoIsFalse() {
-        val inactiveUser = User(id = 2, guid = "inactiveUser", isActivo = false)
-        val inactiveSancion = Sancion(id = 2, guid = "inactiveSancion", user = inactiveUser, fechaFin = LocalDate.now())
+        val inactiveUser = User(guid = "inactiveUser", isActivo = false)
+        val inactiveDispositivo = Dispositivo()
+        val inactivePrestamo = Prestamo(dispositivo = inactiveDispositivo, user = inactiveUser)
+        val inactiveSancion = Sancion(guid = "inactiveSancion", user = inactiveUser, prestamo = inactivePrestamo, fechaFin = LocalDate.now())
 
         entityManager.persist(inactiveUser)
+        entityManager.persist(inactiveDispositivo)
+        entityManager.persist(inactivePrestamo)
         entityManager.persist(inactiveSancion)
         entityManager.flush()
 
         val result = sancionRepository.findByTipoSancionAndFechaFinLessThanEqualAndUserIsActivoIsFalse(TipoSancion.ADVERTENCIA, LocalDate.now())
         assertTrue(result.any { it.guid == "inactiveSancion" })
     }
-
 
     @Test
     fun findSancionsByUserAndTipoSancionIn() {
