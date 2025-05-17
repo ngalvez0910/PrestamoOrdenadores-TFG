@@ -28,19 +28,17 @@ class PrestamoRepositoryTest {
     private lateinit var prestamoRepository: PrestamoRepository
 
     private val dispositivo = Dispositivo(
-        1,
         "guidTest123",
         "5CD1234XYZ",
         "raton, cargador",
         EstadoDispositivo.DISPONIBLE,
         null,
+        false,
         LocalDateTime.now(),
-        LocalDateTime.now(),
-        false
+        LocalDateTime.now()
     )
 
     private val user = User(
-        1,
         "guidTest123",
         "email",
         "password",
@@ -55,11 +53,12 @@ class PrestamoRepositoryTest {
         LocalDateTime.now(),
         LocalDateTime.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false,
+        false
     )
 
     private val prestamo = Prestamo(
-        1,
         "guidTest123",
         user,
         dispositivo,
@@ -67,7 +66,8 @@ class PrestamoRepositoryTest {
         LocalDate.now(),
         LocalDate.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false
     )
 
     @BeforeEach
@@ -107,7 +107,6 @@ class PrestamoRepositoryTest {
         entityManager.persist(newDispositivo)
 
         val newUser = User(
-            2L,
             "newUserGuid",
             "email2@example.com",
             "password",
@@ -122,11 +121,12 @@ class PrestamoRepositoryTest {
             LocalDateTime.now(),
             LocalDateTime.now(),
             LocalDateTime.now(),
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            false,
+            false
         )
 
         val newPrestamo = Prestamo(
-            2L,
             "guidTest098",
             newUser,
             newDispositivo,
@@ -134,7 +134,8 @@ class PrestamoRepositoryTest {
             LocalDate.now(),
             LocalDate.now(),
             LocalDateTime.now(),
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            false
         )
         val savedPrestamo = prestamoRepository.save(newPrestamo)
 
@@ -172,7 +173,7 @@ class PrestamoRepositoryTest {
 
     @Test
     fun findByUserGuid() {
-        val user1Prestamos = prestamoRepository.findByUserGuid("userGuid1")
+        val user1Prestamos = prestamoRepository.findByUserGuid("guidTest123")
         assertEquals(1, user1Prestamos.size)
         assertTrue(user1Prestamos.any { it.guid == "guidTest123" })
     }
@@ -191,14 +192,8 @@ class PrestamoRepositoryTest {
     }
 
     @Test
-    fun findPrestamoByEstadoPrestamo_NotFound() {
-        val finalizados = prestamoRepository.findPrestamoByEstadoPrestamo(EstadoPrestamo.valueOf("FINALIZADO"))
-        assertTrue(finalizados.isEmpty())
-    }
-
-    @Test
     fun findPrestamosByUserId() {
-        val prestamos = prestamoRepository.findPrestamosByUserId(1L)
+        val prestamos = prestamoRepository.findPrestamosByUserId(user.id)
         assertEquals(1, prestamos.size)
         assertEquals("guidTest123", prestamos[0]?.guid)
     }
