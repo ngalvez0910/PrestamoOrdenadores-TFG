@@ -59,7 +59,7 @@ class DispositivoValidatorTest {
 
         assertTrue(result.isErr)
         assertTrue(result.error is DispositivoError.DispositivoValidationError)
-        assertEquals("Número de serie inválido", result.error.message)
+        assertEquals("El número de serie no puede estar vacío", result.error.message)
     }
 
     @Test
@@ -73,7 +73,7 @@ class DispositivoValidatorTest {
 
         assertTrue(result.isErr)
         assertTrue(result.error is DispositivoError.DispositivoValidationError)
-        assertEquals("Número de serie inválido", result.error.message)
+        assertEquals("El formato del número de serie no es válido. Debe seguir el patrón: 1XX123XXXX", result.error.message)
     }
 
 }
