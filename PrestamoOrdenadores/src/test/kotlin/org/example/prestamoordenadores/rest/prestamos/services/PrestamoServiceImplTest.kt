@@ -16,6 +16,7 @@ import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponseAdmin
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoUpdateRequest
 import org.example.prestamoordenadores.rest.prestamos.errors.PrestamoError
 import org.example.prestamoordenadores.rest.prestamos.mappers.PrestamoMapper
@@ -95,6 +96,17 @@ class PrestamoServiceImplTest {
         fechaPrestamo = prestamo.fechaPrestamo.toString(),
         fechaDevolucion = prestamo.fechaDevolucion.toString()
     )
+    val adminResponse = PrestamoResponseAdmin(
+        guid = prestamo.guid,
+        user = userResponse,
+        dispositivo = dispositivoResponse,
+        estadoPrestamo = prestamo.estadoPrestamo.toString(),
+        fechaPrestamo = prestamo.fechaPrestamo.toString(),
+        fechaDevolucion = prestamo.fechaDevolucion.toString(),
+        createdDate = prestamo.createdDate.toString(),
+        updatedDate = prestamo.updatedDate.toString(),
+        isDeleted = prestamo.isDeleted
+    )
 
     @BeforeEach
     fun setUp() {
@@ -162,7 +174,7 @@ class PrestamoServiceImplTest {
 
         assertAll(
             { assertTrue(result.isOk) },
-            { assertEquals(listOf(response), result.value) },
+            { assertEquals(listOf(response), result.value.content) },
             { verify { repository.findAll(PageRequest.of(0, 10)) } },
             { verify { mapper.toPrestamoResponseList(prestamos) } }
         )
@@ -173,15 +185,15 @@ class PrestamoServiceImplTest {
         val guid = "test-guid"
 
         every { repository.findByGuid(guid) } returns prestamo
-        every { mapper.toPrestamoResponse(prestamo) } returns response
+        every { mapper.toPrestamoResponseAdmin(prestamo) } returns adminResponse
 
         val result = service.getPrestamoByGuid(guid)
 
         assertAll(
             { assertTrue(result.isOk) },
-            { assertEquals(response, result.value) },
+            { assertEquals(adminResponse, result.value) },
             { verify { repository.findByGuid(guid) } },
-            { verify { mapper.toPrestamoResponse(prestamo) } }
+            { verify { mapper.toPrestamoResponseAdmin(prestamo) } }
         )
     }
 
@@ -207,6 +219,7 @@ class PrestamoServiceImplTest {
         val auth = mockk<Authentication>()
         every { auth.name } returns user.email
         every { SecurityContextHolder.getContext().authentication } returns auth
+        every { webService.createAndSendNotification(any(), any()) } just Runs
 
         every { userRepository.findByEmail(user.email) } returns user
         every { dispositivoRepository.findByEstadoDispositivo(EstadoDispositivo.DISPONIBLE) } returns listOf(dispositivo)
@@ -279,12 +292,19 @@ class PrestamoServiceImplTest {
 
     @Test
     fun updatePrestamo() {
+        mockkStatic(SecurityContextHolder::class)
+
         every { repository.findByGuid(prestamo.guid) } returns prestamo
         every { updateRequest.validate() } returns Ok(updateRequest)
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
         every { repository.save(any()) } returns prestamo
         every { mapper.toPrestamoResponse(any()) } returns response
         every { updateRequest.estadoPrestamo } returns "vencido"
+
+        val auth = mockk<Authentication>()
+        every { auth.name } returns user.email
+        every { SecurityContextHolder.getContext().authentication } returns auth
+        every { webService.createAndSendNotification(any(), any()) } just Runs
 
         val result = service.updatePrestamo(prestamo.guid, updateRequest)
 
@@ -329,10 +349,18 @@ class PrestamoServiceImplTest {
 
     @Test
     fun deletePrestamoByGuid() {
+        mockkStatic(SecurityContextHolder::class)
+
         every { repository.findByGuid("9BR5JE350LA") } returns prestamo
         every { repository.save(prestamo) } returns prestamo
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
-        every { mapper.toPrestamoResponse(any()) } returns response
+        every { mapper.toPrestamoResponseAdmin(any()) } returns adminResponse
+
+        val auth = mockk<Authentication>()
+        every { auth.name } returns user.email
+        every { SecurityContextHolder.getContext().authentication } returns auth
+        every { webService.createAndSendNotification(any(), any()) } just Runs
+        every { userRepository.findByEmail(user.email) } returns user
 
         val result = service.deletePrestamoByGuid("9BR5JE350LA")
 
@@ -340,12 +368,18 @@ class PrestamoServiceImplTest {
             { assertTrue(result.isOk) },
             { verify { repository.save(prestamo) } },
             { verify { repository.findByGuid("9BR5JE350LA") } },
-            { verify { mapper.toPrestamoResponse(any()) } },
+            { verify { mapper.toPrestamoResponseAdmin(any()) } },
         )
     }
 
     @Test
     fun `deletePrestamoByGuid returns Err when prestamo no existe`() {
+        mockkStatic(SecurityContextHolder::class)
+        val auth = mockk<Authentication>()
+        every { auth.name } returns user.email
+        every { SecurityContextHolder.getContext().authentication } returns auth
+        every { userRepository.findByEmail(user.email) } returns user
+
         every { repository.findByGuid("prestamo-guid") } returns null
 
         val result = service.deletePrestamoByGuid("prestamo-guid")
