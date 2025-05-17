@@ -49,7 +49,6 @@ class DispositivoRepositoryTest {
     )
 
     private val user = User(
-        1L,
         "guidTest123",
         "email",
         "password",
@@ -70,7 +69,6 @@ class DispositivoRepositoryTest {
     )
 
     private val incidencia = Incidencia(
-        1L,
         "guidTestINC",
         "Asunto",
         "Descripcion",
