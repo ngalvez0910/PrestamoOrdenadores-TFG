@@ -1,11 +1,15 @@
 package org.example.prestamoordenadores.rest.dispositivos.services
 
 import com.github.michaelbull.result.Ok
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
+import org.example.prestamoordenadores.config.websockets.WebSocketService
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
@@ -20,12 +24,16 @@ import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
+import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.validators.validate
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDateTime
 import kotlin.test.Test
 
@@ -41,7 +49,15 @@ class DispositivoServiceImplTest {
     lateinit var incidenciasRepository: IncidenciaRepository
 
     @MockK
-    lateinit var createRequest: DispositivoCreateRequest
+    lateinit var userRepository: UserRepository
+
+    @MockK
+    lateinit var webService: WebSocketService
+
+    @MockK
+    lateinit var mockAuthentication: Authentication
+    @MockK
+    lateinit var mockSecurityContext: SecurityContext
 
     lateinit var service: DispositivoServiceImpl
 
@@ -62,12 +78,14 @@ class DispositivoServiceImplTest {
             curso = "curso99",
             tutor = "tutor99",
             avatar = "avatar99.png",
-            rol = Role.ALUMNO,
+            rol = Role.ADMIN,
             isActivo = true,
             lastLoginDate = LocalDateTime.now(),
             lastPasswordResetDate = LocalDateTime.now(),
             createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            updatedDate = LocalDateTime.now(),
+            isDeleted = false,
+            isOlvidado = false
         )
 
         incidencia = Incidencia(
@@ -78,7 +96,8 @@ class DispositivoServiceImplTest {
             estadoIncidencia = EstadoIncidencia.PENDIENTE,
             user = user,
             createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            updatedDate = LocalDateTime.now(),
+            isDeleted = false
         )
 
         dispositivo = Dispositivo(
@@ -88,12 +107,12 @@ class DispositivoServiceImplTest {
             componentes = "ratón",
             estadoDispositivo = EstadoDispositivo.DISPONIBLE,
             incidencia = incidencia,
-            isActivo = true,
+            isDeleted = false,
             createdDate = LocalDateTime.now(),
             updatedDate = LocalDateTime.now()
         )
 
-        service = DispositivoServiceImpl(repository, mapper, incidenciasRepository)
+        service = DispositivoServiceImpl(repository, mapper, incidenciasRepository, userRepository, webService)
     }
 
     @Test
@@ -106,7 +125,7 @@ class DispositivoServiceImplTest {
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
             incidencia = dispositivo.incidencia,
-            isDeleted = dispositivo.isActivo
+            isDeleted = dispositivo.isDeleted
         )
 
         val responses = listOf(dispositivoAdmin)
@@ -116,7 +135,9 @@ class DispositivoServiceImplTest {
         val result = service.getAllDispositivos(0, 10)
 
         assertTrue(result.isOk)
-        assertEquals(responses, result.value)
+        val paged = result.value
+        assertEquals(1, paged.totalElements)
+        assertEquals(responses, paged.content)
     }
 
     @Test
@@ -127,7 +148,7 @@ class DispositivoServiceImplTest {
             componentes = dispositivo.componentes,
             estado = dispositivo.estadoDispositivo.toString(),
             incidencia = dispositivo.incidencia,
-            isDeleted = dispositivo.isActivo
+            isDeleted = dispositivo.isDeleted
         )
 
         every { repository.findDispositivoByGuid("guidTestD01") } returns dispositivo
@@ -161,28 +182,69 @@ class DispositivoServiceImplTest {
 
     @Test
     fun createDispositivo() {
-        val response = DispositivoResponse(
-            guid = "guidTestD02",
-            numeroSerie = "4JT8695OPQ",
+        val dispositivoRequest = DispositivoCreateRequest(
+            numeroSerie = "1AB123ABCD",
             componentes = "cargador"
         )
 
-        every { createRequest.validate() } returns Ok(createRequest)
-        every { createRequest.componentes } returns "cargador"
-        every { mapper.toDispositivoFromCreate(createRequest) } returns dispositivo
-        every { repository.save(dispositivo) } returns dispositivo
-        every { mapper.toDispositivoResponse(dispositivo) } returns response
+        every { userRepository.findByEmail("test@example.com") } returns user
 
-        val result = service.createDispositivo(createRequest)
+        val deviceEntity = mockk<Dispositivo>()
+        every { deviceEntity.numeroSerie } returns "1AB123ABCD"
+        every { deviceEntity.guid } returns "DEVICE-GUID-123"
 
-        assertAll(
-            { assertTrue(result.isOk) },
-            { assertEquals(response, result.value) },
-            { verify { createRequest.validate() } },
-            { verify { mapper.toDispositivoFromCreate(createRequest) } },
-            { verify { repository.save(dispositivo) } },
-            { verify { mapper.toDispositivoResponse(dispositivo) } }
+        val deviceResponse = mockk<DispositivoResponse>()
+
+        every { mapper.toDispositivoFromCreate(dispositivoRequest) } returns deviceEntity
+        every { repository.save(deviceEntity) } returns deviceEntity
+        every { mapper.toDispositivoResponse(deviceEntity) } returns deviceResponse
+
+        every { mockAuthentication.isAuthenticated } returns true
+        every { mockAuthentication.principal } returns "test@example.com"
+        every { mockSecurityContext.authentication } returns mockAuthentication
+        SecurityContextHolder.setContext(mockSecurityContext)
+        every { webService.createAndSendNotification(any(), any()) } just Runs
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(user)
+
+        val result = service.createDispositivo(dispositivoRequest)
+
+        assertTrue(result.isOk)
+        assertEquals(deviceResponse, result.value)
+
+        verify {
+            userRepository.findByEmail("test@example.com")
+            mapper.toDispositivoFromCreate(dispositivoRequest)
+            repository.save(deviceEntity)
+            mapper.toDispositivoResponse(deviceEntity)
+        }
+    }
+
+    @Test
+    fun `createDispositivo returns Err when user no existe`() {
+        val userEmail = "noexiste@example.com"
+        val dispositivoCreateRequest = DispositivoCreateRequest(
+            numeroSerie = "1AB123ABCD",
+            componentes = "cargador"
         )
+
+        val auth = mockk<Authentication>()
+        every { auth.isAuthenticated } returns true
+        every { auth.principal } returns userEmail
+
+        val context = mockk<SecurityContext>()
+        every { context.authentication } returns auth
+        SecurityContextHolder.setContext(context)
+
+        every { userRepository.findByEmail(userEmail) } returns null
+
+        val result = service.createDispositivo(dispositivoCreateRequest)
+
+        assertTrue(result.isErr)
+        val error = result.error
+        assertTrue(error is DispositivoError.UserNotFound)
+        assertEquals("Usuario $userEmail no encontrado.", (error as DispositivoError.UserNotFound).message)
+
+        verify(exactly = 1) { userRepository.findByEmail(userEmail) }
     }
 
     @Test
@@ -265,11 +327,11 @@ class DispositivoServiceImplTest {
     fun deleteDispositivoByGuid() {
         val guid = "device-guid"
         val dispositivo = mockk<Dispositivo>(relaxed = true)
-        val expectedResponse = mockk<DispositivoResponse>()
+        val expectedResponse = mockk<DispositivoResponseAdmin>()
 
         every { repository.findDispositivoByGuid(guid) } returns dispositivo
         every { repository.save(dispositivo) } returns dispositivo
-        every { mapper.toDispositivoResponse(dispositivo) } returns expectedResponse
+        every { mapper.toDispositivoResponseAdmin(dispositivo) } returns expectedResponse
 
         val result = service.deleteDispositivoByGuid(guid)
 
@@ -278,7 +340,7 @@ class DispositivoServiceImplTest {
             { assertEquals(expectedResponse, result.value) },
             { verify { repository.findDispositivoByGuid(guid) } },
             { verify { repository.save(dispositivo) } },
-            { verify { mapper.toDispositivoResponse(dispositivo) } }
+            { verify { mapper.toDispositivoResponseAdmin(dispositivo) } }
         )
     }
 

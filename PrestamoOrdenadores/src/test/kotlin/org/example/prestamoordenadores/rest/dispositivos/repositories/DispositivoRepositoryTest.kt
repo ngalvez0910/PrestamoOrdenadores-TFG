@@ -14,9 +14,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
-import java.util.*
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -34,7 +32,7 @@ class DispositivoRepositoryTest {
         "raton, cargador",
         EstadoDispositivo.DISPONIBLE,
         null,
-        true,
+        false,
         LocalDateTime.now(),
         LocalDateTime.now()
     )
@@ -45,7 +43,7 @@ class DispositivoRepositoryTest {
         "raton, cargador",
         EstadoDispositivo.DISPONIBLE,
         null,
-        true,
+        false,
         LocalDateTime.now(),
         LocalDateTime.now()
     )
@@ -65,7 +63,9 @@ class DispositivoRepositoryTest {
         LocalDateTime.now(),
         LocalDateTime.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false,
+        false
     )
 
     private val incidencia = Incidencia(
@@ -75,7 +75,8 @@ class DispositivoRepositoryTest {
         EstadoIncidencia.PENDIENTE,
         user,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false
     )
 
     private var dispositivo3 = Dispositivo(
@@ -135,5 +136,15 @@ class DispositivoRepositoryTest {
         assertNotNull(found)
         assertEquals(dispositivo3.guid, found?.guid)
         assertEquals("7GH3456DEF", found?.numeroSerie)
+    }
+
+    @Test
+    fun findByIncidenciaIdIn() {
+        val incidenciaIds = listOf(incidencia.id)
+        val foundDevices = dispositivoRepository.findByIncidenciaIdIn(incidenciaIds)
+
+        assertNotNull(foundDevices)
+        assertEquals(1, foundDevices.size)
+        assertTrue(foundDevices.any { it.guid == dispositivo3.guid })
     }
 }

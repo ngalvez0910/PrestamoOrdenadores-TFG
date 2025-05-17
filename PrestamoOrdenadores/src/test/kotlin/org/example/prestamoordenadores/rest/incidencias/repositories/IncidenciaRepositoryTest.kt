@@ -24,47 +24,50 @@ class IncidenciaRepositoryTest {
     @Autowired
     private lateinit var incidenciaRepository: IncidenciaRepository
 
-    private val user1 = User(
-        "userGuid1",
-        "email1",
+    private val user = User(
+        "guidTest123",
+        "email",
         "password",
         Role.ALUMNO,
-        "numIdent1",
-        "name1",
-        "apellido1",
-        "curso1",
-        "tutor1",
-        "avatar1",
+        "numIdent",
+        "name",
+        "apellido",
+        "curso",
+        "tutor",
+        "avatar",
         true,
         LocalDateTime.now(),
         LocalDateTime.now(),
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false,
+        false
     )
 
-    private val incidencia1 = Incidencia(
-        "guidTest123",
+    private val incidencia = Incidencia(
+        "guidTestINC",
         "Asunto",
         "Descripcion",
         EstadoIncidencia.PENDIENTE,
-        user1,
+        user,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false
     )
 
     @BeforeEach
     fun setup() {
-        entityManager.persist(user1)
-        entityManager.persist(incidencia1)
+        entityManager.persist(user)
+        entityManager.persist(incidencia)
         entityManager.flush()
     }
 
     @Test
     fun findIncidenciaByGuid() {
-        val found = incidenciaRepository.findIncidenciaByGuid("guidTest123")
+        val found = incidenciaRepository.findIncidenciaByGuid("guidTestINC")
 
         assertNotNull(found)
-        assertEquals("guidTest123", found?.guid)
+        assertEquals("guidTestINC", found?.guid)
         assertEquals("Asunto", found?.asunto)
     }
 
@@ -79,7 +82,7 @@ class IncidenciaRepositoryTest {
         val pendientes = incidenciaRepository.findIncidenciasByEstadoIncidencia(EstadoIncidencia.PENDIENTE)
 
         assertEquals(1, pendientes.size)
-        assertEquals("guidTest123", pendientes[0].guid)
+        assertEquals("guidTestINC", pendientes[0].guid)
     }
 
     @Test
@@ -90,15 +93,30 @@ class IncidenciaRepositoryTest {
 
     @Test
     fun findIncidenciasByUserGuid() {
-        val user1Incidencias = incidenciaRepository.findIncidenciasByUserGuid("userGuid1")
+        val user1Incidencias = incidenciaRepository.findIncidenciasByUserGuid("guidTest123")
 
         assertEquals(1, user1Incidencias.size)
-        assertTrue(user1Incidencias.any { it.guid == "guidTest123" })
+        assertTrue(user1Incidencias.any { it.guid == "guidTestINC" })
     }
 
     @Test
     fun findIncidenciasByUserGuid_NotFound() {
         val nonExistentUserIncidencias = incidenciaRepository.findIncidenciasByUserGuid("nonExistentUserGuid")
         assertTrue(nonExistentUserIncidencias.isEmpty())
+    }
+
+    @Test
+    fun findIncidenciasByUserId() {
+        val result = incidenciaRepository.findIncidenciasByUserId(user.id)
+
+        assertEquals(1, result.size)
+        assertTrue(result.all { it?.id == user.id })
+    }
+
+    @Test
+    fun findIncidenciasByUserId_EmptyList() {
+        val result = incidenciaRepository.findIncidenciasByUserId(999L)
+
+        assertTrue(result.isEmpty())
     }
 }

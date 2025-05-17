@@ -2,6 +2,7 @@ package org.example.prestamoordenadores.rest.incidencias.mappers
 
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequest
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponse
+import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaResponseAdmin
 import org.example.prestamoordenadores.rest.incidencias.models.EstadoIncidencia
 import org.example.prestamoordenadores.rest.incidencias.models.Incidencia
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
@@ -49,12 +50,14 @@ class IncidenciaMapperTest {
     @Test
     fun toIncidenciaResponse() {
         val userResponse = UserResponse(
-            "guidTest123",
-            "email",
-            "name",
-            "apellido",
-            "curso",
-            "tutor"
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         val incidenciaResponse = IncidenciaResponse(
@@ -64,6 +67,41 @@ class IncidenciaMapperTest {
             EstadoIncidencia.PENDIENTE.toString(),
             userResponse,
             LocalDate.now().toString()
+        )
+
+        val response = mapper.toIncidenciaResponse(incidencia)
+
+        assertAll(
+            { assertEquals(incidenciaResponse.guid, response.guid) },
+            { assertEquals(incidenciaResponse.asunto, response.asunto) },
+            { assertEquals(incidenciaResponse.descripcion, response.descripcion) },
+            { assertEquals(incidenciaResponse.estadoIncidencia, response.estadoIncidencia) },
+            { assertEquals(incidenciaResponse.user, response.user) }
+        )
+    }
+
+    @Test
+    fun toIncidenciaResponseAdmin() {
+        val userResponse = UserResponse(
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
+        )
+
+        val incidenciaResponse = IncidenciaResponseAdmin(
+            "guidTest123",
+            "Asunto",
+            "Descripcion",
+            EstadoIncidencia.PENDIENTE.toString(),
+            userResponse,
+            LocalDate.now().toString(),
+            LocalDate.now().toString(),
+            false
         )
 
         val response = mapper.toIncidenciaResponse(incidencia)

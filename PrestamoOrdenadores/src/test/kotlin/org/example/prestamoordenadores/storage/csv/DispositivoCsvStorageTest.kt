@@ -31,15 +31,15 @@ class DispositivoCsvStorageTest {
     @BeforeEach
     fun setUp() {
         dispositivo = Dispositivo(
-            id = 1,
-            guid = "guidTestD01",
-            numeroSerie = "2ZY098ABCD",
-            componentes = "ratón",
-            estadoDispositivo = EstadoDispositivo.DISPONIBLE,
-            incidencia = null,
-            isActivo = true,
-            createdDate = LocalDateTime.now(),
-            updatedDate = LocalDateTime.now()
+            1,
+            "guidTest123",
+            "5CD1234XYZ",
+            "raton, cargador",
+            EstadoDispositivo.DISPONIBLE,
+            null,
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            false
         )
 
         dispositivoCsvStorage = DispositivoCsvStorage(repository)
@@ -54,8 +54,8 @@ class DispositivoCsvStorageTest {
         val csvData = dispositivoCsvStorage.generateCsv()
 
         val expectedCsvData = """
-            Guid;Nº Serie;Componentes;Estado;Incidencias;Activo
-            guidTestD01;2ZY098ABCD;ratón;DISPONIBLE;;true
+            Guid;Nº Serie;Componentes;Estado;Incidencias;Borrado
+            guidTest123;5CD1234XYZ;raton, cargador;DISPONIBLE;;false
         """.trimIndent() + "\n"
 
         val expectedCsvDataBytes = expectedCsvData.toByteArray()
@@ -68,7 +68,7 @@ class DispositivoCsvStorageTest {
 
     @Test
     fun saveCsvToFile() {
-        val csvData = "Guid;Nº Serie;Componentes;Estado;Incidencias;Activo\n".toByteArray()
+        val csvData = "Guid;Nº Serie;Componentes;Estado;Incidencias;Borrado\n".toByteArray()
         val fileName = "dispositivos_test.csv"
 
         dispositivoCsvStorage.saveCsvToFile(csvData, fileName)

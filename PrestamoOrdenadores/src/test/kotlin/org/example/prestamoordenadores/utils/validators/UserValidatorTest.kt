@@ -4,6 +4,7 @@ import org.example.prestamoordenadores.rest.auth.dto.UserCreateRequest
 import org.example.prestamoordenadores.rest.auth.dto.UserLoginRequest
 import org.example.prestamoordenadores.rest.users.dto.UserAvatarUpdateRequest
 import org.example.prestamoordenadores.rest.users.dto.UserPasswordResetRequest
+import org.example.prestamoordenadores.rest.users.dto.UserUpdateRequest
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -234,46 +235,6 @@ class UserValidatorTest {
     }
 
     @Test
-    fun validateUserRoleUpdateRequest() {
-        val request = UserRoleUpdateRequest(
-            rol = Role.ADMIN.name
-        )
-        val result = request.validate()
-        assertTrue(result.isOk)
-        assertEquals(request, result.component1())
-    }
-
-    @Test
-    fun `validate UserRoleUpdateRequest Error when role en blanco`() {
-        val request = UserRoleUpdateRequest(
-            rol = ""
-        )
-        val result = request.validate()
-        assertTrue(result.isErr)
-        assertEquals("El rol no puede estar vacío o no es válido", result.error.message)
-    }
-
-    @Test
-    fun `validate UserRoleUpdateRequest Error when rol invalido`() {
-        val request = UserRoleUpdateRequest(
-            rol = "INVALID_ROLE"
-        )
-        val result = request.validate()
-        assertTrue(result.isErr)
-        assertEquals("El rol no puede estar vacío o no es válido", result.error.message)
-    }
-
-    @Test
-    fun `validate UserRoleUpdateRequest when rol en lowercase`() {
-        val request = UserRoleUpdateRequest(
-            rol = Role.ADMIN.name.lowercase()
-        )
-        val result = request.validate()
-        assertTrue(result.isOk)
-        assertEquals(request, result.component1())
-    }
-
-    @Test
     fun validateUserLoginRequest() {
         val request = UserLoginRequest(
             email = "test@example.com",
@@ -376,5 +337,29 @@ class UserValidatorTest {
         val result = request.validate()
         assertTrue(result.isErr)
         assertEquals("Las contraseñas no coinciden", result.error.message)
+    }
+
+    @Test
+    fun validateUserUpdateRequest() {
+        val request = UserUpdateRequest(rol = Role.ADMIN.name, isActivo = true)
+        val result = request.validate()
+        assertTrue(result.isOk)
+        assertEquals(request, result.component1())
+    }
+
+    @Test
+    fun `validate UserUpdateRequest Error when rol en blanco`() {
+        val request = UserUpdateRequest(rol = "", isActivo = true)
+        val result = request.validate()
+        assertTrue(result.isErr)
+        assertEquals("El rol no puede estar vacío o no es válido", result.error.message)
+    }
+
+    @Test
+    fun `validate UserUpdateRequest Error when rol no válido`() {
+        val request = UserUpdateRequest(rol = "NO_EXISTE", isActivo = true)
+        val result = request.validate()
+        assertTrue(result.isErr)
+        assertEquals("El rol no puede estar vacío o no es válido", result.error.message)
     }
 }

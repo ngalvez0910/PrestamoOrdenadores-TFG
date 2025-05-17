@@ -4,6 +4,7 @@ import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.models.Dispositivo
 import org.example.prestamoordenadores.rest.dispositivos.models.EstadoDispositivo
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponse
+import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponseAdmin
 import org.example.prestamoordenadores.rest.prestamos.models.EstadoPrestamo
 import org.example.prestamoordenadores.rest.prestamos.models.Prestamo
 import org.example.prestamoordenadores.rest.users.dto.UserResponse
@@ -22,9 +23,9 @@ class PrestamoMapperTest {
         "raton, cargador",
         EstadoDispositivo.DISPONIBLE,
         null,
-        true,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false
     )
 
     private val user = User(
@@ -63,12 +64,14 @@ class PrestamoMapperTest {
     @Test
     fun toPrestamoResponse() {
         val userResponse = UserResponse(
-            "guidTest123",
-            "email",
-            "name",
-            "apellido",
-            "curso",
-            "tutor"
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
         )
 
         val dispositivoResponse = DispositivoResponse(
@@ -84,6 +87,46 @@ class PrestamoMapperTest {
             "EN_CURSO",
             LocalDate.now().toString(),
             LocalDate.now().toString(),
+        )
+
+        val response = mapper.toPrestamoResponse(prestamo)
+
+        assertAll(
+            { assertEquals(prestamoResponse.guid, response.guid) },
+            { assertEquals(prestamoResponse.user, response.user) },
+            { assertEquals(prestamoResponse.dispositivo, response.dispositivo) }
+        )
+    }
+
+    @Test
+    fun toPrestamoResponseAdmin() {
+        val userResponse = UserResponse(
+            user.numeroIdentificacion,
+            user.guid,
+            user.email,
+            user.nombre,
+            user.apellidos,
+            user.curso!!,
+            user.tutor!!,
+            user.avatar
+        )
+
+        val dispositivoResponse = DispositivoResponse(
+            "guidTest123",
+            "5CD1234XYZ",
+            "raton, cargador",
+        )
+
+        val prestamoResponse = PrestamoResponseAdmin(
+            "guidTest123",
+            userResponse,
+            dispositivoResponse,
+            "EN_CURSO",
+            LocalDate.now().toString(),
+            LocalDate.now().toString(),
+            LocalDate.now().toString(),
+            LocalDate.now().toString(),
+            false
         )
 
         val response = mapper.toPrestamoResponse(prestamo)

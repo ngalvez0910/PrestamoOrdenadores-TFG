@@ -17,9 +17,9 @@ class DispositivoMapperTest {
         "raton, cargador",
         EstadoDispositivo.DISPONIBLE,
         null,
-        true,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        false
     )
 
     private val mapper = DispositivoMapper()
@@ -44,6 +44,7 @@ class DispositivoMapperTest {
     @Test
     fun toDispositivoFromCreate() {
         val dispositivoCreate = DispositivoCreateRequest(
+            "0DW9406KDF",
             "raton, cargador",
         )
 
@@ -73,7 +74,6 @@ class DispositivoMapperTest {
             { assertEquals(dispositivoResponseAdmin.componentes, response.componentes) },
             { assertEquals(dispositivoResponseAdmin.estado, response.estado) },
             { assertEquals(dispositivoResponseAdmin.incidencia, response.incidencia) },
-            { assertEquals(dispositivoResponseAdmin.isDeleted, response.isDeleted) }
         )
     }
 
