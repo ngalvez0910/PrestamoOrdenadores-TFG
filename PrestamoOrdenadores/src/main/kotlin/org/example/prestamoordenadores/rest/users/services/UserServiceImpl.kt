@@ -17,7 +17,6 @@ import org.example.prestamoordenadores.rest.users.repositories.UserRepository
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
@@ -38,10 +37,8 @@ class UserServiceImpl(
     private val prestamoRepository: PrestamoRepository,
     private val sancionRepository: SancionRepository,
     private val dispositivoRepository: DispositivoRepository,
+    private val passwordEncoder: PasswordEncoder
 ): UserService {
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
-
     override fun getAllUsers(page: Int, size: Int): Result<PagedResponse<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
 
