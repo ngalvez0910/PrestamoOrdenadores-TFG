@@ -12,7 +12,6 @@ import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -94,7 +93,7 @@ class PrestamoController
             failure = { error ->
                 when(error) {
                     is UserNotFound -> ResponseEntity.status(404).body("Usuario no encontrado")
-                    is PrestamoValidationError -> ResponseEntity.status(403).body("Préstamo inválido")
+                    is PrestamoValidationError -> ResponseEntity.status(400).body("Préstamo inválido")
                     is DispositivoNotFound -> ResponseEntity.status(404).body("No hay dispositivos disponibles actualmente")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
@@ -109,7 +108,7 @@ class PrestamoController
             failure = { error ->
                 when(error) {
                     is PrestamoNotFound -> ResponseEntity.status(404).body("Préstamo no encontrado")
-                    is PrestamoValidationError -> ResponseEntity.status(403).body("Préstamo inválido")
+                    is PrestamoValidationError -> ResponseEntity.status(400).body("Préstamo inválido")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
