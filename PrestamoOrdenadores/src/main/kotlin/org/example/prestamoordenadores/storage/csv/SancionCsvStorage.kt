@@ -55,7 +55,7 @@ class SancionCsvStorage(
         }
 
         val filePath = dataFolderPath.resolve(fileName)
-        File(filePath.toUri()).writeBytes(csvData)
+        Files.write(filePath, csvData)
     }
 
     fun generateAndSaveCsv() {

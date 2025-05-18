@@ -100,7 +100,7 @@ class SancionController
             failure = { error ->
                 when(error) {
                     is SancionNotFound -> ResponseEntity.status(404).body("Sanción no encontrada")
-                    is SancionValidationError -> ResponseEntity.status(403).body("Sanción inválida")
+                    is SancionValidationError -> ResponseEntity.status(400).body("Sanción inválida")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
