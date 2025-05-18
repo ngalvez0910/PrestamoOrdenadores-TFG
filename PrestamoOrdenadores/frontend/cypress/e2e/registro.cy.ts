@@ -43,11 +43,6 @@ describe('Registro de usuario', () => {
     });
 
     it('Realiza un registro válido', () => {
-        cy.intercept('POST', '/api/auth/register', {
-            statusCode: 200,
-            body: { token: 'fake-token' },
-        }).as('registerRequest');
-
         cy.get('#numeroIdentificacion').type('2023LT123');
         cy.get('#nombre').type('Pepe');
         cy.get('#apellidos').type('Pérez');
