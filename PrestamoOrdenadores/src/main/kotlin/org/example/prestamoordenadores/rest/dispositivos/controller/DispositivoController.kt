@@ -9,7 +9,6 @@ import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
 import org.example.prestamoordenadores.rest.dispositivos.services.DispositivoService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -80,7 +79,7 @@ class DispositivoController
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
                 when(error) {
-                    is DispositivoValidationError -> ResponseEntity.status(403).body("Dispositivo inválido")
+                    is DispositivoValidationError -> ResponseEntity.status(400).body("Dispositivo inválido")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
