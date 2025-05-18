@@ -98,7 +98,7 @@ class IncidenciaController
             success = { ResponseEntity.status(201).body(it) },
             failure = { error ->
                 when(error) {
-                    is IncidenciaValidationError -> ResponseEntity.status(403).body("Incidencia inválida")
+                    is IncidenciaValidationError -> ResponseEntity.status(400).body("Incidencia inválida")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }
