@@ -236,7 +236,6 @@ export default defineComponent({
             return;
           }
           console.error("[App.vue WebSocket] Error en WebSocket global:", event);
-          toast.add({ severity: 'error', summary: 'Error de Conexión WS', detail: 'Problema con el servicio de notificaciones.', life: 5000 });
         };
 
         newWsInstance.onclose = (event) => {
