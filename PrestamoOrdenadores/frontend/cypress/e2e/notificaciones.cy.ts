@@ -62,8 +62,6 @@ describe('Página de Notificaciones', () => {
 
         cy.contains('a', 'Notificaciones').click();
 
-        cy.intercept('POST', '**/notificaciones/read-all', {}).as('readAll');
-
         cy.get('.action-button.secondary-button').click();
 
         cy.get('.notification-item').each(item => {
@@ -100,7 +98,7 @@ describe('Página de Notificaciones', () => {
         cy.get('.notification-dialog').should('be.visible');
         cy.get('.p-button-text').contains('Ir al enlace').click();
 
-        cy.location('pathname').should('not.eq', '/notificaciones'); // Confirmar navegación
+        cy.location('pathname').should('not.eq', '/notificaciones');
     });
 
     it('Muestra mensaje si no hay notificaciones', () => {

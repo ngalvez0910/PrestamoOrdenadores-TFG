@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
@@ -69,7 +69,6 @@ import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
-
 import { getIncidenciasByUserGuid, createIncidencia, type Incidencia } from '@/services/IncidenciaService.ts';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
@@ -77,132 +76,119 @@ import { useRouter } from 'vue-router';
 export default defineComponent({
   name: "IncidenciasMe",
   components: { DataTable, Column, Button, Toast, Dialog, InputText, Textarea },
-  setup() {
-    const incidencias = ref<Incidencia[]>([]);
-    const loading = ref(true);
-    const toast = useToast();
-    const router = useRouter();
-
-    const isReportarModalVisible = ref(false);
-    const nuevaIncidencia = ref({
-      asunto: '',
-      descripcion: '',
-    });
-    const nuevaIncidenciaErrors = ref({
-      asunto: '',
-      descripcion: '',
-    });
-    const isSubmittingIncidencia = ref(false);
-
-    const resetNuevaIncidenciaForm = () => {
-      nuevaIncidencia.value.asunto = '';
-      nuevaIncidencia.value.descripcion = '';
-      nuevaIncidenciaErrors.value.asunto = '';
-      nuevaIncidenciaErrors.value.descripcion = '';
-      isSubmittingIncidencia.value = false;
+  data() {
+    return {
+      incidencias: [] as Incidencia[],
+      loading: true,
+      isReportarModalVisible: false,
+      isSubmittingIncidencia: false,
+      nuevaIncidencia: {
+        asunto: '',
+        descripcion: ''
+      },
+      nuevaIncidenciaErrors: {
+        asunto: '',
+        descripcion: ''
+      }
     };
-
-    const openReportarModal = () => {
-      resetNuevaIncidenciaForm();
-      isReportarModalVisible.value = true;
-    };
-
-    const handleReportarIncidencia = async () => {
-      let isValid = true;
-      nuevaIncidenciaErrors.value.asunto = '';
-      nuevaIncidenciaErrors.value.descripcion = '';
-
-      if (!nuevaIncidencia.value.asunto.trim()) {
-        nuevaIncidenciaErrors.value.asunto = 'El asunto es obligatorio.';
-        isValid = false;
-      }
-      if (nuevaIncidencia.value.asunto.trim().length > 255) {
-        nuevaIncidenciaErrors.value.asunto = 'El asunto no puede exceder los 255 caracteres.';
-        isValid = false;
-      }
-      if (!nuevaIncidencia.value.descripcion.trim()) {
-        nuevaIncidenciaErrors.value.descripcion = 'La descripción es obligatoria.';
-        isValid = false;
-      }
-      if (nuevaIncidencia.value.descripcion.trim().length > 1000) {
-        nuevaIncidenciaErrors.value.descripcion = 'La descripción no puede exceder los 1000 caracteres.';
-        isValid = false;
-      }
-
-      if (!isValid) {
-        return;
-      }
-
-      isSubmittingIncidencia.value = true;
+  },
+  created() {
+    this.fetchIncidencias();
+  },
+  methods: {
+    async fetchIncidencias() {
+      this.loading = true;
       try {
-        const response = await createIncidencia(nuevaIncidencia.value);
+        this.incidencias = await getIncidenciasByUserGuid();
+        console.log("Datos de incidencias:", this.incidencias);
+      } catch (error: any) {
+        console.error("Error al obtener las incidencias:", error);
+        this.$toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message || 'No se pudieron cargar las incidencias.',
+          life: 3000
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
+    openReportarModal() {
+      this.resetNuevaIncidenciaForm();
+      this.isReportarModalVisible = true;
+    },
+    resetNuevaIncidenciaForm() {
+      this.nuevaIncidencia = { asunto: '', descripcion: '' };
+      this.nuevaIncidenciaErrors = { asunto: '', descripcion: '' };
+      this.isSubmittingIncidencia = false;
+    },
+    validarIncidencia() {
+      let isValid = true;
+      this.nuevaIncidenciaErrors.asunto = '';
+      this.nuevaIncidenciaErrors.descripcion = '';
+
+      const asunto = this.nuevaIncidencia.asunto.trim();
+      const descripcion = this.nuevaIncidencia.descripcion.trim();
+
+      if (!asunto) {
+        this.nuevaIncidenciaErrors.asunto = 'El asunto es obligatorio.';
+        isValid = false;
+      } else if (asunto.length > 255) {
+        this.nuevaIncidenciaErrors.asunto = 'El asunto no puede exceder los 255 caracteres.';
+        isValid = false;
+      }
+
+      if (!descripcion) {
+        this.nuevaIncidenciaErrors.descripcion = 'La descripción es obligatoria.';
+        isValid = false;
+      } else if (descripcion.length > 1000) {
+        this.nuevaIncidenciaErrors.descripcion = 'La descripción no puede exceder los 1000 caracteres.';
+        isValid = false;
+      }
+
+      return isValid;
+    },
+    async handleReportarIncidencia() {
+      if (!this.validarIncidencia()) return;
+
+      this.isSubmittingIncidencia = true;
+
+      try {
+        const response = await createIncidencia(this.nuevaIncidencia);
         if (response) {
-          isReportarModalVisible.value = false;
-          await fetchIncidencias();
+          this.isReportarModalVisible = false;
+          await this.fetchIncidencias();
         } else {
           throw new Error('No se recibió respuesta al crear la incidencia.');
         }
       } catch (error: any) {
         console.error('Error al reportar la incidencia:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: error.response?.data?.message || error.message || 'No se pudo reportar la incidencia.', life: 3000 });
+        this.$toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.response?.data?.message || error.message || 'No se pudo reportar la incidencia.',
+          life: 3000
+        });
       } finally {
-        isSubmittingIncidencia.value = false;
+        this.isSubmittingIncidencia = false;
       }
-    };
-
-    const fetchIncidencias = async () => {
-      loading.value = true;
-      try {
-        incidencias.value = await getIncidenciasByUserGuid();
-        console.log("Datos de incidencias:", incidencias.value);
-      } catch (error: any) {
-        console.error("Error al obtener las incidencias:", error);
-        toast.add({ severity: 'error', summary: 'Error', detail: error.message || 'No se pudieron cargar las incidencias.', life: 3000 });
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    onMounted(fetchIncidencias);
-
-    const goToCrearIncidencia = () => {
-      console.log("Navegando a crear incidencia");
-      router.push({ name: 'ReportarIncidencia' });
-    };
-
-    const goBack = () => {
-      router.back();
-    };
-
-    const getEstadoIncidenciaClass = (estado: string | undefined): string => {
+    },
+    getEstadoIncidenciaClass(estado: string | undefined): string {
       if (!estado) return 'status-unknown';
       switch (estado) {
         case 'PENDIENTE': return 'status-pendiente';
         case 'RESUELTO': return 'status-resuelto';
         default: return 'status-unknown';
       }
-    };
-
-    // const verDetalleIncidencia = (incidenciaId: string) => {
-    //   router.push({ name: 'IncidenciaDetalleUsuario', params: { id: incidenciaId } }); // Ejemplo
-    // };
-
-    return {
-      incidencias,
-      loading,
-      isReportarModalVisible,
-      nuevaIncidencia,
-      nuevaIncidenciaErrors,
-      isSubmittingIncidencia,
-      openReportarModal,
-      handleReportarIncidencia,
-      resetNuevaIncidenciaForm,
-      goBack,
-      getEstadoIncidenciaClass,
-    };
+    }
   },
+  mounted() {
+    this.$toast = useToast();
+    this.$router = useRouter();
+  }
 });
 </script>
+
 
 <style scoped>
 .page-container.incidencias-me-page {
