@@ -48,7 +48,7 @@
 
         <div class="form-group">
           <label for="isDeleted">Marcado Borrado</label>
-          <input class="input-field" readonly :value="dispositivoData.isDeleted ? 'SI' : 'NO'"/>
+          <input id="isDeleted" class="input-field" readonly :value="dispositivoData.isDeleted ? 'SI' : 'NO'"/>
         </div>
 
       </div>
@@ -110,6 +110,9 @@ export default defineComponent({
       return estado.replace(/_/g, ' ');
     },
     toggleEdit() {
+      if (this.editable) {
+        this.dispositivoData = JSON.parse(JSON.stringify(this.originalData));
+      }
       this.editable = !this.editable;
     },
     goBack() {
