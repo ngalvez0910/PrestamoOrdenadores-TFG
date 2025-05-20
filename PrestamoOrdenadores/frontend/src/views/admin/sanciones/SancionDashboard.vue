@@ -127,7 +127,7 @@ interface Sancion {
   guid: string;
   tipoSancion: string;
   tipo: string;
-  user: { guid: string } | null;
+  user: { guid: string, numeroIdentificacion: string } | null;
   userGuid: string;
   prestamo: { guid: string } | null;
   prestamoGuid: string;

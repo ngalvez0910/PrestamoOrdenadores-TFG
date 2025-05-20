@@ -33,6 +33,7 @@
       <Avatar :image="currentAvatar" shape="circle" class="avatar" />
     </Button>
 
+
     <Menu ref="userMenu" id="user_profile_menu" class="user-menu" :model="userMenuItems" :popup="true">
       <template #item="{ item, props }">
         <a v-if="item.url" :href="item.url" class="menu-item-link" v-bind="props.action">
@@ -40,7 +41,7 @@
           <span class="menu-item-label">{{ item.label }}</span>
         </a>
         <div v-else-if="item.separator" class="menu-separator"></div>
-        <button v-else class="menu-item-link button-link" v-bind="props.action" @click="item.command">
+        <button v-else class="menu-item-link button-link" v-bind="props.action">
           <i v-if="item.icon" :class="item.icon + ' menu-item-icon'"></i>
           <span class="menu-item-label">{{ item.label }}</span>
         </button>
@@ -53,7 +54,7 @@
           <i v-if="item.icon" :class="item.icon + ' menu-item-icon'"></i>
           <span class="menu-item-label">{{ item.label }}</span>
         </a>
-        <button v-else class="menu-item-link button-link" v-bind="props.action" @click="item.command">
+        <button v-else class="menu-item-link button-link" v-bind="props.action">
           <i v-if="item.icon" :class="item.icon + ' menu-item-icon'"></i>
           <span class="menu-item-label">{{ item.label }}</span>
         </button>
