@@ -14,9 +14,6 @@ export default {
 
 <style scoped>
 .menubar {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   display: flex;
   justify-content: flex-start;
@@ -25,7 +22,6 @@ export default {
   color: var(--color-primary);
   padding: 10px 30px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
   box-sizing: border-box;
 }
 

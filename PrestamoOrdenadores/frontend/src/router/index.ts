@@ -150,21 +150,44 @@ const router = createRouter({
       component: () => import('../views/Unauthorized.vue'),
       meta: { requiresAuth: false },
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/NotFound.vue'),
+      meta: { requiresAuth: false }
+    }
   ],
 })
 
 router.beforeEach(async (to, from, next) => {
   authService.syncFromStorage();
 
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  await authService.refreshAuth();
 
+  const isAuthenticated = authService.isAuthenticated();
+  const userRole = authService.role;
+  const isLoginPage = to.name === 'home' || to.name === 'Login';
+
+  if (isAuthenticated && isLoginPage) {
+    console.log('[Router Guard] Usuario autenticado intentando ir a la página de inicio/login. Redirigiendo al dashboard por defecto.');
+    if (userRole === 'ADMIN') {
+      next({ name: 'adminDashboard' });
+    } else if (userRole === 'ALUMNO' || userRole === 'PROFESOR') {
+      next({ name: 'Profile' });
+    } else {
+      console.warn(`[Router Guard] Rol de usuario desconocido: ${userRole}. Redirigiendo a /profile.`);
+      next({ name: 'Profile' });
+    }
+    return;
+  }
+
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiredRole = to.matched.find(record => record.meta.requiredRole)?.meta.requiredRole;
 
   if (requiresAuth) {
     try {
-      const isAuthenticated = authService.isAuthenticated();
-
       if (!isAuthenticated) {
+        console.log('[Router Guard] Ruta requiere autenticación, pero el usuario no está logueado. Redirigiendo a login.');
         next({
           name: 'home',
           query: { redirect: to.fullPath }
@@ -173,19 +196,16 @@ router.beforeEach(async (to, from, next) => {
       }
 
       if (requiredRole) {
-        const userRole = authService.role;
-
         if (userRole !== requiredRole) {
-          console.warn(`Access denied. Required role: ${requiredRole}, User role: ${userRole}`);
+          console.warn(`[Router Guard] Acceso denegado. Rol requerido: ${requiredRole}, Rol del usuario: ${userRole}. Redirigiendo a no autorizado.`);
           next({ name: 'Unauthorized' });
           return;
         }
       }
-
       next();
 
     } catch (error) {
-      console.error('Error checking authentication:', error);
+      console.error('[Router Guard] Error al verificar autenticación o roles:', error);
       next({ name: 'home' });
     }
   } else {

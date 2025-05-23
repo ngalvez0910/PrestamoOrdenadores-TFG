@@ -1,9 +1,9 @@
 <template>
-  <div class="unauthorized-container">
-    <div class="unauthorized-content">
-      <h1>⚠️ Acceso No Autorizado</h1>
-      <p>No tienes permisos para acceder a esta página.</p>
-      <p>Necesitas tener rol de Administrador para ver este contenido.</p>
+  <div class="not-found-container">
+    <div class="not-found-content">
+      <h1>404</h1>
+      <h2>Página no encontrada</h2>
+      <p>Lo sentimos, la página que buscas no existe.</p>
 
       <div class="actions">
         <button @click="goBack" class="btn btn-primary">
@@ -14,25 +14,29 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { useRouter } from 'vue-router';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import router from "@/router";
 
-const router = useRouter();
-
-const goBack = () => {
-  router.go(-1);
-};
+export default defineComponent({
+  name: 'NotFound',
+  methods: {
+    goBack() {
+      router.go(-1);
+    }
+  }
+});
 </script>
 
 <style scoped>
-.unauthorized-container {
+.not-found-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 74vh;
 }
 
-.unauthorized-content {
+.not-found-content {
   text-align: center;
   background: white;
   padding: 2rem;
@@ -41,12 +45,12 @@ const goBack = () => {
   max-width: 500px;
 }
 
-.unauthorized-content h1 {
+.not-found-content h1 {
   color: var(--color-error);
   margin-bottom: 1rem;
 }
 
-.unauthorized-content p {
+.not-found-content p {
   color: #666;
   margin-bottom: 1rem;
 }
