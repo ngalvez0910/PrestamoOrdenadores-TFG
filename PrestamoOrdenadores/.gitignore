@@ -69,4 +69,12 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
+# No ignorar archivos de configuración de Docker y variables de entorno
+!.env
+!.env.prod
+!docker-compose.yml
+!docker-compose.dev.yml
+!docker-compose.prod.yml
+!Dockerfile
+
 # End of https://www.toptal.com/developers/gitignore/api/kotlin,git,gradle
