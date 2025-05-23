@@ -73,7 +73,8 @@ gradle-app.setting
 !.env
 !.env.prod
 !docker-compose.yml
-!docker-compose.yaml
+!docker-compose.dev.yml
+!docker-compose.prod.yml
 !Dockerfile
 
 # End of https://www.toptal.com/developers/gitignore/api/kotlin,git,gradle
