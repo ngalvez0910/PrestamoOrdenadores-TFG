@@ -1,4 +1,5 @@
 import './assets/main.css'
+import axios from 'axios'
 import './assets/base.css'
 
 import { createApp } from 'vue'
@@ -7,6 +8,7 @@ import { createPinia } from 'pinia'
 import 'primevue/resources/themes/lara-light-indigo/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
+import '@fortawesome/fontawesome-free/css/all.css'
 
 import App from './App.vue'
 import PrimeVue from 'primevue/config'
@@ -23,6 +25,20 @@ import ToastService from 'primevue/toastservice';
 import Paginator from 'primevue/paginator';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmationService from 'primevue/confirmationservice';
+import {authService} from "@/services/AuthService.ts";
+
+axios.interceptors.request.use(
+    config => {
+        const token = authService.token;
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
 
 const app = createApp(App)
 
