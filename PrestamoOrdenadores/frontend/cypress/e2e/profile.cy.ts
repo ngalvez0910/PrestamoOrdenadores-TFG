@@ -1,7 +1,7 @@
 describe('Profile Page', () => {
     beforeEach(() => {
         cy.visit('/');
-        cy.get('input#email').type('sofia.rodriguez@loantech.com')
+        cy.get('input#email').type('sofia.rodriguez.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -12,7 +12,7 @@ describe('Profile Page', () => {
         cy.contains('Mi Perfil');
         cy.get('.avatar-image');
         cy.get('#nombre').contains('Sofía Rodríguez');
-        cy.get('#email').contains('sofia.rodriguez@loantech.com');
+        cy.get('#email').contains('sofia.rodriguez.loantech@gmail.com');
         cy.get('#curso').contains('3º ESO');
     });
 

@@ -194,7 +194,7 @@ export default {
           break;
         case 'email':
           this.modalTitle = '¿Qué Correo Electrónico debo utilizar?';
-          this.modalBody = 'Tu correo institucional asignado. Debe terminar en @loantech.com.';
+          this.modalBody = 'Tu correo institucional asignado. Debe terminar en .loantech@gmail.com.';
           break;
         case 'password':
           this.modalTitle = 'Contraseña Segura';
@@ -214,16 +214,16 @@ export default {
       if (!email) {
         errorMessage = 'El correo electrónico es obligatorio';
       } else {
-        const endsWithLoantech = email.endsWith('@loantech.com');
-        const endsWithProfesor = email.endsWith('@profesor.loantech.com');
-        const endsWithAdmin = email.endsWith('@admin.loantech.com');
+        const endsWithLoantech = email.endsWith('.loantech@gmail.com');
+        const endsWithProfesor = email.endsWith('.profesor.loantech@gmail.com');
+        const endsWithAdmin = email.endsWith('.admin.loantech@gmail.com');
 
         const basicFormatCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
         if (basicFormatCheck && (endsWithLoantech || endsWithProfesor || endsWithAdmin)) {
           isValidFormat = true;
         } else {
-          errorMessage = 'El correo debe ser válido y terminar en @loantech.com';
+          errorMessage = 'El correo debe ser válido y terminar en .loantech@gmail.com';
         }
       }
 
@@ -240,21 +240,21 @@ export default {
       this.errors.curso = '';
       this.errors.tutor = '';
 
-      if (this.form.email.endsWith('@loantech.com')) {
+      if (this.form.email.endsWith('.loantech@gmail.com')) {
         if (!this.form.curso) {
           this.errors.curso = 'El curso es obligatorio para estudiantes.';
         }
         if (!this.form.tutor) {
           this.errors.tutor = 'El tutor es obligatorio para estudiantes.';
         }
-      } else if (this.form.email.endsWith('@profesor.loantech.com')) {
+      } else if (this.form.email.endsWith('profesor.loantech@gmail.com')) {
         if (!this.form.curso) {
           this.errors.curso = 'El curso/departamento es obligatorio para profesores.';
         }
         if (this.form.tutor) {
           this.errors.tutor = 'El campo tutor no es aplicable para profesores y debe estar vacío.';
         }
-      } else if (this.form.email.endsWith('@admin.loantech.com')) {
+      } else if (this.form.email.endsWith('admin.loantech@gmail.com')) {
         if (this.form.curso) {
           this.errors.curso = 'El campo curso no es aplicable para administradores y debe estar vacío.';
         }
@@ -315,12 +315,12 @@ export default {
         formIsValid = false;
       } else {
         const basicFormatCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email);
-        const endsWithLoantech = this.form.email.endsWith('@loantech.com');
-        const endsWithProfesor = this.form.email.endsWith('@profesor.loantech.com');
-        const endsWithAdmin = this.form.email.endsWith('@admin.loantech.com');
+        const endsWithLoantech = this.form.email.endsWith('.loantech@gmail.com');
+        const endsWithProfesor = this.form.email.endsWith('.profesor.loantech@gmail.com');
+        const endsWithAdmin = this.form.email.endsWith('.admin.loantech@gmail.com');
 
         if (!(basicFormatCheck && (endsWithLoantech || endsWithProfesor || endsWithAdmin))) {
-          this.errors.email = 'El correo debe ser válido y terminar en @loantech.com.';
+          this.errors.email = 'El correo debe ser válido y terminar en .loantech@gmail.com.';
           formIsValid = false;
         }
       }

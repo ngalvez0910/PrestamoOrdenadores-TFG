@@ -29,7 +29,7 @@ import java.time.LocalDateTime
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@WithMockUser(username = "admin@admin.loantech.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
+@WithMockUser(username = "admin.admin.loantech@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class PrestamoControllerTest {
 
     @Autowired
@@ -43,7 +43,7 @@ class PrestamoControllerTest {
 
     @Test
     fun getAllPrestamos() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val prestamos = listOf(prestamo)
@@ -63,7 +63,7 @@ class PrestamoControllerTest {
     @Test
     fun getPrestamoByGuid() {
         val guid = "prestamo-123"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponseAdmin("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString(),
             LocalDateTime.now().toString(), LocalDateTime.now().toString(), false)
@@ -88,7 +88,7 @@ class PrestamoControllerTest {
 
     @Test
     fun getPrestamoByFechaPrestamo() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val fecha = LocalDateTime.parse(prestamo.fechaPrestamo).toLocalDate()
@@ -103,7 +103,7 @@ class PrestamoControllerTest {
 
     @Test
     fun getPrestamoByFechaDevolucion() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val fecha = LocalDateTime.parse(prestamo.fechaDevolucion).toLocalDate()
@@ -119,7 +119,7 @@ class PrestamoControllerTest {
     @Test
     fun getPrestamosByUserGuid() {
         val guid = "user-123"
-        val user = UserResponse("numIdentificacion", guid, "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", guid, "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
 
@@ -144,7 +144,7 @@ class PrestamoControllerTest {
 
     @Test
     fun createPrestamo() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         every { service.createPrestamo() } returns Ok(prestamo)
@@ -189,7 +189,7 @@ class PrestamoControllerTest {
     fun updatePrestamo() {
         val guid = "prestamo-123"
         val requestBody = """{"estadoPrestamo": "VENCIDO"}"""
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "VENCIDO", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val updateRequest = PrestamoUpdateRequest("VENCIDO")
@@ -237,7 +237,7 @@ class PrestamoControllerTest {
     @Test
     fun deletePrestamo() {
         val guid = "prestamo-123"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponseAdmin(guid, user, dispositivo, "ENTREGADO", LocalDateTime.now().toString(), LocalDateTime.now().toString(),
             LocalDateTime.now().toString(), LocalDateTime.now().toString(), true)
@@ -276,7 +276,7 @@ class PrestamoControllerTest {
     @Test
     fun cancelarPrestamo() {
         val guid = "prestamo-123"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
 

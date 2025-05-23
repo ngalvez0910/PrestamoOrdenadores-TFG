@@ -95,7 +95,7 @@ class IncidenciaServiceImplTest {
         user = User(
             id = 99,
             guid = "guidTestU99",
-            email = "email99@loantech.com",
+            email = "email99.loantech@gmail.com",
             numeroIdentificacion = "2023LT249",
             campoPassword = "Password123?",
             nombre = "nombre99",
@@ -203,7 +203,7 @@ class IncidenciaServiceImplTest {
         every { createRequest.asunto } returns "asunto"
         every { createRequest.descripcion } returns "descripcion"
         every { userRepository.findByEmail(user.email) } returns user
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
         every { mapper.toIncidenciaFromCreate(createRequest, user) } returns incidencia
         every { repository.save(incidencia) } returns incidencia
         every { mapper.toIncidenciaResponse(incidencia) } returns incidenciaResponse
@@ -246,7 +246,7 @@ class IncidenciaServiceImplTest {
     fun updateIncidencia() {
         every { repository.findIncidenciaByGuid("INC0001") } returns incidencia
         every { updateRequest.validate() } returns Ok(updateRequest)
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
         every { repository.save(any()) } returns incidencia
         every { mapper.toIncidenciaResponse(any()) } returns incidenciaResponse
         every { updateRequest.estadoIncidencia } returns "pendiente"
@@ -293,7 +293,7 @@ class IncidenciaServiceImplTest {
     fun deleteIncidenciaByGuid() {
         every { repository.findIncidenciaByGuid("INC0001") } returns incidencia
         every { repository.save(incidencia) } returns incidencia
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
         every { mapper.toIncidenciaResponseAdmin(any()) } returns incidenciaResponseAdmin
         mockkStatic(SecurityContextHolder::class)
         val auth = mockk<Authentication>()

@@ -113,7 +113,7 @@ class PrestamoServiceImplTest {
         user = User(
             id = 99,
             guid = "guidTestU99",
-            email = "email99@loantech.com",
+            email = "email99.loantech@gmail.com",
             numeroIdentificacion = "2023LT249",
             campoPassword = "Password123?",
             nombre = "nombre99",
@@ -228,7 +228,7 @@ class PrestamoServiceImplTest {
         every { dispositivoRepository.save(dispositivo) } returns dispositivo
         every { storage.generateAndSavePdf(prestamo.guid) } just Runs
         every { storage.generatePdf(prestamo.guid) } returns ByteArray(0)
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
         every { emailService.sendHtmlEmail(any(), any(), any(), any(), any(), any(), any()) } just Runs
         every { mapper.toPrestamoResponse(prestamo) } returns response
 
@@ -296,7 +296,7 @@ class PrestamoServiceImplTest {
 
         every { repository.findByGuid(prestamo.guid) } returns prestamo
         every { updateRequest.validate() } returns Ok(updateRequest)
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
         every { repository.save(any()) } returns prestamo
         every { mapper.toPrestamoResponse(any()) } returns response
         every { updateRequest.estadoPrestamo } returns "vencido"
@@ -353,7 +353,7 @@ class PrestamoServiceImplTest {
 
         every { repository.findByGuid("9BR5JE350LA") } returns prestamo
         every { repository.save(prestamo) } returns prestamo
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
         every { mapper.toPrestamoResponseAdmin(any()) } returns adminResponse
 
         val auth = mockk<Authentication>()

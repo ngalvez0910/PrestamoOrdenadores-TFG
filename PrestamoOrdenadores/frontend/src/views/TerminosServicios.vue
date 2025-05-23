@@ -28,7 +28,7 @@
         <p>La Aplicación es una herramienta facilitada por el Centro para gestionar la disponibilidad y el préstamo temporal de Equipos informáticos con fines exclusivamente educativos y relacionados con la actividad académica o profesional dentro del Centro. La disponibilidad de Equipos está sujeta a existencias.</p>
 
         <h3>4. Acceso y Cuenta de Usuario</h3>
-        <p>El acceso a la Aplicación se realizará mediante las credenciales corporativas proporcionadas por el Centro (ej. cuenta de correo electrónico del dominio <strong>@loantech.com</strong> y contraseña asociada).</p>
+        <p>El acceso a la Aplicación se realizará mediante las credenciales corporativas proporcionadas por el Centro (ej. cuenta de correo electrónico del dominio <strong>.loantech@gmail.com</strong> y contraseña asociada).</p>
         <p>El usuario es <strong>responsable</strong> de mantener la confidencialidad de sus credenciales de acceso y de todas las actividades que ocurran bajo su cuenta. Deberá notificar inmediatamente al <strong>Departamento TIC</strong> cualquier uso no autorizado de su cuenta o cualquier otra brecha de seguridad.</p>
 
         <h3>5. Proceso de Préstamo</h3>
@@ -92,7 +92,7 @@
         <p>Estos Términos se regirán e interpretarán de acuerdo con la legislación española.</p>
 
         <h3>14. Contacto</h3>
-        <p>Para cualquier duda o consulta sobre estos Términos o el funcionamiento del servicio de préstamo, puede contactar con el <strong>Departamento TIC</strong> a través de <strong>tic@loantech.com</strong>.</p>
+        <p>Para cualquier duda o consulta sobre estos Términos o el funcionamiento del servicio de préstamo, puede contactar con el <strong>Departamento TIC</strong> a través de <strong>tic.loantech@gmail.com</strong>.</p>
 
       </article>
     </div>

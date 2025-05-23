@@ -34,7 +34,7 @@ class UserCsvStorageTest {
         user = User(
             id = 99,
             guid = "guidTestU99",
-            email = "email99@loantech.com",
+            email = "email99.loantech@gmail.com",
             numeroIdentificacion = "2023LT249",
             campoPassword = "Password123?",
             nombre = "nombre99",
@@ -61,7 +61,7 @@ class UserCsvStorageTest {
 
         val expectedCsvData = """
             Guid;Email;Nombre;Apellidos;Curso;Tutor;Rol;Activo
-            guidTestU99;email99@loantech.com;nombre99;apellidos99;curso99;tutor99;ALUMNO;true
+            guidTestU99;email99.loantech@gmail.com;nombre99;apellidos99;curso99;tutor99;ALUMNO;true
         """.trimIndent() + "\n"
 
         val expectedCsvDataBytes = expectedCsvData.toByteArray()

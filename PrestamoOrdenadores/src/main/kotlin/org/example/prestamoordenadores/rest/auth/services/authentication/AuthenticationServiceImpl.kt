@@ -29,9 +29,9 @@ class AuthenticationServiceImpl
     override fun signUp(request: UserCreateRequest?): JwtAuthResponse {
         if (request!!.password == request.confirmPassword) {
             val rol = when {
-                request.email!!.endsWith("@profesor.loantech.com") -> Role.PROFESOR
-                request.email!!.endsWith("@admin.loantech.com") -> Role.ADMIN
-                request.email!!.endsWith("@loantech.com") -> Role.ALUMNO
+                request.email!!.endsWith(".profesor.loantech@gmail.com") -> Role.PROFESOR
+                request.email!!.endsWith(".admin.loantech@gmail.com") -> Role.ADMIN
+                request.email!!.endsWith(".loantech@gmail.com") -> Role.ALUMNO
                 else -> Role.ALUMNO
             }
 

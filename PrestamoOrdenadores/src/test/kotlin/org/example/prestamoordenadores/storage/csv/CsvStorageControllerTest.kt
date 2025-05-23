@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@WithMockUser(username = "admin@admin.loantech.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
+@WithMockUser(username = "admin.admin.loantech@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class CsvStorageControllerTest {
 
     @Autowired

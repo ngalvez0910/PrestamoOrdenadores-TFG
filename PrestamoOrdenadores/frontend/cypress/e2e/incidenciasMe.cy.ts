@@ -4,7 +4,7 @@ describe('Página Mis Incidencias', () => {
     });
 
     it('muestra título y botón para reportar', () => {
-        cy.get('input#email').type('sofia.rodriguez@loantech.com')
+        cy.get('input#email').type('sofia.rodriguez.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -17,7 +17,7 @@ describe('Página Mis Incidencias', () => {
     });
 
     it('muestra mensaje cuando no hay incidencias', () => {
-        cy.get('input#email').type('pedro.ramos@profesor.loantech.com')
+        cy.get('input#email').type('pedro.ramos.profesor.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -29,7 +29,7 @@ describe('Página Mis Incidencias', () => {
     });
 
     it('abre el modal al hacer clic en "Reportar Incidencia"', () => {
-        cy.get('input#email').type('sofia.rodriguez@loantech.com')
+        cy.get('input#email').type('sofia.rodriguez.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -42,7 +42,7 @@ describe('Página Mis Incidencias', () => {
     });
 
     it('valida campos obligatorios al enviar formulario vacío', () => {
-        cy.get('input#email').type('sofia.rodriguez@loantech.com')
+        cy.get('input#email').type('sofia.rodriguez.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -57,7 +57,7 @@ describe('Página Mis Incidencias', () => {
     });
 
     it('valida límites de caracteres', () => {
-        cy.get('input#email').type('sofia.rodriguez@loantech.com')
+        cy.get('input#email').type('sofia.rodriguez.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -74,7 +74,7 @@ describe('Página Mis Incidencias', () => {
     });
 
     it('envía incidencia válida y actualiza tabla', () => {
-        cy.get('input#email').type('sofia.rodriguez@loantech.com')
+        cy.get('input#email').type('sofia.rodriguez.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 

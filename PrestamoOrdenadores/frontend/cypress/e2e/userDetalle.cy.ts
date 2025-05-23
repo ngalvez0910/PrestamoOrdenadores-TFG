@@ -2,7 +2,7 @@ describe('UsuarioDetalle.vue', () => {
     beforeEach(() => {
         cy.visit('/');
 
-        cy.get('input#email').type('admin@admin.loantech.com')
+        cy.get('input#email').type('admin.admin.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -26,7 +26,7 @@ describe('UsuarioDetalle.vue', () => {
         cy.contains('Detalles del Usuario');
         cy.contains('María');
         cy.contains('Gómez');
-        cy.contains('maria@profesor.loantech.com');
+        cy.contains('maria.profesor.loantech@gmail.com');
         cy.contains('1º Bachillerato');
         cy.contains('PROFESOR');
         cy.contains('SI');

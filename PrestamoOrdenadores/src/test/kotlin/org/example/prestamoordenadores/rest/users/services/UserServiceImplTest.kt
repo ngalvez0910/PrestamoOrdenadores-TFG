@@ -78,7 +78,7 @@ class UserServiceImplTest {
         user = User(
             id = 1,
             guid = "guidTestU01",
-            email = "email@loantech.com",
+            email = "email.loantech@gmail.com",
             numeroIdentificacion = "2023LT242",
             campoPassword = "Password123?",
             nombre = "nombre",
@@ -255,7 +255,7 @@ class UserServiceImplTest {
         val user2 = User(
             id = 2,
             guid = "guidTestU02",
-            email = "email2@loantech.com",
+            email = "email2.loantech@gmail.com",
             numeroIdentificacion = "2023LT243",
             campoPassword = "Password123?",
             nombre = "nombre2",
@@ -538,7 +538,7 @@ class UserServiceImplTest {
 
     @Test
     fun `getByEmail returns Err when user no existe`() {
-        val email = "noexiste@loantech.com"
+        val email = "noexiste.loantech@gmail.com"
 
         every { repository.findByEmail(email) } returns null
 

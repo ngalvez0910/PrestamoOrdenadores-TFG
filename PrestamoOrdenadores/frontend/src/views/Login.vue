@@ -9,7 +9,7 @@
             id="email"
             class="input-field"
             name="email"
-            placeholder="email@loantech.com"
+            placeholder="email.loantech@gmail.com"
             v-model="form.email"
             :aria-invalid="errors.email ? 'true' : 'false'"
             aria-describedby="email-error"

@@ -2,7 +2,7 @@ describe('UsuariosDashboard', () => {
     beforeEach(() => {
         cy.visit('/');
 
-        cy.get('input#email').type('admin@admin.loantech.com')
+        cy.get('input#email').type('admin.admin.loantech@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -21,8 +21,8 @@ describe('UsuariosDashboard', () => {
         cy.contains('Tutor').should('exist');
         cy.contains('Rol').should('exist');
 
-        cy.contains('sofia.rodriguez@loantech.com').should('exist');
-        cy.contains('david.garcia@loantech.com').should('exist');
+        cy.contains('sofia.rodriguez.loantech@gmail.com').should('exist');
+        cy.contains('david.garcia.loantech@gmail.com').should('exist');
     });
 
     it('Filtra usuarios al buscar por nombre', () => {
