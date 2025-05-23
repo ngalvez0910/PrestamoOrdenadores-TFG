@@ -9,7 +9,7 @@
           <li><a href="/politicaPrivacidad">Política de Privacidad</a></li>
           <li><a href="/terminosServicio">Términos de Servicio</a></li>
           <li>
-            <span class="icon">📧</span> <a href="mailto:contacto@loantech.com">contacto@loantech.com</a>
+            <span class="icon">📧</span> <a href="mailto:contacto.loantech@gmail.com">contacto.loantech@gmail.com</a>
           </li>
           <li>
             <span class="icon">📞</span> <a href="tel:+34910384889">+34 910 384 889</a>

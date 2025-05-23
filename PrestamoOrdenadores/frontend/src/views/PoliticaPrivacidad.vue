@@ -22,14 +22,14 @@
           <li><strong>Identidad:</strong> Centro Educativo LoanTech</li>
           <li><strong>CIF:</strong> G87654321</li>
           <li><strong>Dirección Postal:</strong> Calle de la Innovación, 1, 28905 Getafe, Madrid</li>
-          <li><strong>Correo electrónico de contacto:</strong> secretaria@loantech.com</li>
+          <li><strong>Correo electrónico de contacto:</strong> secretaria.loantech@gmail.com</li>
           <li><strong>Teléfono:</strong> +34 91 123 45 67</li>
         </ul>
 
         <h3>3. Delegado de Protección de Datos (DPD)</h3>
         <p>El Centro Educativo LoanTech cuenta con un Delegado de Protección de Datos (DPD). Si tiene alguna consulta específica sobre protección de datos, puede contactar con él/ella a través de:</p>
         <ul>
-          <li><strong>Correo electrónico del DPD:</strong> dpd@loantech.com</li>
+          <li><strong>Correo electrónico del DPD:</strong> dpd.loantech@gmail.com</li>
           <li><strong>Dirección Postal:</strong> Dirección del Centro</li>
           <li><strong>Otros medios de contacto:</strong> Formulario de contacto en la web del centro</li>
         </ul>
@@ -37,7 +37,7 @@
         <h3>4. ¿Qué datos personales recogemos?</h3>
         <p>Para la correcta gestión del servicio de préstamo de equipos, la Aplicación recoge y trata los siguientes datos personales:</p>
         <ul>
-          <li><strong>Datos identificativos del usuario:</strong> Nombre y apellidos, número de identificación del alumno/a (NIA u otro identificador interno), curso/grupo, correo electrónico corporativo del centro (ej. <strong>nombreapellido@loantech.com</strong>), nombre de usuario para acceder a la aplicación (si aplica).</li>
+          <li><strong>Datos identificativos del usuario:</strong> Nombre y apellidos, número de identificación del alumno/a (NIA u otro identificador interno), curso/grupo, correo electrónico corporativo del centro (ej. <strong>nombreapellido.loantech@gmail.com</strong>), nombre de usuario para acceder a la aplicación (si aplica).</li>
           <li><strong>Datos del préstamo:</strong> Identificador único del equipo prestado (número de serie, etiqueta de inventario), fecha y hora de solicitud, estado de la solicitud, fecha y hora de recogida/préstamo, fecha prevista de devolución, fecha y hora de devolución efectiva.</li>
           <li><strong>Datos de comunicación:</strong> Correo electrónico corporativo para el envío de notificaciones (confirmaciones, recordatorios de devolución, avisos de retraso).</li>
           <li><strong>Datos sobre incidencias (si aplica):</strong> Información sobre posibles daños o mal funcionamiento del equipo reportados durante o después del préstamo, vinculados al usuario responsable del equipo en ese momento.</li>
@@ -67,7 +67,7 @@
         <p>Una vez finalizados los plazos de conservación, los datos serán suprimidos o anonimizados de forma segura.</p>
 
         <h3>8. Seguridad de los datos</h3>
-        <p>El Centro Educativo LoanTech ha adoptado las medidas de índole técnica y organizativa necesarias para garantizar la seguridad de los datos de carácter personal y evitar su alteración, pérdida, tratamiento o acceso no autorizado, habida cuenta del estado de la tecnología, la naturaleza de los datos almacenados y los riesgos a que están expuestos. El acceso a la Aplicación está restringido a usuarios autorizados mediante <strong>su cuenta corporativa educativa (@loantech.com)</strong>.</p>
+        <p>El Centro Educativo LoanTech ha adoptado las medidas de índole técnica y organizativa necesarias para garantizar la seguridad de los datos de carácter personal y evitar su alteración, pérdida, tratamiento o acceso no autorizado, habida cuenta del estado de la tecnología, la naturaleza de los datos almacenados y los riesgos a que están expuestos. El acceso a la Aplicación está restringido a usuarios autorizados mediante <strong>su cuenta corporativa educativa (.loantech@gmail.com)</strong>.</p>
 
         <h3>9. Comunicación de datos a terceros</h3>
         <p>Sus datos personales <strong>no serán cedidos a terceros</strong> salvo obligación legal.</p>

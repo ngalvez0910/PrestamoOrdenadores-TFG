@@ -25,7 +25,7 @@ describe('Registro de usuario', () => {
     it('Valida correo inválido', () => {
         cy.get('#email').type('correo@dominio.com');
         cy.get('button[type="submit"]').click();
-        cy.contains('El correo debe ser válido y terminar en @loantech.com');
+        cy.contains('El correo debe ser válido y terminar en .loantech@gmail.com');
     });
 
     it('Valida contraseña débil', () => {
@@ -48,7 +48,7 @@ describe('Registro de usuario', () => {
         cy.get('#apellidos').type('Pérez');
         cy.get('#curso').type('2DAW');
         cy.get('#tutor').type('Profesor X');
-        cy.get('#email').type('pepe@loantech.com');
+        cy.get('#email').type('pepe.loantech@gmail.com');
         cy.get('#password').type('Password123!');
         cy.get('#confirmPassword').type('Password123!');
 

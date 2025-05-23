@@ -115,7 +115,7 @@ class SancionServiceImplTest {
         user = User(
             id = 99,
             guid = "guidTestU99",
-            email = "email99@loantech.com",
+            email = "email99.loantech@gmail.com",
             numeroIdentificacion = "2023LT249",
             campoPassword = "Password123?",
             nombre = "nombre99",
@@ -243,7 +243,7 @@ class SancionServiceImplTest {
     fun updateSancion() {
         every { repository.findByGuid(sancion.guid) } returns sancion
         every { updateRequest.validate() } returns Ok(updateRequest)
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
         every { repository.save(any()) } returns sancion
         every { mapper.toSancionResponse(any()) } returns response
         every { updateRequest.tipoSancion } returns "bloqueo_temporal"
@@ -294,7 +294,7 @@ class SancionServiceImplTest {
     fun deleteSancionByGuid() {
         every { repository.findByGuid("SANC0001") } returns sancion
         every { repository.save(sancion) } returns sancion
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
         every { mapper.toSancionAdminResponse(any()) } returns responseAdmin
         every { webService.createAndSendNotification(any(), any()) } just Runs
 
@@ -413,7 +413,7 @@ class SancionServiceImplTest {
         every { repository.findByUserAndTipoSancion(user, TipoSancion.BLOQUEO_TEMPORAL) } returns emptyList()
         every { repository.findByUserAndTipoSancion(user, TipoSancion.ADVERTENCIA) } returns listOf(sancion)
         every { webService.createAndSendNotification(any(), any()) } just Runs
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
 
         service.gestionarAdvertencias()
 
@@ -472,7 +472,7 @@ class SancionServiceImplTest {
         every { repository.findByUserAndTipoSancion(any(), TipoSancion.INDEFINIDO) } returns emptyList()
         every { repository.findByUserAndTipoSancion(any(), TipoSancion.BLOQUEO_TEMPORAL) } returns listOf(sancionExpirada)
         every { webService.createAndSendNotification(any(), any()) } just Runs
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
 
         service.gestionarReactivacionYPosibleEscaladaAIndefinido()
 
@@ -534,7 +534,7 @@ class SancionServiceImplTest {
         every { userRepository.save(user) } returns user
         every { repository.save(any()) } answers { firstArg() }
         every { webService.createAndSendNotification(any(), any()) } just Runs
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
 
         service.crearBloqueoTemporal(user, "motivo de test", prestamo)
 
@@ -548,7 +548,7 @@ class SancionServiceImplTest {
         every { userRepository.save(user) } returns user
         every { repository.save(any()) } answers { firstArg() }
         every { webService.createAndSendNotification(any(), any()) } just Runs
-        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin@loantech.com", rol = Role.ADMIN))
+        every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
 
         service.crearBloqueoIndefinido(user, "motivo indefinido")
 

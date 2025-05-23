@@ -30,7 +30,7 @@ import java.time.LocalDateTime
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@WithMockUser(username = "admin@admin.loantech.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
+@WithMockUser(username = "admin.admin.loantech@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class IncidenciaControllerTest {
 
     @Autowired
@@ -44,7 +44,7 @@ class IncidenciaControllerTest {
 
     @Test
     fun getAllIncidencias() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val incidencia = IncidenciaResponse("guid", "asunto", "descripcion", "PENDIENTE", user, LocalDateTime.now().toString())
         val incidencias = listOf(incidencia)
         val pagedResponse = PagedResponse(
@@ -63,7 +63,7 @@ class IncidenciaControllerTest {
     @Test
     fun getIncidenciaByGuid() {
         val guid = "123"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val incidencia = IncidenciaResponse("guid", "asunto", "descripcion", "PENDIENTE", user, LocalDateTime.now().toString())
         every { service.getIncidenciaByGuid(guid) } returns Ok(incidencia)
 
@@ -87,7 +87,7 @@ class IncidenciaControllerTest {
     @Test
     fun getIncidenciaByGuidAdmin() {
         val guid = "123"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val incidencia = IncidenciaResponseAdmin(guid, "asunto", "desc", "PENDIENTE", user, LocalDateTime.now().toString(),
             LocalDateTime.now().toString(), true)
         every { service.getIncidenciaByGuidAdmin(guid) } returns Ok(incidencia)
@@ -112,7 +112,7 @@ class IncidenciaControllerTest {
     @Test
     fun getIncidenciaByEstado() {
         val estado = "PENDIENTE"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val responseMock = IncidenciaResponse("guid", "asunto", "descripcion", "PENDIENTE", user, LocalDateTime.now().toString())
         every { service.getIncidenciaByEstado(estado) } returns Ok(listOf(responseMock))
 
@@ -136,7 +136,7 @@ class IncidenciaControllerTest {
     @Test
     fun getIncidenciasByUserGuid() {
         val guid = "user-123"
-        val user = UserResponse("numIdentificacion", guid, "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", guid, "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val responseMock = IncidenciaResponse("guid", "asunto", "descripcion", "PENDIENTE", user, LocalDateTime.now().toString())
         every { service.getIncidenciasByUserGuid(guid) } returns Ok(listOf(responseMock))
 
@@ -160,7 +160,7 @@ class IncidenciaControllerTest {
     @Test
     fun createIncidencia() {
         val requestJson = """{"asunto":"asunto","descripcion":"desc prueba"}"""
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val responseMock = IncidenciaResponse("guid", "asunto", "desc prueba", "PENDIENTE", user, LocalDateTime.now().toString())
         val incidenciaRequest = IncidenciaCreateRequest("asunto", "desc prueba")
         every { service.createIncidencia(incidenciaRequest) } returns Ok(responseMock)
@@ -190,7 +190,7 @@ class IncidenciaControllerTest {
     fun updateIncidencia() {
         val guid = "123"
         val requestJson = """{"estadoIncidencia":"RESUELTO"}"""
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val incidenciaRequest = IncidenciaUpdateRequest("RESUELTO")
         val responseMock = IncidenciaResponse(guid, "nuevo asunto", "desc", "RESUELTO", user, LocalDateTime.now().toString())
         every { service.updateIncidencia(eq(guid), incidenciaRequest) } returns Ok(responseMock)
@@ -221,7 +221,7 @@ class IncidenciaControllerTest {
     @Test
     fun deleteIncidencia() {
         val guid = "123"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val responseMock = IncidenciaResponseAdmin(guid, "asunto", "desc", "PENDIENTE", user, LocalDateTime.now().toString(),
             LocalDateTime.now().toString(), true)
         every { service.deleteIncidenciaByGuid(guid) } returns Ok(responseMock)

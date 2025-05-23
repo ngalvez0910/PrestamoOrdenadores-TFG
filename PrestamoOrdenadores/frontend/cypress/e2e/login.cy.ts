@@ -37,7 +37,7 @@ describe('Login Page', () => {
   })
 
   it('realiza login exitoso y redirige según rol ADMIN', () => {
-    cy.get('#email').type('admin@admin.loantech.com')
+    cy.get('#email').type('admin.admin.loantech@gmail.com')
     cy.get('#password').type('Password123?')
     cy.get('button[type="submit"]').click()
 
@@ -46,7 +46,7 @@ describe('Login Page', () => {
 
 
   it('realiza login exitoso y redirige a perfil para usuario normal', () => {
-    cy.get('input#email').type('sofia.rodriguez@loantech.com')
+    cy.get('input#email').type('sofia.rodriguez.loantech@gmail.com')
     cy.get('input#password').type('Password123?')
     cy.get('button[type="submit"]').click()
 

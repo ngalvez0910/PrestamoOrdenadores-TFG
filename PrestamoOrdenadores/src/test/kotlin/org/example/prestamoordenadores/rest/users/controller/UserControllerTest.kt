@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@WithMockUser(username = "admin@admin.loantech.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
+@WithMockUser(username = "admin.admin.loantech@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class UserControllerTest {
 
     @Autowired
@@ -42,7 +42,7 @@ class UserControllerTest {
 
     @Test
     fun getAllUsers() {
-        val user = UserResponseAdmin("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", Role.ADMIN, true, LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), false, false)
+        val user = UserResponseAdmin("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", Role.ADMIN, true, LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), false, false)
         val users = listOf(user)
         val pagedResponse = PagedResponse(
             content = users,
@@ -60,7 +60,7 @@ class UserControllerTest {
     @Test
     fun getUserByGuid() {
         val guid = "guid123"
-        val user = UserResponse("numIdentificacion", guid, "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", guid, "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
 
         every { service.getUserByGuid(guid) } returns Ok(user)
 
@@ -84,7 +84,7 @@ class UserControllerTest {
 
     @Test
     fun getUserByNombre() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
 
         every { service.getByNombre("nombre") } returns Ok(user)
 
@@ -108,7 +108,7 @@ class UserControllerTest {
 
     @Test
     fun getUsersByGrade() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
 
         every { service.getByCurso("curso") } returns Ok(listOf(user))
 
@@ -132,11 +132,11 @@ class UserControllerTest {
 
     @Test
     fun getUserByEmail() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
 
-        every { service.getByEmail("email@loantech.com") } returns Ok(user)
+        every { service.getByEmail("email.loantech@gmail.com") } returns Ok(user)
 
-        mockMvc.get("/users/email/email@loantech.com")
+        mockMvc.get("/users/email/email.loantech@gmail.com")
             .andExpect {
                 status { isOk() }
             }
@@ -156,7 +156,7 @@ class UserControllerTest {
 
     @Test
     fun getUsersByTutor() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
 
         every { service.getByTutor("tutor") } returns Ok(listOf(user))
 
@@ -180,7 +180,7 @@ class UserControllerTest {
     fun updateAvatar() {
         val body = """{"avatar":"url"}"""
         val request = UserAvatarUpdateRequest("url")
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "url")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "url")
 
         every { service.updateAvatar("guid", request) } returns Ok(user)
 
@@ -196,7 +196,7 @@ class UserControllerTest {
     fun resetPassword() {
         val body = """{"oldPassword":"oldPassword1?", "newPassword":"nuevaPassword1?", "confirmPassword":"nuevaPassword1?"}"""
         val request = UserPasswordResetRequest("oldPassword1?", "nuevaPassword1?", "nuevaPassword1?")
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
 
         every { service.resetPassword("guid", request) } returns Ok(user)
 
@@ -208,7 +208,7 @@ class UserControllerTest {
 
     @Test
     fun deleteUserByGuid() {
-        val user = UserResponseAdmin("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", Role.ADMIN, false, LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), true, false)
+        val user = UserResponseAdmin("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", Role.ADMIN, false, LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), true, false)
 
         every { service.deleteUserByGuid("guid") } returns Ok(user)
 
@@ -233,7 +233,7 @@ class UserControllerTest {
     @Test
     fun getUserByGuidAdmin() {
         val guid = "guid123"
-        val user = UserResponseAdmin("numIdentificacion", guid, "email@loantech.com", "nombre", "apellidos", "curso", "tutor", Role.ADMIN, true, LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), false, false)
+        val user = UserResponseAdmin("numIdentificacion", guid, "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", Role.ADMIN, true, LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), false, false)
 
         every { service.getUserByGuidAdmin(guid) } returns Ok(user)
 
@@ -259,7 +259,7 @@ class UserControllerTest {
     fun updateUser() {
         val body = """{"rol":"ALUMNO", "isActivo":"true"}"""
         val request = UserUpdateRequest("ALUMNO", true)
-        val user = UserResponseAdmin("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", Role.ALUMNO, true, LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), false, false)
+        val user = UserResponseAdmin("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", Role.ALUMNO, true, LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), LocalDateTime.now().toString(), false, false)
 
         every { service.updateUser("guid", request) } returns Ok(user)
 

@@ -36,7 +36,7 @@ class SancionCsvStorageTest {
         user = User(
             id = 99,
             guid = "guidTestU99",
-            email = "email99@loantech.com",
+            email = "email99.loantech@gmail.com",
             numeroIdentificacion = "2023LT249",
             campoPassword = "Password123?",
             nombre = "nombre99",

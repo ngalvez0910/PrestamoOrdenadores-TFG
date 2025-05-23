@@ -28,7 +28,7 @@ import java.time.LocalDateTime
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@WithMockUser(username = "admin@admin.loantech.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
+@WithMockUser(username = "admin.admin.loantech@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class SancionControllerTest {
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -38,7 +38,7 @@ class SancionControllerTest {
 
     @Test
     fun getAllSanciones() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val sancion = SancionResponse("guid", user, prestamo, "ADVERTENCIA", LocalDate.now().toString(), LocalDate.now().toString())
@@ -59,7 +59,7 @@ class SancionControllerTest {
     @Test
     fun getSancionByGuid() {
         val guid = "abc123"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val sancion = SancionResponse(guid, user, prestamo, "ADVERTENCIA", LocalDate.now().toString(), LocalDate.now().toString())
@@ -85,7 +85,7 @@ class SancionControllerTest {
     @Test
     fun getSancionByGuidAdmin() {
         val guid = "admin123"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val sancion = SancionAdminResponse(
@@ -111,7 +111,7 @@ class SancionControllerTest {
     @Test
     fun getSancionByFechaSancion() {
         val fecha = LocalDate.now()
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val sancion = SancionResponse("guid", user, prestamo, "ADVERTENCIA", fecha.toString(), LocalDate.now().toString())
@@ -128,7 +128,7 @@ class SancionControllerTest {
     @Test
     fun getSancionesByUserGuid() {
         val guid = "user123"
-        val user = UserResponse("numIdentificacion", guid, "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", guid, "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val sancion = SancionResponse("guid", user, prestamo, "ADVERTENCIA", LocalDate.now().toString(), LocalDate.now().toString())
@@ -154,7 +154,7 @@ class SancionControllerTest {
 
     @Test
     fun getSancionesByTipo() {
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val sancion = SancionResponse("guid", user, prestamo, "ADVERTENCIA", LocalDate.now().toString(), LocalDate.now().toString())
@@ -181,7 +181,7 @@ class SancionControllerTest {
     fun updateSancion() {
         val guid = "guid"
         val body = SancionUpdateRequest("BLOQUEO_TEMPORAL")
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val sancion = SancionResponse(guid, user, prestamo, "BLOQUEO_TEMPORAL", LocalDate.now().toString(), LocalDate.now().toString())
@@ -225,7 +225,7 @@ class SancionControllerTest {
     @Test
     fun deleteSancion() {
         val guid = "guid"
-        val user = UserResponse("numIdentificacion", "guid", "email@loantech.com", "nombre", "apellidos", "curso", "tutor", "avatar")
+        val user = UserResponse("numIdentificacion", "guid", "email.loantech@gmail.com", "nombre", "apellidos", "curso", "tutor", "avatar")
         val dispositivo = DispositivoResponse("guid", "4HJ937MAKO", "cargador")
         val prestamo = PrestamoResponse("guid", user, dispositivo, "DISPONIBLE", LocalDateTime.now().toString(), LocalDateTime.now().toString())
         val sancion = SancionAdminResponse(

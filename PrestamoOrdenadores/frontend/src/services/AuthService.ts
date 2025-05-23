@@ -43,6 +43,7 @@ if (savedToken) {
 }
 
 export const authService = {
+
     async register(userData: any): Promise<string | null> {
         try {
             const response = await axios.post("http://localhost:8080/auth/signup", userData);
@@ -78,6 +79,7 @@ export const authService = {
         state.token = null;
         state.roleFromToken = null;
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         delete axios.defaults.headers.common['Authorization'];
     },
 
@@ -208,6 +210,45 @@ export const authService = {
         }
     },
 
+    isTokenValid(): boolean {
+        if (!state.token) return false;
+
+        try {
+            const decoded: any = jwtDecode(state.token);
+            const currentTime = Date.now() / 1000;
+
+            // Verificar si el token ha expirado
+            if (decoded.exp && decoded.exp < currentTime) {
+                console.log("[AuthService] Token expirado");
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error("[AuthService] Error al verificar validez del token:", error);
+            return false;
+        }
+    },
+
+    hasRole(role: string): boolean {
+        return this.role === role;
+    },
+
+    hasAnyRole(roles: string[]): boolean {
+        return roles.includes(this.role || '');
+    },
+
+    getTokenInfo(): any | null {
+        if (!state.token) return null;
+
+        try {
+            return jwtDecode(state.token);
+        } catch (error) {
+            console.error("[AuthService] Error al decodificar token:", error);
+            return null;
+        }
+    },
+
     get user(): UserData | null {
         return state.user;
     },
@@ -221,11 +262,15 @@ export const authService = {
     },
 
     isAuthenticated(): boolean {
-        return !!state.token;
+        return !!state.token && this.isTokenValid();
     },
 
     isAdmin(): boolean {
         return this.role === 'ADMIN';
+    },
+
+    getUserRole(): string | null {
+        return this.role;
     },
 
     syncFromStorage(): void {
@@ -244,6 +289,24 @@ export const authService = {
             } catch (e) {
                 console.error("[AuthService] Error parsing stored user:", e);
             }
+        }
+    },
+
+    async refreshAuth(): Promise<boolean> {
+        try {
+            if (!this.isAuthenticated()) {
+                return false;
+            }
+
+            if (!state.user && state.token) {
+                await this.fetchUser();
+            }
+
+            return this.isAuthenticated();
+        } catch (error) {
+            console.error("[AuthService] Error refreshing auth:", error);
+            await this.logout();
+            return false;
         }
     }
 };

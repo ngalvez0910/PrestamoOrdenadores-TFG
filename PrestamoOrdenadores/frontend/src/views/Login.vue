@@ -9,7 +9,7 @@
             id="email"
             class="input-field"
             name="email"
-            placeholder="email@loantech.com"
+            placeholder="email.loantech@gmail.com"
             v-model="form.email"
             :aria-invalid="errors.email ? 'true' : 'false'"
             aria-describedby="email-error"
@@ -76,76 +76,30 @@ export default {
         password: ''
       },
       passwordFieldType: 'password',
+      redirectPath: '/',
     };
   },
+  mounted() {
+    this.redirectPath = (this.$route.query.redirect as string) || '/profile';
+  },
   methods: {
-    async login() {
+    validateForm(): boolean {
       this.errors = { email: '', password: '' };
       let formIsValid = true;
+
       if (!this.form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
         this.errors.email = 'Correo electrónico inválido';
         formIsValid = false;
       }
-      if (this.form.password.length < 8 /* || !/^(?=.*[A-Z])... */) {
-        this.errors.password = 'Contraseña incorrecta';
+      if (this.form.password.length < 8) {
+        this.errors.password = 'La contraseña debe tener al menos 8 caracteres.';
         formIsValid = false;
       }
 
-      if (formIsValid) {
-        try {
-          this.toast.add({ severity: 'info', summary: 'Iniciando sesión...', detail: 'Por favor espera.', life: 1500 });
-
-          const response = await axios.post('http://localhost:8080/auth/signin', this.form);
-          const receivedToken = response.data.token;
-
-          if (receivedToken) {
-            authService.setToken(receivedToken);
-            try {
-              await authService.fetchUser();
-              console.log("[Login.vue] authService.fetchUser completado.");
-
-              const userRoleFromService = authService.role;
-              console.log("[Login.vue] Rol obtenido DESDE authService:", userRoleFromService);
-
-              if (!userRoleFromService) {
-                console.error("[Login.vue] No se encontró el rol en authService.user después de fetchUser.");
-                this.toast.add({ severity: 'error', summary: 'Error de Datos', detail: 'No se pudo verificar el rol del usuario.', life: 3000 });
-                await authService.logout();
-                return;
-              }
-
-              this.toast.add({ severity: 'success', summary: '¡Éxito!', detail: 'Sesión iniciada.', life: 2000 });
-
-              if (userRoleFromService === 'ADMIN') {
-                this.$router.push('/admin/dashboard');
-              } else {
-                this.$router.push('/profile');
-              }
-
-            } catch (fetchError) {
-              console.error("[Login.vue] Error durante fetchUser post-login:", fetchError);
-              this.toast.add({ severity: 'warn', summary: 'Info Parcial', detail: 'Sesión iniciada pero no se pudieron cargar detalles completos.', life: 3000 });
-              if (authService.token) {
-                this.$router.push('/profile');
-              } else {
-                this.$router.push('/');
-              }
-            }
-          } else {
-            console.error("[Login.vue] Respuesta OK de API pero sin token.");
-            this.toast.add({ severity: 'error', summary: 'Error de Respuesta', detail: 'No se recibió token del servidor.', life: 3000 });
-            await authService.logout();
-          }
-        } catch (error) {
-          console.error('[Login.vue] Error inesperado en el método login:', error);
-          this.toast.add({
-            severity: 'error',
-            summary: 'Error Inesperado',
-            detail: 'Ocurrió un problema al intentar iniciar sesión.',
-            life: 3000,
-          });
-        }
-      } else {
+      return formIsValid;
+    },
+    async login() {
+      if (!this.validateForm()) {
         this.toast.add({
           severity: 'error',
           summary: 'Error en el formulario',
@@ -153,6 +107,74 @@ export default {
           life: 3000,
           styleClass: 'custom-toast-error'
         });
+        return;
+      }
+
+      try {
+        this.toast.add({ severity: 'info', summary: 'Iniciando sesión...', detail: 'Por favor espera.', life: 1500 });
+
+        const response = await axios.post('http://localhost:8080/auth/signin', this.form);
+        const receivedToken = response.data.token;
+
+        if (receivedToken) {
+          authService.setToken(receivedToken);
+          try {
+            await authService.fetchUser();
+            console.log("[Login.vue] authService.fetchUser completado.");
+
+            const userRoleFromService = authService.role;
+            console.log("[Login.vue] Rol obtenido DESDE authService:", userRoleFromService);
+
+            if (!userRoleFromService) {
+              console.error("[Login.vue] No se encontró el rol en authService.user después de fetchUser.");
+              this.toast.add({ severity: 'error', summary: 'Error de Datos', detail: 'No se pudo verificar el rol del usuario.', life: 3000 });
+              await authService.logout();
+              return;
+            }
+
+            this.toast.add({ severity: 'success', summary: '¡Éxito!', detail: 'Sesión iniciada.', life: 2000 });
+
+            if (userRoleFromService === 'ADMIN') {
+              this.$router.push('/admin/dashboard');
+            } else {
+              this.$router.push(this.redirectPath);
+            }
+
+          } catch (fetchError) {
+            console.error("[Login.vue] Error durante fetchUser post-login:", fetchError);
+            this.toast.add({ severity: 'warn', summary: 'Info Parcial', detail: 'Sesión iniciada pero no se pudieron cargar detalles completos.', life: 3000 });
+            if (authService.token) {
+              this.$router.push(this.redirectPath);
+            } else {
+              this.$router.push('/');
+            }
+          }
+        } else {
+          console.error("[Login.vue] Respuesta OK de API pero sin token.");
+          this.toast.add({ severity: 'error', summary: 'Error de Respuesta', detail: 'No se recibió token del servidor.', life: 3000 });
+          await authService.logout();
+        }
+      } catch (error: any) {
+        console.error('[Login.vue] Error inesperado en el método login:', error);
+        let errorMessage = 'Ocurrió un problema al intentar iniciar sesión.';
+
+        if (axios.isAxiosError(error) && error.response) {
+          if (error.response.status === 401) {
+            errorMessage = 'Credenciales incorrectas. Por favor, verifica tu correo y contraseña.';
+          } else if (error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+          }
+        }
+
+        this.toast.add({
+          severity: 'error',
+          summary: 'Error al iniciar sesión',
+          detail: errorMessage,
+          life: 3000,
+        });
+        if (authService.token) {
+          await authService.logout();
+        }
       }
     },
     togglePasswordVisibility() {
