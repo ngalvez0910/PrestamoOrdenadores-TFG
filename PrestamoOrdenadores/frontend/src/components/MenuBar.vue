@@ -2,7 +2,8 @@
   <div class="menubar">
     <div class="brand-and-nav">
       <h1><a :href="getHomeRoute()">LoanTech</a></h1>
-      <nav class="main-nav">
+
+      <nav class="main-nav desktop-nav">
         <router-link :to="getHomeRoute()" class="nav-link">
           <i class="pi pi-home nav-link-icon"></i> Inicio
         </router-link>
@@ -12,12 +13,12 @@
               text
               class="nav-button admin-dropdown-trigger"
               :class="{ 'admin-section-active': isInAdminSection }"
-          @click="toggleAdminMenu($event)"
-          aria-haspopup="true"
-          aria-controls="admin_menu"
+              @click="toggleAdminMenu($event)"
+              aria-haspopup="true"
+              aria-controls="admin_menu"
           >
-          <i class="pi pi-sliders-h nav-link-icon"></i>
-          Administración <i class="pi pi-angle-down" style="margin-left: 5px;"></i>
+            <i class="pi pi-sliders-h nav-link-icon"></i>
+            Administración <i class="pi pi-angle-down" style="margin-left: 5px;"></i>
           </Button>
         </template>
 
@@ -28,10 +29,27 @@
       </nav>
     </div>
 
-    <Button class="user-info" @click="toggleUserMenu($event)" text aria-haspopup="true" aria-controls="user_profile_menu">
-      <p class="username">{{ username || "Usuario" }}</p>
-      <Avatar :image="currentAvatar" shape="circle" class="avatar" />
-    </Button>
+    <div class="right-section">
+      <Button
+          icon="pi pi-bars"
+          class="p-button-text p-button-rounded hamburger-menu-button"
+          @click="toggleSidebar"
+          aria-controls="sidebar_menu"
+          aria-expanded="false"
+      />
+
+      <Button
+          class="notifications-button p-button-rounded p-button-text"
+          icon="pi pi-bell"
+          @click="goToNotifications"
+          v-tooltip.bottom="'Notificaciones'"
+      />
+
+      <Button class="user-info" @click="toggleUserMenu($event)" text aria-haspopup="true" aria-controls="user_profile_menu">
+        <p class="username">{{ username || "Usuario" }}</p>
+        <Avatar :image="currentAvatar" shape="circle" class="avatar" />
+      </Button>
+    </div>
 
 
     <Menu ref="userMenu" id="user_profile_menu" class="user-menu" :model="userMenuItems" :popup="true">
@@ -61,6 +79,28 @@
       </template>
     </Menu>
 
+    <Sidebar v-model:visible="sidebarVisible" :baseZIndex="1000" position="left" class="custom-sidebar">
+      <template #header>
+        <h3 style="color: var(--color-primary); font-weight: 600;">Navegación</h3>
+      </template>
+      <div class="sidebar-nav-links">
+        <router-link :to="getHomeRoute()" class="nav-link-sidebar" @click="sidebarVisible = false">
+          <i class="pi pi-home nav-link-icon"></i> Inicio
+        </router-link>
+
+        <template v-if="isAdmin">
+          <router-link to="/admin/dashboard" class="nav-link-sidebar" @click="sidebarVisible = false">
+            <i class="pi pi-sliders-h nav-link-icon"></i> Administración
+          </router-link>
+        </template>
+
+        <router-link v-for="link in userSpecificLinks" :key="link.label" :to="link.url" class="nav-link-sidebar" @click="sidebarVisible = false">
+          <i v-if="link.icon" :class="link.icon + ' nav-link-icon'"></i>
+          {{ link.label }}
+        </router-link>
+      </div>
+    </Sidebar>
+
   </div>
 </template>
 
@@ -71,19 +111,20 @@ import Button from "primevue/button";
 import {ref, computed, onMounted, watch} from "vue";
 import { useRouter } from "vue-router";
 import {authService, type UserData} from "@/services/AuthService.ts";
+import Sidebar from 'primevue/sidebar';
+import Tooltip from 'primevue/tooltip';
 
 export default {
   name: "MenuBar",
-  components: {
-    Avatar,
-    Menu,
-    Button
-  },
+  components: {Avatar, Menu, Button, Sidebar},
+  directives: {Tooltip},
   setup() {
     const userMenu = ref();
     const adminMenu = ref();
     const router = useRouter();
     const avatarUpdateKey = ref(Date.now());
+    const sidebarVisible = ref(false);
+
     const forceAvatarUpdate = () => {
       avatarUpdateKey.value = Date.now();
     };
@@ -97,9 +138,6 @@ export default {
     });
 
     const user = computed<UserData | null>(() => authService.user);
-    const token = computed<string | null>(() => authService.token);
-
-    const rol = computed(() => user.value?.rol || "");
     const username = computed(() => user.value?.nombre || "Usuario");
 
     const avatar = computed(() => {
@@ -133,6 +171,10 @@ export default {
       if (isAdmin.value) {
         adminMenu.value?.toggle(event);
       }
+    };
+
+    const toggleSidebar = () => {
+      sidebarVisible.value = !sidebarVisible.value;
     };
 
     const userMenuItems = ref([
@@ -173,11 +215,15 @@ export default {
     const userSpecificLinks = ref([
       { label: 'Mis Préstamos', url: '/prestamo/me', icon: 'pi pi-arrow-right-arrow-left' },
       { label: 'Mis Incidencias', url: '/incidencias/me', icon: 'pi pi-flag-fill' },
-      { label: 'Notificaciones', url: '/notificaciones', icon: 'pi pi-bell' },
+      { label: 'Mis Sanciones', url: '/sanciones/me', icon: 'pi pi-ban' },
     ]);
 
     const getHomeRoute = () => {
       return isAdmin.value ? "/admin/dashboard" : "/profile";
+    };
+
+    const goToNotifications = () => {
+      router.push('/notificaciones');
     };
 
     return {
@@ -193,7 +239,10 @@ export default {
       isAdmin,
       isInAdminSection,
       getHomeRoute,
-      forceAvatarUpdate
+      forceAvatarUpdate,
+      goToNotifications,
+      sidebarVisible,
+      toggleSidebar
     };
   },
 };
@@ -218,6 +267,34 @@ export default {
   flex-grow: 1;
 }
 
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.notifications-button.p-button {
+  background-color: transparent !important;
+  color: var(--color-primary) !important;
+  border: none !important;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50% !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.notifications-button.p-button:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.1) !important;
+  color: var(--color-interactive) !important;
+}
+
+.notifications-button.p-button .p-button-icon {
+  font-size: 1.3rem;
+}
+
 .menubar h1 {
   margin-right: 40px;
 }
@@ -238,6 +315,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.hamburger-menu-button {
+  display: none !important;
+  color: var(--color-primary) !important;
+  font-size: 1.5rem !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.hamburger-menu-button:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.1) !important;
+  color: var(--color-interactive-darker) !important;
 }
 
 .nav-link, .nav-button {
@@ -382,7 +472,7 @@ export default {
 }
 
 .menu-item-link:hover {
-  background-color: var(rgba(var(--color-interactive-rgb), 0.1)) !important;
+  background-color: rgba(var(--color-interactive-rgb), 0.1) !important;
   color: var(--color-interactive-darker) !important;
 }
 
@@ -394,6 +484,56 @@ export default {
   height: 1px;
   background-color: var(--color-neutral-medium);
   margin: 8px 0;
+}
+
+:global(.custom-sidebar.p-sidebar) {
+  background-color: var(--color-text-on-dark) !important;
+  color: var(--color-primary) !important;
+}
+
+:global(.custom-sidebar .p-sidebar-header) {
+  padding: 1.5rem !important;
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.1);
+}
+
+:global(.custom-sidebar .p-sidebar-close) {
+  color: var(--color-primary) !important;
+  font-size: 1.3rem !important;
+}
+
+:global(.custom-sidebar .p-sidebar-close:hover) {
+  background-color: rgba(var(--color-primary-rgb), 0.1) !important;
+  color: var(--color-interactive) !important;
+}
+
+.sidebar-nav-links {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+}
+
+.nav-link-sidebar {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border-radius: 0;
+}
+
+.nav-link-sidebar:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.1) !important;
+  color: var(--color-interactive-darker) !important;
+}
+
+.nav-link-sidebar.router-link-exact-active {
+  background-color: rgba(var(--color-interactive-rgb), 0.15) !important;
+  color: var(--color-interactive-darker) !important;
+  border-left: 4px solid var(--color-interactive) !important;
+  padding-left: 16px;
 }
 
 @media (max-width: 1100px) {
@@ -409,21 +549,21 @@ export default {
   }
 }
 
-
 @media (max-width: 992px) {
-  .main-nav {
+  .main-nav.desktop-nav {
     display: none;
   }
-
+  .hamburger-menu-button {
+    display: inline-flex !important;
+  }
   .brand-and-nav {
     flex-grow: 0;
+    gap: 10px;
   }
-
   .menubar {
     padding: 10px 15px;
   }
-
-  .user-info.p-button {
+  .right-section {
     margin-left: auto;
   }
 }
@@ -439,6 +579,13 @@ export default {
     padding: 5px !important;
     border-radius: 50%;
     gap: 0;
+  }
+  .notifications-button.p-button {
+    width: 36px;
+    height: 36px;
+  }
+  .notifications-button.p-button .p-button-icon {
+    font-size: 1.1rem;
   }
 }
 </style>

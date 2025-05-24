@@ -24,6 +24,8 @@ import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import Paginator from 'primevue/paginator';
 import ConfirmDialog from 'primevue/confirmdialog';
+import Sidebar from "primevue/sidebar";
+import Tooltip from "primevue/tooltip";
 import ConfirmationService from 'primevue/confirmationservice';
 import {authService} from "@/services/AuthService.ts";
 
@@ -56,6 +58,7 @@ app.component('Column', Column)
 app.component('Menu', Menu)
 app.component('Badge', Badge)
 app.component('Toast', Toast)
+app.component('Sidebar', Sidebar)
 app.component('Paginator', Paginator)
 
 
