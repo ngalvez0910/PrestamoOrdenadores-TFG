@@ -57,7 +57,6 @@
     </form>
   </Dialog>
 
-  <Toast />
 </template>
 
 <script lang="ts">
@@ -188,7 +187,6 @@ export default defineComponent({
   }
 });
 </script>
-
 
 <style scoped>
 .page-container.incidencias-me-page {
@@ -371,28 +369,6 @@ export default defineComponent({
 .action-button.secondary-button:hover {
   background-color: rgba(var(--color-interactive-rgb), 0.05);
 }
-
-
-/* Estilos para botones de acción en tabla (si los añades) */
-/*
-.action-button-table {
-    margin: 0 2px;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-}
-.action-button-table.p-button-info {
-    background-color: var(--color-info) !important;
-    border-color: var(--color-info) !important;
-}
-.action-button-table.p-button-info:hover {
-    background-color: var(--color-info-darker) !important;
-    border-color: var(--color-info-darker) !important;
-}
-*/
 
 @media (max-width: 768px) {
   .page-container.incidencias-me-page {

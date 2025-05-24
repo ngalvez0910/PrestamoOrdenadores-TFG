@@ -88,7 +88,6 @@
       <Button label="Ir al enlace" icon="pi pi-link" class="p-button-text" v-if="selectedNotificationForDialog.enlace" @click="navigateFromDialog" />
     </template>
   </Dialog>
-  <Toast />
 </template>
 
 <script lang="ts">

@@ -142,7 +142,6 @@
     </template>
   </Dialog>
 
-  <Toast />
 </template>
 
 <script lang="ts">
