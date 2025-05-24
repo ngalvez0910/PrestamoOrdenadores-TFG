@@ -152,4 +152,14 @@ export const getSancionesByUserGuid = async(): Promise<Sancion[]> => {
         console.error('Error obteniendo sanciones y/o guid:', error.response?.data || error.message);
         throw new Error(error.response?.data || error.message);
     }
-}
+};
+
+export const getSancionesCountByUserGuid = async (): Promise<number> => {
+    try {
+        const sanciones = await getSancionesByUserGuid();
+        return sanciones.length;
+    } catch (error) {
+        console.error("Error obteniendo el recuento de sanciones:", error);
+        return 0;
+    }
+};

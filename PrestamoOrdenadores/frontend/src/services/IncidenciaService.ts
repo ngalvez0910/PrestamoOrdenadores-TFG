@@ -202,3 +202,13 @@ export const deleteIncidencia = async (guid: string): Promise<void | null> => {
         return null;
     }
 };
+
+export const getIncidenciasCountByUserGuid = async (): Promise<number> => {
+    try {
+        const incidencias = await getIncidenciasByUserGuid();
+        return incidencias.length;
+    } catch (error) {
+        console.error("Error obteniendo el recuento de incidencias:", error);
+        return 0;
+    }
+};

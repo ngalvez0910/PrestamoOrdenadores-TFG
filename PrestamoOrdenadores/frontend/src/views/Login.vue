@@ -188,7 +188,7 @@ export default {
   align-items: center;
   min-height: calc(100vh - 60px);
   min-width: 500px;
-  padding: 80px 20px 40px 20px;
+  padding: 0 20px 0 20px;
   box-sizing: border-box;
 }
 

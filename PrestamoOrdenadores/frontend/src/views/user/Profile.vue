@@ -33,6 +33,21 @@
         </div>
       </div>
 
+      <div class="stats-section">
+        <div class="stat-item">
+          <span class="stat-number">{{ prestamosRealizados }}</span>
+          <span class="stat-label">PRÉSTAMOS REALIZADOS</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ incidenciasReportadas }}</span>
+          <span class="stat-label">INCIDENCIAS REPORTADAS</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ sancionesRecibidas }}</span>
+          <span class="stat-label">SANCIONES RECIBIDAS</span>
+        </div>
+      </div>
+
       <div class="profile-card-footer">
         <button @click="openChangePasswordModal" class="action-button change-password-button">
           <i class="pi pi-key"></i> Cambiar Contraseña
@@ -113,6 +128,9 @@ import { jwtDecode } from "jwt-decode";
 import {useToast} from "primevue/usetoast";
 import { authService } from '@/services/AuthService.ts';
 import {updateAvatar} from "@/services/UsuarioService.ts";
+import {getPrestamosCountByUserGuid} from "@/services/PrestamoService.ts";
+import {getIncidenciasCountByUserGuid} from "@/services/IncidenciaService.ts";
+import {getSancionesCountByUserGuid} from "@/services/SancionService.ts";
 
 interface UserData {
   guid: string;
@@ -134,6 +152,9 @@ export default defineComponent({
       curso: '',
       avatar: 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg',
       loading: true,
+      prestamosRealizados: 0,
+      incidenciasReportadas: 0,
+      sancionesRecibidas: 0,
       isChangePasswordModalVisible: false,
       changePasswordForm: {
         oldPassword: '',
@@ -173,6 +194,7 @@ export default defineComponent({
   },
   mounted() {
     this.obtenerDatos();
+    this.obtenerRecuentos();
   },
   methods: {
     async obtenerDatos() {
@@ -200,6 +222,22 @@ export default defineComponent({
         } catch (error) {
           console.error("Error al obtener los datos del usuario:", error);
         }
+      }
+    },
+    async obtenerRecuentos() {
+      try {
+        const [prestamosCount, incidenciasCount, sancionesCount] = await Promise.all([
+          getPrestamosCountByUserGuid(),
+          getIncidenciasCountByUserGuid(),
+          getSancionesCountByUserGuid(),
+        ]);
+
+        this.prestamosRealizados = prestamosCount;
+        this.incidenciasReportadas = incidenciasCount;
+        this.sancionesRecibidas = sancionesCount;
+      } catch (error) {
+        console.error("Error al obtener los recuentos:", error);
+        this.toast.add({ severity: 'warn', summary: 'Datos Incompletos', detail: 'No se pudieron cargar todos los recuentos (préstamos, incidencias, sanciones).', life: 3000 });
       }
     },
     async logout() {
@@ -344,7 +382,7 @@ export default defineComponent({
 
 <style scoped>
 .page-container.profile-page {
-  padding: 80px 30px 40px 30px;
+  padding: 40px 30px 40px 30px;
   max-width: 800px;
   margin: 0 auto;
   box-sizing: border-box;
@@ -438,6 +476,45 @@ export default defineComponent({
   display: flex;
   align-items: center;
   word-wrap: break-word;
+}
+
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding-top: 25px;
+  margin-top: 25px;
+  border-top: 1px solid var(--color-neutral-medium);
+  text-align: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 10px;
+  background-color: var(--color-background-main);
+  border-radius: 10px;
+  border: 1px solid var(--color-neutral-medium);
+  box-shadow: 0 2px 5px rgba(var(--color-primary-rgb), 0.05);
+}
+
+.stat-number {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-interactive);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .profile-card-footer {
