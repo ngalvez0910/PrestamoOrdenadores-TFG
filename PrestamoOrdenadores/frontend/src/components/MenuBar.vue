@@ -42,7 +42,6 @@
           class="notifications-button p-button-rounded p-button-text"
           icon="pi pi-bell"
           @click="goToNotifications"
-          v-tooltip.bottom="'Notificaciones'"
       />
 
       <Button class="user-info" @click="toggleUserMenu($event)" text aria-haspopup="true" aria-controls="user_profile_menu">

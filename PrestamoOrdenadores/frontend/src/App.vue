@@ -385,6 +385,7 @@ a {
 
 .main-content {
   flex-grow: 1;
+  overflow-y: auto;
 }
 
 </style>

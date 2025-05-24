@@ -280,7 +280,6 @@ export default defineComponent({
   font-family: 'Montserrat', sans-serif !important;
 }
 
-
 .status-badge {
   padding: 5px 12px;
   border-radius: 16px;
