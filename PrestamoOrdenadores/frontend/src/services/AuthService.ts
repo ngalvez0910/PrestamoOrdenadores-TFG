@@ -230,25 +230,6 @@ export const authService = {
         }
     },
 
-    hasRole(role: string): boolean {
-        return this.role === role;
-    },
-
-    hasAnyRole(roles: string[]): boolean {
-        return roles.includes(this.role || '');
-    },
-
-    getTokenInfo(): any | null {
-        if (!state.token) return null;
-
-        try {
-            return jwtDecode(state.token);
-        } catch (error) {
-            console.error("[AuthService] Error al decodificar token:", error);
-            return null;
-        }
-    },
-
     get user(): UserData | null {
         return state.user;
     },
@@ -267,10 +248,6 @@ export const authService = {
 
     isAdmin(): boolean {
         return this.role === 'ADMIN';
-    },
-
-    getUserRole(): string | null {
-        return this.role;
     },
 
     syncFromStorage(): void {

@@ -142,12 +142,7 @@ export default {
 
           } catch (fetchError) {
             console.error("[Login.vue] Error durante fetchUser post-login:", fetchError);
-            this.toast.add({ severity: 'warn', summary: 'Info Parcial', detail: 'Sesión iniciada pero no se pudieron cargar detalles completos.', life: 3000 });
-            if (authService.token) {
-              this.$router.push(this.redirectPath);
-            } else {
-              this.$router.push('/');
-            }
+            this.toast.add({ severity: 'warn', summary: 'Info Parcial', detail: 'Sesión iniciada pero no se pudieron cargar detalles completos del usuario. Intenta recargar la página.', life: 5000 });
           }
         } else {
           console.error("[Login.vue] Respuesta OK de API pero sin token.");
