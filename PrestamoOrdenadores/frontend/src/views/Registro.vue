@@ -14,7 +14,7 @@
               title="Haz clic para más información"
           ></i>
         </label>
-        <input type="text" id="numeroIdentificacion" class="input-field" name="numeroIdentificacion" placeholder="Número de Identificación" v-model="form.numeroIdentificacion">
+        <input type="text" id="numeroIdentificacion" class="input-field" name="numeroIdentificacion" placeholder="Número de Identificación" v-model="form.numeroIdentificacion" @blur="validateField('numeroIdentificacion')">
         <p class="error-message" v-if="errors.numeroIdentificacion">{{ errors.numeroIdentificacion }}</p>
       </div>
 
@@ -22,14 +22,14 @@
         <div class="form-col">
           <div class="form-group">
             <label for="nombre" class="input-label">Nombre</label>
-            <input type="text" id="nombre" class="input-field" name="nombre" placeholder="Tu nombre" v-model="form.nombre">
+            <input type="text" id="nombre" class="input-field" name="nombre" placeholder="Tu nombre" v-model="form.nombre" @blur="validateField('nombre')">
             <p class="error-message" v-if="errors.nombre">{{ errors.nombre }}</p>
           </div>
         </div>
         <div class="form-col">
           <div class="form-group">
             <label for="apellidos" class="input-label">Apellidos</label>
-            <input type="text" id="apellidos" class="input-field" name="apellidos" placeholder="Tus apellidos" v-model="form.apellidos">
+            <input type="text" id="apellidos" class="input-field" name="apellidos" placeholder="Tus apellidos" v-model="form.apellidos" @blur="validateField('apellidos')">
             <p class="error-message" v-if="errors.apellidos">{{ errors.apellidos }}</p>
           </div>
         </div>
@@ -39,14 +39,14 @@
         <div class="form-col">
           <div class="form-group">
             <label for="curso" class="input-label">Curso</label>
-            <input class="input-field" id="curso" type="text" name="curso" placeholder="Ej: 1ASIR, 2DAW"  v-model="form.curso">
+            <input class="input-field" id="curso" type="text" name="curso" placeholder="Ej: 1ASIR, 2DAW"  v-model="form.curso" @blur="validateField('curso')">
             <p class="error-message" v-if="errors.curso">{{ errors.curso }}</p>
           </div>
         </div>
         <div class="form-col">
           <div class="form-group">
             <label for="tutor" class="input-label">Tutor</label>
-            <input class="input-field" id="tutor" type="text" name="tutor" placeholder="Nombre del tutor" v-model="form.tutor">
+            <input class="input-field" id="tutor" type="text" name="tutor" placeholder="Nombre del tutor" v-model="form.tutor" @blur="validateField('tutor')">
             <p class="error-message" v-if="errors.tutor">{{ errors.tutor }}</p>
           </div>
         </div>
@@ -83,6 +83,7 @@
                   class="input-field"
                   placeholder="Crea una contraseña segura"
                   v-model="form.password"
+                  @input="validateField('password')"
                   :aria-invalid="errors.password ? 'true' : 'false'"
                   aria-describedby="password-error"
               >
@@ -105,6 +106,7 @@
                   class="input-field"
                   placeholder="Vuelve a escribir la contraseña"
                   v-model="form.confirmPassword"
+                  @input="validateField('confirmPassword')"
                   :aria-invalid="errors.confirmPassword ? 'true' : 'false'"
                   aria-describedby="confirmPassword-error"
               >
@@ -137,16 +139,34 @@
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
-import { useToast } from 'primevue/usetoast';
 import { authService } from '@/services/AuthService.ts';
+import {defineComponent} from "vue";
 
-export default {
+interface FormData {
+  numeroIdentificacion: string;
+  nombre: string;
+  apellidos: string;
+  curso: string;
+  tutor: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+interface FormErrors {
+  numeroIdentificacion: string;
+  nombre: string;
+  apellidos: string;
+  email: string;
+  curso: string;
+  tutor: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export default defineComponent({
   name: 'Register',
   components: { Toast, Button, Dialog },
-  setup() {
-    const toast = useToast();
-    return { toast };
-  },
   data() {
     return {
       form: {
@@ -158,7 +178,7 @@ export default {
         email: '',
         password: '',
         confirmPassword: '',
-      },
+      } as FormData,
       errors: {
         numeroIdentificacion: '',
         nombre: '',
@@ -168,7 +188,7 @@ export default {
         tutor: '',
         password: '',
         confirmPassword: '',
-      },
+      } as FormErrors,
       isSubmitting: false,
       isInfoModalVisible: false,
       modalTitle: '',
@@ -177,8 +197,14 @@ export default {
       confirmPasswordFieldType: 'password',
     };
   },
+  mounted() {
+    this.$toast = this.$toast || this.getToast();
+  },
   methods: {
-    showInfo(infoType: string) {
+    getToast() {
+      return this.$toast;
+    },
+    showInfo(infoType: string): void {
       switch (infoType) {
         case 'numeroIdentificacion':
           this.modalTitle = '¿Cuál es mi Número de Identificación?';
@@ -206,7 +232,98 @@ export default {
       }
       this.isInfoModalVisible = true;
     },
-    validateEmail() {
+    validateField(fieldName: keyof FormData): boolean {
+      this.errors[fieldName] = '';
+      let isValid = true;
+
+      switch (fieldName) {
+        case 'numeroIdentificacion':
+          if (!this.form.numeroIdentificacion) {
+            this.errors.numeroIdentificacion = 'Campo obligatorio';
+            isValid = false;
+          } else {
+            const nieRegex = /^(\d{4})LT(\d{3})$/;
+            if (!nieRegex.test(this.form.numeroIdentificacion)) {
+              this.errors.numeroIdentificacion = 'Formato incorrecto. Debe ser XXXXLTXXX (ej: 2023LT123).';
+              isValid = false;
+            } else {
+              const match = this.form.numeroIdentificacion.match(nieRegex);
+              if (match) {
+                const year = parseInt(match[1], 10);
+                const currentYear = new Date().getFullYear();
+                const minValidYear = currentYear - 30;
+
+                if (year < minValidYear || year > currentYear) {
+                  this.errors.numeroIdentificacion = `Año inválido en el número de identificación. Debe ser entre ${minValidYear} y ${currentYear}.`;
+                  isValid = false;
+                }
+              }
+            }
+          }
+          break;
+        case 'nombre':
+          if (!this.form.nombre) {
+            this.errors.nombre = 'Campo obligatorio';
+            isValid = false;
+          }
+          break;
+        case 'apellidos':
+          if (!this.form.apellidos) {
+            this.errors.apellidos = 'Campo obligatorio';
+            isValid = false;
+          }
+          break;
+        case 'curso':
+          if (this.form.email.endsWith('.loantech@gmail.com') && !this.form.curso) {
+            this.errors.curso = 'El curso es obligatorio para estudiantes.';
+            isValid = false;
+          } else if (this.form.email.endsWith('profesor.loantech@gmail.com') && !this.form.curso) {
+            this.errors.curso = 'El curso/departamento es obligatorio para profesores.';
+            isValid = false;
+          } else if (this.form.email.endsWith('admin.loantech@gmail.com') && this.form.curso) {
+            this.errors.curso = 'El campo curso no es aplicable para administradores y debe estar vacío.';
+            isValid = false;
+          }
+          break;
+        case 'tutor':
+          if (this.form.email.endsWith('.loantech@gmail.com') && !this.form.tutor) {
+            this.errors.tutor = 'El tutor es obligatorio para estudiantes.';
+            isValid = false;
+          } else if (this.form.email.endsWith('profesor.loantech@gmail.com') && this.form.tutor) {
+            this.errors.tutor = 'El campo tutor no es aplicable para profesores y debe estar vacío.';
+            isValid = false;
+          } else if (this.form.email.endsWith('admin.loantech@gmail.com') && this.form.tutor) {
+            this.errors.tutor = 'El campo tutor no es aplicable para administradores y debe estar vacío.';
+            isValid = false;
+          }
+          break;
+        case 'password':
+          if (!this.form.password) {
+            this.errors.password = 'La contraseña es obligatoria.';
+            isValid = false;
+          } else if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
+            this.errors.password = 'La contraseña debe cumplir los siguientes requisitos:\n - Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un dígito.\n- Al menos un carácter especial (ej: !@#$%^&*).';
+            isValid = false;
+          }
+          if (this.form.confirmPassword) {
+            this.validateField('confirmPassword');
+          }
+          break;
+        case 'confirmPassword':
+          if (!this.form.confirmPassword) {
+            this.errors.confirmPassword = 'Por favor, confirma la contraseña.';
+            isValid = false;
+          } else if (this.form.password && this.form.password !== this.form.confirmPassword) {
+            this.errors.confirmPassword = 'Las contraseñas no coinciden';
+            isValid = false;
+          }
+          break;
+        default:
+          break;
+      }
+      return isValid;
+    },
+    validateEmail(): void {
       const email = this.form.email;
       let isValidFormat = false;
       let errorMessage = '';
@@ -215,8 +332,8 @@ export default {
         errorMessage = 'El correo electrónico es obligatorio';
       } else {
         const endsWithLoantech = email.endsWith('.loantech@gmail.com');
-        const endsWithProfesor = email.endsWith('.profesor.loantech@gmail.com');
-        const endsWithAdmin = email.endsWith('.admin.loantech@gmail.com');
+        const endsWithProfesor = email.endsWith('.loantech.profesor@gmail.com');
+        const endsWithAdmin = email.endsWith('.loantech.admin@gmail.com');
 
         const basicFormatCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -236,7 +353,7 @@ export default {
         this.errors.tutor = '';
       }
     },
-    validateEmailDependencies() {
+    validateEmailDependencies(): void {
       this.errors.curso = '';
       this.errors.tutor = '';
 
@@ -247,14 +364,14 @@ export default {
         if (!this.form.tutor) {
           this.errors.tutor = 'El tutor es obligatorio para estudiantes.';
         }
-      } else if (this.form.email.endsWith('profesor.loantech@gmail.com')) {
+      } else if (this.form.email.endsWith('.loantech.profesor@gmail.com')) {
         if (!this.form.curso) {
           this.errors.curso = 'El curso/departamento es obligatorio para profesores.';
         }
         if (this.form.tutor) {
           this.errors.tutor = 'El campo tutor no es aplicable para profesores y debe estar vacío.';
         }
-      } else if (this.form.email.endsWith('admin.loantech@gmail.com')) {
+      } else if (this.form.email.endsWith('.loantech.admin@gmail.com')) {
         if (this.form.curso) {
           this.errors.curso = 'El campo curso no es aplicable para administradores y debe estar vacío.';
         }
@@ -264,94 +381,35 @@ export default {
       }
     },
     validateForm(): boolean {
-      this.errors = {
-        numeroIdentificacion: '',
-        nombre: '',
-        apellidos: '',
-        curso: '',
-        tutor: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-      };
+      const basicFields: Array<keyof FormData> = [
+        'numeroIdentificacion', 'nombre', 'apellidos', 'password', 'confirmPassword'
+      ];
 
-      let formIsValid = true;
+      let allFieldsValid = true;
 
-      if (!this.form.numeroIdentificacion) {
-        this.errors.numeroIdentificacion = 'Campo obligatorio';
-        formIsValid = false;
-      } else {
-        const nieRegex = /^(\d{4})LT(\d{3})$/;
-        if (!nieRegex.test(this.form.numeroIdentificacion)) {
-          this.errors.numeroIdentificacion = 'Formato incorrecto. Debe ser XXXXLTXXX (ej: 2023LT123).';
-          formIsValid = false;
-        } else {
-          const match = this.form.numeroIdentificacion.match(nieRegex);
-          if (match) {
-            const year = parseInt(match[1], 10);
-            const currentYear = new Date().getFullYear();
-            const minValidYear = currentYear - 30;
-
-            if (year < minValidYear || year > currentYear) {
-              this.errors.numeroIdentificacion = `Número de Identificación inválido`;
-              formIsValid = false;
-            }
-          }
+      for (const field of basicFields) {
+        if (!this.validateField(field)) {
+          allFieldsValid = false;
         }
       }
 
-      if (!this.form.nombre) {
-        this.errors.nombre = 'Campo obligatorio';
-        formIsValid = false;
-      }
-
-      if (!this.form.apellidos) {
-        this.errors.apellidos = 'Campo obligatorio';
-        formIsValid = false;
-      }
-
-      if (!this.form.email) {
-        this.errors.email = 'El correo electrónico es obligatorio';
-        formIsValid = false;
-      } else {
-        const basicFormatCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email);
-        const endsWithLoantech = this.form.email.endsWith('.loantech@gmail.com');
-        const endsWithProfesor = this.form.email.endsWith('.profesor.loantech@gmail.com');
-        const endsWithAdmin = this.form.email.endsWith('.admin.loantech@gmail.com');
-
-        if (!(basicFormatCheck && (endsWithLoantech || endsWithProfesor || endsWithAdmin))) {
-          this.errors.email = 'El correo debe ser válido y terminar en .loantech@gmail.com.';
-          formIsValid = false;
-        }
+      this.validateEmail();
+      if (this.errors.email) {
+        allFieldsValid = false;
       }
 
       if (!this.errors.email) {
         this.validateEmailDependencies();
-        if (this.errors.curso) formIsValid = false;
-        if (this.errors.tutor) formIsValid = false;
+        if (this.errors.curso || this.errors.tutor) {
+          allFieldsValid = false;
+        }
       }
 
-      if (!this.form.password) {
-        this.errors.password = 'La contraseña es obligatoria.';
-        formIsValid = false;
-      } else if (this.form.password.length < 8 || !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(this.form.password)) {
-        this.errors.password = 'La contraseña debe cumplir los siguientes requisitos:\n - Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un dígito.\n- Al menos un carácter especial (ej: !@#$%^&*).';
-        formIsValid = false;
-      }
-
-      if (!this.form.confirmPassword) {
-        this.errors.confirmPassword = 'Por favor, confirma la contraseña.';
-        formIsValid = false;
-      } else if (this.form.password && this.form.password !== this.form.confirmPassword) {
-        this.errors.confirmPassword = 'Las contraseñas no coinciden';
-        formIsValid = false;
-      }
-
-      return formIsValid;
+      return allFieldsValid;
     },
-    async registerUser() {
+    async registerUser(): Promise<void> {
       if (!this.validateForm()) {
-        this.toast.add({
+        this.$toast.add({
           severity: 'error',
           summary: 'Error en el Registro',
           detail: 'Por favor, corrija los errores y vuelva a intentarlo.',
@@ -377,7 +435,7 @@ export default {
       try {
         const token = await authService.register(userData);
         if (token) {
-          this.toast.add({
+          this.$toast.add({
             severity: 'success',
             summary: 'Registro Exitoso',
             detail: 'El registro se completó y la sesión se inició automáticamente.',
@@ -386,7 +444,7 @@ export default {
           });
           this.$router.push('/profile');
         } else {
-          this.toast.add({
+          this.$toast.add({
             severity: 'error',
             summary: 'Error en el Registro',
             detail: 'Hubo un problema al iniciar sesión automáticamente después del registro.',
@@ -396,7 +454,7 @@ export default {
         }
       } catch (error: any) {
         console.error('Error al registrar el usuario:', error.response?.data?.message || error.message);
-        this.toast.add({
+        this.$toast.add({
           severity: 'error',
           summary: 'Error en el Registro',
           detail: error.response?.data?.message || 'Hubo un error al registrar el usuario. Inténtelo de nuevo.',
@@ -414,7 +472,7 @@ export default {
       this.confirmPasswordFieldType = this.confirmPasswordFieldType === 'password' ? 'text' : 'password';
     }
   },
-};
+});
 </script>
 
 <style scoped>

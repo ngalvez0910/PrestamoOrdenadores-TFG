@@ -33,7 +33,7 @@ describe('PrestamoMe Page', () => {
     });
 
     it('Muestra mensaje cuando no hay préstamos', () => {
-        cy.get('input#email').type('pedro.ramos.profesor.loantech@gmail.com')
+        cy.get('input#email').type('pedro.ramos.loantech.profesor@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
