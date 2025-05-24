@@ -17,7 +17,7 @@ describe('Página Mis Incidencias', () => {
     });
 
     it('muestra mensaje cuando no hay incidencias', () => {
-        cy.get('input#email').type('pedro.ramos.profesor.loantech@gmail.com')
+        cy.get('input#email').type('pedro.ramos.loantech.profesor@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 

@@ -280,3 +280,13 @@ export const deletePrestamo = async (guid: string): Promise<void | null> => {
         return null;
     }
 };
+
+export const getPrestamosCountByUserGuid = async (): Promise<number> => {
+    try {
+        const prestamos = await getPrestamosByUserGuid();
+        return prestamos.length;
+    } catch (error) {
+        console.error("Error obteniendo el recuento de préstamos:", error);
+        return 0;
+    }
+};

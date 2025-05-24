@@ -4,7 +4,7 @@ describe('Página de Notificaciones', () => {
     });
 
     it('Carga las notificaciones correctamente', () => {
-        cy.get('input#email').type('admin.admin.loantech@gmail.com')
+        cy.get('input#email').type('admin.loantech.admin@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -16,7 +16,7 @@ describe('Página de Notificaciones', () => {
     });
 
     it('Muestra el botón de "Marcar todas como leídas" solo si hay no leídas', () => {
-        cy.get('input#email').type('admin.admin.loantech@gmail.com')
+        cy.get('input#email').type('admin.loantech.admin@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -30,7 +30,7 @@ describe('Página de Notificaciones', () => {
     });
 
     it('Marca una notificación como leída', () => {
-        cy.get('input#email').type('admin.admin.loantech@gmail.com')
+        cy.get('input#email').type('admin.loantech.admin@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -42,7 +42,7 @@ describe('Página de Notificaciones', () => {
     });
 
     it('Elimina una notificación', () => {
-        cy.get('input#email').type('admin.admin.loantech@gmail.com')
+        cy.get('input#email').type('admin.loantech.admin@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -54,7 +54,7 @@ describe('Página de Notificaciones', () => {
     });
 
     it('Marca todas como leídas', () => {
-        cy.get('input#email').type('admin.admin.loantech@gmail.com')
+        cy.get('input#email').type('admin.loantech.admin@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -70,7 +70,7 @@ describe('Página de Notificaciones', () => {
     });
 
     it('Abre el diálogo de detalles de notificación', () => {
-        cy.get('input#email').type('admin.admin.loantech@gmail.com')
+        cy.get('input#email').type('admin.loantech.admin@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -85,7 +85,7 @@ describe('Página de Notificaciones', () => {
     });
 
     it('Navega al enlace desde el diálogo si existe', () => {
-        cy.get('input#email').type('admin.admin.loantech@gmail.com')
+        cy.get('input#email').type('admin.loantech.admin@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 
@@ -102,7 +102,7 @@ describe('Página de Notificaciones', () => {
     });
 
     it('Muestra mensaje si no hay notificaciones', () => {
-        cy.get('input#email').type('pedro.ramos.profesor.loantech@gmail.com')
+        cy.get('input#email').type('pedro.ramos.loantech.profesor@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 

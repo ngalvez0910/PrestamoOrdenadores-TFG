@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@WithMockUser(username = "admin.admin.loantech@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
+@WithMockUser(username = "admin.loantech.admin@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class UserControllerTest {
 
     @Autowired

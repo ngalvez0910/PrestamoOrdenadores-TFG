@@ -133,6 +133,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/sanciones/me',
+      name: 'SancionesMe',
+      component: () => import('../views/user/SancionesMe.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/politicaPrivacidad',
       name: 'PoliticaPrivacidad',
       component: () => import('../views/PoliticaPrivacidad.vue'),

@@ -45,8 +45,6 @@
       <p class="register-link">
         ¿No tienes cuenta? <a href="/registro">Regístrate aquí</a>
       </p>
-
-      <Toast />
     </div>
   </div>
 </template>
@@ -91,10 +89,6 @@ export default {
         this.errors.email = 'Correo electrónico inválido';
         formIsValid = false;
       }
-      if (this.form.password.length < 8) {
-        this.errors.password = 'La contraseña debe tener al menos 8 caracteres.';
-        formIsValid = false;
-      }
 
       return formIsValid;
     },
@@ -111,8 +105,6 @@ export default {
       }
 
       try {
-        this.toast.add({ severity: 'info', summary: 'Iniciando sesión...', detail: 'Por favor espera.', life: 1500 });
-
         const response = await axios.post('http://localhost:8080/auth/signin', this.form);
         const receivedToken = response.data.token;
 
@@ -127,12 +119,15 @@ export default {
 
             if (!userRoleFromService) {
               console.error("[Login.vue] No se encontró el rol en authService.user después de fetchUser.");
-              this.toast.add({ severity: 'error', summary: 'Error de Datos', detail: 'No se pudo verificar el rol del usuario.', life: 3000 });
+              this.toast.add({
+                severity: 'error',
+                summary: 'Error de Datos',
+                detail: 'No se pudo verificar el rol del usuario.',
+                life: 3000
+              });
               await authService.logout();
               return;
             }
-
-            this.toast.add({ severity: 'success', summary: '¡Éxito!', detail: 'Sesión iniciada.', life: 2000 });
 
             if (userRoleFromService === 'ADMIN') {
               this.$router.push('/admin/dashboard');
@@ -142,16 +137,9 @@ export default {
 
           } catch (fetchError) {
             console.error("[Login.vue] Error durante fetchUser post-login:", fetchError);
-            this.toast.add({ severity: 'warn', summary: 'Info Parcial', detail: 'Sesión iniciada pero no se pudieron cargar detalles completos.', life: 3000 });
-            if (authService.token) {
-              this.$router.push(this.redirectPath);
-            } else {
-              this.$router.push('/');
-            }
           }
         } else {
           console.error("[Login.vue] Respuesta OK de API pero sin token.");
-          this.toast.add({ severity: 'error', summary: 'Error de Respuesta', detail: 'No se recibió token del servidor.', life: 3000 });
           await authService.logout();
         }
       } catch (error: any) {
@@ -159,19 +147,28 @@ export default {
         let errorMessage = 'Ocurrió un problema al intentar iniciar sesión.';
 
         if (axios.isAxiosError(error) && error.response) {
-          if (error.response.status === 401) {
+          const { status, data } = error.response;
+
+          if (status === 401) {
             errorMessage = 'Credenciales incorrectas. Por favor, verifica tu correo y contraseña.';
-          } else if (error.response.data && error.response.data.message) {
-            errorMessage = error.response.data.message;
+          } else if (status === 404) {
+            errorMessage = 'Usuario inexistente.';
+          } else if (status === 403) {
+            errorMessage = 'Acceso denegado. Tu cuenta puede estar bloqueada o no tienes permisos.';
+          } else if (data && data.message) {
+            errorMessage = data.message;
           }
+        } else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+          errorMessage = 'Error de conexión. Por favor, verifica tu conexión a internet.';
         }
 
         this.toast.add({
           severity: 'error',
           summary: 'Error al iniciar sesión',
           detail: errorMessage,
-          life: 3000,
+          life: 4000,
         });
+
         if (authService.token) {
           await authService.logout();
         }
@@ -191,7 +188,7 @@ export default {
   align-items: center;
   min-height: calc(100vh - 60px);
   min-width: 500px;
-  padding: 80px 20px 40px 20px;
+  padding: 0 20px 0 20px;
   box-sizing: border-box;
 }
 

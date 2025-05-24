@@ -7,7 +7,7 @@
       <router-view />
     </main>
     <Footer />
-    <Toast />
+    <Toast position="bottom-right"/>
   </div>
 </template>
 
@@ -385,6 +385,7 @@ a {
 
 .main-content {
   flex-grow: 1;
+  overflow-y: auto;
 }
 
 </style>

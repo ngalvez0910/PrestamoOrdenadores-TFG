@@ -76,7 +76,6 @@
 
   </div>
 
-  <Toast />
 </template>
 
 <script lang="ts">

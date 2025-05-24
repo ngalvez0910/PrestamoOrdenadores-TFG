@@ -37,7 +37,7 @@ describe('Login Page', () => {
   })
 
   it('realiza login exitoso y redirige según rol ADMIN', () => {
-    cy.get('#email').type('admin.admin.loantech@gmail.com')
+    cy.get('#email').type('admin.loantech.admin@gmail.com')
     cy.get('#password').type('Password123?')
     cy.get('button[type="submit"]').click()
 

@@ -1,6 +1,8 @@
 import axios from 'axios';
+import {jwtDecode} from "jwt-decode";
+import type {UserData} from "@/services/AuthService.ts";
 
-interface Sancion {
+export interface Sancion {
     guid: string;
     tipo: string;
     user: { guid: string; numeroIdentificacion: string; };
@@ -111,5 +113,53 @@ export const deleteSancion = async (guid: string): Promise<void | null> => {
     } catch (error) {
         console.error('Error obteniendo sancion por GUID:', error);
         return null;
+    }
+};
+
+export const getSancionesByUserGuid = async(): Promise<Sancion[]> => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error("No se encontró el token de autenticación.");
+        return [];
+    }
+
+    try {
+        const decodedToken = jwtDecode(token);
+        const userEmail = decodedToken.sub;
+
+        if (!userEmail) {
+            console.error("No se encontró el email del usuario en el token.");
+            return [];
+        }
+
+        const userResponse = await axios.get<UserData>(`http://localhost:8080/users/email/${userEmail}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const userGuid = userResponse.data.guid;
+
+        const sancionesResponse = await axios.get<Sancion[]>(`http://localhost:8080/sanciones/user/${userGuid}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        return sancionesResponse.data || [];
+
+    } catch (error: any) {
+        console.error('Error obteniendo sanciones y/o guid:', error.response?.data || error.message);
+        throw new Error(error.response?.data || error.message);
+    }
+};
+
+export const getSancionesCountByUserGuid = async (): Promise<number> => {
+    try {
+        const sanciones = await getSancionesByUserGuid();
+        return sanciones.length;
+    } catch (error) {
+        console.error("Error obteniendo el recuento de sanciones:", error);
+        return 0;
     }
 };

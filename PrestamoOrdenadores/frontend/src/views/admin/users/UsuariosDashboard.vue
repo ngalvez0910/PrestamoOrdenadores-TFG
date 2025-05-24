@@ -58,8 +58,6 @@
     </div>
   </div>
 
-  <Toast/>
-
   <Dialog v-model:visible="showDeleteDialog" header="Confirmar Eliminación" modal :draggable="false" :style="{ width: '50vw', fontFamily: 'Montserrat, sans-serif' }">
     <div v-if="userToDelete">
       <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem;"/><br>

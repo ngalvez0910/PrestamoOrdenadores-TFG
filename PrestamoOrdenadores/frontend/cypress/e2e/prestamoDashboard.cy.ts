@@ -2,7 +2,7 @@ describe('PrestamoDashboard Component', () => {
     beforeEach(() => {
         cy.visit('/');
 
-        cy.get('input#email').type('admin.admin.loantech@gmail.com')
+        cy.get('input#email').type('admin.loantech.admin@gmail.com')
         cy.get('input#password').type('Password123?')
         cy.get('button[type="submit"]').click()
 

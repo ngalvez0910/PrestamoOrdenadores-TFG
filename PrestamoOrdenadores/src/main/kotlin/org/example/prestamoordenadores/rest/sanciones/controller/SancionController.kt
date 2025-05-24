@@ -68,6 +68,7 @@ class SancionController
     }
 
     @GetMapping("/user/{guid}")
+    @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
     fun getSancionesByUserGuid(@PathVariable guid: String) : ResponseEntity<Any>{
         return sancionService.getSancionByUserGuid(guid).mapBoth(
             success = { ResponseEntity.ok(it) },

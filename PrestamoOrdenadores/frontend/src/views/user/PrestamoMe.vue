@@ -5,7 +5,7 @@
         <h2>Mis Préstamos</h2>
       </div>
       <div class="header-right">
-        <button class="action-button primary-button" @click="realizarPrestamo">
+        <button class="action-button primary-button" @click="openRealizarPrestamoDialog">
           <i class="pi pi-plus"></i> Realizar Préstamo
         </button>
       </div>
@@ -52,8 +52,15 @@
     </div>
   </div>
 
-  <ConfirmDialog style="font-family: 'Montserrat', sans-serif;"/>
-  <Toast />
+  <Dialog v-model:visible="displayConfirmDialog" modal :header="'Confirmar Préstamo'" :style="{ width: '500px', fontFamily: 'Montserrat, sans-serif' }" :breakpoints="{ '960px': '75vw', '641px': '100vw' }" class="custom-dialog">
+    <div class="dialog-content">
+      <p class="dialog-message">Estás a punto de realizar un préstamo. ¿Deseas continuar?</p>
+    </div>
+    <template #footer>
+      <Button label="Cancelar" @click="cancelarRealizarPrestamo" class="p-button action-button secondary-button" />
+      <Button label="Realizar préstamo" @click="confirmRealizarPrestamo" class="p-button action-button primary-button" />
+    </template>
+  </Dialog>
 </template>
 
 <script lang="ts">
@@ -61,30 +68,31 @@ import { defineComponent, ref, onMounted } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import ConfirmDialog from 'primevue/confirmdialog';
+import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import Tooltip from 'primevue/tooltip';
 
 import { getPrestamosByUserGuid, createPrestamo, descargarPdfPrestamo, type Prestamo } from '@/services/PrestamoService.ts';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
-import { useConfirm } from 'primevue/useconfirm';
 
 export default defineComponent({
   name: "PrestamoMe",
-  components: { DataTable, Column, Button, ConfirmDialog, Toast },
+  components: { DataTable, Column, Button, Dialog, Toast },
   directives: { Tooltip },
   setup() {
     const prestamos = ref<Prestamo[]>([]);
     const toast = useToast();
     const router = useRouter();
-    const confirm = useConfirm();
     const loading = ref(true);
+    const displayConfirmDialog = ref(false);
 
     onMounted(async () => {
       await fetchPrestamos();
     });
-
+    const openRealizarPrestamoDialog = () => {
+      displayConfirmDialog.value = true;
+    };
     const fetchPrestamos = async () => {
       loading.value = true;
       try {
@@ -98,64 +106,46 @@ export default defineComponent({
         loading.value = false;
       }
     };
+    const confirmRealizarPrestamo = async () => {
+      displayConfirmDialog.value = false;
+      console.log('Confirmación aceptada, llamando a createPrestamo');
+      try {
+        const prestamoResponse = await createPrestamo();
+        if (prestamoResponse) {
+          await fetchPrestamos();
+          console.log('Llamando a descargarPdfPrestamo con GUID:', prestamoResponse);
+          await descargarPdfPrestamo(prestamoResponse);
+          console.log('Descarga de PDF iniciada');
+        } else {
+          throw new Error('La creación del préstamo no devolvió un GUID válido.');
+        }
+      } catch (error: any) {
+        console.error('Error al realizar el préstamo:', error.response?.data || error.message);
+        const errorMessage = error.response?.data?.message || error.response?.data || error.message || 'Error desconocido al realizar el préstamo.';
 
-    const realizarPrestamo = async () => {
-      console.log('Iniciando proceso de préstamo');
-      confirm.require({
-        message: 'Estás a punto de realizar un préstamo. ¿Deseas continuar?',
-        header: 'Confirmar Préstamo',
-        icon: 'pi pi-question-circle',
-        acceptLabel: 'Sí, realizar préstamo',
-        rejectLabel: 'Cancelar',
-        acceptClass: 'p-button-success',
-        rejectClass: 'p-button-danger',
-        accept: async () => {
-          console.log('Confirmación aceptada, llamando a createPrestamo');
-          try {
-            const prestamoResponse = await createPrestamo();
-            if (prestamoResponse) {
-              await fetchPrestamos();
-              console.log('Llamando a descargarPdfPrestamo con GUID:', prestamoResponse);
-              await descargarPdfPrestamo(prestamoResponse);
-              console.log('Descarga de PDF iniciada');
-            } else {
-              throw new Error('La creación del préstamo no devolvió un GUID válido.');
-            }
-          } catch (error: any) {
-            console.error('Error al realizar el préstamo:', error.response?.data || error.message);
-            const errorMessage = error.response?.data?.message || error.response?.data || error.message || 'Error desconocido al realizar el préstamo.';
-
-            if (error.response?.status === 404 && (errorMessage.includes('No hay dispositivos disponibles') || errorMessage.includes('dispositivos disponibles'))) {
-              toast.add({
-                severity: 'warn',
-                summary: 'Sin Disponibilidad',
-                detail: 'No hay dispositivos disponibles para realizar el préstamo en este momento.',
-                life: 5000,
-              });
-            } else if (error.response?.status === 409 && (errorMessage.includes('límite de préstamos') || errorMessage.includes('préstamo activo'))) {
-              toast.add({
-                severity: 'warn',
-                summary: 'Límite Alcanzado',
-                detail: 'Ya tienes un préstamo activo o has alcanzado el límite. No puedes realizar otro hasta devolver el actual.',
-                life: 6000,
-              });
-            } else {
-              toast.add({ severity: 'error', summary: 'Error de Préstamo', detail: errorMessage, life: 5000 });
-            }
-          }
-        },
-        reject: () => {
-          console.log('Confirmación rechazada');
+        if (error.response?.status === 404 && (errorMessage.includes('No hay dispositivos disponibles') || errorMessage.includes('dispositivos disponibles'))) {
           toast.add({
-            severity: 'info',
-            summary: 'Operación Cancelada',
-            detail: 'El préstamo no se ha realizado.',
-            life: 3000,
+            severity: 'warn',
+            summary: 'Sin Disponibilidad',
+            detail: 'No hay dispositivos disponibles para realizar el préstamo en este momento.',
+            life: 5000,
           });
-        },
-      });
+        } else if (error.response?.status === 409 && (errorMessage.includes('límite de préstamos') || errorMessage.includes('préstamo activo'))) {
+          toast.add({
+            severity: 'warn',
+            summary: 'Límite Alcanzado',
+            detail: 'Ya tienes un préstamo activo o has alcanzado el límite. No puedes realizar otro hasta devolver el actual.',
+            life: 6000,
+          });
+        } else {
+          toast.add({ severity: 'error', summary: 'Error de Préstamo', detail: errorMessage, life: 5000 });
+        }
+      }
     };
-
+    const cancelarRealizarPrestamo = () => {
+      displayConfirmDialog.value = false;
+      console.log('Confirmación rechazada');
+    };
     const descargarPdf = async (prestamoGuid: string) => {
       if (!prestamoGuid) {
         toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'GUID de préstamo no disponible.', life: 3000 });
@@ -169,11 +159,9 @@ export default defineComponent({
         toast.add({ severity: 'error', summary: 'Error de PDF', detail: 'No se pudo descargar el PDF.', life: 3000 });
       }
     };
-
     const goBack = () => {
       router.back();
     };
-
     const getEstadoPrestamoClass = (estado: string | undefined): string => {
       if (!estado) return 'status-unknown';
       switch (estado.toUpperCase()) {
@@ -183,14 +171,16 @@ export default defineComponent({
         default: return 'status-unknown';
       }
     };
-
     return {
       prestamos,
       loading,
-      realizarPrestamo,
+      openRealizarPrestamoDialog,
+      confirmRealizarPrestamo,
+      cancelarRealizarPrestamo,
       descargarPdf,
       goBack,
       getEstadoPrestamoClass,
+      displayConfirmDialog
     };
   },
 });
@@ -251,16 +241,19 @@ export default defineComponent({
   text-decoration: none;
   line-height: 1.2;
 }
+
 .action-button:active { transform: scale(0.98); }
 
 .action-button.primary-button {
   background-color: var(--color-interactive);
   color: var(--color-text-on-dark-hover);
 }
+
 .action-button.primary-button:hover {
   background-color: var(--color-interactive-darker);
   box-shadow: 0 2px 8px rgba(var(--color-interactive-rgb), 0.3);
 }
+
 .action-button.primary-button i {
   font-size: 1.1rem;
 }
@@ -288,14 +281,17 @@ export default defineComponent({
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
+
 .status-en-curso {
   background-color: rgba(var(--color-success-rgb), 0.15);
   color: var(--color-success, #15803d);
 }
+
 .status-cancelado {
   background-color: rgba(var(--color-neutral-medium), 0.15);
   color: var(--color-neutral-medium, #575757);
 }
+
 .status-vencido {
   background-color: rgba(var(--color-warning-rgb), 0.15);
   color: var(--color-warning, #B45309);
@@ -346,6 +342,7 @@ export default defineComponent({
   border: 1px solid var(--color-warning, #f59e0b) !important;
   color: var(--color-text-dark, #78350f) !important;
 }
+
 :deep(.p-toast .p-toast-message.custom-toast-warning .p-toast-message-icon),
 :deep(.p-toast .p-toast-message.custom-toast-warning .p-toast-summary) {
   color: var(--color-text-dark, #78350f) !important;
@@ -356,40 +353,33 @@ export default defineComponent({
   border: 1px solid var(--color-interactive, #3b82f6) !important;
   color: var(--color-interactive-darker, #1e3a8a) !important;
 }
+
 :deep(.p-toast .p-toast-message.custom-toast-info .p-toast-message-icon),
 :deep(.p-toast .p-toast-message.custom-toast-info .p-toast-summary) {
   color: var(--color-interactive-darker, #1e3a8a) !important;
 }
 
-:deep(.p-confirm-dialog .p-confirm-dialog-accept.p-button-success) {
-  background-color: var(--color-success) !important;
-  border-color: var(--color-success) !important;
-  color: white !important;
-}
-:deep(.p-confirm-dialog .p-confirm-dialog-accept.p-button-success:hover) {
-  background-color: var(--color-success) !important;
-  border-color: var(--color-success) !important;
+:deep(.custom-dialog .p-dialog-content) {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-:deep(.p-confirm-dialog .p-confirm-dialog-reject.p-button-danger) {
-  background-color: var(--color-error) !important;
-  border-color: var(--color-error) !important;
-  color: white !important;
-}
-:deep(.p-confirm-dialog .p-confirm-dialog-reject.p-button-danger:hover) {
-  background-color: var(--color-error) !important;
-  border-color: var(--color-error) !important;
+:deep(.custom-dialog .dialog-message) {
+  font-size: 1.1rem;
+  color: var(--color-text-dark);
+  margin-bottom: 1.5rem;
 }
 
-:deep(.p-confirm-dialog .p-dialog-footer button) {
-  width: auto;
-  min-width: 120px;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px !important;
-  font-weight: 500;
-  margin: 0 5px;
+:deep(.custom-dialog .p-dialog-header .p-dialog-title) {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  color: var(--color-primary);
 }
-:deep(.p-confirm-dialog .p-dialog-header .p-dialog-header-icon) {
+
+:deep(.custom-dialog .p-dialog-header .p-dialog-header-icon) {
   width: auto !important;
   margin-top: 0 !important;
   margin-right: 0 !important;
@@ -397,17 +387,45 @@ export default defineComponent({
   color: var(--color-text-dark) !important;
   background-color: transparent !important;
 }
-:deep(.p-confirm-dialog .p-dialog-header .p-dialog-title) {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-  color: var(--color-primary);
+
+:deep(.custom-dialog .action-button.primary-button) {
+  background-color: var(--color-interactive);
+  color: var(--color-text-on-dark-hover);
 }
-:deep(.p-confirm-dialog .p-confirm-dialog-message) {
-  margin-left: 0;
+
+:deep(.custom-dialog .action-button.primary-button:hover) {
+  background-color: var(--color-interactive-darker) !important;
+  box-shadow: 0 2px 8px rgba(var(--color-interactive-rgb), 0.3) !important;
 }
-:deep(.p-confirm-dialog .p-confirm-dialog-icon) {
-  font-size: 1.5rem;
-  color: var(--color-interactive);
+
+:deep(.custom-dialog .action-button.primary-button:active) {
+  transform: scale(0.98) !important;
+}
+
+.action-button.secondary-button {
+  background-color: transparent !important;
+  color: var(--color-interactive) !important;
+  border: 1px solid var(--color-interactive) !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease !important;
+}
+
+.action-button.secondary-button:hover {
+  background-color: rgba(var(--color-interactive-rgb), 0.05) !important;
+  color: var(--color-interactive-darker) !important;
+  border-color: var(--color-interactive-darker) !important;
+}
+
+.action-button.secondary-button:active {
+  transform: scale(0.98) !important;
+}
+
+:deep(.custom-dialog .p-dialog-footer .p-button) {
+  width: auto;
+  min-width: 120px;
+  margin: 0 5px;
 }
 
 @media (max-width: 768px) {
