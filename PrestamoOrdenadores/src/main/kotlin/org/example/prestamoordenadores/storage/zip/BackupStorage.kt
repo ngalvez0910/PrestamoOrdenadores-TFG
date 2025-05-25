@@ -19,7 +19,7 @@ class BackupStorage {
         val backupDir = File("data/backup")
         backupDir.mkdirs()
         val backupFile = File(backupDir, "db_backup_$timestamp.sql")
-        val dbHost = "localhost"
+        val dbHost = "postgres-db"
         val dbName = "prestamosDB"
         val dbUser = "admin"
 
@@ -117,7 +117,7 @@ class BackupStorage {
             return false
         }
 
-        val dbHost = "localhost"
+        val dbHost = "postgres-db"
         val dbName = "prestamosDB"
         val dbUser = "admin"
 

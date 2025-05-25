@@ -26,6 +26,8 @@ services:
     depends_on:
       - postgres-db
     env_file: .env.prod
+    volumes:
+      - ./data/backup:/app/data/backup
 
   frontend:
     container_name: prestamos-frontend
