@@ -38,11 +38,14 @@
           aria-expanded="false"
       />
 
-      <Button
-          class="notifications-button p-button-rounded p-button-text"
-          icon="pi pi-bell"
-          @click="goToNotifications"
-      />
+      <div class="notification-button-container">
+        <Button
+            class="notifications-button p-button-rounded p-button-text"
+            icon="pi pi-bell"
+            @click="goToNotifications"
+        />
+        <span v-if="unreadNotificationsCount > 0" class="notification-badge"></span>
+      </div>
 
       <Button class="user-info" @click="toggleUserMenu($event)" text aria-haspopup="true" aria-controls="user_profile_menu">
         <p class="username">{{ username || "Usuario" }}</p>
@@ -107,11 +110,22 @@
 import Avatar from "primevue/avatar";
 import Menu from "primevue/menu";
 import Button from "primevue/button";
-import {ref, computed, onMounted, watch} from "vue";
+import {ref, computed, onMounted, watch, inject, type Ref} from "vue";
 import { useRouter } from "vue-router";
 import {authService, type UserData} from "@/services/AuthService.ts";
 import Sidebar from 'primevue/sidebar';
 import Tooltip from 'primevue/tooltip';
+import axios from 'axios';
+
+interface Notificacion {
+  id: string;
+  titulo: string;
+  mensaje?: string;
+  fecha: Date | string;
+  leida: boolean;
+  tipo?: string;
+  enlace?: string;
+}
 
 export default {
   name: "MenuBar",
@@ -123,10 +137,39 @@ export default {
     const router = useRouter();
     const avatarUpdateKey = ref(Date.now());
     const sidebarVisible = ref(false);
+    const unreadNotificationsCount = ref(0);
+
+    const API_BASE_URL = inject<string>('API_BASE_URL', 'http://localhost:8080');
+    const lastReceivedNotification = inject<Readonly<Ref<Notificacion | null>>>('lastReceivedNotification');
 
     const forceAvatarUpdate = () => {
       avatarUpdateKey.value = Date.now();
     };
+
+    const fetchUnreadNotificationsCount = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await axios.get<Notificacion[]>(`${API_BASE_URL}/notificaciones`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.data && Array.isArray(response.data)) {
+          unreadNotificationsCount.value = response.data.filter(n => !n.leida).length;
+        }
+      } catch (error) {
+        console.error("[MenuBar] Error al obtener notificaciones:", error);
+      }
+    };
+
+    if (lastReceivedNotification) {
+      watch(lastReceivedNotification, (newNotification) => {
+        if (newNotification && !newNotification.leida) {
+          unreadNotificationsCount.value += 1;
+        }
+      });
+    }
 
     onMounted(() => {
       authService.syncFromStorage();
@@ -134,6 +177,8 @@ export default {
       if (authService.token && !authService.user) {
         authService.fetchUser().catch(console.error);
       }
+
+      fetchUnreadNotificationsCount();
     });
 
     const user = computed<UserData | null>(() => authService.user);
@@ -222,6 +267,7 @@ export default {
     };
 
     const goToNotifications = () => {
+      unreadNotificationsCount.value = 0;
       router.push('/notificaciones');
     };
 
@@ -241,7 +287,8 @@ export default {
       forceAvatarUpdate,
       goToNotifications,
       sidebarVisible,
-      toggleSidebar
+      toggleSidebar,
+      unreadNotificationsCount
     };
   },
 };
@@ -272,6 +319,11 @@ export default {
   gap: 15px;
 }
 
+.notification-button-container {
+  position: relative;
+  display: inline-block;
+}
+
 .notifications-button.p-button {
   background-color: transparent !important;
   color: var(--color-primary) !important;
@@ -292,6 +344,18 @@ export default {
 
 .notifications-button.p-button .p-button-icon {
   font-size: 1.3rem;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #007bff;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--color-text-on-dark);
 }
 
 .menubar h1 {

@@ -84,10 +84,10 @@ class PrestamoPdfStorage(
         )
 
         document.add(
-            Paragraph("Curso: ${user?.curso}")
-            .setFontColor(ColorConstants.BLACK)
-            .setFontSize(12f)
-            .setTextAlignment(TextAlignment.LEFT)
+            Paragraph("Curso: ${user?.curso ?: ""}")
+                .setFontColor(ColorConstants.BLACK)
+                .setFontSize(12f)
+                .setTextAlignment(TextAlignment.LEFT)
         )
 
         document.add(
