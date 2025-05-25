@@ -229,7 +229,7 @@ class PrestamoServiceImplTest {
         every { storage.generateAndSavePdf(prestamo.guid) } just Runs
         every { storage.generatePdf(prestamo.guid) } returns ByteArray(0)
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
-        every { emailService.sendHtmlEmail(any(), any(), any(), any(), any(), any(), any()) } just Runs
+        every { emailService.sendHtmlEmailPrestamoCreado(any(), any(), any(), any(), any(), any(), any()) } just Runs
         every { mapper.toPrestamoResponse(prestamo) } returns response
 
         val result = service.createPrestamo()
@@ -243,7 +243,7 @@ class PrestamoServiceImplTest {
             { verify { repository.save(prestamo) } },
             { verify { dispositivoRepository.save(dispositivo) } },
             { verify { storage.generateAndSavePdf(prestamo.guid) } },
-            { verify { emailService.sendHtmlEmail(any(), any(), any(), any(), any(), any(), any()) } },
+            { verify { emailService.sendHtmlEmailPrestamoCreado(any(), any(), any(), any(), any(), any(), any()) } },
             { verify { mapper.toPrestamoResponse(prestamo) } },
         )
     }

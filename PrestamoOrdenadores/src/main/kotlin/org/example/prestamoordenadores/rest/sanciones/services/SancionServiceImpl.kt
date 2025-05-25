@@ -21,6 +21,7 @@ import org.example.prestamoordenadores.rest.sanciones.repositories.SancionReposi
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.emails.EmailService
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.lighthousegames.logging.logging
@@ -46,6 +47,7 @@ class SancionServiceImpl(
     private val userRepository: UserRepository,
     private val prestamoRepository: PrestamoRepository,
     private val webService : WebSocketService,
+    private val emailService: EmailService
 ) : SancionService {
     override fun getAllSanciones(page: Int, size: Int): Result<PagedResponse<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo todas las sanciones" }
@@ -180,8 +182,7 @@ class SancionServiceImpl(
         return Ok(mapper.toSancionResponseList(sanciones))
     }
 
-    //@Scheduled(cron = "0 0 0/2 * * *")
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 0 0/2 * * *")
     @Transactional
     fun gestionarAdvertencias() {
         logger.info { "Iniciando tarea programada: Gestionar Advertencias por Préstamos Vencidos (Lógica revisada según aclaración)." }
@@ -218,6 +219,8 @@ class SancionServiceImpl(
                     )
                     val sancionGuardada = repository.save(nuevaAdvertencia)
 
+                    enviarCorreo(user, "ADVERTENCIA")
+
                     sendNotificationNuevaSancion(
                         sancionGuardada,
                         "automática por préstamo ${prestamo.guid} no devuelto tras 3 días en estado VENCIDO (marcado como VENCIDO el ${fechaQuePasoAVencido.toLocalDate()})"
@@ -230,8 +233,7 @@ class SancionServiceImpl(
         logger.info { "Tarea programada: Gestionar Advertencias por Préstamos Vencidos (Lógica revisada según aclaración) finalizada." }
     }
 
-    //@Scheduled(cron = "0 5 0/2 * * *")
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 5 0/2 * * *")
     @Transactional
     fun gestionarReactivacionYPosibleEscaladaAIndefinido() {
         logger.info { "Iniciando tarea programada: Gestionar Reactivación de Usuarios y posible Escalada a Indefinido." }
@@ -262,6 +264,7 @@ class SancionServiceImpl(
                     user.updatedDate = LocalDateTime.now()
                     userRepository.save(user)
                     logger.info { "Usuario ${user.username} reactivado. Sanción de bloqueo ${sancionBloqueo.guid} finalizada." }
+                    enviarCorreoReactivacion(user)
                     sendNotificationReactivacionUsuario(user, sancionBloqueo, "finalización de bloqueo temporal")
                 } else {
                     logger.info { "Usuario ${user.username} no reactivado (sanción ${sancionBloqueo.guid} expirada) debido a otras sanciones bloqueantes activas." }
@@ -362,6 +365,7 @@ class SancionServiceImpl(
 
         val sancionGuardada = repository.save(nuevaSancionBloqueo)
 
+        enviarCorreo(user, "BLOQUEO TEMPORAL")
         sendNotificationNuevaSancion(sancionGuardada, "automática: $motivo")
     }
 
@@ -383,6 +387,7 @@ class SancionServiceImpl(
 
         val sancionGuardada = repository.save(nuevaSancionIndefinida)
 
+        enviarCorreo(user, "BLOQUEO INDEFINIDO")
         sendNotificationNuevaSancion(sancionGuardada, "automática: $motivo")
     }
 
@@ -543,5 +548,22 @@ class SancionServiceImpl(
                 webService.createAndSendNotification(admin.email, notificacionParaAdmin)
             }
         }
+    }
+
+    private fun enviarCorreo(user: User, tipoSancion: String) {
+        emailService.sendHtmlEmailSancion(
+            to = user.email,
+            subject = "Notificación de Sanción LoanTech",
+            nombreUsuario = user.nombre,
+            tipoSancion = tipoSancion,
+        )
+    }
+
+    private fun enviarCorreoReactivacion(user: User) {
+        emailService.sendHtmlEmailUsuarioReactivado(
+            to = user.email,
+            subject = "¡Tu cuenta en LoanTech ha sido reactivada!",
+            nombreUsuario = user.nombre
+        )
     }
 }

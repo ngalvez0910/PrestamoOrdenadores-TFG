@@ -206,7 +206,7 @@ class PrestamoServiceImpl(
     private fun enviarCorreo(user: User, dispositivoSeleccionado: Dispositivo, prestamoCreado: Prestamo) {
         val pdfBytes = prestamoPdfStorage.generatePdf(prestamoCreado.guid)
 
-        emailService.sendHtmlEmail(
+        emailService.sendHtmlEmailPrestamoCreado(
             to = user.email,
             subject = "Confirmación de Préstamo",
             nombreUsuario = user.nombre,
@@ -355,8 +355,7 @@ class PrestamoServiceImpl(
         }
     }
 
-    //@Scheduled(cron = "0 0 2 * * *")
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 0 2 * * *")
     fun gestionarCaducidadPrestamos() {
         logger.info { "Iniciando tarea programada: Gestionar Caducidad y Recordatorios de Préstamos." }
 
@@ -372,6 +371,7 @@ class PrestamoServiceImpl(
                 return
             }
 
+            enviarCorreoPrestamoCaducado(prestamo.user, prestamo.dispositivo, prestamoActualizado)
             sendNotificationActualizacionPrestamo(prestamoActualizado, "VENCIDO")
         }
 
@@ -380,6 +380,7 @@ class PrestamoServiceImpl(
 
         prestamosParaRecordatorio.forEach { prestamo ->
             logger.info { "Préstamo GUID: ${prestamo.guid} caduca el $fechaParaRecordatorio. Enviando recordatorio." }
+            enviarCorreoPrestamoApuntodeCaducar(prestamo.user, prestamo.dispositivo, prestamo)
             sendNotificationActualizacionPrestamo(prestamo, "RECORDATORIO_CADUCIDAD")
         }
 
@@ -420,5 +421,25 @@ class PrestamoServiceImpl(
                 Err(PrestamoError.PrestamoValidationError("Error al guardar la cancelación del préstamo"))
             }
         }
+    }
+
+    private fun enviarCorreoPrestamoApuntodeCaducar(user: User, dispositivo: Dispositivo, prestamo: Prestamo) {
+        emailService.sendHtmlEmailPrestamoApuntodeCaducar(
+            to = user.email,
+            subject = "Recordatorio: Tu préstamo está a punto de caducar",
+            nombreUsuario = user.nombre,
+            numeroSerieDispositivo = dispositivo.numeroSerie,
+            fechaDevolucion = prestamo.fechaDevolucion.toDefaultDateString()
+        )
+    }
+
+    private fun enviarCorreoPrestamoCaducado(user: User, dispositivo: Dispositivo, prestamo: Prestamo) {
+        emailService.sendHtmlEmailPrestamoCaducado(
+            to = user.email,
+            subject = "¡Urgente! Tu préstamo ha caducado",
+            nombreUsuario = user.nombre,
+            numeroSerieDispositivo = dispositivo.numeroSerie,
+            fechaCaducidad = prestamo.fechaDevolucion.toDefaultDateString()
+        )
     }
 }
