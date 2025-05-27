@@ -2,7 +2,7 @@
   <div class="storage-container"> <div class="dashboard"> <div class="dashboard-box"> <i class="pi pi-desktop icon"></i>
     <p>Dispositivos</p>
     <div class="box-action-wrapper">
-      <button class="box-action-button" @click="descargarCsvDispositivos">Descargar CSV</button>
+      <button class="box-action-button" @click="descargarXlsxDispositivos">Descargar XLSX</button>
     </div>
   </div>
 
@@ -10,7 +10,7 @@
       <i class="pi pi-users icon"></i>
       <p>Usuarios</p>
       <div class="box-action-wrapper">
-        <button class="box-action-button" @click="descargarCsvUsers">Descargar CSV</button>
+        <button class="box-action-button" @click="descargarExcelUsers">Descargar XLSX</button>
       </div>
     </div>
 
@@ -18,7 +18,7 @@
       <i class="pi pi-flag-fill icon"></i>
       <p>Incidencias</p>
       <div class="box-action-wrapper">
-        <button class="box-action-button" @click="descargarCsvIncidencias">Descargar CSV</button>
+        <button class="box-action-button" @click="descargarExcelIncidencias">Descargar XLSX</button>
       </div>
     </div>
 
@@ -26,7 +26,7 @@
       <i class="pi pi-arrow-right-arrow-left icon"></i>
       <p>Préstamos</p>
       <div class="box-action-wrapper">
-        <button class="box-action-button" @click="descargarCsvPrestamos">Descargar CSV</button>
+        <button class="box-action-button" @click="descargarExcelPrestamos">Descargar XLSX</button>
       </div>
     </div>
 
@@ -34,7 +34,7 @@
       <i class="pi pi-ban icon"></i>
       <p>Sanciones</p>
       <div class="box-action-wrapper">
-        <button class="box-action-button" @click="descargarCsvSanciones">Descargar CSV</button>
+        <button class="box-action-button" @click="descargarExcelSanciones">Descargar XLSX</button>
       </div>
     </div>
 
@@ -73,11 +73,11 @@
 </template>
 
 <script lang="ts">
-import { descargarCsvDispositivos } from "@/services/DispositivoService.ts";
-import {descargarCsvUsers} from "@/services/UsuarioService.ts";
-import {descargarCsvIncidencias} from "@/services/IncidenciaService.ts";
-import {descargarCsvPrestamos} from "@/services/PrestamoService.ts";
-import {descargarCsvSanciones} from "@/services/SancionService.ts";
+import { descargarDispositivosXLSX } from "@/services/DispositivoService.ts";
+import {descargarUsersXLSX} from "@/services/UsuarioService.ts";
+import {descargarIncidenciasXLSX} from "@/services/IncidenciaService.ts";
+import {descargarPrestamosXLSX} from "@/services/PrestamoService.ts";
+import {descargarSancionesXLSX} from "@/services/SancionService.ts";
 import { createBackup, listBackups, restoreBackup, type BackupInfo } from "@/services/StorageService.ts";
 import Toast from 'primevue/toast';
 
@@ -97,44 +97,44 @@ export default {
     };
   },
   methods: {
-    async descargarCsvDispositivos() {
+    async descargarXlsxDispositivos() {
       try {
-        await descargarCsvDispositivos();
-        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de dispositivos.`, life: 3000 });
+        await descargarDispositivosXLSX();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del XLSX de dispositivos.`, life: 3000 });
       } catch (error) {
-        console.error('Error al descargar el CSV en el componente', error);
+        console.error('Error al descargar el XLSX en el componente', error);
       }
     },
-    async descargarCsvUsers() {
+    async descargarExcelUsers() {
       try {
-        await descargarCsvUsers();
-        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de usuarios.`, life: 3000 });
+        await descargarUsersXLSX();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del XLSX de usuarios.`, life: 3000 });
       } catch (error) {
-        console.error('Error al descargar el CSV en el componente', error);
+        console.error('Error al descargar el XLSX en el componente', error);
       }
     },
-    async descargarCsvIncidencias() {
+    async descargarExcelIncidencias() {
       try {
-        await descargarCsvIncidencias();
-        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de incidencias.`, life: 3000 });
+        await descargarIncidenciasXLSX();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del XLSX de incidencias.`, life: 3000 });
       } catch (error) {
-        console.error('Error al descargar el CSV en el componente', error);
+        console.error('Error al descargar el XLSX en el componente', error);
       }
     },
-    async descargarCsvPrestamos() {
+    async descargarExcelPrestamos() {
       try {
-        await descargarCsvPrestamos();
-        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de préstamos.`, life: 3000 });
+        await descargarPrestamosXLSX();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del XLSX de préstamos.`, life: 3000 });
       } catch (error) {
-        console.error('Error al descargar el CSV en el componente', error);
+        console.error('Error al descargar el XLSX en el componente', error);
       }
     },
-    async descargarCsvSanciones() {
+    async descargarExcelSanciones() {
       try {
-        await descargarCsvSanciones();
-        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del CSV de sanciones.`, life: 3000 });
+        await descargarSancionesXLSX();
+        this.$toast.add({ severity: 'success', summary: 'Descarga Iniciada', detail: `Se ha iniciado la descarga del XLSX de sanciones.`, life: 3000 });
       } catch (error) {
-        console.error('Error al descargar el CSV en el componente', error);
+        console.error('Error al descargar el XLSX en el componente', error);
       }
     },
     async crearCopiaSeguridad() {
