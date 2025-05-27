@@ -3,7 +3,6 @@ plugins {
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.7"
-    //kotlin("plugin.jpa") version "1.9.25"
 }
 
 group = "org.example"
@@ -71,6 +70,10 @@ dependencies {
 
     // MockBean
     testImplementation("com.ninja-squad:springmockk:4.0.2")
+
+    // Excel
+    implementation("org.apache.poi:poi:5.4.0")
+    implementation("org.apache.poi:poi-ooxml:5.4.0")
 }
 
 kotlin {

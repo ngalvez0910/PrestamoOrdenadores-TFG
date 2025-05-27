@@ -75,7 +75,7 @@ export const actualizarDispositivo = async (guid: string, data: { componentes: s
     }
 };
 
-export const descargarCsvDispositivos = async (): Promise<void | null> => {
+export const descargarDispositivosXLSX = async (): Promise<void | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -83,25 +83,29 @@ export const descargarCsvDispositivos = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/storage/csv/dispositivos`, {
+        const response = await axios.get(`http://localhost:8080/storage/excel/dispositivos`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
 
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const url = window.URL.createObjectURL(new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }));
         const link = document.createElement('a');
         link.href = url;
+
         const today = new Date();
         const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-        link.setAttribute('download', `dispositivos_${formattedDate}.csv`);
+        link.setAttribute('download', `dispositivos_${formattedDate}.xlsx`);
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Error al descargar el CSV de dispositivos', error);
+        console.error('Error al descargar el archivo Excel de dispositivos', error);
         throw error;
     }
 };

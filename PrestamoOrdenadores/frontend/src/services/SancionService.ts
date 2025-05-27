@@ -66,7 +66,7 @@ export const actualizarSancion = async (guid: string, data: { tipoSancion: strin
     }
 };
 
-export const descargarCsvSanciones = async (): Promise<void | null> => {
+export const descargarSancionesXLSX = async (): Promise<void | null> => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -74,25 +74,29 @@ export const descargarCsvSanciones = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/storage/csv/sanciones`, {
+        const response = await axios.get(`http://localhost:8080/storage/excel/sanciones`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
 
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const url = window.URL.createObjectURL(new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }));
         const link = document.createElement('a');
         link.href = url;
+
         const today = new Date();
         const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-        link.setAttribute('download', `sanciones_${formattedDate}.csv`);
+        link.setAttribute('download', `sanciones_${formattedDate}.xlsx`);
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Error al descargar el CSV de sanciones', error);
+        console.error('Error al descargar el archivo Excel de sanciones', error);
         throw error;
     }
 };
