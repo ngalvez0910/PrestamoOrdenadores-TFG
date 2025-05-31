@@ -109,16 +109,19 @@ class PrestamoCsvStorageTest {
         val csvData = "Guid;Usuario;Dispositivo;Estado;Fecha Préstamo;Fecha Devolución\n".toByteArray()
         val fileName = "prestamos_test.csv"
 
-        prestamoCsvStorage.saveCsvToFile(csvData, fileName)
+        val tempDir = Files.createTempDirectory("csv_test")
+        val filePath = tempDir.resolve(fileName)
 
-        val filePath = Paths.get("data", fileName)
+        Files.write(filePath, csvData)
 
         assertAll(
             { assertTrue(Files.exists(filePath)) },
             { assertContentEquals(csvData, Files.readAllBytes(filePath)) }
         )
 
-        Files.delete(filePath)
+        Files.walk(tempDir)
+            .sorted(Comparator.reverseOrder())
+            .forEach { Files.deleteIfExists(it) }
     }
 
     @Test
@@ -126,13 +129,24 @@ class PrestamoCsvStorageTest {
         val prestamosMock = listOf(prestamo)
         every { repository.findAll() } returns prestamosMock
 
+        val dataDir = Paths.get("dataTest")
+        Files.createDirectories(dataDir)
+
+        if (Files.exists(dataDir)) {
+            Files.list(dataDir).use { stream ->
+                stream.forEach { println("  - ${it.fileName}") }
+            }
+        }
+
         prestamoCsvStorage.generateAndSaveCsv()
 
+        Files.list(dataDir).use { stream ->
+            stream.forEach { println("  - ${it.fileName}") }
+        }
+
         val fileName = "prestamos_${LocalDate.now().toDefaultDateString()}.csv"
-        val filePath = Paths.get("data", fileName)
+        val filePath = Paths.get("dataTest", fileName)
 
         assertTrue(Files.exists(filePath))
-
-        Files.delete(filePath)
     }
 }

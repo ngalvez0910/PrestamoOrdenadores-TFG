@@ -14,11 +14,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Testcontainers
 class PrestamoRepositoryTest {
 
     @Autowired
@@ -69,6 +73,15 @@ class PrestamoRepositoryTest {
         LocalDateTime.now(),
         false
     )
+
+    companion object {
+        @Container
+        @ServiceConnection
+        val postgresContainer = PostgreSQLContainer("postgres:15.3")
+            .withDatabaseName("prestamosDB-test")
+            .withUsername("testuser")
+            .withPassword("testpass")
+    }
 
     @BeforeEach
     fun setup() {
