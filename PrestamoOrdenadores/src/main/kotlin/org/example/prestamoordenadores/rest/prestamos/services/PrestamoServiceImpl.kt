@@ -146,17 +146,17 @@ class PrestamoServiceImpl(
         val dispositivoSeleccionado = dispositivosDisponibles.random()
 
         val prestamoCreado = mapper.toPrestamoFromCreate(user, dispositivoSeleccionado)
-        prestamoCreado.fechaDevolucion = LocalDate.now().plusWeeks(3) // Establece la fecha de devolución 3 semanas después
+        prestamoCreado.fechaDevolucion = LocalDate.now().plusWeeks(3)
         prestamoRepository.save(prestamoCreado)
 
-        dispositivoSeleccionado.estadoDispositivo = EstadoDispositivo.PRESTADO // Actualiza el estado del dispositivo
+        dispositivoSeleccionado.estadoDispositivo = EstadoDispositivo.PRESTADO
         dispositivoRepository.save(dispositivoSeleccionado)
 
-        prestamoPdfStorage.generateAndSavePdf(prestamoCreado.guid) // Genera y guarda el PDF del préstamo
+        prestamoPdfStorage.generateAndSavePdf(prestamoCreado.guid)
 
-        enviarCorreo(user, dispositivoSeleccionado, prestamoCreado) // Envía el correo de confirmación
+        enviarCorreo(user, dispositivoSeleccionado, prestamoCreado)
 
-        sendNotificationNuevoPrestamo(prestamoCreado, user) // Envía notificaciones WebSocket
+        sendNotificationNuevoPrestamo(prestamoCreado, user)
         return Ok(mapper.toPrestamoResponse(prestamoCreado))
     }
 
@@ -364,7 +364,7 @@ class PrestamoServiceImpl(
         val administradores = userRepository.findUsersByRol(Role.ADMIN)
 
         administradores.forEach { admin ->
-            if (admin?.email != user.email) { // Evitar enviarle al mismo usuario si es admin y realizó el préstamo
+            if (admin?.email != user.email) {
                 val notificacionParaAdmin = NotificationDto(
                     id = UUID.randomUUID().toString(),
                     titulo = "Nueva Solicitud de Préstamo: ${prestamo.guid}",
@@ -514,11 +514,10 @@ class PrestamoServiceImpl(
      *
      * @author Natalia González Álvarez
      */
-    @Scheduled(cron = "0 0 2 * * *") // Se ejecuta a las 2 AM cada día
+    @Scheduled(cron = "0 0 2 * * *")
     fun gestionarCaducidadPrestamos() {
         logger.info { "Iniciando tarea programada: Gestionar Caducidad y Recordatorios de Préstamos." }
 
-        // Préstamos que caducan hoy
         val prestamosQueCaducanHoy = prestamoRepository.findByFechaDevolucion(LocalDate.now())
 
         prestamosQueCaducanHoy.forEach { prestamo ->
@@ -528,14 +527,13 @@ class PrestamoServiceImpl(
             val prestamoActualizado = prestamoRepository.save(prestamo)
             if (prestamoActualizado == null) {
                 logger.error { "No se pudo actualizar el prestamo con GUID: ${prestamo.guid}" }
-                return@forEach // Continúa con el siguiente préstamo
+                return@forEach
             }
 
             enviarCorreoPrestamoCaducado(prestamo.user, prestamo.dispositivo, prestamoActualizado)
             sendNotificationActualizacionPrestamo(prestamoActualizado, "VENCIDO")
         }
 
-        // Préstamos que caducan mañana (recordatorio)
         val fechaParaRecordatorio = LocalDate.now().plusDays(1)
         val prestamosParaRecordatorio = prestamoRepository.findByFechaDevolucion(fechaParaRecordatorio)
 
@@ -563,7 +561,7 @@ class PrestamoServiceImpl(
      * @author Natalia González Álvarez
      */
     @CachePut(cacheNames = ["prestamos"], key = "#result.value.guid", condition = "#result.isOk && #result.value != null")
-    @Transactional // Asegura que la operación sea atómica
+    @Transactional
     override fun cancelarPrestamo(guid: String): Result<PrestamoResponse?, PrestamoError> {
         logger.debug { "Cancelando préstamo con GUID: $guid" }
 
@@ -575,7 +573,6 @@ class PrestamoServiceImpl(
         } else {
             if (prestamoEncontrado.estadoPrestamo == EstadoPrestamo.CANCELADO || prestamoEncontrado.estadoPrestamo == EstadoPrestamo.DEVUELTO) {
                 logger.info { "El préstamo GUID: $guid ya está en estado ${prestamoEncontrado.estadoPrestamo}. No se requiere acción." }
-                // Si ya está cancelado o devuelto, y el dispositivo no está disponible, lo marcamos como disponible.
                 if(prestamoEncontrado.dispositivo.estadoDispositivo != EstadoDispositivo.DISPONIBLE){
                     prestamoEncontrado.dispositivo.estadoDispositivo = EstadoDispositivo.DISPONIBLE
                     dispositivoRepository.save(prestamoEncontrado.dispositivo)

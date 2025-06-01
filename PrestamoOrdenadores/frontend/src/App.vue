@@ -32,6 +32,7 @@ interface Notificacion {
   tipo?: NotificationEntityType;
   enlace?: string;
   severidadSugerida?: ToastSeverity;
+  mostrarToast?: boolean;
 }
 
 export default defineComponent({
@@ -93,6 +94,7 @@ export default defineComponent({
         tipo: backendNotif.tipo?.toLowerCase() as NotificationEntityType,
         enlace: backendNotif.enlace,
         severidadSugerida: severidad,
+        mostrarToast: backendNotif.mostrarToast
       };
     };
 
@@ -101,6 +103,11 @@ export default defineComponent({
       console.log("[App.vue WebSocket] Nueva notificación global procesada:", nuevaNotificacion);
 
       lastReceivedNotification.value = nuevaNotificacion;
+
+      if (nuevaNotificacion.mostrarToast === false) {
+        console.log("[App.vue WebSocket] Notificación no configurada para mostrar toast. Omitiendo toast.");
+        return;
+      }
 
       let toastSeverity: 'success' | 'info' | 'warn' | 'error';
 
@@ -123,7 +130,6 @@ export default defineComponent({
       toast.add({
         severity: toastSeverity,
         summary: `${nuevaNotificacion.titulo}`,
-        detail: nuevaNotificacion.mensaje?.substring(0, 100) + ((nuevaNotificacion.mensaje?.length || 0) > 100 ? '...' : ''),
         life: (toastSeverity === 'success' || toastSeverity === 'info') ? 3000 : 7000,
       });
     };

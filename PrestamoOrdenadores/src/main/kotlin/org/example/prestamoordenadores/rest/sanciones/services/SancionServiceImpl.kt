@@ -258,7 +258,8 @@ class SancionServiceImpl(
      * y genera una sanción de [TipoSancion.ADVERTENCIA] si no existe una ya para ese préstamo.
      * También evalúa si el usuario debe pasar a [TipoSancion.BLOQUEO_TEMPORAL].
      */
-    @Scheduled(cron = "0 0 0/2 * * *")
+    //@Scheduled(cron = "0 0 0/2 * * *")
+    @Scheduled(cron = "0 * * * * *")
     @Transactional
     fun gestionarAdvertencias() {
         logger.info { "Iniciando tarea programada: Gestionar Advertencias por Préstamos Vencidos (Lógica revisada según aclaración)." }
@@ -316,7 +317,8 @@ class SancionServiceImpl(
      * También evalúa si un usuario inactivo con sanciones expiradas puede ser reactivado.
      * Finalmente, evalúa si un usuario debe pasar a [TipoSancion.INDEFINIDO].
      */
-    @Scheduled(cron = "0 5 0/2 * * *")
+    //@Scheduled(cron = "0 5 0/2 * * *")
+    @Scheduled(cron = "0 * * * * *")
     @Transactional
     fun gestionarReactivacionYPosibleEscaladaAIndefinido() {
         logger.info { "Iniciando tarea programada: Gestionar Reactivación de Usuarios y posible Escalada a Indefinido." }
@@ -538,7 +540,8 @@ class SancionServiceImpl(
             leida = false,
             tipo = NotificationTypeDto.SANCION,
             enlace = null,
-            severidadSugerida = severidadUser
+            severidadSugerida = severidadUser,
+            mostrarToast = true
         )
 
         webService.createAndSendNotification(user.email, notificacionParaUser)
@@ -554,7 +557,8 @@ class SancionServiceImpl(
                     leida = false,
                     tipo = NotificationTypeDto.SANCION,
                     enlace = "/admin/sancion/detalle/${sancion.guid}",
-                    severidadSugerida = if (sancion.tipoSancion == TipoSancion.ADVERTENCIA) NotificationSeverityDto.INFO else NotificationSeverityDto.WARNING
+                    severidadSugerida = if (sancion.tipoSancion == TipoSancion.ADVERTENCIA) NotificationSeverityDto.INFO else NotificationSeverityDto.WARNING,
+                    mostrarToast = false
                 )
                 webService.createAndSendNotification(admin.email, notificacionParaAdmin)
             }
