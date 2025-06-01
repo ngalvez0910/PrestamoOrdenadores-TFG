@@ -113,7 +113,7 @@ class IncidenciaCsvStorageTest {
         val incidenciasMock = listOf(incidencia)
         every { repository.findAll() } returns incidenciasMock
 
-        val dataDir = Paths.get("dataTest")
+        val dataDir = Paths.get("data")
         Files.createDirectories(dataDir)
 
         if (Files.exists(dataDir)) {
@@ -130,7 +130,7 @@ class IncidenciaCsvStorageTest {
 
         val expectedFileName = "incidencias_${LocalDate.now().toDefaultDateString()}.csv"
 
-        val filePath = Paths.get("dataTest", expectedFileName)
+        val filePath = Paths.get("data", expectedFileName)
 
         assertTrue(Files.exists(filePath))
     }

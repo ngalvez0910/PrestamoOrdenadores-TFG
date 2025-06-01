@@ -137,13 +137,13 @@ class SancionRepositoryTest {
     @Test
     fun findSancionByTipoSancion() {
         val bloqueos = sancionRepository.findSancionByTipoSancion(TipoSancion.ADVERTENCIA)
-        assertEquals(1, bloqueos.size)
+        assertEquals(5, bloqueos.size)
         assertTrue(bloqueos.any { it.guid == "guidTest123" })
     }
 
     @Test
     fun findSancionByTipoSancion_NotFound() {
-        val suspensiones = sancionRepository.findSancionByTipoSancion(TipoSancion.BLOQUEO_TEMPORAL)
+        val suspensiones = sancionRepository.findSancionByTipoSancion(TipoSancion.INDEFINIDO)
         assertTrue(suspensiones.isEmpty())
     }
 

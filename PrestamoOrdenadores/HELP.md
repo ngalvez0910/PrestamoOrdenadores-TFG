@@ -10,7 +10,7 @@ For further reference, please consider the following sections:
 * [Coroutines section of the Spring Framework Documentation](https://docs.spring.io/spring-framework/reference/6.2.2/languages/kotlin/coroutines.html)
 * [Spring Boot Testcontainers support](https://docs.spring.io/spring-boot/3.4.2/reference/testing/testcontainers.html#testing.testcontainers)
 * [Testcontainers Postgres Module Reference Guide](https://java.testcontainers.org/modules/databases/postgres/)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/3.4.2/reference/data/sql.html#data.sql.jpa-and-spring-data)
+* [Spring Data JPA](https://docs.spring.io/spring-boot/3.4.2/reference/data/sql.html#data-test.sql.jpa-and-spring-data)
 * [Spring Security](https://docs.spring.io/spring-boot/3.4.2/reference/web/spring-security.html)
 * [Testcontainers](https://java.testcontainers.org/)
 * [Spring Web](https://docs.spring.io/spring-boot/3.4.2/reference/web/servlet.html)

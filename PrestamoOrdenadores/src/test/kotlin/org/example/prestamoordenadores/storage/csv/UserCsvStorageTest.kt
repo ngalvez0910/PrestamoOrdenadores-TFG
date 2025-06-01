@@ -97,7 +97,7 @@ class UserCsvStorageTest {
         val usersMock = listOf(user)
         every { repository.findAll() } returns usersMock
 
-        val dataDir = Paths.get("dataTest")
+        val dataDir = Paths.get("data")
         Files.createDirectories(dataDir)
 
         if (Files.exists(dataDir)) {
@@ -113,7 +113,7 @@ class UserCsvStorageTest {
         }
 
         val fileName = "usuarios_${LocalDate.now().toDefaultDateString()}.csv"
-        val filePath = Paths.get("dataTest", fileName)
+        val filePath = Paths.get("data", fileName)
 
         assertTrue(Files.exists(filePath))
     }

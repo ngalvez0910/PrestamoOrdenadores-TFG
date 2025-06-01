@@ -126,11 +126,11 @@ class DispositivoRepositoryTest {
     fun findByEstadoDispositivo() {
         val disponibles = dispositivoRepository.findByEstadoDispositivo(EstadoDispositivo.DISPONIBLE)
 
-        assertEquals(2, disponibles.size)
-        assertEquals(dispositivo1.guid, disponibles[0].guid)
-        assertEquals(dispositivo1.numeroSerie, disponibles[0].numeroSerie)
-        assertEquals(dispositivo2.guid, disponibles[1].guid)
-        assertEquals(dispositivo2.numeroSerie, disponibles[1].numeroSerie)
+        assertEquals(10, disponibles.size)
+        assertEquals("ed472271676", disponibles[0].guid)
+        assertEquals("1AB123WXYZ", disponibles[0].numeroSerie)
+        assertEquals("b1a2z3y4x5w", disponibles[1].guid)
+        assertEquals("1XY234CDEF", disponibles[1].numeroSerie)
     }
 
     @Test

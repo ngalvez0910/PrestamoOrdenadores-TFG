@@ -129,7 +129,7 @@ class PrestamoCsvStorageTest {
         val prestamosMock = listOf(prestamo)
         every { repository.findAll() } returns prestamosMock
 
-        val dataDir = Paths.get("dataTest")
+        val dataDir = Paths.get("data")
         Files.createDirectories(dataDir)
 
         if (Files.exists(dataDir)) {
@@ -145,7 +145,7 @@ class PrestamoCsvStorageTest {
         }
 
         val fileName = "prestamos_${LocalDate.now().toDefaultDateString()}.csv"
-        val filePath = Paths.get("dataTest", fileName)
+        val filePath = Paths.get("data", fileName)
 
         assertTrue(Files.exists(filePath))
     }

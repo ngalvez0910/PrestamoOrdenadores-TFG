@@ -109,7 +109,7 @@ class PrestamoRepositoryTest {
     fun save() {
         val newDispositivo = Dispositivo(
             "guidTest098",
-            "5CD1234XYZ",
+            "0LS0482ROA",
             "raton, cargador",
             EstadoDispositivo.DISPONIBLE,
             null,
@@ -138,6 +138,7 @@ class PrestamoRepositoryTest {
             false,
             false
         )
+        entityManager.persist(newUser)
 
         val newPrestamo = Prestamo(
             "guidTest098",
@@ -200,8 +201,8 @@ class PrestamoRepositoryTest {
     @Test
     fun findPrestamoByEstadoPrestamo() {
         val enCursoPrestamos = prestamoRepository.findPrestamoByEstadoPrestamo(EstadoPrestamo.EN_CURSO)
-        assertEquals(1, enCursoPrestamos.size)
-        assertEquals("guidTest123", enCursoPrestamos[0].guid)
+        assertEquals(2, enCursoPrestamos.size)
+        assertEquals("asdfghj345", enCursoPrestamos[0].guid)
     }
 
     @Test

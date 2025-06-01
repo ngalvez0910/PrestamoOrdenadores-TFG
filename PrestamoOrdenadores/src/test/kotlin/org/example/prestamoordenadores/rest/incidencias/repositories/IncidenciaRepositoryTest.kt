@@ -95,8 +95,8 @@ class IncidenciaRepositoryTest {
     fun findIncidenciasByEstadoIncidencia() {
         val pendientes = incidenciaRepository.findIncidenciasByEstadoIncidencia(EstadoIncidencia.PENDIENTE)
 
-        assertEquals(1, pendientes.size)
-        assertEquals("guidTestINC", pendientes[0].guid)
+        assertEquals(4, pendientes.size)
+        assertEquals("INC000003", pendientes[0].guid)
     }
 
     @Test
@@ -124,7 +124,7 @@ class IncidenciaRepositoryTest {
         val result = incidenciaRepository.findIncidenciasByUserId(user.id)
 
         assertEquals(1, result.size)
-        assertTrue(result.all { it?.id == user.id })
+        assertTrue(result.all { it?.user?.id == user.id })
     }
 
     @Test

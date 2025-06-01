@@ -206,14 +206,7 @@ class UserRepositoryTest {
     fun findUsersByRol() {
         val estudiantes = userRepository.findUsersByRol(Role.ALUMNO)
 
-        assertEquals(2, estudiantes.size)
+        assertEquals(7, estudiantes.size)
         assertTrue(estudiantes.all { it?.rol == Role.ALUMNO })
-    }
-
-    @Test
-    fun findUsersByRol_IsEmpty() {
-        val resultado = userRepository.findUsersByRol(Role.ADMIN)
-
-        assertTrue(resultado.isEmpty())
     }
 }

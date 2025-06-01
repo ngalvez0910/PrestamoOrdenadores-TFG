@@ -8,15 +8,31 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 
 @AutoConfigureMockMvc
 @SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
 @WithMockUser(username = "admin.loantech.admin@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class ExcelStorageControllerTest {
+
+    companion object {
+        @Container
+        @ServiceConnection
+        val postgres = PostgreSQLContainer("postgres:15-alpine")
+            .withDatabaseName("prestamosDB-test")
+            .withUsername("admin")
+            .withPassword("adminPassword123")
+    }
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -54,7 +70,6 @@ class ExcelStorageControllerTest {
                 status { isOk() }
                 content { contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") }
                 header { string("Content-Disposition", "attachment; filename=\"dispositivos.xlsx\"") }
-                content { contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") }
             }
     }
 
@@ -65,7 +80,6 @@ class ExcelStorageControllerTest {
                 status { isOk() }
                 content { contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") }
                 header { string("Content-Disposition", "attachment; filename=\"incidencias.xlsx\"") }
-                content { contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") }
             }
     }
 
