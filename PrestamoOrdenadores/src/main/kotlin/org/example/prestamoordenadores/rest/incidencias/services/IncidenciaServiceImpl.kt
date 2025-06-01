@@ -313,7 +313,8 @@ class IncidenciaServiceImpl(
             leida = false,
             tipo = NotificationTypeDto.INCIDENCIA,
             enlace = null,
-            severidadSugerida = NotificationSeverityDto.SUCCESS
+            severidadSugerida = NotificationSeverityDto.SUCCESS,
+            mostrarToast = true
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
 
@@ -329,7 +330,8 @@ class IncidenciaServiceImpl(
                     leida = false,
                     tipo = NotificationTypeDto.INCIDENCIA,
                     enlace = "/admin/incidencia/detalle/${incidencia.guid}",
-                    severidadSugerida = NotificationSeverityDto.INFO
+                    severidadSugerida = NotificationSeverityDto.INFO,
+                    mostrarToast = true
                 )
                 webService.createAndSendNotification(admin?.email ?: "", notificacionParaAdmin)
             }
@@ -357,7 +359,8 @@ class IncidenciaServiceImpl(
             leida = false,
             tipo = NotificationTypeDto.SISTEMA,
             enlace = null,
-            severidadSugerida = NotificationSeverityDto.INFO
+            severidadSugerida = NotificationSeverityDto.INFO,
+            mostrarToast = true
         )
         webService.createAndSendNotification(reportante.email, notificacionParaUser)
 
@@ -369,7 +372,8 @@ class IncidenciaServiceImpl(
             leida = false,
             tipo = NotificationTypeDto.INCIDENCIA,
             enlace = "/admin/incidencia/detalle/${incidencia.guid}",
-            severidadSugerida = NotificationSeverityDto.SUCCESS
+            severidadSugerida = NotificationSeverityDto.SUCCESS,
+            mostrarToast = true
         )
         logger.debug { "Preparando notificación de confirmación de resolución para admin (${user.email}): $notificacionParaAdminQueResolvio" }
         webService.createAndSendNotification(user.email, notificacionParaAdminQueResolvio)
@@ -389,7 +393,8 @@ class IncidenciaServiceImpl(
                         leida = false,
                         tipo = NotificationTypeDto.INCIDENCIA,
                         enlace = "/admin/incidencia/detalle/${incidencia.guid}",
-                        severidadSugerida = NotificationSeverityDto.INFO
+                        severidadSugerida = NotificationSeverityDto.INFO,
+                        mostrarToast = false
                     )
                     logger.debug { "Preparando notificación informativa de resolución para otro admin (${otroAdmin.email}): $notificacionParaOtroAdmin" }
                     webService.createAndSendNotification(otroAdmin.email, notificacionParaOtroAdmin)
@@ -416,7 +421,8 @@ class IncidenciaServiceImpl(
             leida = false,
             tipo = NotificationTypeDto.SISTEMA,
             enlace = "/admin/incidencia/detalle/${incidencia.guid}",
-            severidadSugerida = NotificationSeverityDto.SUCCESS
+            severidadSugerida = NotificationSeverityDto.SUCCESS,
+            mostrarToast = false
         )
         logger.debug { "Preparando notificación de confirmación de eliminacion para admin (${user.email}): $notificacionAdminElimina" }
         webService.createAndSendNotification(user.email, notificacionAdminElimina)
@@ -436,7 +442,8 @@ class IncidenciaServiceImpl(
                         leida = false,
                         tipo = NotificationTypeDto.SISTEMA,
                         enlace = "/admin/incidencia/detalle/${incidencia.guid}",
-                        severidadSugerida = NotificationSeverityDto.INFO
+                        severidadSugerida = NotificationSeverityDto.INFO,
+                        mostrarToast = false
                     )
                     logger.debug { "Preparando notificación informativa de eliminaicon para otro admin (${otroAdmin.email}): $notificacionParaOtroAdmin" }
                     webService.createAndSendNotification(otroAdmin.email, notificacionParaOtroAdmin)

@@ -357,7 +357,8 @@ class PrestamoServiceImpl(
             leida = false,
             tipo = NotificationTypeDto.PRESTAMO,
             enlace = null,
-            severidadSugerida = NotificationSeverityDto.SUCCESS
+            severidadSugerida = NotificationSeverityDto.SUCCESS,
+            mostrarToast = true
         )
         webService.createAndSendNotification(user.email, notificacionParaUser)
 
@@ -373,7 +374,8 @@ class PrestamoServiceImpl(
                     leida = false,
                     tipo = NotificationTypeDto.PRESTAMO,
                     enlace = "/admin/prestamo/detalle/${prestamo.guid}",
-                    severidadSugerida = NotificationSeverityDto.INFO
+                    severidadSugerida = NotificationSeverityDto.INFO,
+                    mostrarToast = false
                 )
                 webService.createAndSendNotification(admin?.email ?: "", notificacionParaAdmin)
             }
@@ -433,7 +435,8 @@ class PrestamoServiceImpl(
             leida = false,
             tipo = NotificationTypeDto.SISTEMA,
             enlace = null,
-            severidadSugerida = severidad
+            severidadSugerida = severidad,
+            mostrarToast = true
         )
         webService.createAndSendNotification(prestamo.user.email, notificacionParaUser)
 
@@ -449,7 +452,8 @@ class PrestamoServiceImpl(
                         leida = false,
                         tipo = NotificationTypeDto.SISTEMA,
                         enlace = "/admin/prestamo/detalle/${prestamo.guid}",
-                        severidadSugerida = severidad
+                        severidadSugerida = severidad,
+                        mostrarToast = false
                     )
                     webService.createAndSendNotification(admin.email, notificacionParaAdmin)
                 }
@@ -475,7 +479,8 @@ class PrestamoServiceImpl(
             leida = false,
             tipo = NotificationTypeDto.SISTEMA,
             enlace = null,
-            severidadSugerida = NotificationSeverityDto.SUCCESS
+            severidadSugerida = NotificationSeverityDto.SUCCESS,
+            mostrarToast = false
         )
         logger.debug { "Preparando notificación de confirmación de eliminacion para admin (${user.email}): $notificacionAdminElimina" }
         webService.createAndSendNotification(user.email, notificacionAdminElimina)
@@ -495,7 +500,8 @@ class PrestamoServiceImpl(
                         leida = false,
                         tipo = NotificationTypeDto.SISTEMA,
                         enlace = "/admin/prestamo/detalle/${prestamo.guid}",
-                        severidadSugerida = NotificationSeverityDto.INFO
+                        severidadSugerida = NotificationSeverityDto.INFO,
+                        mostrarToast = false
                     )
                     logger.debug { "Preparando notificación informativa de eliminaicon para otro admin (${otroAdmin.email}): $notificacionParaOtroAdmin" }
                     webService.createAndSendNotification(otroAdmin.email, notificacionParaOtroAdmin)
