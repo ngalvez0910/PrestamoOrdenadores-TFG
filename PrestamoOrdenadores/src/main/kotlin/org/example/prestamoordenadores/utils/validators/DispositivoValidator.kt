@@ -6,6 +6,19 @@ import com.github.michaelbull.result.Result
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError
 
+/**
+ * Función de extensión para validar un objeto [DispositivoCreateRequest].
+ *
+ * Realiza las siguientes validaciones:
+ * - El número de serie no puede estar en blanco.
+ * - El número de serie debe seguir el patrón "1XX123XXXX" (un dígito, dos letras mayúsculas, tres dígitos, cuatro letras mayúsculas).
+ * - Los componentes no pueden estar en blanco.
+ *
+ * @receiver La instancia de [DispositivoCreateRequest] a validar.
+ * @return Un [Result] que contiene el [DispositivoCreateRequest] validado si la validación es exitosa ([Ok]),
+ * o un [DispositivoError.DispositivoValidationError] si falla ([Err]).
+ * @author Natalia González Álvarez
+ */
 fun DispositivoCreateRequest.validate(): Result<DispositivoCreateRequest, DispositivoError> {
     val regexNumSerie = Regex("^\\d[A-Z]{2}\\d{3}[A-Z]{4}$")
 
