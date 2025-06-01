@@ -29,6 +29,7 @@ import org.example.prestamoordenadores.rest.users.dto.UserResponse
 import org.example.prestamoordenadores.rest.users.models.Role
 import org.example.prestamoordenadores.rest.users.models.User
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
+import org.example.prestamoordenadores.utils.emails.EmailService
 import org.example.prestamoordenadores.utils.pagination.PagedResponse
 import org.example.prestamoordenadores.utils.validators.validate
 import org.junit.jupiter.api.Assertions.*
@@ -59,6 +60,9 @@ class SancionServiceImplTest {
 
     @MockK
     lateinit var webService: WebSocketService
+
+    @MockK
+    lateinit var emailService: EmailService
 
     @MockK
     lateinit var updateRequest: SancionUpdateRequest
@@ -146,7 +150,8 @@ class SancionServiceImplTest {
             mapper,
             userRepository,
             prestamoRepository,
-            webService
+            webService,
+            emailService
         )
     }
 
@@ -414,12 +419,14 @@ class SancionServiceImplTest {
         every { repository.findByUserAndTipoSancion(user, TipoSancion.ADVERTENCIA) } returns listOf(sancion)
         every { webService.createAndSendNotification(any(), any()) } just Runs
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
+        every { emailService.sendHtmlEmailSancion(any(), any(), any(), any()) } just Runs
 
         service.gestionarAdvertencias()
 
         verify(exactly = 1) { prestamoRepository.findPrestamoByEstadoPrestamo(EstadoPrestamo.VENCIDO) }
         verify(exactly = 1) { repository.existsByPrestamoGuidAndTipoSancion("PREST000001", TipoSancion.ADVERTENCIA) }
         verify(exactly = 1) { repository.save(match { it.tipoSancion == TipoSancion.ADVERTENCIA && it.prestamo == prestamoVencido }) }
+        verify(exactly = 1) { emailService.sendHtmlEmailSancion(any(), any(), any(), any()) }
     }
 
     @Test
@@ -473,12 +480,14 @@ class SancionServiceImplTest {
         every { repository.findByUserAndTipoSancion(any(), TipoSancion.BLOQUEO_TEMPORAL) } returns listOf(sancionExpirada)
         every { webService.createAndSendNotification(any(), any()) } just Runs
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
+        every { emailService.sendHtmlEmailUsuarioReactivado(any(), any(), any()) } just Runs
 
         service.gestionarReactivacionYPosibleEscaladaAIndefinido()
 
         verify(exactly = 1) { repository.findByTipoSancionAndFechaFinLessThanEqualAndUserIsActivoIsFalse(any(), any()) }
         verify(exactly = 1) { repository.findSancionsByUserAndTipoSancionIn(any(), any()) }
         verify(exactly = 1) { userRepository.save(match { it.isActivo }) }
+        verify(exactly = 1) { emailService.sendHtmlEmailUsuarioReactivado(any(), any(), any()) }
     }
 
     @Test
@@ -535,12 +544,16 @@ class SancionServiceImplTest {
         every { repository.save(any()) } answers { firstArg() }
         every { webService.createAndSendNotification(any(), any()) } just Runs
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
+        every { emailService.sendHtmlEmailSancion(any(), any(), any(), any()) } just Runs
 
         service.crearBloqueoTemporal(user, "motivo de test", prestamo)
 
         assertFalse(user.isActivo)
         verify { userRepository.save(user) }
         verify { repository.save(match { it.tipoSancion == TipoSancion.BLOQUEO_TEMPORAL }) }
+        verify { webService.createAndSendNotification(any(), any()) }
+        verify { userRepository.findUsersByRol(any()) }
+        verify { emailService.sendHtmlEmailSancion(any(), any(), any(), any()) }
     }
 
     @Test
@@ -549,11 +562,15 @@ class SancionServiceImplTest {
         every { repository.save(any()) } answers { firstArg() }
         every { webService.createAndSendNotification(any(), any()) } just Runs
         every { userRepository.findUsersByRol(Role.ADMIN) } returns listOf(User(email = "admin.loantech@gmail.com", rol = Role.ADMIN))
+        every { emailService.sendHtmlEmailSancion(any(), any(), any(), any()) } just Runs
 
         service.crearBloqueoIndefinido(user, "motivo indefinido")
 
         assertFalse(user.isActivo)
         verify { userRepository.save(user) }
         verify { repository.save(match { it.tipoSancion == TipoSancion.INDEFINIDO }) }
+        verify { webService.createAndSendNotification(any(), any()) }
+        verify { userRepository.findUsersByRol(any()) }
+        verify { emailService.sendHtmlEmailSancion(any(), any(), any(), any()) }
     }
 }

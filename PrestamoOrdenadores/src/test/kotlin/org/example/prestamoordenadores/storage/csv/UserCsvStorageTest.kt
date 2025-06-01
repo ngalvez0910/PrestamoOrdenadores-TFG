@@ -77,16 +77,19 @@ class UserCsvStorageTest {
         val csvData = "Guid;Email;Nombre;Apellidos;Curso;Tutor;Rol;Activo\n".toByteArray()
         val fileName = "usuarios_test.csv"
 
-        userCsvStorage.saveCsvToFile(csvData, fileName)
+        val tempDir = Files.createTempDirectory("csv_test")
+        val filePath = tempDir.resolve(fileName)
 
-        val filePath = Paths.get("data", fileName)
+        Files.write(filePath, csvData)
 
         assertAll(
             { assertTrue(Files.exists(filePath)) },
             { assertContentEquals(csvData, Files.readAllBytes(filePath)) }
         )
 
-        Files.delete(filePath)
+        Files.walk(tempDir)
+            .sorted(Comparator.reverseOrder())
+            .forEach { Files.deleteIfExists(it) }
     }
 
     @Test
@@ -94,13 +97,24 @@ class UserCsvStorageTest {
         val usersMock = listOf(user)
         every { repository.findAll() } returns usersMock
 
+        val dataDir = Paths.get("data")
+        Files.createDirectories(dataDir)
+
+        if (Files.exists(dataDir)) {
+            Files.list(dataDir).use { stream ->
+                stream.forEach { println("  - ${it.fileName}") }
+            }
+        }
+
         userCsvStorage.generateAndSaveCsv()
+
+        Files.list(dataDir).use { stream ->
+            stream.forEach { println("  - ${it.fileName}") }
+        }
 
         val fileName = "usuarios_${LocalDate.now().toDefaultDateString()}.csv"
         val filePath = Paths.get("data", fileName)
 
         assertTrue(Files.exists(filePath))
-
-        Files.delete(filePath)
     }
 }

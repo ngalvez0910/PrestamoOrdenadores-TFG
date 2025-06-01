@@ -4,6 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.example.prestamoordenadores.PrestamoOrdenadoresApplication
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
 import org.example.prestamoordenadores.rest.prestamos.dto.PrestamoResponseAdmin
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
@@ -27,10 +29,14 @@ import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.put
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDateTime
 
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest(classes = [PrestamoOrdenadoresApplication::class])
+@Testcontainers
 @WithMockUser(username = "admin.loantech.admin@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class UserControllerTest {
 
@@ -39,6 +45,15 @@ class UserControllerTest {
 
     @MockkBean
     lateinit var service: UserService
+
+    companion object {
+        @Container
+        @ServiceConnection
+        val postgresContainer = PostgreSQLContainer("postgres:15.3")
+            .withDatabaseName("prestamosDB-test")
+            .withUsername("testuser")
+            .withPassword("testpass")
+    }
 
     @Test
     fun getAllUsers() {

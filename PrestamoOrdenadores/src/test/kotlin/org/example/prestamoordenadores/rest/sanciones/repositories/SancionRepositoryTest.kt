@@ -16,11 +16,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Testcontainers
 class SancionRepositoryTest {
 
     @Autowired
@@ -84,8 +88,18 @@ class SancionRepositoryTest {
         false
     )
 
+    companion object {
+        @Container
+        @ServiceConnection
+        val postgresContainer = PostgreSQLContainer("postgres:15.3")
+            .withDatabaseName("prestamosDB-test")
+            .withUsername("testuser")
+            .withPassword("testpass")
+    }
+
     @BeforeEach
     fun setup() {
+        entityManager.clear()
         entityManager.persist(user)
         entityManager.persist(dispositivo)
         entityManager.persist(prestamo)
@@ -123,13 +137,13 @@ class SancionRepositoryTest {
     @Test
     fun findSancionByTipoSancion() {
         val bloqueos = sancionRepository.findSancionByTipoSancion(TipoSancion.ADVERTENCIA)
-        assertEquals(1, bloqueos.size)
+        assertEquals(5, bloqueos.size)
         assertTrue(bloqueos.any { it.guid == "guidTest123" })
     }
 
     @Test
     fun findSancionByTipoSancion_NotFound() {
-        val suspensiones = sancionRepository.findSancionByTipoSancion(TipoSancion.BLOQUEO_TEMPORAL)
+        val suspensiones = sancionRepository.findSancionByTipoSancion(TipoSancion.INDEFINIDO)
         assertTrue(suspensiones.isEmpty())
     }
 

@@ -28,7 +28,7 @@ describe('StorageDashboard', () => {
         });
     });
 
-    it('dispara descarga de CSV al hacer clic en cada botón', () => {
+    it('dispara descarga de XLSX al hacer clic en cada botón', () => {
         const botones = [
             'Dispositivos',
             'Usuarios',

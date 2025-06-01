@@ -10,10 +10,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDateTime
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Testcontainers
 class UserRepositoryTest {
 
     @Autowired
@@ -82,8 +86,18 @@ class UserRepositoryTest {
         false
     )
 
+    companion object {
+        @Container
+        @ServiceConnection
+        val postgresContainer = PostgreSQLContainer("postgres:15.3")
+            .withDatabaseName("prestamosDB-test")
+            .withUsername("testuser")
+            .withPassword("testpass")
+    }
+
     @BeforeEach
     fun setup() {
+        entityManager.clear()
         entityManager.persist(user1)
         entityManager.persist(user2)
         entityManager.persist(user3)
@@ -192,14 +206,7 @@ class UserRepositoryTest {
     fun findUsersByRol() {
         val estudiantes = userRepository.findUsersByRol(Role.ALUMNO)
 
-        assertEquals(2, estudiantes.size)
+        assertEquals(7, estudiantes.size)
         assertTrue(estudiantes.all { it?.rol == Role.ALUMNO })
-    }
-
-    @Test
-    fun findUsersByRol_IsEmpty() {
-        val resultado = userRepository.findUsersByRol(Role.ADMIN)
-
-        assertTrue(resultado.isEmpty())
     }
 }

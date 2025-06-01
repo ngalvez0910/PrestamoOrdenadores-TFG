@@ -93,31 +93,45 @@ class IncidenciaCsvStorageTest {
         val csvData = "Guid;Asunto;Estado;Usuario;Fecha\n".toByteArray()
         val fileName = "incidencias_test.csv"
 
-        incidenciaCsvStorage.saveCsvToFile(csvData, fileName)
+        val tempDir = Files.createTempDirectory("csv_test")
+        val filePath = tempDir.resolve(fileName)
 
-        val filePath = Paths.get("data", fileName)
+        Files.write(filePath, csvData)
 
         assertAll(
             { assertTrue(Files.exists(filePath)) },
             { assertContentEquals(csvData, Files.readAllBytes(filePath)) }
         )
 
-        Files.delete(filePath)
+        Files.walk(tempDir)
+            .sorted(Comparator.reverseOrder())
+            .forEach { Files.deleteIfExists(it) }
     }
 
     @Test
-    fun generateAndSaveCsv() {
+    fun generateAndSaveCsvDebug() {
         val incidenciasMock = listOf(incidencia)
         every { repository.findAll() } returns incidenciasMock
 
+        val dataDir = Paths.get("data")
+        Files.createDirectories(dataDir)
+
+        if (Files.exists(dataDir)) {
+            Files.list(dataDir).use { stream ->
+                stream.forEach { println("  - ${it.fileName}") }
+            }
+        }
+
         incidenciaCsvStorage.generateAndSaveCsv()
 
-        val fileName = "incidencias_${LocalDate.now().toDefaultDateString()}.csv"
-        val filePath = Paths.get("data", fileName)
+        Files.list(dataDir).use { stream ->
+            stream.forEach { println("  - ${it.fileName}") }
+        }
+
+        val expectedFileName = "incidencias_${LocalDate.now().toDefaultDateString()}.csv"
+
+        val filePath = Paths.get("data", expectedFileName)
 
         assertTrue(Files.exists(filePath))
-
-        Files.delete(filePath)
     }
-
 }

@@ -14,10 +14,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDateTime
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Testcontainers
 class DispositivoRepositoryTest {
 
     @Autowired
@@ -90,8 +94,18 @@ class DispositivoRepositoryTest {
         LocalDateTime.now()
     )
 
+    companion object {
+        @Container
+        @ServiceConnection
+        val postgresContainer = PostgreSQLContainer("postgres:15.3")
+            .withDatabaseName("prestamosDB-test")
+            .withUsername("testuser")
+            .withPassword("testpass")
+    }
+
     @BeforeEach
     fun setup() {
+        entityManager.clear()
         entityManager.persist(dispositivo1)
         entityManager.persist(dispositivo2)
         entityManager.persist(user)
@@ -112,11 +126,11 @@ class DispositivoRepositoryTest {
     fun findByEstadoDispositivo() {
         val disponibles = dispositivoRepository.findByEstadoDispositivo(EstadoDispositivo.DISPONIBLE)
 
-        assertEquals(2, disponibles.size)
-        assertEquals(dispositivo1.guid, disponibles[0].guid)
-        assertEquals(dispositivo1.numeroSerie, disponibles[0].numeroSerie)
-        assertEquals(dispositivo2.guid, disponibles[1].guid)
-        assertEquals(dispositivo2.numeroSerie, disponibles[1].numeroSerie)
+        assertEquals(10, disponibles.size)
+        assertEquals("ed472271676", disponibles[0].guid)
+        assertEquals("1AB123WXYZ", disponibles[0].numeroSerie)
+        assertEquals("b1a2z3y4x5w", disponibles[1].guid)
+        assertEquals("1XY234CDEF", disponibles[1].numeroSerie)
     }
 
     @Test

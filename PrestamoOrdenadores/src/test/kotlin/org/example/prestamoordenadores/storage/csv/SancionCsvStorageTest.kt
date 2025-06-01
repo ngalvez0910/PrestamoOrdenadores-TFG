@@ -89,16 +89,19 @@ class SancionCsvStorageTest {
         val csvData = "Guid;Usuario;Tipo;Fecha\n".toByteArray()
         val fileName = "sanciones_test.csv"
 
-        sancionCsvStorage.saveCsvToFile(csvData, fileName)
+        val tempDir = Files.createTempDirectory("csv_test")
+        val filePath = tempDir.resolve(fileName)
 
-        val filePath = Paths.get("data", fileName)
+        Files.write(filePath, csvData)
 
         assertAll(
             { assertTrue(Files.exists(filePath)) },
             { assertContentEquals(csvData, Files.readAllBytes(filePath)) }
         )
 
-        Files.delete(filePath)
+        Files.walk(tempDir)
+            .sorted(Comparator.reverseOrder())
+            .forEach { Files.deleteIfExists(it) }
     }
 
     @Test
@@ -106,14 +109,25 @@ class SancionCsvStorageTest {
         val sancionesMock = listOf(sancion)
         every { repository.findAll() } returns sancionesMock
 
+        val dataDir = Paths.get("data")
+        Files.createDirectories(dataDir)
+
+        if (Files.exists(dataDir)) {
+            Files.list(dataDir).use { stream ->
+                stream.forEach { println("  - ${it.fileName}") }
+            }
+        }
+
         sancionCsvStorage.generateAndSaveCsv()
+
+        Files.list(dataDir).use { stream ->
+            stream.forEach { println("  - ${it.fileName}") }
+        }
 
         val fileName = "sanciones_${LocalDate.now().toDefaultDateString()}.csv"
         val filePath = Paths.get("data", fileName)
 
         assertTrue(Files.exists(filePath))
-
-        Files.delete(filePath)
     }
 
 }

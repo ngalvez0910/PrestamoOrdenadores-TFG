@@ -3,7 +3,6 @@ package org.example.prestamoordenadores.rest.dispositivos.controller
 import com.github.michaelbull.result.mapBoth
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoUpdateRequest
-import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoAlreadyExists
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoNotFound
 import org.example.prestamoordenadores.rest.dispositivos.errors.DispositivoError.DispositivoValidationError
 import org.example.prestamoordenadores.rest.dispositivos.services.DispositivoService
@@ -93,7 +92,6 @@ class DispositivoController
             failure = { error ->
                 when(error) {
                     is DispositivoNotFound -> ResponseEntity.status(404).body("Dispositivo no encontrado")
-                    is DispositivoAlreadyExists -> ResponseEntity.status(409).body("Dispositivo ya existente")
                     else -> ResponseEntity.status(422).body("Se ha producido un error en la solicitud")
                 }
             }

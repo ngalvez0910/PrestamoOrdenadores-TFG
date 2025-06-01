@@ -1,22 +1,37 @@
 package org.example.prestamoordenadores
 
-import io.mockk.impl.annotations.MockK
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 
 @SpringBootTest
-@TestPropertySource("classpath:application-test.properties")
+@Testcontainers
 @AutoConfigureMockMvc
 class PrestamoOrdenadoresApplicationTests {
 
-    @MockK
-    private lateinit var javaMailSender: JavaMailSender
+    companion object {
+        @Container
+        @JvmStatic
+        val postgres = PostgreSQLContainer("postgres:15.3")
+            .withDatabaseName("prestamosDB-test")
+            .withUsername("admin")
+            .withPassword("adminPassword123")
+
+        @DynamicPropertySource
+        @JvmStatic
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.datasource.url", postgres::getJdbcUrl)
+            registry.add("spring.datasource.username", postgres::getUsername)
+            registry.add("spring.datasource.password", postgres::getPassword)
+        }
+    }
 
     @Test
     fun contextLoads() {
     }
-
 }

@@ -6,6 +6,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
+import org.example.prestamoordenadores.PrestamoOrdenadoresApplication
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoCreateRequest
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponse
 import org.example.prestamoordenadores.rest.dispositivos.dto.DispositivoResponseAdmin
@@ -17,15 +18,20 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest(classes = [PrestamoOrdenadoresApplication::class])
+@Testcontainers
 @WithMockUser(username = "admin.loantech.admin@gmail.com", password = "Password123?", roles = ["ADMIN", "ALUMNO", "PROFESOR"])
 class DispositivoControllerTest {
 
@@ -34,6 +40,15 @@ class DispositivoControllerTest {
 
     @MockkBean
     lateinit var service: DispositivoService
+
+    companion object {
+        @Container
+        @ServiceConnection
+        val postgresContainer = PostgreSQLContainer("postgres:15.3")
+            .withDatabaseName("prestamosDB-test")
+            .withUsername("testuser")
+            .withPassword("testpass")
+    }
 
     @Test
     fun getAllDispositivos() {
