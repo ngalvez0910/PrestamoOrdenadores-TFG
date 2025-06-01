@@ -12,6 +12,20 @@ import org.springframework.web.bind.annotation.RestController
 
 private val logger = logging()
 
+/**
+ * Controlador REST para la descarga de archivos Excel de diferentes entidades del sistema.
+ *
+ * Este controlador proporciona endpoints para generar y descargar archivos Excel que contienen
+ * datos de dispositivos, incidencias, préstamos, sanciones y usuarios.
+ * Todas las operaciones en este controlador requieren que el usuario tenga el rol 'ADMIN'.
+ *
+ * @property dispositivoExcelStorage Servicio para generar Excel de dispositivos.
+ * @property incidenciaExcelStorage Servicio para generar Excel de incidencias.
+ * @property prestamoExcelStorage Servicio para generar Excel de préstamos.
+ * @property sancionExcelStorage Servicio para generar Excel de sanciones.
+ * @property userExcelStorage Servicio para generar Excel de usuarios.
+ * @author Natalia González Álvarez
+ */
 @RestController
 @RequestMapping("/storage/excel")
 @PreAuthorize("hasRole('ADMIN')")
@@ -23,6 +37,12 @@ class ExcelStorageController(
     private val userExcelStorage: UserExcelStorage
 ) {
 
+    /**
+     * Descarga un archivo Excel que contiene todos los dispositivos.
+     *
+     * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
+     * o un estado 500 si ocurre un error durante la generación.
+     */
     @GetMapping("/dispositivos", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadDispositivosExcel(): ResponseEntity<ByteArray> {
         return try {
@@ -46,6 +66,12 @@ class ExcelStorageController(
         }
     }
 
+    /**
+     * Descarga un archivo Excel que contiene todas las incidencias.
+     *
+     * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
+     * o un estado 500 si ocurre un error durante la generación.
+     */
     @GetMapping("/incidencias", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadIncidenciasExcel(): ResponseEntity<ByteArray> {
         return try {
@@ -68,6 +94,12 @@ class ExcelStorageController(
         }
     }
 
+    /**
+     * Descarga un archivo Excel que contiene todos los préstamos.
+     *
+     * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
+     * o un estado 500 si ocurre un error durante la generación.
+     */
     @GetMapping("/prestamos", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadPrestamosExcel(): ResponseEntity<ByteArray> {
         return try {
@@ -90,6 +122,12 @@ class ExcelStorageController(
         }
     }
 
+    /**
+     * Descarga un archivo Excel que contiene todas las sanciones.
+     *
+     * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
+     * o un estado 500 si ocurre un error durante la generación.
+     */
     @GetMapping("/sanciones", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadSancionesExcel(): ResponseEntity<ByteArray> {
         return try {
@@ -112,6 +150,12 @@ class ExcelStorageController(
         }
     }
 
+    /**
+     * Descarga un archivo Excel que contiene todos los usuarios.
+     *
+     * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
+     * o un estado 500 si ocurre un error durante la generación.
+     */
     @GetMapping("/users", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadUsersExcel(): ResponseEntity<ByteArray> {
         return try {

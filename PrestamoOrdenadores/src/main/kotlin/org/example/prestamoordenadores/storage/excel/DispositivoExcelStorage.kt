@@ -8,10 +8,35 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.springframework.stereotype.Service
 
+/**
+ * Servicio para la generación de archivos Excel con datos de dispositivos.
+ *
+ * Esta clase se encarga de recuperar la información de los dispositivos desde el repositorio
+ * y generar un archivo Excel con estos datos. El archivo contendrá una hoja llamada "Dispositivos"
+ * con columnas para el GUID, número de serie, componentes, estado, GUID de incidencia asociada
+ * y estado de borrado del dispositivo.
+ *
+ * @property dispositivoRepository Repositorio para acceder a los datos de los dispositivos.
+ * @author Natalia González Álvarez
+ */
 @Service
 class DispositivoExcelStorage(
     private val dispositivoRepository: DispositivoRepository,
 ) {
+    /**
+     * Genera un archivo Excel que contiene todos los dispositivos.
+     *
+     * Los datos de los dispositivos se obtienen del [DispositivoRepository]. El archivo Excel
+     * tendrá una hoja con el nombre "Dispositivos" y las siguientes columnas:
+     * - "Guid": Identificador único del dispositivo.
+     * - "Nº Serie": Número de serie del dispositivo.
+     * - "Componentes": Componentes del dispositivo.
+     * - "Estado": Estado actual del dispositivo (por ejemplo, disponible, en reparación).
+     * - "Incidencias": GUID de la incidencia asociada, si la hay.
+     * - "Borrado": Estado de borrado lógico del dispositivo.
+     *
+     * @return Un [ByteArray] que representa el contenido del archivo Excel generado.
+     */
     fun generateExcel(): ByteArray {
         val dispositivos = dispositivoRepository.findAll()
 
