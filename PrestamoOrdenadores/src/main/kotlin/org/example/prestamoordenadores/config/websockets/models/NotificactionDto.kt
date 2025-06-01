@@ -15,6 +15,7 @@ import java.time.LocalDateTime
  * @property tipo Tipo de la notificación (por ejemplo, INFO, PRESTAMO, ERROR...).
  * @property enlace Enlace relacionado a la notificación, si lo hay. Puede ser `null`.
  * @property severidadSugerida Nivel de severidad recomendado para mostrar la notificación visualmente. Por defecto es INFO.
+ * @property mostrarToast Indica si la notificación debe mostrarse en un toast.
  *
  * @author Natalia González Álvarez
  */
@@ -26,7 +27,8 @@ data class NotificationDto(
     var leida: Boolean,
     val tipo: NotificationTypeDto?,
     val enlace: String?,
-    val severidadSugerida: NotificationSeverityDto? = NotificationSeverityDto.INFO
+    val severidadSugerida: NotificationSeverityDto? = NotificationSeverityDto.INFO,
+    val mostrarToast: Boolean = true
 )
 
 /**
