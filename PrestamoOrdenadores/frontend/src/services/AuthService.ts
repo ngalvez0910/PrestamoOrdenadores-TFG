@@ -217,7 +217,6 @@ export const authService = {
             const decoded: any = jwtDecode(state.token);
             const currentTime = Date.now() / 1000;
 
-            // Verificar si el token ha expirado
             if (decoded.exp && decoded.exp < currentTime) {
                 console.log("[AuthService] Token expirado");
                 return false;

@@ -243,7 +243,7 @@ export default defineComponent({
         if (index !== -1) {
           notifications.value[index].leida = originalLeidaState;
         }
-        if (notificationToUpdateInDialog && selectedNotificationForDialog.value) { // Revertir en el diálogo
+        if (notificationToUpdateInDialog && selectedNotificationForDialog.value) {
           selectedNotificationForDialog.value.leida = originalLeidaState;
         }
         console.error("Error al marcar como leída:", error);
@@ -292,10 +292,6 @@ export default defineComponent({
       if (!notification.leida) {
         markAsRead(notification, true);
       }
-      // La navegación se puede mover a un botón dentro del diálogo si se desea
-      // if (notification.enlace) {
-      // router.push(notification.enlace);
-      // }
     };
 
     const getNotificationIcon = (tipo?: NotificationType): string => {
