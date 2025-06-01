@@ -17,6 +17,25 @@ import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+/**
+ * Entidad que representa una sanción aplicada a un usuario en el sistema.
+ *
+ * Mapea a la tabla "sanciones" en la base de datos y contiene información
+ * detallada sobre la sanción, el usuario sancionado, el préstamo asociado,
+ * su tipo, fechas y estado.
+ *
+ * @property id El identificador único de la sanción en la base de datos (clave primaria autoincremental).
+ * @property guid El identificador único global (GUID) de la sanción, generado automáticamente.
+ * @property user El usuario al que se le ha aplicado la sanción. Es una relación uno a uno.
+ * @property prestamo El préstamo asociado a esta sanción. Es una relación uno a uno.
+ * @property tipoSancion El tipo de sanción aplicada, utilizando el enum [TipoSancion].
+ * @property fechaSancion La fecha en que se aplicó la sanción.
+ * @property fechaFin La fecha de finalización de la sanción. Puede ser nula para sanciones indefinidas.
+ * @property createdDate La fecha y hora de creación del registro de la sanción.
+ * @property updatedDate La fecha y hora de la última actualización del registro de la sanción.
+ * @property isDeleted Un indicador booleano que señala si la sanción ha sido marcada para eliminación lógica.
+ * @author Natalia González Álvarez
+ */
 @Entity
 @Table(name = "sanciones")
 class Sancion (
@@ -48,9 +67,36 @@ class Sancion (
 
     var isDeleted: Boolean = false
 ){
+    /**
+     * Constructor secundario para facilitar la creación de una sanción con un GUID específico
+     * y fechas ya definidas, útil para operaciones de carga o pruebas.
+     *
+     * @param guid El identificador único global (GUID) de la sanción.
+     * @param user El usuario sancionado.
+     * @param prestamo El préstamo asociado a la sanción.
+     * @param tipoSancion El tipo de sanción.
+     * @param fechaSancion La fecha de inicio de la sanción.
+     * @param fechaFin La fecha de finalización de la sanción.
+     * @param createdDate La fecha de creación.
+     * @param updatedDate La fecha de última actualización.
+     * @param isDeleted Indica si la sanción está lógicamente eliminada (por defecto false).
+     * @author Natalia González Álvarez
+     */
     constructor(guid: String, user: User, prestamo: Prestamo, tipoSancion: TipoSancion, fechaSancion: LocalDate, fechaFin: LocalDate, createdDate: LocalDateTime, updatedDate: LocalDateTime, isDeleted: Boolean = false) :
             this(0, guid, user, prestamo, tipoSancion, fechaSancion, fechaFin, createdDate, updatedDate, isDeleted)
 
+    /**
+     * Comprueba si la sanción está activa en la fecha actual.
+     *
+     * Una sanción no está activa si ha sido eliminada lógicamente.
+     * La lógica de actividad varía según el [TipoSancion]:
+     * - [TipoSancion.ADVERTENCIA]: Siempre activa.
+     * - [TipoSancion.BLOQUEO_TEMPORAL]: Activa si la fecha actual no es posterior a la fecha de fin.
+     * - [TipoSancion.INDEFINIDO]: Siempre activa.
+     *
+     * @return `true` si la sanción está activa, `false` en caso contrario.
+     * @author Natalia González Álvarez
+     */
     fun isActiveNow(): Boolean {
         if (this.isDeleted) {
             return false
