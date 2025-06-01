@@ -219,7 +219,7 @@ export default {
               const minute = parseInt(match[5], 10);
               const second = parseInt(match[6], 10);
               const year = parseInt(match[7], 10);
-              const monthIndex = monthMap[monthAbbr]; // Obtiene 0 para Jan, 1 para Feb, etc.
+              const monthIndex = monthMap[monthAbbr];
 
               if (monthIndex !== undefined && !isNaN(day) && !isNaN(hour) && !isNaN(minute) && !isNaN(second) && !isNaN(year)) {
                 date = new Date(year, monthIndex, day, hour, minute, second);
