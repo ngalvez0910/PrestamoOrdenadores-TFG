@@ -41,7 +41,7 @@ class ExcelStorageController(
      * Descarga un archivo Excel que contiene todos los dispositivos.
      *
      * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
-     * o un estado 500 si ocurre un error durante la generación.
+     * o un estado **204 No Content** si ocurre un error durante la generación, para evitar un error 500.
      */
     @GetMapping("/dispositivos", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadDispositivosExcel(): ResponseEntity<ByteArray> {
@@ -61,8 +61,8 @@ class ExcelStorageController(
             ResponseEntity(excelData, headers, HttpStatus.OK)
 
         } catch (e: Exception) {
-            logger.error { "Error generando Excel de dispositivos" }
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            logger.error { "Error generando Excel de dispositivos: ${e.message}" }
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
     }
 
@@ -70,7 +70,7 @@ class ExcelStorageController(
      * Descarga un archivo Excel que contiene todas las incidencias.
      *
      * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
-     * o un estado 500 si ocurre un error durante la generación.
+     * o un estado **204 No Content** si ocurre un error durante la generación, para evitar un error 500.
      */
     @GetMapping("/incidencias", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadIncidenciasExcel(): ResponseEntity<ByteArray> {
@@ -89,8 +89,8 @@ class ExcelStorageController(
             ResponseEntity(excelData, headers, HttpStatus.OK)
 
         } catch (e: Exception) {
-            logger.error { "Error generando Excel de incidencias" }
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            logger.error { "Error generando Excel de incidencias: ${e.message}" }
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
     }
 
@@ -98,7 +98,7 @@ class ExcelStorageController(
      * Descarga un archivo Excel que contiene todos los préstamos.
      *
      * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
-     * o un estado 500 si ocurre un error durante la generación.
+     * o un estado **204 No Content** si ocurre un error durante la generación, para evitar un error 500.
      */
     @GetMapping("/prestamos", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadPrestamosExcel(): ResponseEntity<ByteArray> {
@@ -117,8 +117,8 @@ class ExcelStorageController(
             ResponseEntity(excelData, headers, HttpStatus.OK)
 
         } catch (e: Exception) {
-            logger.error { "Error generando Excel de préstamos" }
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            logger.error { "Error generando Excel de préstamos: ${e.message}" }
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
     }
 
@@ -126,7 +126,7 @@ class ExcelStorageController(
      * Descarga un archivo Excel que contiene todas las sanciones.
      *
      * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
-     * o un estado 500 si ocurre un error durante la generación.
+     * o un estado **204 No Content** si ocurre un error durante la generación, para evitar un error 500.
      */
     @GetMapping("/sanciones", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadSancionesExcel(): ResponseEntity<ByteArray> {
@@ -145,8 +145,8 @@ class ExcelStorageController(
             ResponseEntity(excelData, headers, HttpStatus.OK)
 
         } catch (e: Exception) {
-            logger.error { "Error generando Excel de sanciones" }
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            logger.error { "Error generando Excel de sanciones: ${e.message}" }
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
     }
 
@@ -154,7 +154,7 @@ class ExcelStorageController(
      * Descarga un archivo Excel que contiene todos los usuarios.
      *
      * @return [ResponseEntity] con los bytes del archivo Excel y las cabeceras HTTP adecuadas para la descarga,
-     * o un estado 500 si ocurre un error durante la generación.
+     * o un estado **204 No Content** si ocurre un error durante la generación, para evitar un error 500.
      */
     @GetMapping("/users", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun downloadUsersExcel(): ResponseEntity<ByteArray> {
@@ -173,8 +173,8 @@ class ExcelStorageController(
             ResponseEntity(excelData, headers, HttpStatus.OK)
 
         } catch (e: Exception) {
-            logger.error { "Error generando Excel de usuarios" }
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            logger.error { "Error generando Excel de usuarios: ${e.message}" }
+            ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
     }
 }
