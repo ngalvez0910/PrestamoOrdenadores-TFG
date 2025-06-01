@@ -10,7 +10,32 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 private val log = logging()
 
+/**
+ * Interceptor para el handshake de WebSocket.
+ *
+ * Esta clase intercepta las solicitudes de handshake de WebSocket para extraer la información de autenticación
+ * del usuario y añadirla a los atributos de la sesión WebSocket. Esto permite que los manejadores de WebSocket
+ * accedan al nombre de usuario autenticado.
+ *
+ * @author Natalia González Álvarez
+ */
 class WebSocketInterceptor : HandshakeInterceptor {
+
+    /**
+     * Se invoca antes de que se realice el handshake de WebSocket.
+     *
+     * Este método verifica la autenticación del usuario en el [SecurityContextHolder].
+     * Si el usuario está autenticado y no es "anonymousUser", su nombre de usuario se añade a los
+     * atributos de la sesión WebSocket.
+     *
+     * @param request La [ServerHttpRequest] entrante.
+     * @param response La [ServerHttpResponse] saliente.
+     * @param wsHandler El [WebSocketHandler] que manejará la conexión.
+     * @param attributes Los atributos de la sesión WebSocket a los que se puede añadir información.
+     * @return `true` si el handshake debe continuar, `false` si debe ser denegado.
+     * @throws Exception Si ocurre un error durante el procesamiento.
+     * @author Natalia González Álvarez
+     */
     @Throws(
         Exception::class
     )
@@ -42,6 +67,17 @@ class WebSocketInterceptor : HandshakeInterceptor {
         }
     }
 
+    /**
+     * Se invoca después de que se ha realizado el handshake de WebSocket (independientemente de si fue exitoso o no).
+     *
+     * Este método no realiza ninguna acción en la implementación actual.
+     *
+     * @param request La [ServerHttpRequest] entrante.
+     * @param response La [ServerHttpResponse] saliente.
+     * @param wsHandler El [WebSocketHandler] que manejará la conexión.
+     * @param exception Cualquier excepción que haya ocurrido durante el handshake (nulo si no hubo).
+     * @author Natalia González Álvarez
+     */
     public override fun afterHandshake(
         request: ServerHttpRequest,
         response: ServerHttpResponse,
