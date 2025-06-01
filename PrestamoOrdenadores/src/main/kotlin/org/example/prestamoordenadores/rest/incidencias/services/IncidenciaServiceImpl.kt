@@ -34,6 +34,19 @@ import java.util.UUID
 
 private val logger = logging()
 
+/**
+ * Implementación del servicio de gestión de incidencias.
+ *
+ * Proporciona la lógica de negocio para las operaciones CRUD y consultas relacionadas
+ * con las incidencias, incluyendo la interacción con la base de datos, mapeo de DTOs,
+ * manejo de errores, y notificaciones vía WebSocket.
+ *
+ * @property repository Repositorio para operaciones de base de datos de [Incidencia].
+ * @property mapper Mapeador para convertir entre entidades [Incidencia] y DTOs.
+ * @property userRepository Repositorio para operaciones de base de datos de [User].
+ * @property webService Servicio para el envío de notificaciones WebSocket.
+ * @author Natalia González Álvarez
+ */
 @Service
 @CacheConfig(cacheNames = ["incidencias"])
 class IncidenciaServiceImpl(
@@ -42,6 +55,15 @@ class IncidenciaServiceImpl(
     private val userRepository: UserRepository,
     private val webService : WebSocketService
 ) : IncidenciaService {
+
+    /**
+     * Obtiene una lista paginada de todas las incidencias.
+     *
+     * @param page El número de página (basado en 0).
+     * @param size El tamaño de la página.
+     * @return Un [Result.Ok] con un [PagedResponse] de [IncidenciaResponse] si es exitoso.
+     * @author Natalia González Álvarez
+     */
     override fun getAllIncidencias(page: Int, size: Int): Result<PagedResponse<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo todas las incidencias" }
 
@@ -57,6 +79,15 @@ class IncidenciaServiceImpl(
         return Ok(pagedResponse)
     }
 
+    /**
+     * Obtiene una incidencia por su identificador único global (GUID) para una vista de usuario.
+     *
+     * Este método está cacheado.
+     *
+     * @param guid El GUID de la incidencia a buscar.
+     * @return Un [Result.Ok] con el [IncidenciaResponse] si se encuentra, o un [Result.Err] con [IncidenciaError.IncidenciaNotFound] si no.
+     * @author Natalia González Álvarez
+     */
     @Cacheable(key = "#guid")
     override fun getIncidenciaByGuid(guid: String): Result<IncidenciaResponse?, IncidenciaError> {
         logger.debug { "Obteniendo incidencia con GUID: $guid" }
@@ -70,6 +101,15 @@ class IncidenciaServiceImpl(
         }
     }
 
+    /**
+     * Obtiene una incidencia por su identificador único global (GUID) para una vista administrativa.
+     *
+     * Este método está cacheado.
+     *
+     * @param guid El GUID de la incidencia a buscar.
+     * @return Un [Result.Ok] con el [IncidenciaResponseAdmin] si se encuentra, o un [Result.Err] con [IncidenciaError.IncidenciaNotFound] si no.
+     * @author Natalia González Álvarez
+     */
     @Cacheable(key = "#guid")
     override fun getIncidenciaByGuidAdmin(guid: String): Result<IncidenciaResponseAdmin?, IncidenciaError> {
         logger.debug { "Obteniendo incidencia con GUID: $guid" }
@@ -83,6 +123,18 @@ class IncidenciaServiceImpl(
         }
     }
 
+    /**
+     * Crea una nueva incidencia.
+     *
+     * Valida la solicitud, obtiene el usuario autenticado y guarda la nueva incidencia.
+     * Envía notificaciones a los administradores y al usuario que reportó la incidencia.
+     * Este método actualiza la caché tras la creación.
+     *
+     * @param incidencia La solicitud [IncidenciaCreateRequest] con los datos de la nueva incidencia.
+     * @return Un [Result.Ok] con el [IncidenciaResponse] del dispositivo creado si es exitoso,
+     * o un [Result.Err] con un [IncidenciaError] si falla la validación o el usuario no es encontrado.
+     * @author Natalia González Álvarez
+     */
     @CachePut(key = "#result.guid")
     override fun createIncidencia(incidencia: IncidenciaCreateRequest): Result<IncidenciaResponse, IncidenciaError> {
         logger.debug { "Creando incidencia" }
@@ -107,6 +159,22 @@ class IncidenciaServiceImpl(
         return Ok(incidenciaResponse)
     }
 
+    /**
+     * Actualiza el estado de una incidencia existente.
+     *
+     * Requiere que un administrador esté autenticado. Normaliza el estado de entrada
+     * y actualiza la incidencia en la base de datos. Envía notificaciones
+     * al usuario que reportó la incidencia y a los administradores.
+     * Este método actualiza la caché tras la actualización.
+     *
+     * @param guid El GUID de la incidencia a actualizar.
+     * @param incidencia La solicitud [IncidenciaUpdateRequest] con el nuevo estado.
+     * @return Un [Result.Ok] con el [IncidenciaResponse] actualizado si es exitoso,
+     * o un [Result.Err] con [IncidenciaError.IncidenciaNotFound] si no se encuentra la incidencia,
+     * [IncidenciaError.UserNotFound] si el administrador no es encontrado,
+     * o [IncidenciaError.IncidenciaValidationError] si el estado es inválido.
+     * @author Natalia González Álvarez
+     */
     @CachePut(key = "#result.guid")
     override fun updateIncidencia(guid: String, incidencia: IncidenciaUpdateRequest): Result<IncidenciaResponse?, IncidenciaError> {
         val authentication = SecurityContextHolder.getContext().authentication
@@ -137,6 +205,19 @@ class IncidenciaServiceImpl(
         return Ok(mapper.toIncidenciaResponse(existingIncidencia))
     }
 
+    /**
+     * Elimina lógicamente una incidencia por su GUID, marcándola como eliminada.
+     *
+     * Requiere que un administrador esté autenticado. Actualiza el estado de la incidencia
+     * a `isDeleted = true` y su fecha de actualización. Envía notificaciones a los administradores.
+     * Este método invalida la entrada en caché correspondiente al GUID.
+     *
+     * @param guid El GUID de la incidencia a eliminar lógicamente.
+     * @return Un [Result.Ok] con el [IncidenciaResponseAdmin] del dispositivo modificado si es exitoso,
+     * o un [Result.Err] con [IncidenciaError.IncidenciaNotFound] si la incidencia no se encuentra,
+     * o [IncidenciaError.UserNotFound] si el administrador no es encontrado.
+     * @author Natalia González Álvarez
+     */
     @CacheEvict
     override fun deleteIncidenciaByGuid(guid: String): Result<IncidenciaResponseAdmin?, IncidenciaError> {
         val authentication = SecurityContextHolder.getContext().authentication
@@ -162,6 +243,17 @@ class IncidenciaServiceImpl(
         return Ok(mapper.toIncidenciaResponseAdmin(incidencia))
     }
 
+    /**
+     * Obtiene una lista de incidencias por su estado.
+     *
+     * Normaliza el estado de entrada para que coincida con los valores del enum [EstadoIncidencia].
+     * Este método está cacheado.
+     *
+     * @param estado La cadena de texto que representa el estado de la incidencia (ej. "PENDIENTE", "RESUELTO").
+     * @return Un [Result.Ok] con una lista de [IncidenciaResponse] si es exitoso,
+     * o un [Result.Err] con [IncidenciaError.IncidenciaNotFound] si el estado proporcionado no es válido.
+     * @author Natalia González Álvarez
+     */
     @Cacheable(key = "#estado")
     override fun getIncidenciaByEstado(estado: String): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo incidencias en estado: $estado" }
@@ -178,6 +270,16 @@ class IncidenciaServiceImpl(
         return Ok(mapper.toIncidenciaResponseList(incidencias))
     }
 
+    /**
+     * Obtiene una lista de incidencias asociadas a un usuario específico por su GUID.
+     *
+     * Este método está cacheado.
+     *
+     * @param userGuid El GUID del usuario cuyas incidencias se desean buscar.
+     * @return Un [Result.Ok] con una lista de [IncidenciaResponse] si es exitoso,
+     * o un [Result.Err] con [IncidenciaError.UserNotFound] si el usuario no es encontrado.
+     * @author Natalia González Álvarez
+     */
     @Cacheable(key = "#userGuid")
     override fun getIncidenciasByUserGuid(userGuid: String): Result<List<IncidenciaResponse>, IncidenciaError> {
         logger.debug { "Obteniendo incidencias de user con GUID: $userGuid" }
@@ -192,6 +294,16 @@ class IncidenciaServiceImpl(
         return Ok(mapper.toIncidenciaResponseList(incidencias))
     }
 
+    /**
+     * Envía notificaciones WebSocket cuando se crea una nueva incidencia.
+     *
+     * Envía una notificación de confirmación al usuario que reportó la incidencia
+     * y notificaciones informativas a todos los administradores.
+     *
+     * @param incidencia La [Incidencia] que ha sido creada.
+     * @param user El [User] que reportó la incidencia.
+     * @author Natalia González Álvarez
+     */
     private fun sendNotificationNuevaIncidencia(incidencia: Incidencia, user: User) {
         val notificacionParaUser = NotificationDto(
             id = UUID.randomUUID().toString(),
@@ -208,7 +320,7 @@ class IncidenciaServiceImpl(
         val administradores = userRepository.findUsersByRol(Role.ADMIN)
 
         administradores.forEach { admin ->
-            if (admin?.email != user.email) {
+            if (admin?.email != user.email) { // Evitar enviarle al mismo usuario si es admin y reportó
                 val notificacionParaAdmin = NotificationDto(
                     id = UUID.randomUUID().toString(),
                     titulo = "Nueva Incidencia Reportada: ${incidencia.guid}",
@@ -224,6 +336,16 @@ class IncidenciaServiceImpl(
         }
     }
 
+    /**
+     * Envía notificaciones WebSocket cuando se actualiza una incidencia (ej. se resuelve).
+     *
+     * Notifica al usuario que reportó la incidencia que ha sido resuelta,
+     * al administrador que la resolvió, y a los demás administradores.
+     *
+     * @param incidencia La [Incidencia] que ha sido actualizada.
+     * @param user El [User] (administrador) que realizó la actualización.
+     * @author Natalia González Álvarez
+     */
     private fun sendNotificationActualizacionIncidencia(incidencia: Incidencia, user: User) {
         val reportante = incidencia.user
 
@@ -276,6 +398,15 @@ class IncidenciaServiceImpl(
         }
     }
 
+    /**
+     * Envía notificaciones WebSocket cuando se elimina lógicamente una incidencia.
+     *
+     * Notifica al administrador que realizó la eliminación y a los demás administradores.
+     *
+     * @param incidencia La [Incidencia] que ha sido eliminada lógicamente.
+     * @param user El [User] (administrador) que realizó la eliminación.
+     * @author Natalia González Álvarez
+     */
     private fun sendNotificationEliminacionIncidencia(incidencia: Incidencia, user: User) {
         val notificacionAdminElimina = NotificationDto(
             id = UUID.randomUUID().toString(),
