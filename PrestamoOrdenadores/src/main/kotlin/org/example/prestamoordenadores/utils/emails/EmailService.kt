@@ -7,12 +7,34 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 
+/**
+ * Servicio para el envío de correos electrónicos.
+ *
+ * Esta clase se encarga de construir y enviar diferentes tipos de correos electrónicos
+ * (confirmación de préstamo, notificación de sanción, recordatorio de préstamo a punto de caducar,
+ * notificación de préstamo caducado y reactivación de usuario) utilizando [JavaMailSender].
+ *
+ * @property mailSender El objeto [JavaMailSender] utilizado para enviar los correos.
+ * @author Natalia González Álvarez
+ */
 @Service
 class  EmailService(private val mailSender: JavaMailSender) {
 
     @Value("\${spring.mail.username}")
     private lateinit var senderEmail: String
 
+    /**
+     * Envía un correo electrónico HTML para confirmar la creación de un préstamo.
+     * Incluye los detalles del préstamo y un PDF adjunto.
+     *
+     * @param to La dirección de correo electrónico del destinatario.
+     * @param subject El asunto del correo electrónico.
+     * @param nombreUsuario El nombre del usuario al que se le ha concedido el préstamo.
+     * @param numeroSerieDispositivo El número de serie del dispositivo prestado.
+     * @param fechaDevolucion La fecha en que se debe devolver el dispositivo.
+     * @param pdfBytes Los bytes del archivo PDF a adjuntar.
+     * @param nombreArchivoPdf El nombre del archivo PDF adjunto.
+     */
     fun sendHtmlEmailPrestamoCreado(to: String, subject: String, nombreUsuario: String, numeroSerieDispositivo: String, fechaDevolucion: String, pdfBytes: ByteArray, nombreArchivoPdf: String) {
         val mimeMessage: MimeMessage = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(
@@ -75,6 +97,14 @@ class  EmailService(private val mailSender: JavaMailSender) {
         }
     }
 
+    /**
+     * Envía un correo electrónico HTML para notificar una sanción.
+     *
+     * @param to La dirección de correo electrónico del destinatario.
+     * @param subject El asunto del correo electrónico.
+     * @param nombreUsuario El nombre del usuario sancionado.
+     * @param tipoSancion El tipo de sanción aplicada.
+     */
     fun sendHtmlEmailSancion(to: String, subject: String, nombreUsuario: String, tipoSancion: String) {
         val mimeMessage: MimeMessage = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(
@@ -132,6 +162,15 @@ class  EmailService(private val mailSender: JavaMailSender) {
         }
     }
 
+    /**
+     * Envía un correo electrónico HTML de recordatorio cuando un préstamo está a punto de caducar.
+     *
+     * @param to La dirección de correo electrónico del destinatario.
+     * @param subject El asunto del correo electrónico.
+     * @param nombreUsuario El nombre del usuario con el préstamo próximo a caducar.
+     * @param numeroSerieDispositivo El número de serie del dispositivo prestado.
+     * @param fechaDevolucion La fecha en que se debe devolver el dispositivo.
+     */
     fun sendHtmlEmailPrestamoApuntodeCaducar(to: String, subject: String, nombreUsuario: String, numeroSerieDispositivo: String, fechaDevolucion: String) {
         val mimeMessage: MimeMessage = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
@@ -186,6 +225,15 @@ class  EmailService(private val mailSender: JavaMailSender) {
         }
     }
 
+    /**
+     * Envía un correo electrónico HTML de notificación cuando un préstamo ha caducado.
+     *
+     * @param to La dirección de correo electrónico del destinatario.
+     * @param subject El asunto del correo electrónico.
+     * @param nombreUsuario El nombre del usuario con el préstamo caducado.
+     * @param numeroSerieDispositivo El número de serie del dispositivo prestado.
+     * @param fechaCaducidad La fecha en que el préstamo caducó.
+     */
     fun sendHtmlEmailPrestamoCaducado(to: String, subject: String, nombreUsuario: String, numeroSerieDispositivo: String, fechaCaducidad: String) {
         val mimeMessage: MimeMessage = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
@@ -240,6 +288,13 @@ class  EmailService(private val mailSender: JavaMailSender) {
         }
     }
 
+    /**
+     * Envía un correo electrónico HTML para notificar la reactivación de la cuenta de un usuario.
+     *
+     * @param to La dirección de correo electrónico del destinatario.
+     * @param subject El asunto del correo electrónico.
+     * @param nombreUsuario El nombre del usuario cuya cuenta ha sido reactivada.
+     */
     fun sendHtmlEmailUsuarioReactivado(to: String, subject: String, nombreUsuario: String) {
         val mimeMessage: MimeMessage = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")

@@ -42,6 +42,23 @@ import java.util.UUID
 
 private val logger = logging()
 
+/**
+ * Implementación del servicio de gestión de préstamos.
+ *
+ * Proporciona la lógica de negocio para las operaciones CRUD y consultas relacionadas
+ * con los préstamos, incluyendo la interacción con la base de datos, mapeo de DTOs,
+ * manejo de errores, notificaciones vía WebSocket y gestión de emails.
+ * También incluye tareas programadas para la gestión de la caducidad de los préstamos.
+ *
+ * @property prestamoRepository Repositorio para operaciones de base de datos de [Prestamo].
+ * @property mapper Mapeador para convertir entre entidades [Prestamo] y DTOs.
+ * @property userRepository Repositorio para operaciones de base de datos de [User].
+ * @property dispositivoRepository Repositorio para operaciones de base de datos de [Dispositivo].
+ * @property prestamoPdfStorage Servicio para la generación y almacenamiento de PDFs de préstamos.
+ * @property webService Servicio para el envío de notificaciones WebSocket.
+ * @property emailService Servicio para el envío de correos electrónicos.
+ * @author Natalia González Álvarez
+ */
 @Service
 @CacheConfig(cacheNames = ["prestamos"])
 class PrestamoServiceImpl(
@@ -53,6 +70,15 @@ class PrestamoServiceImpl(
     private val webService : WebSocketService,
     private val emailService: EmailService
 ): PrestamoService {
+
+    /**
+     * Obtiene una lista paginada de todos los préstamos.
+     *
+     * @param page El número de página (basado en 0).
+     * @param size El tamaño de la página.
+     * @return Un [Result.Ok] con un [PagedResponse] de [PrestamoResponse] si es exitoso.
+     * @author Natalia González Álvarez
+     */
     override fun getAllPrestamos(page: Int, size: Int): Result<PagedResponse<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo todos los prestamos" }
 
@@ -68,6 +94,15 @@ class PrestamoServiceImpl(
         return Ok(pagedResponse)
     }
 
+    /**
+     * Obtiene un préstamo por su identificador único global (GUID) para una vista administrativa.
+     *
+     * Este método está cacheado.
+     *
+     * @param guid El GUID del préstamo a buscar.
+     * @return Un [Result.Ok] con el [PrestamoResponseAdmin] si se encuentra, o un [Result.Err] con [PrestamoError.PrestamoNotFound] si no.
+     * @author Natalia González Álvarez
+     */
     @Cacheable(key = "#guid")
     override fun getPrestamoByGuid(guid: String): Result<PrestamoResponseAdmin?, PrestamoError> {
         logger.debug { "Obteniendo prestamo con GUID: $guid" }
@@ -81,6 +116,18 @@ class PrestamoServiceImpl(
         }
     }
 
+    /**
+     * Crea un nuevo préstamo.
+     *
+     * Obtiene el usuario autenticado y un dispositivo disponible aleatoriamente.
+     * Marca el dispositivo como "PRESTADO" y guarda el nuevo préstamo.
+     * Genera y guarda un PDF del préstamo y envía correos electrónicos y notificaciones.
+     * Este método actualiza la caché tras la creación.
+     *
+     * @return Un [Result.Ok] con el [PrestamoResponse] del préstamo creado si es exitoso,
+     * o un [Result.Err] con un [PrestamoError] si falla (ej. usuario no encontrado, no hay dispositivos disponibles).
+     * @author Natalia González Álvarez
+     */
     @CachePut(key = "#result.guid")
     override fun createPrestamo(): Result<PrestamoResponse, PrestamoError> {
         logger.debug { "Creando nuevo prestamo" }
@@ -99,20 +146,35 @@ class PrestamoServiceImpl(
         val dispositivoSeleccionado = dispositivosDisponibles.random()
 
         val prestamoCreado = mapper.toPrestamoFromCreate(user, dispositivoSeleccionado)
-        prestamoCreado.fechaDevolucion = LocalDate.now().plusWeeks(3)
+        prestamoCreado.fechaDevolucion = LocalDate.now().plusWeeks(3) // Establece la fecha de devolución 3 semanas después
         prestamoRepository.save(prestamoCreado)
 
-        dispositivoSeleccionado.estadoDispositivo = EstadoDispositivo.PRESTADO
+        dispositivoSeleccionado.estadoDispositivo = EstadoDispositivo.PRESTADO // Actualiza el estado del dispositivo
         dispositivoRepository.save(dispositivoSeleccionado)
 
-        prestamoPdfStorage.generateAndSavePdf(prestamoCreado.guid)
+        prestamoPdfStorage.generateAndSavePdf(prestamoCreado.guid) // Genera y guarda el PDF del préstamo
 
-        enviarCorreo(user, dispositivoSeleccionado, prestamoCreado)
+        enviarCorreo(user, dispositivoSeleccionado, prestamoCreado) // Envía el correo de confirmación
 
-        sendNotificationNuevoPrestamo(prestamoCreado, user)
+        sendNotificationNuevoPrestamo(prestamoCreado, user) // Envía notificaciones WebSocket
         return Ok(mapper.toPrestamoResponse(prestamoCreado))
     }
 
+    /**
+     * Actualiza un préstamo existente identificado por su GUID.
+     *
+     * Valida la solicitud de actualización y actualiza el estado del préstamo.
+     * Si el nuevo estado es "DEVUELTO", el dispositivo asociado cambia a "DISPONIBLE".
+     * Envía notificaciones tras la actualización.
+     * Este método actualiza la caché tras la actualización.
+     *
+     * @param guid El GUID del préstamo a actualizar.
+     * @param prestamo La solicitud [PrestamoUpdateRequest] con el nuevo estado.
+     * @return Un [Result.Ok] con el [PrestamoResponse] actualizado si es exitoso,
+     * o un [Result.Err] con [PrestamoError.PrestamoNotFound] si no se encuentra el préstamo,
+     * o [PrestamoError.PrestamoValidationError] si la validación falla o hay un error al guardar.
+     * @author Natalia González Álvarez
+     */
     @CachePut(key = "#result.guid")
     override fun updatePrestamo(guid: String, prestamo: PrestamoUpdateRequest): Result<PrestamoResponse?, PrestamoError> {
         logger.debug { "Actualizando prestamo con GUID: $guid" }
@@ -127,10 +189,16 @@ class PrestamoServiceImpl(
         return if (prestamoEncontrado == null) {
             Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
         } else {
-            val nuevoEstadoPrestamo = EstadoPrestamo.valueOf(prestamo.estadoPrestamo.uppercase())
+            val nuevoEstadoPrestamo = try {
+                EstadoPrestamo.valueOf(prestamo.estadoPrestamo.uppercase())
+            } catch (e: IllegalArgumentException) {
+                return Err(PrestamoError.PrestamoValidationError("Estado de préstamo inválido: ${prestamo.estadoPrestamo}"))
+            }
+
 
             if (nuevoEstadoPrestamo == EstadoPrestamo.DEVUELTO) {
                 prestamoEncontrado.dispositivo.estadoDispositivo = EstadoDispositivo.DISPONIBLE
+                dispositivoRepository.save(prestamoEncontrado.dispositivo) // Asegura que el dispositivo se actualice
             }
 
             prestamoEncontrado.estadoPrestamo = nuevoEstadoPrestamo
@@ -140,8 +208,11 @@ class PrestamoServiceImpl(
                 val prestamoGuardado = prestamoRepository.save(prestamoEncontrado)
                 logger.info { "Préstamo GUID: ${prestamoGuardado?.guid} actualizado a estado: ${prestamoGuardado?.estadoPrestamo}" }
 
-                sendNotificationActualizacionPrestamo(prestamoGuardado!!, prestamoGuardado?.estadoPrestamo?.name!!)
-                Ok(mapper.toPrestamoResponse(prestamoGuardado))
+                // Asegúrate de que prestamoGuardado no sea nulo antes de llamar a sendNotificationActualizacionPrestamo
+                prestamoGuardado?.let {
+                    sendNotificationActualizacionPrestamo(it, it.estadoPrestamo.name)
+                    Ok(mapper.toPrestamoResponse(it))
+                } ?: Err(PrestamoError.PrestamoValidationError("Error al guardar la actualización del préstamo: el préstamo guardado es nulo."))
             } catch (e: Exception) {
                 logger.error { "Error al guardar el préstamo $guid: ${e.message}" }
                 Err(PrestamoError.PrestamoValidationError("Error al guardar la actualización del préstamo"))
@@ -149,6 +220,19 @@ class PrestamoServiceImpl(
         }
     }
 
+    /**
+     * Elimina lógicamente un préstamo por su GUID, marcándolo como eliminado.
+     *
+     * Requiere que un administrador esté autenticado. Actualiza el estado de la incidencia
+     * a `isDeleted = true` y su fecha de actualización. Envía notificaciones a los administradores.
+     * Este método invalida la entrada en caché correspondiente al GUID.
+     *
+     * @param guid El GUID del préstamo a eliminar lógicamente.
+     * @return Un [Result.Ok] con el [PrestamoResponseAdmin] del dispositivo modificado si es exitoso,
+     * o un [Result.Err] con [PrestamoError.PrestamoNotFound] si el préstamo no se encuentra,
+     * o [PrestamoError.UserNotFound] si el administrador no es encontrado.
+     * @author Natalia González Álvarez
+     */
     @CacheEvict
     override fun deletePrestamoByGuid(guid: String): Result<PrestamoResponseAdmin, PrestamoError> {
         val authentication = SecurityContextHolder.getContext().authentication
@@ -174,6 +258,15 @@ class PrestamoServiceImpl(
         return Ok(mapper.toPrestamoResponseAdmin(prestamoEncontrado))
     }
 
+    /**
+     * Obtiene una lista de préstamos por su fecha de inicio.
+     *
+     * Este método está cacheado.
+     *
+     * @param fechaPrestamo La fecha de inicio de los préstamos a buscar.
+     * @return Un [Result.Ok] con una lista de [PrestamoResponse] si es exitoso.
+     * @author Natalia González Álvarez
+     */
     @Cacheable(key = "#fechaPrestamo")
     override fun getByFechaPrestamo(fechaPrestamo: LocalDate): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo prestamos con fecha de prestamo: $fechaPrestamo" }
@@ -182,6 +275,15 @@ class PrestamoServiceImpl(
         return Ok(mapper.toPrestamoResponseList(prestamos))
     }
 
+    /**
+     * Obtiene una lista de préstamos por su fecha de devolución.
+     *
+     * Este método está cacheado.
+     *
+     * @param fechaDevolucion La fecha de devolución de los préstamos a buscar.
+     * @return Un [Result.Ok] con una lista de [PrestamoResponse] si es exitoso.
+     * @author Natalia González Álvarez
+     */
     @Cacheable(key = "#fechaDevolucion")
     override fun getByFechaDevolucion(fechaDevolucion: LocalDate): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo prestamos con fecha de devolucion: $fechaDevolucion" }
@@ -190,6 +292,16 @@ class PrestamoServiceImpl(
         return Ok(mapper.toPrestamoResponseList(prestamos))
     }
 
+    /**
+     * Obtiene una lista de préstamos asociados a un usuario específico por su GUID.
+     *
+     * Este método está cacheado.
+     *
+     * @param userGuid El GUID del usuario cuyas préstamos se desean buscar.
+     * @return Un [Result.Ok] con una lista de [PrestamoResponse] si es exitoso,
+     * o un [Result.Err] con [PrestamoError.UserNotFound] si el usuario no es encontrado.
+     * @author Natalia González Álvarez
+     */
     @Cacheable(key = "#userGuid")
     override fun getPrestamoByUserGuid(userGuid: String): Result<List<PrestamoResponse>, PrestamoError> {
         logger.debug { "Obteniendo prestamos del usuario con GUID: $userGuid" }
@@ -203,8 +315,18 @@ class PrestamoServiceImpl(
         return Ok(mapper.toPrestamoResponseList(prestamos))
     }
 
+    /**
+     * Envía un correo electrónico de confirmación de préstamo.
+     *
+     * Incluye los detalles del préstamo y un PDF adjunto.
+     *
+     * @param user El [User] que realizó el préstamo.
+     * @param dispositivoSeleccionado El [Dispositivo] prestado.
+     * @param prestamoCreado El [Prestamo] creado.
+     * @author Natalia González Álvarez
+     */
     private fun enviarCorreo(user: User, dispositivoSeleccionado: Dispositivo, prestamoCreado: Prestamo) {
-        val pdfBytes = prestamoPdfStorage.generatePdf(prestamoCreado.guid)
+        val pdfBytes = prestamoPdfStorage.generatePdf(prestamoCreado.guid) // Genera los bytes del PDF
 
         emailService.sendHtmlEmailPrestamoCreado(
             to = user.email,
@@ -217,6 +339,15 @@ class PrestamoServiceImpl(
         )
     }
 
+    /**
+     * Envía notificaciones WebSocket cuando se crea un nuevo préstamo.
+     *
+     * Notifica al usuario que realizó el préstamo y a todos los administradores.
+     *
+     * @param prestamo El [Prestamo] que ha sido creado.
+     * @param user El [User] que realizó el préstamo.
+     * @author Natalia González Álvarez
+     */
     private fun sendNotificationNuevoPrestamo(prestamo: Prestamo, user: User) {
         val notificacionParaUser = NotificationDto(
             id = UUID.randomUUID().toString(),
@@ -233,7 +364,7 @@ class PrestamoServiceImpl(
         val administradores = userRepository.findUsersByRol(Role.ADMIN)
 
         administradores.forEach { admin ->
-            if (admin?.email != user.email) {
+            if (admin?.email != user.email) { // Evitar enviarle al mismo usuario si es admin y realizó el préstamo
                 val notificacionParaAdmin = NotificationDto(
                     id = UUID.randomUUID().toString(),
                     titulo = "Nueva Solicitud de Préstamo: ${prestamo.guid}",
@@ -249,6 +380,15 @@ class PrestamoServiceImpl(
         }
     }
 
+    /**
+     * Envía notificaciones WebSocket cuando el estado de un préstamo se actualiza.
+     *
+     * Adapta el título, mensaje y severidad de la notificación según el tipo de actualización (recordatorio, vencido, devuelto, cancelado).
+     *
+     * @param prestamo El [Prestamo] que ha sido actualizado.
+     * @param tipoNotificacion La cadena que describe el tipo de actualización (ej. "VENCIDO", "DEVUELTO").
+     * @author Natalia González Álvarez
+     */
     private fun sendNotificationActualizacionPrestamo(prestamo: Prestamo, tipoNotificacion: String) {
         var tituloNotificacion: String
         var mensajeNotificacion: String
@@ -317,6 +457,15 @@ class PrestamoServiceImpl(
         }
     }
 
+    /**
+     * Envía notificaciones WebSocket cuando se elimina lógicamente un préstamo.
+     *
+     * Notifica al administrador que realizó la eliminación y a los demás administradores.
+     *
+     * @param prestamo El [Prestamo] que ha sido eliminado lógicamente.
+     * @param user El [User] (administrador) que realizó la eliminación.
+     * @author Natalia González Álvarez
+     */
     private fun sendNotificationEliminacionPrestamo(prestamo: Prestamo, user: User) {
         val notificacionAdminElimina = NotificationDto(
             id = UUID.randomUUID().toString(),
@@ -355,10 +504,21 @@ class PrestamoServiceImpl(
         }
     }
 
-    @Scheduled(cron = "0 0 2 * * *")
+    /**
+     * Tarea programada que gestiona la caducidad de los préstamos.
+     *
+     * Se ejecuta diariamente a las 2 AM (0 0 2 * * *).
+     * Identifica los préstamos que caducan hoy y los marca como "VENCIDO".
+     * También identifica los préstamos que caducarán mañana y envía recordatorios.
+     * Envía correos electrónicos y notificaciones WebSocket correspondientes.
+     *
+     * @author Natalia González Álvarez
+     */
+    @Scheduled(cron = "0 0 2 * * *") // Se ejecuta a las 2 AM cada día
     fun gestionarCaducidadPrestamos() {
         logger.info { "Iniciando tarea programada: Gestionar Caducidad y Recordatorios de Préstamos." }
 
+        // Préstamos que caducan hoy
         val prestamosQueCaducanHoy = prestamoRepository.findByFechaDevolucion(LocalDate.now())
 
         prestamosQueCaducanHoy.forEach { prestamo ->
@@ -368,13 +528,14 @@ class PrestamoServiceImpl(
             val prestamoActualizado = prestamoRepository.save(prestamo)
             if (prestamoActualizado == null) {
                 logger.error { "No se pudo actualizar el prestamo con GUID: ${prestamo.guid}" }
-                return
+                return@forEach // Continúa con el siguiente préstamo
             }
 
             enviarCorreoPrestamoCaducado(prestamo.user, prestamo.dispositivo, prestamoActualizado)
             sendNotificationActualizacionPrestamo(prestamoActualizado, "VENCIDO")
         }
 
+        // Préstamos que caducan mañana (recordatorio)
         val fechaParaRecordatorio = LocalDate.now().plusDays(1)
         val prestamosParaRecordatorio = prestamoRepository.findByFechaDevolucion(fechaParaRecordatorio)
 
@@ -387,8 +548,22 @@ class PrestamoServiceImpl(
         logger.info { "Tarea programada: Gestionar Caducidad y Recordatorios de Préstamos finalizada." }
     }
 
+    /**
+     * Cancela un préstamo específico por su GUID.
+     *
+     * Si el préstamo ya está cancelado o devuelto, no realiza cambios.
+     * Si no, cambia el estado del préstamo a "CANCELADO" y su fecha de actualización.
+     * Envía notificaciones tras la cancelación.
+     * Este método actualiza la caché tras la cancelación.
+     *
+     * @param guid El GUID del préstamo a cancelar.
+     * @return Un [Result.Ok] con el [PrestamoResponse] del préstamo cancelado si es exitoso,
+     * o un [Result.Err] con [PrestamoError.PrestamoNotFound] si el préstamo no se encuentra,
+     * o [PrestamoError.PrestamoValidationError] si hay un error al guardar.
+     * @author Natalia González Álvarez
+     */
     @CachePut(cacheNames = ["prestamos"], key = "#result.value.guid", condition = "#result.isOk && #result.value != null")
-    @Transactional
+    @Transactional // Asegura que la operación sea atómica
     override fun cancelarPrestamo(guid: String): Result<PrestamoResponse?, PrestamoError> {
         logger.debug { "Cancelando préstamo con GUID: $guid" }
 
@@ -400,7 +575,11 @@ class PrestamoServiceImpl(
         } else {
             if (prestamoEncontrado.estadoPrestamo == EstadoPrestamo.CANCELADO || prestamoEncontrado.estadoPrestamo == EstadoPrestamo.DEVUELTO) {
                 logger.info { "El préstamo GUID: $guid ya está en estado ${prestamoEncontrado.estadoPrestamo}. No se requiere acción." }
-                prestamoEncontrado.dispositivo.estadoDispositivo = EstadoDispositivo.DISPONIBLE
+                // Si ya está cancelado o devuelto, y el dispositivo no está disponible, lo marcamos como disponible.
+                if(prestamoEncontrado.dispositivo.estadoDispositivo != EstadoDispositivo.DISPONIBLE){
+                    prestamoEncontrado.dispositivo.estadoDispositivo = EstadoDispositivo.DISPONIBLE
+                    dispositivoRepository.save(prestamoEncontrado.dispositivo)
+                }
                 return Ok(mapper.toPrestamoResponse(prestamoEncontrado))
             }
 
@@ -423,6 +602,14 @@ class PrestamoServiceImpl(
         }
     }
 
+    /**
+     * Envía un correo electrónico de recordatorio de préstamo a punto de caducar.
+     *
+     * @param user El [User] del préstamo.
+     * @param dispositivo El [Dispositivo] prestado.
+     * @param prestamo El [Prestamo] correspondiente.
+     * @author Natalia González Álvarez
+     */
     private fun enviarCorreoPrestamoApuntodeCaducar(user: User, dispositivo: Dispositivo, prestamo: Prestamo) {
         emailService.sendHtmlEmailPrestamoApuntodeCaducar(
             to = user.email,
@@ -433,6 +620,14 @@ class PrestamoServiceImpl(
         )
     }
 
+    /**
+     * Envía un correo electrónico de notificación de préstamo caducado.
+     *
+     * @param user El [User] del préstamo.
+     * @param dispositivo El [Dispositivo] prestado.
+     * @param prestamo El [Prestamo] correspondiente.
+     * @author Natalia González Álvarez
+     */
     private fun enviarCorreoPrestamoCaducado(user: User, dispositivo: Dispositivo, prestamo: Prestamo) {
         emailService.sendHtmlEmailPrestamoCaducado(
             to = user.email,

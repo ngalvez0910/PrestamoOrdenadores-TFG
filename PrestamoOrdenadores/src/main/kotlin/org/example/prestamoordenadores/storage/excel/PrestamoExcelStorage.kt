@@ -9,10 +9,34 @@ import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
 
+/**
+ * Servicio para la generación de archivos Excel con datos de préstamos.
+ *
+ * Esta clase se encarga de recuperar la información de los **préstamos** desde el repositorio
+ * y generar un archivo Excel con estos datos. El archivo contendrá una hoja llamada "Prestamos"
+ * con columnas para el GUID, usuario, dispositivo, estado, fecha de préstamo y fecha de devolución.
+ *
+ * @property prestamoRepository Repositorio para acceder a los datos de los préstamos.
+ * @author Natalia González Álvarez
+ */
 @Service
 class PrestamoExcelStorage(
     private val prestamoRepository: PrestamoRepository,
 ) {
+    /**
+     * Genera un archivo Excel que contiene todos los préstamos.
+     *
+     * Los datos de los préstamos se obtienen del [PrestamoRepository]. El archivo Excel
+     * tendrá una hoja con el nombre "Prestamos" y las siguientes columnas:
+     * - "Guid": Identificador único del préstamo.
+     * - "Usuario": Número de identificación del usuario asociado al préstamo.
+     * - "Dispositivo": Número de serie del dispositivo asociado al préstamo.
+     * - "Estado": Estado actual del préstamo (por ejemplo, "Pendiente", "Activo", "Devuelto").
+     * - "Fecha Préstamo": Fecha en que se realizó el préstamo, formateada.
+     * - "Fecha Devolución": Fecha de devolución del dispositivo, formateada.
+     *
+     * @return Un [ByteArray] que representa el contenido del archivo Excel generado.
+     */
     fun generateExcel(): ByteArray {
         val prestamos = prestamoRepository.findAll()
 

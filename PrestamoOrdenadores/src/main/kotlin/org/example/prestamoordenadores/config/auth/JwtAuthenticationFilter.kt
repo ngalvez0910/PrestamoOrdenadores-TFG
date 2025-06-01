@@ -21,6 +21,22 @@ import java.io.IOException
 
 private val log = logging()
 
+/**
+ * Filtro que intercepta las peticiones HTTP para validar tokens JWT antes de que lleguen al controlador.
+ *
+ * Se encarga de:
+ * - Extraer el token desde el header `Authorization` o parámetro `token` (para WebSockets).
+ * - Validar el token y extraer el nombre de usuario.
+ * - Cargar los detalles del usuario desde la base de datos.
+ * - Establecer el contexto de seguridad si la autenticación es válida.
+ *
+ * Se ignoran las rutas de autenticación (`/auth/signin` y `/auth/signup`).
+ *
+ * @property jwtService Servicio encargado de la lógica de creación, validación y extracción de datos del JWT.
+ * @property authUsersService Servicio de carga de usuarios desde la base de datos.
+ *
+ * @author Natalia González Álvarez
+ */
 @Component
 class JwtAuthenticationFilter
 @Autowired constructor(
@@ -29,6 +45,15 @@ class JwtAuthenticationFilter
 ) : OncePerRequestFilter() {
     private val authUsersService: CustomUserDetailsService = authUserService
 
+    /**
+     * Método principal que intercepta cada petición HTTP y realiza la lógica de autenticación JWT.
+     *
+     * @param request Petición HTTP entrante.
+     * @param response Respuesta HTTP saliente.
+     * @param filterChain Cadena de filtros a continuar si la autenticación es válida o no aplica.
+     * @throws ServletException Si ocurre un error con el servlet.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     @Throws(ServletException::class, IOException::class)
     override fun doFilterInternal(
         @NonNull request: HttpServletRequest,

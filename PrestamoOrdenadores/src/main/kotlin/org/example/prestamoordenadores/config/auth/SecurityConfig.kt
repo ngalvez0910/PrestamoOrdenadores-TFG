@@ -22,6 +22,16 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
+/**
+ * Configuración de seguridad principal para la aplicación.
+ *
+ * Esta clase habilita la seguridad web, la seguridad a nivel de método y define la cadena de filtros de seguridad.
+ * Configura la autenticación basada en JWT, la gestión de sesiones sin estado y la configuración de CORS.
+ *
+ * @property userService Servicio de detalles de usuario personalizado para la autenticación.
+ * @property jwtAuthenticationFilter Filtro JWT para la autenticación basada en tokens.
+ * @author Natalia González Álvarez
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -30,6 +40,17 @@ class SecurityConfig
     private val userService: CustomUserDetailsService,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter
 ) {
+    /**
+     * Define la cadena de filtros de seguridad HTTP.
+     *
+     * Configura CORS, deshabilita CSRF, establece la política de creación de sesión a `STATELESS`,
+     * define las reglas de autorización para diferentes rutas y añade el filtro JWT.
+     *
+     * @param http El objeto [HttpSecurity] a configurar.
+     * @return La cadena de filtros de seguridad configurada.
+     * @throws Exception Si ocurre un error durante la configuración.
+     * @author Natalia González Álvarez
+     */
     @Bean
     @Throws(Exception::class)
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -48,8 +69,6 @@ class SecurityConfig
                     .requestMatchers("/notificaciones/**").authenticated()
                     .requestMatchers("/error/**").permitAll()
                     .anyRequest().authenticated()
-//                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-//                    .requestMatchers("/static/**").permitAll()
             }
             .authenticationProvider(authenticationProvider()).addFilterBefore(
                 jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java
@@ -58,11 +77,25 @@ class SecurityConfig
         return http.build()
     }
 
+    /**
+     * Proporciona un codificador de contraseñas utilizando BCrypt.
+     *
+     * @return Una instancia de [BCryptPasswordEncoder].
+     * @author Natalia González Álvarez
+     */
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
     }
 
+    /**
+     * Proporciona un proveedor de autenticación DAO.
+     *
+     * Configura el servicio de detalles de usuario y el codificador de contraseñas.
+     *
+     * @return Una instancia de [DaoAuthenticationProvider].
+     * @author Natalia González Álvarez
+     */
     @Bean
     fun authenticationProvider(): AuthenticationProvider {
         val authProvider = DaoAuthenticationProvider()
@@ -71,12 +104,28 @@ class SecurityConfig
         return authProvider
     }
 
+    /**
+     * Proporciona el gestor de autenticación.
+     *
+     * @param config La configuración de autenticación.
+     * @return Una instancia de [AuthenticationManager].
+     * @throws Exception Si ocurre un error al obtener el gestor de autenticación.
+     * @author Natalia González Álvarez
+     */
     @Bean
     @Throws(Exception::class)
     fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager {
         return config.authenticationManager
     }
 
+    /**
+     * Configura las políticas de Cross-Origin Resource Sharing (CORS).
+     *
+     * Permite orígenes específicos, métodos HTTP y cabeceras, y habilita las credenciales.
+     *
+     * @return Una instancia de [CorsConfigurationSource].
+     * @author Natalia González Álvarez
+     */
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()

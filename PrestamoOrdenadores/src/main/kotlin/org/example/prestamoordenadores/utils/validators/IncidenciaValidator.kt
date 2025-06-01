@@ -7,6 +7,18 @@ import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaCreateRequ
 import org.example.prestamoordenadores.rest.incidencias.dto.IncidenciaUpdateRequest
 import org.example.prestamoordenadores.rest.incidencias.errors.IncidenciaError
 
+/**
+ * Función de extensión para validar un objeto [IncidenciaCreateRequest].
+ *
+ * Realiza las siguientes validaciones:
+ * - El campo [asunto] no puede estar en blanco.
+ * - El campo [descripcion] no puede estar en blanco.
+ *
+ * @receiver La instancia de [IncidenciaCreateRequest] a validar.
+ * @return Un [Result] que contiene el [IncidenciaCreateRequest] validado si la validación es exitosa ([Ok]),
+ * o un [IncidenciaError.IncidenciaValidationError] si falla ([Err]).
+ * @author Natalia González Álvarez
+ */
 fun IncidenciaCreateRequest.validate(): Result<IncidenciaCreateRequest, IncidenciaError> {
     if (this.asunto.isBlank()) {
         return Err(IncidenciaError.IncidenciaValidationError("El asunto no puede estar vacío"))
@@ -16,6 +28,17 @@ fun IncidenciaCreateRequest.validate(): Result<IncidenciaCreateRequest, Incidenc
     return Ok(this)
 }
 
+/**
+ * Función de extensión para validar un objeto [IncidenciaUpdateRequest].
+ *
+ * Realiza las siguientes validaciones:
+ * - El campo [estadoIncidencia] no puede estar en blanco.
+ *
+ * @receiver La instancia de [IncidenciaUpdateRequest] a validar.
+ * @return Un [Result] que contiene el [IncidenciaUpdateRequest] validado si la validación es exitosa ([Ok]),
+ * o un [IncidenciaError.IncidenciaValidationError] si falla ([Err]).
+ * @author Natalia González Álvarez
+ */
 fun IncidenciaUpdateRequest.validate(): Result<IncidenciaUpdateRequest, IncidenciaError> {
     if (this.estadoIncidencia.isBlank()) {
         return Err(IncidenciaError.IncidenciaValidationError("El estado de la incidencia no puede estar vacío"))

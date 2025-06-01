@@ -39,6 +39,21 @@ import java.util.UUID
 
 private val logger = logging()
 
+/**
+ * Implementación del servicio de gestión de sanciones.
+ * Proporciona operaciones CRUD para las sanciones, así como lógica de negocio
+ * para la gestión automática de advertencias y bloqueos de usuarios.
+ * Utiliza caché para optimizar el acceso a datos y WebSockets para notificaciones en tiempo real.
+ *
+ * @property repository Repositorio para el acceso a datos de sanciones.
+ * @property mapper Mapper para convertir entre entidades Sancion y DTOs.
+ * @property userRepository Repositorio para el acceso a datos de usuarios.
+ * @property prestamoRepository Repositorio para el acceso a datos de préstamos.
+ * @property webService Servicio para el envío de notificaciones WebSocket.
+ * @property emailService Servicio para el envío de correos electrónicos.
+ *
+ * @author Natalia González Álvarez
+ */
 @Service
 @CacheConfig(cacheNames = ["sanciones"])
 class SancionServiceImpl(
@@ -49,6 +64,13 @@ class SancionServiceImpl(
     private val webService : WebSocketService,
     private val emailService: EmailService
 ) : SancionService {
+    /**
+     * Obtiene todas las sanciones paginadas.
+     *
+     * @param page Número de página (0-indexed).
+     * @param size Tamaño de la página.
+     * @return [Result] que contiene un [PagedResponse] de [SancionResponse] si la operación es exitosa, o un [SancionError] en caso contrario.
+     */
     override fun getAllSanciones(page: Int, size: Int): Result<PagedResponse<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo todas las sanciones" }
 
@@ -64,6 +86,12 @@ class SancionServiceImpl(
         return Ok(pagedResponse)
     }
 
+    /**
+     * Obtiene una sanción por su GUID.
+     *
+     * @param guid El GUID de la sanción a buscar.
+     * @return [Result] que contiene un [SancionResponse] si la sanción es encontrada, o un [SancionError.SancionNotFound] en caso contrario.
+     */
     @Cacheable(key = "#guid")
     override fun getSancionByGuid(guid: String): Result<SancionResponse?, SancionError> {
         logger.debug { "Obteniendo sancion con GUID: $guid" }
@@ -77,6 +105,12 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Obtiene una sanción por su GUID para la vista de administrador, incluyendo más detalles.
+     *
+     * @param guid El GUID de la sanción a buscar.
+     * @return [Result] que contiene un [SancionAdminResponse] si la sanción es encontrada, o un [SancionError.SancionNotFound] en caso contrario.
+     */
     @Cacheable(key = "#guid")
     override fun getSancionByGuidAdmin(guid: String): Result<SancionAdminResponse?, SancionError> {
         logger.debug { "Obteniendo sancion con GUID: $guid" }
@@ -90,6 +124,14 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Actualiza una sanción existente.
+     *
+     * @param guid El GUID de la sanción a actualizar.
+     * @param sancionUpdateDto DTO con los datos de actualización de la sanción.
+     * @return [Result] que contiene un [SancionResponse] de la sanción actualizada si la operación es exitosa,
+     * o un [SancionError] en caso de error de validación o si la sanción no es encontrada.
+     */
     @CachePut(key = "#guid")
     @Transactional
     override fun updateSancion(guid: String, sancionUpdateDto: SancionUpdateRequest): Result<SancionResponse?, SancionError> {
@@ -125,6 +167,13 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Elimina (marca como eliminada) una sanción por su GUID.
+     *
+     * @param guid El GUID de la sanción a eliminar.
+     * @return [Result] que contiene un [SancionAdminResponse] de la sanción eliminada si la operación es exitosa,
+     * o un [SancionError.SancionNotFound] si la sanción no es encontrada.
+     */
     @CacheEvict
     override fun deleteSancionByGuid(guid: String): Result<SancionAdminResponse?, SancionError> {
         logger.debug { "Buscando sancion" }
@@ -144,6 +193,12 @@ class SancionServiceImpl(
         return Ok(mapper.toSancionAdminResponse(existingSancion))
     }
 
+    /**
+     * Obtiene una lista de sanciones por su fecha de sanción.
+     *
+     * @param fecha La fecha de sanción a buscar.
+     * @return [Result] que contiene una lista de [SancionResponse] si la operación es exitosa.
+     */
     @Cacheable(key = "#fecha")
     override fun getByFecha(fecha: LocalDate): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones con fecha: $fecha" }
@@ -152,6 +207,13 @@ class SancionServiceImpl(
         return Ok(mapper.toSancionResponseList(sanciones))
     }
 
+    /**
+     * Obtiene una lista de sanciones por su tipo de sanción.
+     *
+     * @param tipo El tipo de sanción a buscar (String, se normalizará a [TipoSancion]).
+     * @return [Result] que contiene una lista de [SancionResponse] si la operación es exitosa,
+     * o un [SancionError.SancionNotFound] si el tipo de sanción no es válido.
+     */
     @Cacheable(key = "#tipo")
     override fun getByTipo(tipo: String): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones de tipo: $tipo" }
@@ -168,6 +230,13 @@ class SancionServiceImpl(
         return Ok(mapper.toSancionResponseList(sanciones))
     }
 
+    /**
+     * Obtiene una lista de sanciones asociadas a un usuario específico por su GUID.
+     *
+     * @param userGuid El GUID del usuario.
+     * @return [Result] que contiene una lista de [SancionResponse] si la operación es exitosa,
+     * o un [SancionError.UserNotFound] si el usuario no es encontrado.
+     */
     @Cacheable(key = "#userGuid")
     override fun getSancionByUserGuid(userGuid: String): Result<List<SancionResponse>, SancionError> {
         logger.debug { "Obteniendo sanciones de user con GUID: $userGuid" }
@@ -182,6 +251,13 @@ class SancionServiceImpl(
         return Ok(mapper.toSancionResponseList(sanciones))
     }
 
+    /**
+     * Tarea programada que gestiona las advertencias por préstamos vencidos.
+     * Se ejecuta cada 2 horas (a los 0 minutos de cada hora par).
+     * Identifica préstamos en estado [EstadoPrestamo.VENCIDO] que han pasado más de 3 días en este estado
+     * y genera una sanción de [TipoSancion.ADVERTENCIA] si no existe una ya para ese préstamo.
+     * También evalúa si el usuario debe pasar a [TipoSancion.BLOQUEO_TEMPORAL].
+     */
     @Scheduled(cron = "0 0 0/2 * * *")
     @Transactional
     fun gestionarAdvertencias() {
@@ -233,6 +309,13 @@ class SancionServiceImpl(
         logger.info { "Tarea programada: Gestionar Advertencias por Préstamos Vencidos (Lógica revisada según aclaración) finalizada." }
     }
 
+    /**
+     * Tarea programada que gestiona la reactivación de usuarios y la posible escalada a bloqueo indefinido.
+     * Se ejecuta cada 2 horas, 5 minutos después de la hora (ej., 00:05, 02:05, etc.).
+     * Reactiva a los usuarios cuyas sanciones de [TipoSancion.BLOQUEO_TEMPORAL] han expirado.
+     * También evalúa si un usuario inactivo con sanciones expiradas puede ser reactivado.
+     * Finalmente, evalúa si un usuario debe pasar a [TipoSancion.INDEFINIDO].
+     */
     @Scheduled(cron = "0 5 0/2 * * *")
     @Transactional
     fun gestionarReactivacionYPosibleEscaladaAIndefinido() {
@@ -276,6 +359,12 @@ class SancionServiceImpl(
         logger.info { "Tarea programada: Gestionar Reactivación y Escalada a Indefinido finalizada." }
     }
 
+    /**
+     * Evalúa si un usuario debe ser sancionado con un [TipoSancion.INDEFINIDO].
+     * Un usuario es sancionado indefinidamente si ha acumulado dos o más sanciones de [TipoSancion.BLOQUEO_TEMPORAL] cumplidas.
+     *
+     * @param user El usuario a evaluar.
+     */
     @Transactional
     internal fun evaluarPasoAIndefinido(user: User) {
         logger.debug { "Evaluando escalada a INDEFINIDO para usuario ${user.username}." }
@@ -308,6 +397,12 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Evalúa si un usuario debe ser sancionado con un [TipoSancion.BLOQUEO_TEMPORAL].
+     * Un usuario es sancionado temporalmente si ha acumulado dos o más sanciones de [TipoSancion.ADVERTENCIA].
+     *
+     * @param user El usuario a evaluar.
+     */
     @Transactional
     internal fun evaluarPasoABloqueo(user: User) {
         logger.debug { "Evaluando escalada de ADVERTENCIA a BLOQUEO_TEMPORAL para usuario ${user.username}." }
@@ -345,6 +440,14 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Crea una sanción de [TipoSancion.BLOQUEO_TEMPORAL] para un usuario.
+     * También inactiva al usuario si este está activo.
+     *
+     * @param user El usuario a sancionar.
+     * @param motivo El motivo de la sanción.
+     * @param prestamo El préstamo asociado a la sanción.
+     */
     @Transactional
     internal fun crearBloqueoTemporal(user: User, motivo: String, prestamo: Prestamo) {
         logger.info { "Creando sanción BLOQUEO_TEMPORAL automática para usuario ${user.username}. Motivo: $motivo" }
@@ -369,6 +472,13 @@ class SancionServiceImpl(
         sendNotificationNuevaSancion(sancionGuardada, "automática: $motivo")
     }
 
+    /**
+     * Crea una sanción de [TipoSancion.INDEFINIDO] para un usuario.
+     * También inactiva al usuario si este está activo.
+     *
+     * @param user El usuario a sancionar.
+     * @param motivo El motivo de la sanción.
+     */
     @Transactional
     internal fun crearBloqueoIndefinido(user: User, motivo: String) {
         logger.info { "Creando sanción INDEFINIDA automática para usuario ${user.username}. Motivo: $motivo" }
@@ -391,6 +501,12 @@ class SancionServiceImpl(
         sendNotificationNuevaSancion(sancionGuardada, "automática: $motivo")
     }
 
+    /**
+     * Envía una notificación WebSocket a un usuario y a los administradores sobre una nueva sanción.
+     *
+     * @param sancion La sanción que se acaba de crear.
+     * @param origenDetallado Una descripción detallada del origen o motivo de la sanción.
+     */
     private fun sendNotificationNuevaSancion(sancion: Sancion, origenDetallado: String) {
         val user = sancion.user
         var tituloUser: String
@@ -445,6 +561,13 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Envía una notificación WebSocket a un usuario y a los administradores sobre la reactivación de una cuenta.
+     *
+     * @param user El usuario que ha sido reactivado.
+     * @param sancionQueFinaliza La sanción que finalizó, causando la reactivación (puede ser nula).
+     * @param motivoReactivacion Una descripción del motivo de la reactivación.
+     */
     private fun sendNotificationReactivacionUsuario(user: User, sancionQueFinaliza: Sancion?, motivoReactivacion: String) {
         val mensaje = if (sancionQueFinaliza != null) {
             "Tu cuenta ha sido reactivada. El periodo de bloqueo (${sancionQueFinaliza.guid}) ha finalizado. Motivo: $motivoReactivacion."
@@ -486,6 +609,11 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Envía una notificación WebSocket a un usuario y a los administradores sobre una sanción eliminada.
+     *
+     * @param sancion La sanción que ha sido eliminada.
+     */
     private fun sendNotificationSancionEliminada(sancion: Sancion) {
         val user = sancion.user
         val notificacionParaUser = NotificationDto(
@@ -518,6 +646,11 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Envía una notificación WebSocket a un usuario y a los administradores sobre una sanción modificada.
+     *
+     * @param sancion La sanción que ha sido modificada.
+     */
     private fun sendNotificationSancionModificada(sancion: Sancion) {
         val user = sancion.user
         val notificacionParaUser = NotificationDto(
@@ -550,6 +683,12 @@ class SancionServiceImpl(
         }
     }
 
+    /**
+     * Envía un correo electrónico al usuario para notificarle de una sanción.
+     *
+     * @param user El usuario sancionado.
+     * @param tipoSancion El tipo de sanción aplicada (String para el contenido del correo).
+     */
     private fun enviarCorreo(user: User, tipoSancion: String) {
         emailService.sendHtmlEmailSancion(
             to = user.email,
@@ -559,6 +698,11 @@ class SancionServiceImpl(
         )
     }
 
+    /**
+     * Envía un correo electrónico al usuario para notificarle la reactivación de su cuenta.
+     *
+     * @param user El usuario reactivado.
+     */
     private fun enviarCorreoReactivacion(user: User) {
         emailService.sendHtmlEmailUsuarioReactivado(
             to = user.email,

@@ -17,6 +17,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
+/**
+ * Implementación del servicio de autenticación para el registro e inicio de sesión de usuarios.
+ *
+ * Este servicio interactúa con el repositorio de usuarios, el codificador de contraseñas,
+ * el servicio JWT y el gestor de autenticación de Spring Security para manejar las operaciones
+ * de autenticación.
+ *
+ * @property authUsersRepository Repositorio para acceder a los datos de los usuarios.
+ * @property passwordEncoder Codificador de contraseñas para el hashing de contraseñas.
+ * @property jwtService Servicio para la generación de tokens JWT.
+ * @property authenticationManager Gestor de autenticación de Spring Security.
+ * @author Natalia González Álvarez
+ */
 @Service
 class AuthenticationServiceImpl
 @Autowired constructor(
@@ -26,6 +39,18 @@ class AuthenticationServiceImpl
     private val authenticationManager: AuthenticationManager
 ) : AuthenticationService {
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     *
+     * Valida que las contraseñas coincidan y asigna un rol al usuario basándose en el sufijo de su correo electrónico.
+     * Si el correo ya existe, lanza una excepción [UserAuthEmailExist].
+     *
+     * @param request La solicitud que contiene los datos para crear el usuario.
+     * @return Un [JwtAuthResponse] con el token JWT si el registro es exitoso.
+     * @throws UserDiferentePasswords Si las contraseñas proporcionadas no coinciden.
+     * @throws UserAuthEmailExist Si ya existe un usuario con el correo electrónico proporcionado.
+     * @author Natalia González Álvarez
+     */
     override fun signUp(request: UserCreateRequest?): JwtAuthResponse {
         if (request!!.password == request.confirmPassword) {
             val rol = when {
@@ -56,6 +81,18 @@ class AuthenticationServiceImpl
         }
     }
 
+    /**
+     * Inicia sesión de un usuario existente.
+     *
+     * Autentica al usuario utilizando el [AuthenticationManager] y, si las credenciales son válidas,
+     * genera un token JWT para el usuario. Si el usuario no existe o las credenciales son incorrectas,
+     * lanza una excepción [AuthLoginInvalid].
+     *
+     * @param request La solicitud que contiene las credenciales del usuario para iniciar sesión.
+     * @return Un [JwtAuthResponse] con el token JWT si el inicio de sesión es exitoso.
+     * @throws AuthLoginInvalid Si el usuario o la contraseña son incorrectos.
+     * @author Natalia González Álvarez
+     */
     override fun signIn(request: UserLoginRequest?): JwtAuthResponse {
         authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(request!!.email, request.password)

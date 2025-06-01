@@ -20,6 +20,17 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+/**
+ * Controlador REST para la gestión de usuarios.
+ * Define los endpoints para las operaciones relacionadas con los usuarios,
+ * como obtener, actualizar y eliminar usuarios.
+ * Todas las operaciones en este controlador requieren el rol 'ADMIN' por defecto,
+ * a menos que se especifique lo contrario con [@PreAuthorize].
+ *
+ * @property userService Servicio encargado de la lógica de negocio de los usuarios.
+ *
+ * @author Natalia González Álvarez
+ */
 @RestController
 @RequestMapping("/users")
 @PreAuthorize("hasRole('ADMIN')")
@@ -27,6 +38,14 @@ class UserController
 @Autowired constructor(
     private val userService: UserService,
 ) {
+    /**
+     * Obtiene una lista paginada de todos los usuarios.
+     * Requiere el rol 'ADMIN'.
+     *
+     * @param page Número de página a recuperar (por defecto 0).
+     * @param size Tamaño de la página (por defecto 5).
+     * @return [ResponseEntity] con la lista paginada de usuarios si es exitoso, o un mensaje de error.
+     */
     @GetMapping
     fun getAllUsers(
         @RequestParam(defaultValue = "0") page: Int,
@@ -38,6 +57,13 @@ class UserController
         )
     }
 
+    /**
+     * Obtiene un usuario por su identificador único (GUID).
+     * Requiere los roles 'ALUMNO', 'PROFESOR' o 'ADMIN'.
+     *
+     * @param guid El GUID del usuario a buscar.
+     * @return [ResponseEntity] con los detalles del usuario si es encontrado, o un mensaje de error 404 si no existe.
+     */
     @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR')")
     @GetMapping("/{guid}")
     fun getUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
@@ -52,6 +78,13 @@ class UserController
         )
     }
 
+    /**
+     * Obtiene un usuario por su nombre.
+     * Requiere el rol 'ADMIN'.
+     *
+     * @param nombre El nombre del usuario a buscar.
+     * @return [ResponseEntity] con los detalles del usuario si es encontrado, o un mensaje de error 404 si no existe.
+     */
     @GetMapping("/nombre/{nombre}")
     fun getUserByNombre(@PathVariable nombre: String) : ResponseEntity<Any> {
         return userService.getByNombre(nombre).mapBoth(
@@ -65,6 +98,13 @@ class UserController
         )
     }
 
+    /**
+     * Obtiene una lista de usuarios filtrados por su curso.
+     * Requiere el rol 'ADMIN'.
+     *
+     * @param curso El curso de los usuarios a buscar.
+     * @return [ResponseEntity] con la lista de usuarios si es exitoso, o un mensaje de error 404 si no se encuentran usuarios.
+     */
     @GetMapping("/curso/{curso}")
     fun getUsersByGrade(@PathVariable curso: String) : ResponseEntity<Any> {
         return userService.getByCurso(curso).mapBoth(
@@ -78,6 +118,13 @@ class UserController
         )
     }
 
+    /**
+     * Obtiene un usuario por su dirección de correo electrónico.
+     * Requiere los roles 'ALUMNO', 'PROFESOR' o 'ADMIN'.
+     *
+     * @param email La dirección de correo electrónico del usuario a buscar.
+     * @return [ResponseEntity] con los detalles del usuario si es encontrado, o un mensaje de error 404 si no existe.
+     */
     @PreAuthorize("hasAnyRole('ALUMNO', 'PROFESOR', 'ADMIN')")
     @GetMapping("/email/{email}")
     fun getUserByEmail(@PathVariable email: String) : ResponseEntity<Any> {
@@ -92,6 +139,13 @@ class UserController
         )
     }
 
+    /**
+     * Obtiene una lista de usuarios filtrados por el nombre de su tutor.
+     * Requiere el rol 'ADMIN'.
+     *
+     * @param tutor El nombre del tutor de los usuarios a buscar.
+     * @return [ResponseEntity] con la lista de usuarios si es exitoso, o un mensaje de error 404 si no se encuentran usuarios.
+     */
     @GetMapping("/tutor/{tutor}")
     fun getUsersByTutor(@PathVariable tutor: String) : ResponseEntity<Any> {
         return userService.getByTutor(tutor).mapBoth(
@@ -105,6 +159,15 @@ class UserController
         )
     }
 
+    /**
+     * Actualiza el avatar de un usuario.
+     * Requiere los roles 'ADMIN', 'ALUMNO' o 'PROFESOR'.
+     *
+     * @param guid El GUID del usuario cuyo avatar se va a actualizar.
+     * @param user DTO con la nueva URL del avatar.
+     * @return [ResponseEntity] con los detalles del usuario actualizado si es exitoso,
+     * o un mensaje de error si el usuario no es encontrado o los datos son inválidos.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'ALUMNO', 'PROFESOR')")
     @PatchMapping("/avatar/{guid}")
     fun updateAvatar(@PathVariable guid: String, @RequestBody user: UserAvatarUpdateRequest) : ResponseEntity<Any> {
@@ -120,6 +183,15 @@ class UserController
         )
     }
 
+    /**
+     * Restablece la contraseña de un usuario.
+     * Requiere los roles 'ADMIN', 'ALUMNO' o 'PROFESOR'.
+     *
+     * @param guid El GUID del usuario cuya contraseña se va a restablecer.
+     * @param user DTO con la nueva contraseña.
+     * @return [ResponseEntity] con los detalles del usuario actualizado si es exitoso,
+     * o un mensaje de error si el usuario no es encontrado o los datos son inválidos.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'ALUMNO', 'PROFESOR')")
     @PatchMapping("/password/{guid}")
     fun resetPassword(@PathVariable guid: String, @RequestBody user: UserPasswordResetRequest) : ResponseEntity<Any> {
@@ -135,6 +207,14 @@ class UserController
         )
     }
 
+    /**
+     * Marca un usuario como eliminado (baja lógica) por su GUID.
+     * Requiere el rol 'ADMIN'.
+     *
+     * @param guid El GUID del usuario a eliminar.
+     * @return [ResponseEntity] con estado 200 si la eliminación es exitosa,
+     * o un mensaje de error 404 si el usuario no es encontrado.
+     */
     @PatchMapping("/delete/{guid}")
     fun deleteUserByGuid(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.deleteUserByGuid(guid).mapBoth(
@@ -148,6 +228,13 @@ class UserController
         )
     }
 
+    /**
+     * Obtiene un usuario por su GUID, con detalles adicionales para la vista de administrador.
+     * Requiere el rol 'ADMIN'.
+     *
+     * @param guid El GUID del usuario a buscar.
+     * @return [ResponseEntity] con los detalles del usuario si es encontrado, o un mensaje de error 404 si no existe.
+     */
     @GetMapping("/admin/{guid}")
     fun getUserByGuidAdmin(@PathVariable guid: String) : ResponseEntity<Any> {
         return userService.getUserByGuidAdmin(guid).mapBoth(
@@ -161,6 +248,15 @@ class UserController
         )
     }
 
+    /**
+     * Actualiza la información de un usuario.
+     * Requiere el rol 'ADMIN'.
+     *
+     * @param guid El GUID del usuario a actualizar.
+     * @param user DTO con los datos de actualización del usuario.
+     * @return [ResponseEntity] con los detalles del usuario actualizado si es exitoso,
+     * o un mensaje de error si el usuario no es encontrado.
+     */
     @PutMapping("/{guid}")
     fun updateUser(@PathVariable guid: String, @RequestBody user: UserUpdateRequest) : ResponseEntity<Any> {
         return userService.updateUser(guid, user).mapBoth(
@@ -174,6 +270,14 @@ class UserController
         )
     }
 
+    /**
+     * Realiza el "derecho al olvido" para un usuario, eliminando sus datos sensibles.
+     * Requiere el rol 'ADMIN'.
+     *
+     * @param userGuid El GUID del usuario para el cual aplicar el derecho al olvido.
+     * @return [ResponseEntity] con estado 200 si la operación es exitosa,
+     * o un mensaje de error 404 si el usuario no es encontrado.
+     */
     @DeleteMapping("/derechoOlvido/{userGuid}")
     fun derechoAlOlvido(@PathVariable userGuid: String): ResponseEntity<Any> {
         return userService.derechoAlOlvido(userGuid).mapBoth(

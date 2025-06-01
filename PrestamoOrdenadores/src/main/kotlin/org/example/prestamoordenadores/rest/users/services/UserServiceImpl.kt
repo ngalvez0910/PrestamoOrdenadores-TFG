@@ -39,6 +39,13 @@ class UserServiceImpl(
     private val dispositivoRepository: DispositivoRepository,
     private val passwordEncoder: PasswordEncoder
 ): UserService {
+    /**
+     * Obtiene todos los usuarios con paginación.
+     *
+     * @param page Número de página.
+     * @param size Tamaño de página.
+     * @return Resultado con respuesta paginada de usuarios o error.
+     */
     override fun getAllUsers(page: Int, size: Int): Result<PagedResponse<UserResponseAdmin>, UserError> {
         logger.debug { "Obteniendo todos los usuarios" }
 
@@ -54,6 +61,12 @@ class UserServiceImpl(
         return Ok(pagedResponse)
     }
 
+    /**
+     * Obtiene un usuario por su GUID.
+     *
+     * @param guid Identificador único global del usuario.
+     * @return Resultado con usuario o error si no existe.
+     */
     @Cacheable(key = "#guid")
     override fun getUserByGuid(guid: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con GUID: $guid" }
@@ -66,6 +79,13 @@ class UserServiceImpl(
         }
     }
 
+    /**
+     * Actualiza el avatar de un usuario identificado por GUID.
+     *
+     * @param guid GUID del usuario.
+     * @param user Datos con el nuevo avatar.
+     * @return Resultado con usuario actualizado o error.
+     */
     @CachePut(key = "#result.guid")
     override fun updateAvatar(guid: String, user: UserAvatarUpdateRequest): Result<UserResponse?, UserError> {
         logger.debug { "Actualizando avatar del usuario con GUID: $guid" }
@@ -86,6 +106,12 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponse(userEncontrado))
     }
 
+    /**
+     * Elimina lógicamente un usuario por GUID (marca como inactivo y borrado).
+     *
+     * @param guid GUID del usuario a eliminar.
+     * @return Resultado con usuario eliminado o error.
+     */
     @CacheEvict
     override fun deleteUserByGuid(guid: String): Result<UserResponseAdmin?, UserError> {
         logger.debug { "Eliminando usuario con GUID: $guid" }
@@ -103,6 +129,13 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponseAdmin(user))
     }
 
+    /**
+     * Cambia la contraseña de un usuario identificado por GUID.
+     *
+     * @param guid GUID del usuario.
+     * @param user Datos con la nueva contraseña.
+     * @return Resultado con usuario actualizado o error.
+     */
     @CachePut(key = "#guid")
     override fun resetPassword(guid: String, user: UserPasswordResetRequest): Result<UserResponse?, UserError> {
         logger.debug { "Intentando cambiar contraseña para usuario con GUID: $guid" }
@@ -129,6 +162,12 @@ class UserServiceImpl(
         }
     }
 
+    /**
+     * Obtiene usuarios por curso.
+     *
+     * @param curso Curso a filtrar.
+     * @return Resultado con lista de usuarios o error.
+     */
     @Cacheable(key = "#curso")
     override fun getByCurso(curso: String): Result<List<UserResponse?>, UserError> {
         logger.debug { "Obteniendo usuarios del curso: $curso" }
@@ -141,6 +180,12 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponseList(user))
     }
 
+    /**
+     * Obtiene un usuario por nombre.
+     *
+     * @param nombre Nombre a buscar.
+     * @return Resultado con usuario o error.
+     */
     @Cacheable(key = "#nombre")
     override fun getByNombre(nombre: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con el nombre: $nombre" }
@@ -153,6 +198,12 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponse(user))
     }
 
+    /**
+     * Obtiene un usuario por email.
+     *
+     * @param email Email a buscar.
+     * @return Resultado con usuario o error.
+     */
     @Cacheable(key = "#email")
     override fun getByEmail(email: String): Result<UserResponse?, UserError> {
         logger.debug { "Obteniendo usuario con email: $email" }
@@ -165,6 +216,12 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponse(user))
     }
 
+    /**
+     * Obtiene usuarios por tutor.
+     *
+     * @param tutor Nombre del tutor.
+     * @return Resultado con lista de usuarios o error.
+     */
     @Cacheable(key = "#tutor")
     override fun getByTutor(tutor: String): Result<List<UserResponse?>, UserError> {
         logger.debug { "Obteniendo usuarios con tutor: $tutor" }
@@ -177,6 +234,12 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponseList(users))
     }
 
+    /**
+     * Obtiene un usuario por GUID para administración (DTO Admin).
+     *
+     * @param guid GUID del usuario.
+     * @return Resultado con usuario admin o error.
+     */
     @Cacheable(key = "#guid")
     override fun getUserByGuidAdmin(guid: String): Result<UserResponseAdmin?, UserError> {
         logger.debug { "Obteniendo usuario con GUID: $guid" }
@@ -189,6 +252,12 @@ class UserServiceImpl(
         }
     }
 
+    /**
+     * Obtiene un usuario por ID.
+     *
+     * @param id ID del usuario.
+     * @return Resultado con usuario o error.
+     */
     @Cacheable(key = "#id")
     override fun getUserById(id: Long): Result<User?, UserError> {
         logger.debug { "Obteniendo usuario con ID: $id" }
@@ -201,6 +270,13 @@ class UserServiceImpl(
         }
     }
 
+    /**
+     * Actualiza los datos de un usuario identificado por GUID.
+     *
+     * @param guid GUID del usuario.
+     * @param request Datos para actualizar.
+     * @return Resultado con usuario actualizado o error.
+     */
     @CachePut(key = "#result.guid")
     override fun updateUser(guid: String, request: UserUpdateRequest): Result<UserResponseAdmin?, UserError> {
         val datosValidados = request.validate()
@@ -234,6 +310,15 @@ class UserServiceImpl(
         return Ok(mapper.toUserResponseAdmin(user))
     }
 
+    /**
+     * Implementa el derecho al olvido para un usuario identificado por GUID.
+     *
+     * Borra o anonimiza datos relacionados a sanciones, incidencias, dispositivos,
+     * y préstamos para cumplir con la privacidad.
+     *
+     * @param guid GUID del usuario.
+     * @return Resultado con usuario anonimizado o error.
+     */
     @CacheEvict(cacheNames = ["users"], key = "#userGuid")
     override fun derechoAlOlvido(userGuid: String): Result<Unit, UserError> {
         logger.info { "Iniciando proceso de borrado (Derecho al Olvido) para el usuario GUID: $userGuid" }
