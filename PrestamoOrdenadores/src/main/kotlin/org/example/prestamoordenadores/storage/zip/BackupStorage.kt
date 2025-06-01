@@ -12,8 +12,26 @@ import kotlin.concurrent.thread
 
 private val logger = logging()
 
+/**
+ * Servicio para la gestión de copias de seguridad y restauración de la base de datos PostgreSQL.
+ *
+ * Esta clase se encarga de interactuar con las utilidades de línea de comandos `pg_dump` y `psql`
+ * para crear y restaurar backups de la base de datos, así como para listar los backups existentes.
+ * También gestiona un archivo temporal `.pgpass` para el manejo seguro de credenciales.
+ *
+ * @author Natalia González Álvarez
+ */
 @Service
 class BackupStorage {
+    /**
+     * Crea una copia de seguridad de la base de datos PostgreSQL.
+     *
+     * Genera un archivo de respaldo SQL en el directorio `data/backup` con un nombre basado en la fecha y hora.
+     * Utiliza `pg_dump` para realizar la copia de seguridad. Se filtra una línea específica
+     * ("SET transaction_timeout = 0;") del archivo de backup generado.
+     *
+     * @return `true` si la copia de seguridad se realizó con éxito, `false` en caso contrario.
+     */
     fun createDatabaseBackup(): Boolean {
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
         val backupDir = File("data/backup")
@@ -110,6 +128,15 @@ class BackupStorage {
         }
     }
 
+    /**
+     * Restaura la base de datos PostgreSQL a partir de un archivo de copia de seguridad.
+     *
+     * Utiliza `psql` para ejecutar el script SQL del archivo de respaldo.
+     *
+     * @param backupFileName El nombre del archivo de la copia de seguridad a restaurar,
+     * esperado en el directorio `data/backup`.
+     * @return `true` si la restauración se realizó con éxito, `false` en caso contrario.
+     */
     fun restoreDatabaseBackup(backupFileName: String): Boolean {
         val backupFile = File("data/backup", backupFileName)
         if (!backupFile.exists() || !backupFile.isFile) {
@@ -186,6 +213,12 @@ class BackupStorage {
         }
     }
 
+    /**
+     * Lista las copias de seguridad de la base de datos disponibles en el directorio `data/backup`.
+     *
+     * @return Una lista de mapas, donde cada mapa representa un archivo de copia de seguridad con
+     * su nombre, tamaño y fecha de última modificación. La lista se ordena por nombre descendente.
+     */
     fun listDatabaseBackups(): List<Map<String, Any>> {
         val backupDir = File("data/backup")
 
@@ -210,6 +243,19 @@ class BackupStorage {
         return backupFiles
     }
 
+    /**
+     * Configura y crea un archivo `.pgpass` temporal para autenticación no interactiva con PostgreSQL.
+     *
+     * Este archivo contiene las credenciales de la base de datos en un formato específico
+     * y se utiliza para evitar solicitar la contraseña al ejecutar `pg_dump` o `psql`.
+     * Se configura para tener permisos de solo lectura para el propietario.
+     *
+     * @param host El host de la base de datos.
+     * @param database El nombre de la base de datos.
+     * @param user El usuario de la base de datos.
+     * @param password La contraseña del usuario de la base de datos.
+     * @return Un objeto [File] que apunta al archivo `.pgpass` temporal, o `null` si ocurre un error.
+     */
     private fun setupPgPassFile(host: String, database: String, user: String, password: String): File? {
         try {
             val tempFile = File.createTempFile("pgpass", ".conf")
