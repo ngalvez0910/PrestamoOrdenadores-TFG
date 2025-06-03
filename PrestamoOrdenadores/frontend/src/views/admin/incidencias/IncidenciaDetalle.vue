@@ -15,6 +15,13 @@
     </div>
 
     <div class="incidencia-details" v-if="incidenciaData">
+      <button
+          class="action-button download-pdf-button-small"
+          @click="handleDownloadPdf"
+      >
+        <i class="pi pi-file-pdf"></i>
+      </button>
+
       <div class="details-header">
         <h2>Detalles de la Incidencia</h2>
         <i class="pi pi-exclamation-triangle header-icon"></i>
@@ -76,7 +83,7 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {getIncidenciaByGuidAdmin, actualizarIncidencia} from "@/services/IncidenciaService.ts";
+import {getIncidenciaByGuidAdmin, actualizarIncidencia, descargarIncidenciaPDF} from "@/services/IncidenciaService.ts";
 import {useToast} from "primevue/usetoast";
 
 type IncidenceState = 'PENDIENTE' | 'RESUELTO';
@@ -169,6 +176,21 @@ export default defineComponent({
 
         this.editable = false;
       }
+    },
+    async handleDownloadPdf() {
+      if (!this.incidenciaData || !this.incidenciaData.guid) {
+        this.toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'No se pudo obtener el GUID de la incidencia para descargar el PDF.', life: 3000 });
+        return;
+      }
+
+      try {
+        await descargarIncidenciaPDF(this.incidenciaData.guid);
+        this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'El PDF de la incidencia ha sido generado y guardado en el servidor.', life: 5000 });
+      } catch (error: any) {
+        console.error('Error al intentar descargar el PDF:', error);
+        const errorMessage = error.response?.data || error.message || 'Error al generar el PDF de la incidencia.';
+        this.toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
+      }
     }
   }
 })
@@ -187,6 +209,27 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+}
+
+.download-pdf-button-small {
+  background-color: var(--color-neutral-medium);
+  color: var(--color-error);
+  border: var(--color-error);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.download-pdf-button-small i {
+  font-size: 1.1em;
 }
 
 .back-button {

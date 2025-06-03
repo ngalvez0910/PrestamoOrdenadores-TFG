@@ -216,3 +216,49 @@ export const getIncidenciasCountByUserGuid = async (): Promise<number> => {
         return 0;
     }
 };
+
+export const descargarIncidenciaPDF = async (guid: string): Promise<void | null> => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("descargarIncidenciaPDF - No se encontró el token de autenticación.");
+            return null;
+        }
+
+        const response = await axios.get(`http://localhost:8080/incidencias/export/pdf/${guid}`, {
+            responseType: 'blob',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (response.status === 200) {
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+
+            const contentDisposition = response.headers['content-disposition'];
+            let fileName = `incidencia_${guid}.pdf`;
+            if (contentDisposition) {
+                const fileNameMatch = contentDisposition.match(/filename="([^"]+)"/);
+                if (fileNameMatch && fileNameMatch[1]) {
+                    fileName = fileNameMatch[1];
+                }
+            }
+            link.download = fileName;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            return null;
+        } else {
+            console.error('descargarIncidenciaPDF - Error al descargar el PDF:', response.data);
+            throw new Error('No se pudo descargar el PDF de la incidencia.');
+        }
+    } catch (error: any) {
+        console.error('descargarIncidenciaPDF - Error al descargar el PDF:', error.response?.data || error.message);
+        throw error;
+    }
+};

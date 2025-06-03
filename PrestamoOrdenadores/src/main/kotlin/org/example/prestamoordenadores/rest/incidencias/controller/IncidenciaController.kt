@@ -10,6 +10,9 @@ import org.example.prestamoordenadores.rest.incidencias.services.IncidenciaServi
 import org.example.prestamoordenadores.storage.pdf.IncidenciaPdfStorage
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
@@ -211,10 +214,14 @@ class IncidenciaController
      * @author Natalia González Álvarez
      */
     @GetMapping("/export/pdf/{guid}")
-    fun generateAndSavePdf(@PathVariable guid: String): ResponseEntity<String> {
+    fun generateAndSavePdf(@PathVariable guid: String): ResponseEntity<ByteArray> {
+        val pdfBytes = incidenciaPdfStorage.generatePdf(guid)
         val fileName = "incidencia_${LocalDate.now().toDefaultDateString()}.pdf"
-        incidenciaPdfStorage.generateAndSavePdf(guid)
 
-        return ResponseEntity.ok("El PDF ha sido guardado exitosamente en la carpeta 'data' con el nombre $fileName")
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        headers.contentDisposition = org.springframework.http.ContentDisposition.builder("attachment").filename(fileName).build()
+
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
 }
