@@ -681,33 +681,80 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .dispositivos-container {
-    padding: 70px 15px 30px 15px;
-  }
-
   .filters {
     flex-direction: column;
+    margin: 0 auto 30px auto;
     align-items: stretch;
-    margin-left: 0;
-    margin-right: 0;
   }
 
   .filters label {
-    margin-bottom: 5px;
+    margin-bottom: -10px;
+  }
+
+  .filters input {
+    width: 100%;
+    max-width: 100%;
   }
 
   .filters .action-button.primary-button {
-    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-wrapper {
+    margin-left: 0;
+    border: 1px solid var(--color-neutral-medium);
+    border-radius: 8px;
+    box-shadow: none;
   }
 
-  :deep(.p-datatable-custom .p-datatable-thead > tr > th),
-  :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
-    padding: 0.75rem 0.5rem;
-    white-space: normal;
+  :deep(.p-datatable-custom) {
+    font-size: 0.9rem;
   }
 
   .action-buttons {
+    flex-direction: column;
     gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.add-stock-dialog),
+  :deep(.p-dialog) {
+    width: 90vw !important;
+    font-size: 0.9rem;
+  }
+
+  .dialog-footer-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dialog-footer-buttons .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .action-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .action-button.edit-button,
+  .action-button.delete-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .action-button.primary-button,
+  .action-button.secondary-button {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
