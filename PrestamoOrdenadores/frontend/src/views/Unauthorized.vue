@@ -14,14 +14,17 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { useRouter } from 'vue-router';
+<script lang="ts">
+import { defineComponent } from 'vue';
 
-const router = useRouter();
-
-const goBack = () => {
-  router.go(-1);
-};
+export default defineComponent({
+  name: 'UnauthorizedView',
+  methods: {
+    goBack(): void {
+      this.$router.go(-1);
+    }
+  }
+});
 </script>
 
 <style scoped>
