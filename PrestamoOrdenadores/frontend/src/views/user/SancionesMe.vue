@@ -252,7 +252,6 @@ export default defineComponent({
     flex-direction: column;
     align-items: stretch;
     gap: 15px;
-    background-color: var(--surface-b);
   }
   .page-header .header-left {
     justify-content: space-between;

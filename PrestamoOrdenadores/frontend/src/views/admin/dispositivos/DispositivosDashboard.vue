@@ -700,9 +700,7 @@ export default {
     width: 100%;
     justify-content: center;
   }
-}
 
-@media (max-width: 768px) {
   .table-wrapper {
     margin-left: 0;
     border: 1px solid var(--color-neutral-medium);
@@ -718,18 +716,40 @@ export default {
     flex-direction: column;
     gap: 8px;
   }
-}
 
-@media (max-width: 480px) {
   :deep(.add-stock-dialog),
   :deep(.p-dialog) {
-    width: 90vw !important;
+    width: 95vw !important;
+    max-width: 400px;
     font-size: 0.9rem;
   }
 
   .dialog-footer-buttons {
     flex-direction: column;
-    align-items: stretch;
+    gap: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .dialog-footer-buttons .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.add-stock-dialog),
+  :deep(.p-dialog) {
+    width: 95vw !important;
+    max-width: 400px;
+    font-size: 0.9rem;
+  }
+
+  .dialog-footer-buttons {
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .dialog-footer-buttons .action-button {
