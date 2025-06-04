@@ -1,1 +1,1 @@
-# PrestamoOrdenadores-Sek
+# Prestamo de Ordenadores - LoanTech
