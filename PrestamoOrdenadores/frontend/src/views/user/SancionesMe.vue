@@ -45,11 +45,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Message from 'primevue/message';
-import {getSancionesByUserGuid, type Sancion} from "@/services/SancionService.ts";
+import { getSancionesByUserGuid, type Sancion } from "@/services/SancionService.ts";
 
 export default defineComponent({
   name: "SancionesMe",
@@ -58,38 +58,35 @@ export default defineComponent({
     Column,
     Message
   },
-  setup() {
-    const sanciones = ref<Sancion[]>([]);
-    const loading = ref(true);
-    const error = ref<string | null>(null);
-
-    const loadSanciones = async () => {
-      loading.value = true;
-      error.value = null;
+  data() {
+    return {
+      sanciones: [] as Sancion[],
+      loading: true,
+      error: null as string | null,
+    };
+  },
+  methods: {
+    async loadSanciones(): Promise<void> {
+      this.loading = true;
+      this.error = null;
       try {
-        sanciones.value = await getSancionesByUserGuid();
-        console.log("Sanciones cargadas:", sanciones.value);
+        this.sanciones = await getSancionesByUserGuid();
+        console.log("Sanciones cargadas:", this.sanciones);
       } catch (err: any) {
         console.error("Error al cargar las sanciones:", err);
-        error.value = err.message || "No se pudieron cargar tus sanciones.";
+        this.error = err.message || "No se pudieron cargar tus sanciones.";
       } finally {
-        loading.value = false;
+        this.loading = false;
       }
-    };
-
-    onMounted(() => {
-      loadSanciones();
-    });
-
-    const formatDate = (dateString: string): string => {
+    },
+    formatDate(dateString: string): string {
       if (!dateString) return '';
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
       const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
       return date.toLocaleDateString('es-ES', options);
-    };
-
-    const getSancionTipoClass = (tipoSancion: string): string => {
+    },
+    getSancionTipoClass(tipoSancion: string): string {
       switch (tipoSancion) {
         case 'ADVERTENCIA':
           return 'status-sancion-advertencia';
@@ -100,15 +97,10 @@ export default defineComponent({
         default:
           return 'status-unknown';
       }
-    };
-
-    return {
-      sanciones,
-      loading,
-      error,
-      formatDate,
-      getSancionTipoClass,
-    };
+    },
+  },
+  mounted() {
+    this.loadSanciones();
   },
 });
 </script>
