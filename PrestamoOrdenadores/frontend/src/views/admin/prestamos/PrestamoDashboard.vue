@@ -727,61 +727,91 @@ export default {
 
 @media (max-width: 768px) {
   .prestamos-container {
-    padding: 70px 15px 30px 15px;
+    padding: 60px 15px 30px 15px;
   }
 
   .filters-container {
-    gap: 20px;
+    flex-direction: column;
     align-items: stretch;
+    margin: 0 auto 20px auto;
+    max-width: 100%;
   }
 
   .unified-search {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .unified-search label {
+    margin-right: 0;
+  }
+
+  .search-input-container {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .search-input-container input {
+    width: 100%;
+    min-width: auto;
+    padding-right: 40px;
+  }
+
+  .calendar-icon-container {
+    position: absolute;
+    right: 10px;
+  }
+
+  .calendar-dropdown {
+    position: static;
+    margin-top: 10px;
+    right: auto;
+    box-shadow: none;
+    border: 1px solid var(--color-neutral-light);
   }
 
   .active-filter-badge {
-    margin-top: 5px;
+    margin: 10px auto 0 auto;
+    text-align: center;
   }
 
-  :deep(.p-datatable-custom .p-datatable-thead > tr > th),
-  :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
-    padding: 0.8rem 0.8rem;
-    font-size: 0.9rem;
+  .table-wrapper {
+    margin-left: 0;
   }
 
-  .action-buttons {
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  :deep(.p-paginator .p-paginator-current) {
-    font-size: 0.9rem;
-  }
-  :deep(.p-paginator .p-dropdown .p-dropdown-label) {
-    font-size: 0.9rem;
-  }
-
-}
-
-@media (max-width: 480px) {
-  .unified-search label {
-    font-size: 0.9rem;
-  }
-  .search-input-container input {
-    font-size: 0.9rem;
-  }
   :deep(.p-datatable-custom .p-datatable-thead > tr > th),
   :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
     padding: 0.6rem 0.5rem;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .action-buttons {
+    gap: 6px;
+  }
+
+  .action-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .action-button i {
+    font-size: 1rem;
   }
 
   :deep(.p-paginator) {
-    font-size: 0.85rem;
+    padding: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
   }
-  :deep(.p-paginator .p-paginator-pages .p-paginator-page) {
+
+  :deep(.p-paginator .p-paginator-element) {
     min-width: 28px;
     height: 28px;
+    font-size: 0.75rem;
   }
 }
 </style>
