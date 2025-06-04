@@ -77,4 +77,7 @@ gradle-app.setting
 !docker-compose.prod.yml
 !Dockerfile
 
+!ssl/
+!ssl/*
+
 # End of https://www.toptal.com/developers/gitignore/api/kotlin,git,gradle

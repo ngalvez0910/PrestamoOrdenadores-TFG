@@ -64,14 +64,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import Tooltip from 'primevue/tooltip';
-
 import { getPrestamosByUserGuid, createPrestamo, descargarPdfPrestamo, type Prestamo } from '@/services/PrestamoService.ts';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
@@ -80,39 +79,42 @@ export default defineComponent({
   name: "PrestamoMe",
   components: { DataTable, Column, Button, Dialog, Toast },
   directives: { Tooltip },
+  data() {
+    return {
+      prestamos: [] as Prestamo[],
+      loading: true,
+      displayConfirmDialog: false,
+    };
+  },
   setup() {
-    const prestamos = ref<Prestamo[]>([]);
     const toast = useToast();
     const router = useRouter();
-    const loading = ref(true);
-    const displayConfirmDialog = ref(false);
-
-    onMounted(async () => {
-      await fetchPrestamos();
-    });
-    const openRealizarPrestamoDialog = () => {
-      displayConfirmDialog.value = true;
-    };
-    const fetchPrestamos = async () => {
-      loading.value = true;
+    return { toast, router };
+  },
+  methods: {
+    openRealizarPrestamoDialog(): void {
+      this.displayConfirmDialog = true;
+    },
+    async fetchPrestamos(): Promise<void> {
+      this.loading = true;
       try {
         const data = await getPrestamosByUserGuid();
-        prestamos.value = data.map(p => ({ ...p }));
-        console.log("Datos de préstamos:", prestamos.value);
+        this.prestamos = data.map(p => ({ ...p }));
+        console.log("Datos de préstamos:", this.prestamos);
       } catch (error) {
         console.error("Error al obtener los préstamos:", error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los préstamos.', life: 3000 });
+        this.toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los préstamos.', life: 3000 });
       } finally {
-        loading.value = false;
+        this.loading = false;
       }
-    };
-    const confirmRealizarPrestamo = async () => {
-      displayConfirmDialog.value = false;
+    },
+    async confirmRealizarPrestamo(): Promise<void> {
+      this.displayConfirmDialog = false;
       console.log('Confirmación aceptada, llamando a createPrestamo');
       try {
         const prestamoResponse = await createPrestamo();
         if (prestamoResponse) {
-          await fetchPrestamos();
+          await this.fetchPrestamos();
           console.log('Llamando a descargarPdfPrestamo con GUID:', prestamoResponse);
           await descargarPdfPrestamo(prestamoResponse);
           console.log('Descarga de PDF iniciada');
@@ -124,45 +126,45 @@ export default defineComponent({
         const errorMessage = error.response?.data?.message || error.response?.data || error.message || 'Error desconocido al realizar el préstamo.';
 
         if (error.response?.status === 404 && (errorMessage.includes('No hay dispositivos disponibles') || errorMessage.includes('dispositivos disponibles'))) {
-          toast.add({
+          this.toast.add({
             severity: 'warn',
             summary: 'Sin Disponibilidad',
             detail: 'No hay dispositivos disponibles para realizar el préstamo en este momento.',
             life: 5000,
           });
         } else if (error.response?.status === 409 && (errorMessage.includes('límite de préstamos') || errorMessage.includes('préstamo activo'))) {
-          toast.add({
+          this.toast.add({
             severity: 'warn',
             summary: 'Límite Alcanzado',
             detail: 'Ya tienes un préstamo activo o has alcanzado el límite. No puedes realizar otro hasta devolver el actual.',
             life: 6000,
           });
         } else {
-          toast.add({ severity: 'error', summary: 'Error de Préstamo', detail: errorMessage, life: 5000 });
+          this.toast.add({ severity: 'error', summary: 'Error de Préstamo', detail: errorMessage, life: 5000 });
         }
       }
-    };
-    const cancelarRealizarPrestamo = () => {
-      displayConfirmDialog.value = false;
+    },
+    cancelarRealizarPrestamo(): void {
+      this.displayConfirmDialog = false;
       console.log('Confirmación rechazada');
-    };
-    const descargarPdf = async (prestamoGuid: string) => {
+    },
+    async descargarPdf(prestamoGuid: string): Promise<void> {
       if (!prestamoGuid) {
-        toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'GUID de préstamo no disponible.', life: 3000 });
+        this.toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'GUID de préstamo no disponible.', life: 3000 });
         return;
       }
       try {
         await descargarPdfPrestamo(prestamoGuid);
-        toast.add({ severity: 'info', summary: 'PDF', detail: 'La descarga del PDF ha comenzado.', life: 3000 });
+        this.toast.add({ severity: 'info', summary: 'PDF', detail: 'La descarga del PDF ha comenzado.', life: 3000 });
       } catch (error: any) {
         console.error("Error al descargar el PDF:", error);
-        toast.add({ severity: 'error', summary: 'Error de PDF', detail: 'No se pudo descargar el PDF.', life: 3000 });
+        this.toast.add({ severity: 'error', summary: 'Error de PDF', detail: 'No se pudo descargar el PDF.', life: 3000 });
       }
-    };
-    const goBack = () => {
-      router.back();
-    };
-    const getEstadoPrestamoClass = (estado: string | undefined): string => {
+    },
+    goBack(): void {
+      this.router.back();
+    },
+    getEstadoPrestamoClass(estado: string | undefined): string {
       if (!estado) return 'status-unknown';
       switch (estado.toUpperCase()) {
         case 'EN_CURSO': return 'status-en-curso';
@@ -170,18 +172,10 @@ export default defineComponent({
         case 'CANCELADO': return 'status-cancelado';
         default: return 'status-unknown';
       }
-    };
-    return {
-      prestamos,
-      loading,
-      openRealizarPrestamoDialog,
-      confirmRealizarPrestamo,
-      cancelarRealizarPrestamo,
-      descargarPdf,
-      goBack,
-      getEstadoPrestamoClass,
-      displayConfirmDialog
-    };
+    },
+  },
+  mounted() {
+    this.fetchPrestamos();
   },
 });
 </script>
@@ -428,35 +422,58 @@ export default defineComponent({
   margin: 0 5px;
 }
 
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   .page-container.prestamos-me-page {
     padding: 20px 15px;
-    max-width: 100%;
-    position: relative;
     top: 60px;
-    margin-left: auto;
-    margin-right: auto;
-    overflow-y: visible;
   }
+
   .page-header {
     flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
-    position: relative;
+    align-items: flex-start;
+    gap: 10px;
   }
-  .page-header .header-left {
-    justify-content: space-between;
-  }
-  .page-header .header-left h2 {
+
+  .page-header h2 {
     font-size: 1.5rem;
   }
-  .page-header .header-right {
-    display: flex;
-  }
+
   .action-button.primary-button {
     width: 100%;
     justify-content: center;
+    font-size: 0.9rem;
   }
+
+  .table-card {
+    padding: 15px;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .status-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  .action-button-table.pdf-button {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .page-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .action-button.primary-button,
+  .action-button-table.pdf-button {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+
   .table-card {
     padding: 10px;
   }

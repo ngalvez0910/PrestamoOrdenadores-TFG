@@ -371,28 +371,57 @@ export default defineComponent({
 
 @media (max-width: 768px) {
   .page-container.incidencias-me-page {
-    padding: 70px 15px 30px 15px;
+    padding: 20px 15px;
+    top: 60px;
   }
+
   .page-header {
     flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
+    align-items: flex-start;
+    gap: 10px;
   }
+
   .page-header .header-left {
     justify-content: space-between;
   }
-  .page-header .header-left h2 {
+
+  .page-header h2 {
     font-size: 1.5rem;
+    margin-bottom: 0;
   }
+
   .page-header .header-right {
     display: flex;
   }
+
   .action-button.primary-button {
     width: 100%;
     justify-content: center;
+    font-size: 0.9rem;
   }
+
   .table-card {
-    padding: 10px;
+    padding: 15px;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  :deep(.p-datatable) {
+    font-size: 0.9rem;
+    min-width: 100% !important;
+  }
+
+  :deep(.p-datatable .p-datatable-tbody > tr > td) {
+    white-space: normal !important;
+    word-wrap: break-word;
+  }
+
+  .dialog-footer-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .dialog-footer-buttons > button {
+    width: 100%;
   }
 }
 </style>

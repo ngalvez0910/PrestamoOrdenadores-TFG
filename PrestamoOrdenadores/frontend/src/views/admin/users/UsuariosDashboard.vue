@@ -507,28 +507,65 @@ export default {
 
 @media (max-width: 768px) {
   .usuarios-container {
-    padding: 70px 15px 30px 15px;
+    padding: 60px 15px 30px 15px;
   }
 
   .filters {
-    max-width: none;
     flex-direction: column;
     align-items: stretch;
+    margin: 0 auto 30px auto;
+    max-width: 100%;
+    gap: 5px;
   }
 
   .filters label {
+    text-align: left;
     margin-bottom: 5px;
   }
 
-  :deep(.p-datatable-custom .p-datatable-thead > tr > th),
-  :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
-    padding: 0.75rem 0.5rem;
-    white-space: normal;
-    font-size: 0.9rem;
+  .filters input {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .table-wrapper {
+    width: 100%;
+    margin-left: 0;
+    border: 1px solid var(--color-neutral-medium);
+    border-radius: 8px;
   }
 
   .action-buttons {
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .action-button i {
+    font-size: 0.95rem;
+  }
+
+  .status-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+  }
+
+  :deep(.p-paginator) {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  :deep(.p-paginator .p-paginator-element) {
+    font-size: 0.8rem;
+    min-width: 28px;
+    height: 28px;
   }
 }
 </style>

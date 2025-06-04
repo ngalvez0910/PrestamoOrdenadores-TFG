@@ -724,42 +724,107 @@ export default defineComponent({
   line-height: 1;
 }
 
-@media (max-width: 992px) {
-  .profile-card-body {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-  .avatar-section {
-    align-items: center;
-  }
-  .user-info-section {
-    text-align: left;
-  }
-  .profile-tabs-container.internal-tabs ul {
-    flex-wrap: wrap;
-  }
-  .profile-tabs-container.internal-tabs .tab-link {
-    padding: 8px 12px;
-    font-size: 0.9rem;
-  }
-}
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .page-container.profile-page {
-    padding: 70px 20px 30px 20px;
+    padding: 20px 15px;
+    max-width: 100%;
+  }
+  .profile-card {
+    padding: 20px 15px;
+  }
+  .profile-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
   .profile-card-header h2 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
   .header-icon {
     font-size: 2rem;
   }
+  .profile-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .avatar-section {
+    align-items: center;
+  }
+  .avatar-image {
+    width: 120px;
+    height: 120px;
+  }
+  .user-info-section {
+    gap: 15px;
+  }
+  .readonly-field {
+    min-height: 40px;
+    font-size: 0.9rem;
+  }
+  .stats-section {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+  .stat-number {
+    font-size: 1.8rem;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+  }
   .profile-card-footer {
     flex-direction: column;
     gap: 10px;
+    justify-content: center;
+  }
+  .change-password-button {
+    margin-right: 0;
   }
   .action-button {
-    width: 100%;
     justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .page-container.profile-page {
+    padding: 30px 20px;
+    max-width: 700px;
+  }
+  .profile-card {
+    padding: 25px 30px;
+  }
+  .profile-card-header h2 {
+    font-size: 1.5rem;
+  }
+  .header-icon {
+    font-size: 2.2rem;
+  }
+  .profile-card-body {
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+  }
+  .avatar-image {
+    width: 130px;
+    height: 130px;
+  }
+  .stats-section {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 22px;
+    padding-top: 22px;
+  }
+  .stat-number {
+    font-size: 2rem;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+  }
+  .profile-card-footer {
+    justify-content: flex-end;
+    gap: 12px;
   }
 }
 </style>

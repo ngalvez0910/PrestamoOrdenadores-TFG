@@ -81,7 +81,7 @@
       </template>
     </Menu>
 
-    <Sidebar v-model:visible="sidebarVisible" :baseZIndex="1000" position="left" class="custom-sidebar">
+    <Sidebar v-model:visible="sidebarVisible" :baseZIndex="1000" position="left" class="custom-sidebar" style="fontFamily: 'Montserrat', sans-serif">
       <template #header>
         <h3 style="color: var(--color-primary); font-weight: 600;">Navegación</h3>
       </template>
