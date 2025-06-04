@@ -422,35 +422,58 @@ export default defineComponent({
   margin: 0 5px;
 }
 
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   .page-container.prestamos-me-page {
     padding: 20px 15px;
-    max-width: 100%;
-    position: relative;
     top: 60px;
-    margin-left: auto;
-    margin-right: auto;
-    overflow-y: visible;
   }
+
   .page-header {
     flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
-    position: relative;
+    align-items: flex-start;
+    gap: 10px;
   }
-  .page-header .header-left {
-    justify-content: space-between;
-  }
-  .page-header .header-left h2 {
+
+  .page-header h2 {
     font-size: 1.5rem;
   }
-  .page-header .header-right {
-    display: flex;
-  }
+
   .action-button.primary-button {
     width: 100%;
     justify-content: center;
+    font-size: 0.9rem;
   }
+
+  .table-card {
+    padding: 15px;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .status-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  .action-button-table.pdf-button {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .page-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .action-button.primary-button,
+  .action-button-table.pdf-button {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+
   .table-card {
     padding: 10px;
   }
