@@ -91,16 +91,15 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, onMounted, computed, inject, watch, type Ref} from 'vue';
+import { defineComponent, type Ref } from 'vue';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import ProgressSpinner from 'primevue/progressspinner';
 import Tooltip from 'primevue/tooltip';
 import axios from 'axios';
-
+import Dialog from "primevue/dialog";
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
-import Dialog from "primevue/dialog";
 
 type NotificationType = 'info' | 'prestamo' | 'incidencia' | 'sistema' | 'advertencia' | 'error' | 'sancion';
 
@@ -118,183 +117,167 @@ export default defineComponent({
   name: "Notificaciones",
   components: { Button, Toast, ProgressSpinner, Dialog },
   directives: { Tooltip },
+  data() {
+    return {
+      notifications: [] as Notificacion[],
+      loading: true,
+      markingAllAsRead: false,
+      isDialogVisible: false,
+      selectedNotificationForDialog: null as Notificacion | null,
+      API_BASE_URL: 'http://localhost:8080',
+    };
+  },
   setup() {
-    const API_BASE_URL = inject<string>('API_BASE_URL', 'http://localhost:8080');
-
-    const notifications = ref<Notificacion[]>([]);
-    const loading = ref(true);
-    const markingAllAsRead = ref(false);
     const toast = useToast();
     const router = useRouter();
-    const lastReceivedNotification = inject<Readonly<Ref<Notificacion | null>>>('lastReceivedNotification');
-
-    const isDialogVisible = ref(false);
-    const selectedNotificationForDialog = ref<Notificacion | null>(null);
-
-    const parseBackendNotificationForPage = (backendNotif: any): Notificacion => {
-      return {
-        ...backendNotif,
-        fecha: new Date(backendNotif.fecha),
-        tipo: backendNotif.tipo?.toLowerCase() as NotificationType,
-      };
-    };
-
-    const addNotificationToList = (nuevaNotificacionData: Notificacion) => {
-      console.log("[Notificaciones.vue addNotificationToList] Intentando añadir:", JSON.parse(JSON.stringify(nuevaNotificacionData)));
-      console.log("[Notificaciones.vue addNotificationToList] Lista actual ANTES:", JSON.parse(JSON.stringify(notifications.value)));
-
-      if (!notifications.value.some(n => n.id === nuevaNotificacionData.id)) {
-        notifications.value.unshift(nuevaNotificacionData);
-        console.log("[Notificaciones.vue] Notificación AÑADIDA a la lista local (unshift):", nuevaNotificacionData.id);
-      } else {
-        const index = notifications.value.findIndex(n => n.id === nuevaNotificacionData.id);
-        if (index !== -1) {
-          notifications.value[index] = { ...notifications.value[index], ...nuevaNotificacionData };
-          console.log("[Notificaciones.vue] Notificación ACTUALIZADA en la lista local:", nuevaNotificacionData.id);
-        }
-      }
-      console.log("[Notificaciones.vue addNotificationToList] Lista actual DESPUÉS:", JSON.parse(JSON.stringify(notifications.value)));
-    };
-
-    if (lastReceivedNotification) {
-      watch(lastReceivedNotification, (newNotificationPayload) => {
-        if (newNotificationPayload) {
-          console.log("[Notificaciones.vue Watcher] Nueva notificación global detectada:", newNotificationPayload);
-          addNotificationToList(newNotificationPayload);
-        }
-      });
-    } else {
-      console.warn("[Notificaciones.vue] No se pudo inyectar 'lastReceivedNotification'. Las actualizaciones en tiempo real podrían no funcionar en esta página.");
-    }
-
-    const fetchInitialNotifications = async () => {
-      loading.value = true;
-      console.log("[Notificaciones.vue:fetchInitialNotifications] Iniciando carga...");
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          console.warn("[Notificaciones.vue:fetchInitialNotifications] No hay token. Abortando.");
-          notifications.value = [];
-          loading.value = false;
-          return;
-        }
-        const response = await axios.get<Notificacion[]>(`${API_BASE_URL}/notificaciones`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.data && Array.isArray(response.data)) {
-          notifications.value = response.data.map(parseBackendNotificationForPage);
-        } else {
-          notifications.value = [];
-        }
-      } catch (error: any) {
-        console.error("[Notificaciones.vue:fetchInitialNotifications] Error:", error.response?.data || error.message);
-        notifications.value = [];
-        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las notificaciones.', life: 3000 });
-      } finally {
-        loading.value = false;
-        console.log(`[Notificaciones.vue:fetchInitialNotifications] Carga finalizada. Total: ${notifications.value.length}`);
-      }
-    };
-
-    onMounted(() => {
-      fetchInitialNotifications();
-    });
-
-    const sortedNotifications = computed(() => {
-      return [...notifications.value].sort((a, b) => {
+    const lastReceivedNotification = (window as any).__VUE_APP_LAST_NOTIFICATION_REF__;
+    return { toast, router, lastReceivedNotification };
+  },
+  computed: {
+    sortedNotifications(): Notificacion[] {
+      return [...this.notifications].sort((a, b) => {
         if (a.leida !== b.leida) {
           return a.leida ? 1 : -1;
         }
         return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
       });
-    });
+    },
+    unreadCount(): number {
+      return this.notifications.filter(n => !n.leida).length;
+    }
+  },
+  methods: {
+    parseBackendNotificationForPage(backendNotif: any): Notificacion {
+      return {
+        ...backendNotif,
+        fecha: new Date(backendNotif.fecha),
+        tipo: backendNotif.tipo?.toLowerCase() as NotificationType,
+      };
+    },
+    addNotificationToList(nuevaNotificacionData: Notificacion): void {
+      console.log("[Notificaciones.vue addNotificationToList] Intentando añadir:", JSON.parse(JSON.stringify(nuevaNotificacionData)));
+      console.log("[Notificaciones.vue addNotificationToList] Lista actual ANTES:", JSON.parse(JSON.stringify(this.notifications)));
 
-    const unreadCount = computed(() => notifications.value.filter(n => !n.leida).length);
-
-    const markAsRead = async (notification: Notificacion, fromDialog: boolean = false) => {
+      if (!this.notifications.some(n => n.id === nuevaNotificacionData.id)) {
+        this.notifications.unshift(nuevaNotificacionData);
+        console.log("[Notificaciones.vue] Notificación AÑADIDA a la lista local (unshift):", nuevaNotificacionData.id);
+      } else {
+        const index = this.notifications.findIndex(n => n.id === nuevaNotificacionData.id);
+        if (index !== -1) {
+          this.notifications[index] = { ...this.notifications[index], ...nuevaNotificacionData };
+          console.log("[Notificaciones.vue] Notificación ACTUALIZADA en la lista local:", nuevaNotificacionData.id);
+        }
+      }
+      console.log("[Notificaciones.vue addNotificationToList] Lista actual DESPUÉS:", JSON.parse(JSON.stringify(this.notifications)));
+    },
+    async fetchInitialNotifications(): Promise<void> {
+      this.loading = true;
+      console.log("[Notificaciones.vue:fetchInitialNotifications] Iniciando carga...");
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn("[Notificaciones.vue:fetchInitialNotifications] No hay token. Abortando.");
+          this.notifications = [];
+          this.loading = false;
+          return;
+        }
+        const response = await axios.get<Notificacion[]>(`${this.API_BASE_URL}/notificaciones`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.data && Array.isArray(response.data)) {
+          this.notifications = response.data.map(this.parseBackendNotificationForPage);
+        } else {
+          this.notifications = [];
+        }
+      } catch (error: any) {
+        console.error("[Notificaciones.vue:fetchInitialNotifications] Error:", error.response?.data || error.message);
+        this.notifications = [];
+        this.toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las notificaciones.', life: 3000 });
+      } finally {
+        this.loading = false;
+        console.log(`[Notificaciones.vue:fetchInitialNotifications] Carga finalizada. Total: ${this.notifications.length}`);
+      }
+    },
+    async markAsRead(notification: Notificacion, fromDialog: boolean = false): Promise<void> {
       const originalLeidaState = notification.leida;
-      const index = notifications.value.findIndex(n => n.id === notification.id);
+      const index = this.notifications.findIndex(n => n.id === notification.id);
 
       let notificationToUpdateInDialog = false;
-      if (selectedNotificationForDialog.value && selectedNotificationForDialog.value.id === notification.id) {
+      if (this.selectedNotificationForDialog && this.selectedNotificationForDialog.id === notification.id) {
         notificationToUpdateInDialog = true;
       }
 
-      if (index !== -1 && !notifications.value[index].leida) {
-        notifications.value[index].leida = true;
+      if (index !== -1 && !this.notifications[index].leida) {
+        this.notifications[index].leida = true;
         if (notificationToUpdateInDialog) {
-          selectedNotificationForDialog.value!.leida = true;
+          this.selectedNotificationForDialog!.leida = true;
         }
       } else if (index === -1 && !fromDialog) {
         return;
-      } else if (fromDialog && selectedNotificationForDialog.value && !selectedNotificationForDialog.value.leida) {
-        selectedNotificationForDialog.value.leida = true;
-        if (index !== -1) notifications.value[index].leida = true;
+      } else if (fromDialog && this.selectedNotificationForDialog && !this.selectedNotificationForDialog.leida) {
+        this.selectedNotificationForDialog.leida = true;
+        if (index !== -1) this.notifications[index].leida = true;
       }
 
       try {
-        await axios.post(`${API_BASE_URL}/notificaciones/${notification.id}/read`, {}, {
+        await axios.post(`${this.API_BASE_URL}/notificaciones/${notification.id}/read`, {}, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         if (!fromDialog) {
-          toast.add({ severity: 'success', summary: 'Leída', detail: 'Notificación marcada como leída.', life: 1500 });
+          this.toast.add({ severity: 'success', summary: 'Leída', detail: 'Notificación marcada como leída.', life: 1500 });
         }
       } catch (error) {
         if (index !== -1) {
-          notifications.value[index].leida = originalLeidaState;
+          this.notifications[index].leida = originalLeidaState;
         }
-        if (notificationToUpdateInDialog && selectedNotificationForDialog.value) {
-          selectedNotificationForDialog.value.leida = originalLeidaState;
+        if (notificationToUpdateInDialog && this.selectedNotificationForDialog) {
+          this.selectedNotificationForDialog.leida = originalLeidaState;
         }
         console.error("Error al marcar como leída:", error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo marcar como leída.', life: 3000 });
+        this.toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo marcar como leída.', life: 3000 });
       }
-    };
-
-    const markAllAsRead = async () => {
-      markingAllAsRead.value = true;
-      const originalNotificationsState = JSON.parse(JSON.stringify(notifications.value));
-      notifications.value.forEach(n => n.leida = true);
+    },
+    async markAllAsRead(): Promise<void> {
+      this.markingAllAsRead = true;
+      const originalNotificationsState = JSON.parse(JSON.stringify(this.notifications));
+      this.notifications.forEach(n => n.leida = true);
 
       try {
-        await axios.post(`${API_BASE_URL}/notificaciones/read-all`, {}, {
+        await axios.post(`${this.API_BASE_URL}/notificaciones/read-all`, {}, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
-        toast.add({ severity: 'success', summary: 'Leídas', detail: 'Todas las notificaciones marcadas como leídas.', life: 2000 });
+        this.toast.add({ severity: 'success', summary: 'Leídas', detail: 'Todas las notificaciones marcadas como leídas.', life: 2000 });
       } catch (error) {
-        notifications.value = originalNotificationsState.map(parseBackendNotificationForPage);
+        this.notifications = originalNotificationsState.map(this.parseBackendNotificationForPage);
         console.error("Error al marcar todas como leídas:", error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron marcar todas como leídas.', life: 3000 });
+        this.toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron marcar todas como leídas.', life: 3000 });
       } finally {
-        markingAllAsRead.value = false;
+        this.markingAllAsRead = false;
       }
-    };
-
-    const deleteNotification = async (notification: Notificacion) => {
-      const originalNotifications = [...notifications.value];
-      notifications.value = notifications.value.filter(n => n.id !== notification.id);
+    },
+    async deleteNotification(notification: Notificacion): Promise<void> {
+      const originalNotifications = [...this.notifications];
+      this.notifications = this.notifications.filter(n => n.id !== notification.id);
 
       try {
-        await axios.delete(`${API_BASE_URL}/notificaciones/${notification.id}`, {
+        await axios.delete(`${this.API_BASE_URL}/notificaciones/${notification.id}`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
-        toast.add({ severity: 'warn', summary: 'Eliminada', detail: 'Notificación eliminada.', life: 1500 });
+        this.toast.add({ severity: 'warn', summary: 'Eliminada', detail: 'Notificación eliminada.', life: 1500 });
       } catch (error) {
-        notifications.value = originalNotifications;
+        this.notifications = originalNotifications;
         console.error("Error al eliminar notificación:", error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar la notificación.', life: 3000 });
+        this.toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar la notificación.', life: 3000 });
       }
-    };
-
-    const handleNotificationClick = (notification: Notificacion) => {
-      selectedNotificationForDialog.value = { ...notification, fecha: new Date(notification.fecha) };
-      isDialogVisible.value = true;
+    },
+    handleNotificationClick(notification: Notificacion): void {
+      this.selectedNotificationForDialog = { ...notification, fecha: new Date(notification.fecha) };
+      this.isDialogVisible = true;
       if (!notification.leida) {
-        markAsRead(notification, true);
+        this.markAsRead(notification, true);
       }
-    };
-
-    const getNotificationIcon = (tipo?: NotificationType): string => {
+    },
+    getNotificationIcon(tipo?: NotificationType): string {
       switch (tipo) {
         case 'prestamo': return 'pi pi-arrow-right-arrow-left';
         case 'incidencia': return 'pi pi-flag-fill';
@@ -306,9 +289,8 @@ export default defineComponent({
         default:
           return 'pi pi-info-circle';
       }
-    };
-
-    const formatRelativeTime = (dateInput: Date | string): string => {
+    },
+    formatRelativeTime(dateInput: Date | string): string {
       const date = new Date(dateInput);
       const now = new Date();
       const diffSeconds = Math.round((now.getTime() - date.getTime()) / 1000);
@@ -322,43 +304,34 @@ export default defineComponent({
       if (diffDays === 1) return `Ayer`;
       if (diffDays < 7) return `Hace ${diffDays} días`;
       return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-    };
-
-    const truncate = (text: string | undefined, length: number): string => {
+    },
+    truncate(text: string | undefined, length: number): string {
       if (!text) return '';
       return text.length > length ? text.substring(0, length) + "..." : text;
-    };
-
-    const closeNotificationDialog = () => {
-      isDialogVisible.value = false;
-    };
-
-    const navigateFromDialog = () => {
-      if (selectedNotificationForDialog.value && selectedNotificationForDialog.value.enlace) {
-        router.push(selectedNotificationForDialog.value.enlace);
-        closeNotificationDialog();
+    },
+    closeNotificationDialog(): void {
+      this.isDialogVisible = false;
+    },
+    navigateFromDialog(): void {
+      if (this.selectedNotificationForDialog && this.selectedNotificationForDialog.enlace) {
+        this.router.push(this.selectedNotificationForDialog.enlace);
+        this.closeNotificationDialog();
       }
-    };
-
-    return {
-      notifications,
-      loading,
-      markingAllAsRead,
-      sortedNotifications,
-      unreadCount,
-      markAsRead,
-      markAllAsRead,
-      deleteNotification,
-      handleNotificationClick,
-      getNotificationIcon,
-      formatRelativeTime,
-      truncate,
-      isDialogVisible,
-      selectedNotificationForDialog,
-      closeNotificationDialog,
-      navigateFromDialog
-    };
+    }
   },
+  mounted() {
+    this.fetchInitialNotifications();
+    if (this.lastReceivedNotification) {
+      this.$watch('lastReceivedNotification.value', (newNotificationPayload: Notificacion | null) => {
+        if (newNotificationPayload) {
+          console.log("[Notificaciones.vue Watcher] Nueva notificación global detectada:", newNotificationPayload);
+          this.addNotificationToList(newNotificationPayload);
+        }
+      });
+    } else {
+      console.warn("[Notificaciones.vue] No se pudo inyectar 'lastReceivedNotification'. Las actualizaciones en tiempo real podrían no funcionar en esta página.");
+    }
+  }
 });
 </script>
 
