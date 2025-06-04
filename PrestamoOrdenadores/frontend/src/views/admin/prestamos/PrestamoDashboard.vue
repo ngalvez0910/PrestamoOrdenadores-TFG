@@ -770,7 +770,7 @@ export default {
     margin-top: 10px;
     right: auto;
     box-shadow: none;
-    border: 1px solid var(--color-neutral-light);
+    border: 1px solid var(--color-neutral-medium);
   }
 
   .active-filter-badge {

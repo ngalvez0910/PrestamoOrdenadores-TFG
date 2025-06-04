@@ -714,25 +714,89 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .incidencias-container {
-    padding: 70px 15px 30px 15px;
-  }
-  .filters {
-    max-width: none;
+  .filters-container {
     flex-direction: column;
     align-items: stretch;
+    margin: 0 auto 20px auto;
+    max-width: 100%;
   }
-  .filters label {
-    margin-bottom: 5px;
+
+  .unified-search {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
   }
+
+  .unified-search label {
+    margin-right: 0;
+  }
+
+  .search-input-container {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .search-input-container input {
+    width: 100%;
+    min-width: auto;
+    padding-right: 40px;
+  }
+
+  .calendar-icon-container {
+    position: absolute;
+    right: 10px;
+  }
+
+  .calendar-dropdown {
+    position: static;
+    margin-top: 10px;
+    right: auto;
+    box-shadow: none;
+    border: 1px solid var(--color-neutral-medium);
+  }
+
+  .active-filter-badge {
+    margin: 10px auto 0 auto;
+    text-align: center;
+  }
+
+  .table-wrapper {
+    margin-left: 0;
+  }
+
   :deep(.p-datatable-custom .p-datatable-thead > tr > th),
   :deep(.p-datatable-custom .p-datatable-tbody > tr > td) {
-    padding: 0.75rem 0.5rem;
-    white-space: normal;
-    font-size: 0.9rem;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.85rem;
   }
+
   .action-buttons {
-    gap: 8px;
+    gap: 6px;
+  }
+
+  .action-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .action-button i {
+    font-size: 1rem;
+  }
+
+  :deep(.p-paginator) {
+    padding: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  :deep(.p-paginator .p-paginator-element) {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
   }
 }
+
 </style>
