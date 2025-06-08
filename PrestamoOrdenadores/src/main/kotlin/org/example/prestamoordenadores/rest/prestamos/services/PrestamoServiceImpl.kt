@@ -249,6 +249,10 @@ class PrestamoServiceImpl(
             return Err(PrestamoError.PrestamoNotFound("Prestamo con GUID: $guid no encontrado"))
         }
 
+        if (prestamoEncontrado.estadoPrestamo == EstadoPrestamo.EN_CURSO || prestamoEncontrado.estadoPrestamo == EstadoPrestamo.VENCIDO) {
+            return Err(PrestamoError.PrestamoValidationError("No se puede eliminar un préstamo que está EN_CURSO o VENCIDO."))
+        }
+
         prestamoEncontrado.isDeleted = true
         prestamoEncontrado.updatedDate = LocalDateTime.now()
 

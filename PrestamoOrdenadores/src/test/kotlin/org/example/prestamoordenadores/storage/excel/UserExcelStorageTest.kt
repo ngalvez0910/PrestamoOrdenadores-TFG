@@ -61,7 +61,7 @@ class UserExcelStorageTest {
         val sheet = workbook.getSheetAt(0)
 
         val header = sheet.getRow(0)
-        assertEquals("Número de identificación", header.getCell(0).stringCellValue)
+        assertEquals("Número de identificación", header.getCell(0).stringCellValue)
         assertEquals("Email", header.getCell(1).stringCellValue)
         assertEquals("Nombre", header.getCell(2).stringCellValue)
         assertEquals("Apellidos", header.getCell(3).stringCellValue)
