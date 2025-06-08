@@ -44,8 +44,14 @@
               <button @click="editDispositivo(slotProps.data)" class="action-button edit-button" title="Editar/Ver Detalles">
                 <i class="pi pi-info-circle"></i>
               </button>
-              <button @click="deleteDispositivo(slotProps.data)" class="action-button delete-button" title="Eliminar Dispositivo">
-                <i class="pi pi-trash"></i> </button>
+              <button
+                  @click="deleteDispositivo(slotProps.data)"
+                  :class="['action-button', 'delete-button', { 'disabled-button': slotProps.data.estado === 'PRESTADO' }]"
+                  :title="slotProps.data.estado === 'PRESTADO' ? 'No se puede eliminar un dispositivo PRESTADO' : 'Eliminar Dispositivo'"
+                  :disabled="slotProps.data.estado === 'PRESTADO'"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
             </div>
           </template>
         </Column>
@@ -678,6 +684,11 @@ export default {
 
 .action-button-dialog.primary-button i {
   font-size: 1.1rem;
+}
+
+.disabled-button {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

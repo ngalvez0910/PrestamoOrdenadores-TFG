@@ -217,6 +217,10 @@ class DispositivoServiceImpl(
             return Err(DispositivoError.DispositivoNotFound("Dispositivo con GUID: $guid no encontrado"))
         }
 
+        if (dispositivo.estadoDispositivo == EstadoDispositivo.PRESTADO) {
+            return Err(DispositivoError.DispositivoValidationError("No se puede eliminar un dispositivo que está PRESTADO."))
+        }
+
         dispositivo.estadoDispositivo = EstadoDispositivo.NO_DISPONIBLE
         dispositivo.isDeleted = true
         dispositivo.updatedDate = LocalDateTime.now()
