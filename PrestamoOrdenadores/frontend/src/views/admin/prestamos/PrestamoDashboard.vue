@@ -76,7 +76,12 @@
               <button @click="verPrestamo(slotProps.data)" class="action-button view-button" title="Ver Detalles">
                 <i class="pi pi-info-circle"></i>
               </button>
-              <button @click="deletePrestamo(slotProps.data)" class="action-button delete-button" title="Eliminar Préstamo">
+              <button
+                  @click="deletePrestamo(slotProps.data)"
+                  :class="['action-button', 'delete-button', { 'disabled-button': slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO' }]"
+                  :title="slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO' ? 'No se puede eliminar un préstamo EN CURSO o VENCIDO' : 'Eliminar Préstamo'"
+                  :disabled="slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO'"
+              >
                 <i class="pi pi-trash"></i>
               </button>
             </div>
@@ -723,6 +728,11 @@ export default {
 
 .action-button-dialog.primary-button i {
   font-size: 1.1rem;
+}
+
+.disabled-button {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
