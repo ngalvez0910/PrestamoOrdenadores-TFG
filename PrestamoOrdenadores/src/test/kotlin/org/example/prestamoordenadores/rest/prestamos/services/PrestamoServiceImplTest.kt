@@ -349,6 +349,18 @@ class PrestamoServiceImplTest {
 
     @Test
     fun deletePrestamoByGuid() {
+        val prestamo = Prestamo(
+            id = 845,
+            guid = "guidTestP76",
+            user = user,
+            dispositivo = dispositivo,
+            estadoPrestamo = EstadoPrestamo.DEVUELTO,
+            fechaPrestamo = LocalDate.now(),
+            fechaDevolucion = LocalDate.now().plusDays(1),
+            createdDate = LocalDateTime.now(),
+            updatedDate = LocalDateTime.now()
+        )
+
         mockkStatic(SecurityContextHolder::class)
 
         every { repository.findByGuid("9BR5JE350LA") } returns prestamo
