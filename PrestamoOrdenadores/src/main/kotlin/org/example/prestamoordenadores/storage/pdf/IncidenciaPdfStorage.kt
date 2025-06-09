@@ -1,11 +1,18 @@
 package org.example.prestamoordenadores.storage.pdf
 
 import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.colors.DeviceRgb
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
+import com.itextpdf.layout.borders.Border
+import com.itextpdf.layout.borders.SolidBorder
+import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Paragraph
+import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.property.TextAlignment
+import com.itextpdf.layout.property.UnitValue
+import com.itextpdf.layout.property.VerticalAlignment
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.incidencias.repositories.IncidenciaRepository
 import org.example.prestamoordenadores.utils.locale.toDefaultDateString
@@ -32,6 +39,11 @@ class IncidenciaPdfStorage(
     private val dispositivoRepository: DispositivoRepository
 ) {
 
+    private val PRIMARY_COLOR = DeviceRgb(52, 152, 219)
+    private val TEXT_DARK_COLOR = DeviceRgb(50, 50, 50)
+    private val BACKGROUND_MAIN_COLOR = DeviceRgb(245, 247, 250)
+    private val NEUTRAL_MEDIUM_COLOR = DeviceRgb(200, 200, 200)
+
     /**
      * Genera un documento PDF con los detalles de una incidencia específica.
      *
@@ -48,83 +60,119 @@ class IncidenciaPdfStorage(
         val pdfDoc = PdfDocument(PdfWriter(outputStream))
 
         val document = Document(pdfDoc)
+        document.setMargins(40f, 30f, 40f, 30f)
 
-        val loanTechText = Paragraph("LoanTech")
-            .setFontColor(ColorConstants.BLACK)
-            .setBold()
-            .setFontSize(36f)
-            .setTextAlignment(TextAlignment.LEFT)
+        val mainCard = Table(UnitValue.createPercentArray(1))
+            .useAllAvailableWidth()
+            .setBackgroundColor(ColorConstants.WHITE)
+            .setBorder(SolidBorder(NEUTRAL_MEDIUM_COLOR, 1f))
+            .setMarginBottom(20f)
+
+        val headerTable = Table(UnitValue.createPercentArray(floatArrayOf(1f, 1f)))
+            .useAllAvailableWidth()
+            .setBorderBottom(SolidBorder(NEUTRAL_MEDIUM_COLOR, 1f))
+            .setPaddingBottom(15f)
             .setMarginBottom(10f)
 
-        document.add(loanTechText)
-
-        document.add(
-            Paragraph("Reporte de Incidencia")
-                .setFontColor(ColorConstants.BLACK)
-                .setBold()
-                .setFontSize(18f)
-                .setTextAlignment(TextAlignment.CENTER))
-
-        document.add(
-            Paragraph("Fecha de Reporte: ${LocalDate.now().toDefaultDateString()}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.RIGHT)
+        headerTable.addCell(
+            Cell().add(
+                Paragraph("LoanTech")
+                    .setFontColor(PRIMARY_COLOR)
+                    .setBold()
+                    .setFontSize(36f)
+                    .setTextAlignment(TextAlignment.LEFT)
+            ).setBorder(Border.NO_BORDER)
         )
 
-        document.add(Paragraph("\n"))
+        headerTable.addCell(
+            Cell().add(
+                Paragraph("Reporte de Incidencia")
+                    .setFontColor(PRIMARY_COLOR)
+                    .setBold()
+                    .setFontSize(18f)
+                    .setTextAlignment(TextAlignment.RIGHT)
+            ).setBorder(Border.NO_BORDER)
+        )
+        mainCard.addCell(Cell().add(headerTable).setBorder(Border.NO_BORDER))
+
+
+        mainCard.addCell(
+            Cell().add(
+                Paragraph("Fecha de Reporte: ${LocalDate.now().toDefaultDateString()}")
+                    .setFontColor(TEXT_DARK_COLOR)
+                    .setFontSize(12f)
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setMarginBottom(20f)
+            ).setBorder(Border.NO_BORDER)
+        )
 
         val dispositivo = dispositivoRepository.findDispositivoByIncidenciaGuid(guid)
 
-        document.add(
-            Paragraph("Datos del dispositivo: ")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setBold()
-                .setTextAlignment(TextAlignment.LEFT)
+        mainCard.addCell(
+            createSectionTitle("Datos del dispositivo:")
+        )
+        mainCard.addCell(
+            createReadOnlyField("Nº de Serie:", dispositivo?.numeroSerie)
+        )
+        mainCard.addCell(
+            createReadOnlyField("Componentes:", dispositivo?.componentes)
         )
 
-        document.add(
-            Paragraph("Nº de Serie: ${dispositivo?.numeroSerie}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
+        mainCard.addCell(
+            createSectionTitle("Datos de la incidencia:")
+        )
+        mainCard.addCell(
+            createReadOnlyField("Asunto:", incidencia?.asunto)
+        )
+        mainCard.addCell(
+            createReadOnlyField("Descripción:", incidencia?.descripcion)
         )
 
-        document.add(
-            Paragraph("Componentes: ${dispositivo?.componentes}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(
-            Paragraph("Datos de la incidencia: ")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setBold()
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(
-            Paragraph("Asunto: ${incidencia?.asunto}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(
-            Paragraph("Descripción: ${incidencia?.descripcion}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(Paragraph("\n"))
-
+        document.add(mainCard)
         document.close()
 
         return outputStream.toByteArray()
+    }
+
+    private fun createSectionTitle(title: String): Cell {
+        return Cell().add(
+            Paragraph(title)
+                .setFontColor(TEXT_DARK_COLOR)
+                .setFontSize(12f)
+                .setBold()
+                .setTextAlignment(TextAlignment.LEFT)
+                .setMarginBottom(10f)
+        ).setBorder(Border.NO_BORDER)
+    }
+
+    private fun createReadOnlyField(label: String, value: String?): Cell {
+        val table = Table(UnitValue.createPercentArray(1))
+            .useAllAvailableWidth()
+            .setMarginBottom(8f)
+
+        table.addCell(
+            Cell().add(
+                Paragraph(label)
+                    .setFontSize(9f)
+                    .setFontColor(TEXT_DARK_COLOR)
+                    .setBold()
+                    .setOpacity(0.8f)
+                    .setTextAlignment(TextAlignment.LEFT)
+            ).setBorder(Border.NO_BORDER)
+        )
+
+        table.addCell(
+            Cell().add(
+                Paragraph(value ?: "N/A")
+                    .setFontSize(11f)
+                    .setFontColor(TEXT_DARK_COLOR)
+                    .setTextAlignment(TextAlignment.LEFT)
+            )
+                .setBackgroundColor(BACKGROUND_MAIN_COLOR)
+                .setBorder(SolidBorder(NEUTRAL_MEDIUM_COLOR, 1f))
+                .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        )
+        return Cell().add(table).setBorder(Border.NO_BORDER)
     }
 
     /**

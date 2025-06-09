@@ -1,14 +1,18 @@
 package org.example.prestamoordenadores.storage.pdf
 
 import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.colors.DeviceRgb
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
+import com.itextpdf.layout.borders.Border
+import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.property.TextAlignment
 import com.itextpdf.layout.property.UnitValue
+import com.itextpdf.layout.property.VerticalAlignment
 import org.example.prestamoordenadores.rest.dispositivos.repositories.DispositivoRepository
 import org.example.prestamoordenadores.rest.prestamos.repositories.PrestamoRepository
 import org.example.prestamoordenadores.rest.users.repositories.UserRepository
@@ -38,6 +42,11 @@ class PrestamoPdfStorage(
     private val dispositivoRepository: DispositivoRepository
 ) {
 
+    private val PRIMARY_COLOR = DeviceRgb(52, 152, 219)
+    private val TEXT_DARK_COLOR = DeviceRgb(50, 50, 50)
+    private val BACKGROUND_MAIN_COLOR = DeviceRgb(245, 247, 250)
+    private val NEUTRAL_MEDIUM_COLOR = DeviceRgb(200, 200, 200)
+
     /**
      * Genera un documento PDF con los detalles de un préstamo específico.
      *
@@ -55,122 +64,150 @@ class PrestamoPdfStorage(
         val pdfDoc = PdfDocument(PdfWriter(outputStream))
 
         val document = Document(pdfDoc)
+        document.setMargins(40f, 30f, 40f, 30f)
 
-        val loanTechText = Paragraph("LoanTech")
-            .setFontColor(ColorConstants.BLACK)
-            .setBold()
-            .setFontSize(36f)
-            .setTextAlignment(TextAlignment.LEFT)
+        val mainCard = Table(UnitValue.createPercentArray(1))
+            .useAllAvailableWidth()
+            .setBackgroundColor(ColorConstants.WHITE)
+            .setBorder(SolidBorder(NEUTRAL_MEDIUM_COLOR, 1f))
+            .setMarginBottom(20f)
+
+        val headerTable = Table(UnitValue.createPercentArray(floatArrayOf(1f, 1f)))
+            .useAllAvailableWidth()
+            .setBorderBottom(SolidBorder(NEUTRAL_MEDIUM_COLOR, 1f))
+            .setPaddingBottom(15f)
             .setMarginBottom(10f)
 
-        document.add(loanTechText)
-
-        document.add(
-            Paragraph("Solicitud de Préstamo")
-                .setFontColor(ColorConstants.BLACK)
-                .setBold()
-                .setFontSize(18f)
-                .setTextAlignment(TextAlignment.CENTER))
-
-        document.add(
-            Paragraph("Fecha de Solicitud: ${LocalDate.now().toDefaultDateString()}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.RIGHT)
+        headerTable.addCell(
+            Cell().add(
+                Paragraph("LoanTech")
+                    .setFontColor(PRIMARY_COLOR)
+                    .setBold()
+                    .setFontSize(36f)
+                    .setTextAlignment(TextAlignment.LEFT)
+            ).setBorder(Border.NO_BORDER)
         )
 
-        document.add(Paragraph("\n"))
+        headerTable.addCell(
+            Cell().add(
+                Paragraph("Solicitud de Préstamo")
+                    .setFontColor(PRIMARY_COLOR)
+                    .setBold()
+                    .setFontSize(18f)
+                    .setTextAlignment(TextAlignment.RIGHT)
+            ).setBorder(Border.NO_BORDER)
+        )
+        mainCard.addCell(Cell().add(headerTable).setBorder(Border.NO_BORDER))
+
+        mainCard.addCell(
+            Cell().add(
+                Paragraph("Fecha de Solicitud: ${LocalDate.now().toDefaultDateString()}")
+                    .setFontColor(TEXT_DARK_COLOR)
+                    .setFontSize(12f)
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setMarginBottom(20f)
+            ).setBorder(Border.NO_BORDER)
+        )
 
         val user = userRepository.findByGuid(prestamo?.user?.guid ?: "")
-
-        document.add(
-            Paragraph("Datos del usuario: ")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setBold()
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(
-            Paragraph("Nº de Identificación: ${user?.numeroIdentificacion}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(
-            Paragraph("Nombre: ${user?.nombre} ${user?.apellidos}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(
-            Paragraph("Curso: ${user?.curso ?: ""}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(
-            Paragraph("Email: ${user?.email}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(Paragraph("\n"))
-
         val dispositivo = dispositivoRepository.findDispositivoByGuid(prestamo?.dispositivo?.guid ?: "")
 
-        document.add(
-            Paragraph("Datos del dispositivo: ")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setBold()
-                .setTextAlignment(TextAlignment.LEFT)
+        mainCard.addCell(
+            createSectionTitle("Datos del usuario:")
+        )
+        mainCard.addCell(
+            createReadOnlyField("Nº de Identificación:", user?.numeroIdentificacion)
+        )
+        mainCard.addCell(
+            createReadOnlyField("Nombre:", "${user?.nombre} ${user?.apellidos}")
+        )
+        mainCard.addCell(
+            createReadOnlyField("Curso:", user?.curso ?: " - ")
+        )
+        mainCard.addCell(
+            createReadOnlyField("Email:", user?.email)
         )
 
-        document.add(
-            Paragraph("Nº de Serie: ${dispositivo?.numeroSerie}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
+
+        mainCard.addCell(
+            createSectionTitle("Datos del dispositivo:")
+        )
+        mainCard.addCell(
+            createReadOnlyField("Nº de Serie:", dispositivo?.numeroSerie)
+        )
+        mainCard.addCell(
+            createReadOnlyField("Componentes:", dispositivo?.componentes)
         )
 
-        document.add(
-            Paragraph("Componentes: ${dispositivo?.componentes}")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.LEFT)
+        mainCard.addCell(
+            Cell().add(
+                Paragraph("Para recoger su dispositivo acérquese al departamento de informática y presente este documento.")
+                    .setFontColor(TEXT_DARK_COLOR)
+                    .setFontSize(9f)
+                    .setTextAlignment(TextAlignment.LEFT)
+                    .setMarginBottom(20f)
+            ).setBorder(Border.NO_BORDER)
         )
 
-        document.add(Paragraph("\n"))
-
-        document.add(
-            Paragraph("Para recoger su dispositivo acerquese al departamento de informática y presente este documento.")
-                .setFontColor(ColorConstants.BLACK)
-                .setFontSize(9f)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        document.add(Paragraph("\n"))
-
-        val table = Table(UnitValue.createPercentArray(floatArrayOf(2f, 3f)))
+        val signatureTable = Table(UnitValue.createPercentArray(floatArrayOf(1f, 1f)))
             .useAllAvailableWidth()
+            .setBorderTop(SolidBorder(NEUTRAL_MEDIUM_COLOR, 1f))
+            .setPaddingTop(20f)
+            .setMarginTop(20f)
 
-        table.addCell(Cell().add(Paragraph("Fecha de Entrega:").setBold()).setBorder(null))
-        table.addCell(Cell().add(Paragraph("Firma:").setBold()).setBorder(null))
+        signatureTable.addCell(Cell().add(Paragraph("Fecha de Entrega:").setBold().setFontColor(TEXT_DARK_COLOR)).setBorder(Border.NO_BORDER))
+        signatureTable.addCell(Cell().add(Paragraph("Firma:").setBold().setFontColor(TEXT_DARK_COLOR)).setBorder(Border.NO_BORDER))
 
-        table.addCell(Cell().add(Paragraph("")).setBorder(null))
-        table.addCell(Cell().add(Paragraph("______________________")).setBorder(null))
+        signatureTable.addCell(Cell().add(Paragraph("").setHeight(20f)).setBorder(Border.NO_BORDER))
+        signatureTable.addCell(Cell().add(Paragraph("______________________").setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER))
 
-        document.add(table)
+        mainCard.addCell(Cell().add(signatureTable).setBorder(Border.NO_BORDER))
 
-
+        document.add(mainCard)
         document.close()
 
         return outputStream.toByteArray()
+    }
+
+    private fun createSectionTitle(title: String): Cell {
+        return Cell().add(
+            Paragraph(title)
+                .setFontColor(TEXT_DARK_COLOR)
+                .setFontSize(12f)
+                .setBold()
+                .setTextAlignment(TextAlignment.LEFT)
+                .setMarginBottom(10f)
+        ).setBorder(Border.NO_BORDER)
+    }
+
+    private fun createReadOnlyField(label: String, value: String?): Cell {
+        val table = Table(UnitValue.createPercentArray(1))
+            .useAllAvailableWidth()
+            .setMarginBottom(8f)
+
+        table.addCell(
+            Cell().add(
+                Paragraph(label)
+                    .setFontSize(9f)
+                    .setFontColor(TEXT_DARK_COLOR)
+                    .setBold()
+                    .setOpacity(0.8f)
+                    .setTextAlignment(TextAlignment.LEFT)
+            ).setBorder(Border.NO_BORDER)
+        )
+
+        table.addCell(
+            Cell().add(
+                Paragraph(value ?: "N/A")
+                    .setFontSize(11f)
+                    .setFontColor(TEXT_DARK_COLOR)
+                    .setTextAlignment(TextAlignment.LEFT)
+            )
+                .setBackgroundColor(BACKGROUND_MAIN_COLOR)
+                .setBorder(SolidBorder(NEUTRAL_MEDIUM_COLOR, 1f))
+                .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        )
+        return Cell().add(table).setBorder(Border.NO_BORDER)
     }
 
     /**

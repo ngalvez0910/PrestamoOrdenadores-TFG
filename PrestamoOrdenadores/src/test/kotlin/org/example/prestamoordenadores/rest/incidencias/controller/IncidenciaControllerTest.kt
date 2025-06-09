@@ -261,7 +261,8 @@ class IncidenciaControllerTest {
     @Test
     fun generateAndSavePdf() {
         val guid = "123"
-        every { pdfStorage.generateAndSavePdf(guid) } returns Unit
+        val fakePdfBytes = ByteArray(10)
+        every { pdfStorage.generatePdf(guid) } returns fakePdfBytes
 
         mockMvc.get("/incidencias/export/pdf/$guid")
             .andExpect {
