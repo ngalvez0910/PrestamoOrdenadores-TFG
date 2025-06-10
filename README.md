@@ -29,7 +29,7 @@ LoanTech es un sistema de gestión integral para el préstamo de equipos inform�
 - Docker
 - Base de datos (PostgreSQL)
 
-### Pasos de Instalación
+### 👣 Pasos de Instalación
 
 1. Clona el repositorio:
 ```bash
@@ -82,4 +82,4 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ## 👥 Autores
 
-- **Natalia González Álvarez** - [https://github.com/tu-usuario](https://github.com/ngalvez0910)
+- **Natalia González Álvarez** - [https://github.com/ngalvez0910](https://github.com/ngalvez0910)
