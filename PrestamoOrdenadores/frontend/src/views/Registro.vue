@@ -129,8 +129,6 @@
     <p class="login-link">
       ¿Ya tienes cuenta? <a href="/">Inicia sesión aquí</a>
     </p>
-
-    <Toast />
   </div>
   </div>
 </template>
