@@ -78,9 +78,9 @@
               </button>
               <button
                   @click="deletePrestamo(slotProps.data)"
-                  :class="['action-button', 'delete-button', { 'disabled-button': slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO' }]"
-                  :title="slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO' ? 'No se puede eliminar un préstamo EN CURSO o VENCIDO' : 'Eliminar Préstamo'"
-                  :disabled="slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO'"
+                  :class="['action-button', 'delete-button', { 'disabled-button': slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO' || slotProps.data.isDeleted }]"
+                  :title="slotProps.data.isDeleted ? 'Este préstamo ya está marcado como eliminado' : (slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO' ? 'No se puede eliminar un préstamo EN CURSO o VENCIDO' : 'Eliminar Préstamo')"
+                  :disabled="slotProps.data.estadoPrestamo === 'EN_CURSO' || slotProps.data.estadoPrestamo === 'VENCIDO' || slotProps.data.isDeleted"
               >
                 <i class="pi pi-trash"></i>
               </button>
@@ -116,7 +116,6 @@ import Button from 'primevue/button';
 import axios from 'axios';
 import Toast from 'primevue/toast';
 import Dialog from "primevue/dialog";
-import {deleteUser} from "@/services/UsuarioService.ts";
 import {deletePrestamo} from "@/services/PrestamoService.ts";
 
 interface Prestamo {
@@ -299,6 +298,25 @@ export default {
       }
     },
     deletePrestamo(prestamo: Prestamo) {
+      if (prestamo.isDeleted) {
+        this.$toast.add({
+          severity: 'warn',
+          summary: 'Acción No Permitida',
+          detail: 'Este préstamo ya ha sido marcado para eliminación y no puede ser borrado nuevamente.',
+          life: 3000
+        });
+        return;
+      }
+      if (prestamo.estadoPrestamo === 'EN_CURSO' || prestamo.estadoPrestamo === 'VENCIDO') {
+        this.$toast.add({
+          severity: 'warn',
+          summary: 'Acción No Permitida',
+          detail: 'No se puede eliminar un préstamo que está EN CURSO o VENCIDO.',
+          life: 3000
+        });
+        return;
+      }
+
       this.prestamoToDelete = prestamo;
       this.showDeleteDialog = true;
       console.log(`Preparando para eliminar prestamo con GUID: ${prestamo.guid}. Mostrando diálogo.`);
@@ -315,7 +333,26 @@ export default {
       try {
         await deletePrestamo(this.prestamoToDelete.guid)
 
+        const indexInAllData = this.todosLosDatos.findIndex(
+            (p) => p.guid === this.prestamoToDelete!.guid
+        );
+
+        if (indexInAllData !== -1) {
+          const updatedPrestamo = {
+            ...this.todosLosDatos[indexInAllData],
+            isDeleted: true,
+          };
+          this.todosLosDatos.splice(indexInAllData, 1, updatedPrestamo);
+        }
+
         this.filtrarYPaginar();
+
+        this.$toast.add({
+          severity: 'success',
+          summary: 'Eliminación Exitosa',
+          detail: `El préstamo con GUID ${this.prestamoToDelete.guid} ha sido marcado como eliminado.`,
+          life: 3000
+        });
 
       } catch (error: any) {
         console.error("Error eliminando prestamo:", error);
