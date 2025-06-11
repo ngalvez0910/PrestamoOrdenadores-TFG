@@ -109,7 +109,6 @@ import Dialog from "primevue/dialog";
 import Toast from "primevue/toast";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import {deleteUser} from "@/services/UsuarioService.ts";
 
 type DeviceState = 'DISPONIBLE' | 'NO_DISPONIBLE' | 'PRESTADO';
 
