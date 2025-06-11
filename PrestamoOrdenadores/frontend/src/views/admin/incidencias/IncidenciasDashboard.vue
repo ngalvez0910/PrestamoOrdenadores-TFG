@@ -75,8 +75,14 @@
               <button @click="verIncidencia(slotProps.data)" class="action-button view-button" title="Ver Detalles Incidencia">
                 <i class="pi pi-info-circle"></i>
               </button>
-              <button @click="deleteIncidencia(slotProps.data)" class="action-button delete-button" title="Eliminar Incidencia">
-                <i class="pi pi-trash"></i> </button>
+              <button
+                  @click="deleteIncidencia(slotProps.data)"
+                  :class="['action-button', 'delete-button', { 'disabled-button': slotProps.data.isDeleted }]"
+                  :title="slotProps.data.isDeleted ? 'Esta incidencia ya está marcada como eliminada' : 'Eliminar Incidencia'"
+                  :disabled="slotProps.data.isDeleted"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
             </div>
           </template>
         </Column>
@@ -295,9 +301,19 @@ export default {
       }
     },
     deleteIncidencia(incidencia: Incidencia) {
+      if (incidencia.isDeleted) {
+        this.$toast.add({
+          severity: 'warn',
+          summary: 'Acción No Permitida',
+          detail: 'Esta incidencia ya ha sido marcada para eliminación y no puede ser borrada nuevamente.',
+          life: 3000
+        });
+        return;
+      }
+
       this.incidenciaToDelete = incidencia;
       this.showDeleteDialog = true;
-      console.log(`Preparando para eliminar incidencia con GUID: ${incidencia.guid}. Mostrando diálogo.`);
+      console.log(`Preparando para eliminar incidencia con guid: ${incidencia.guid}. Mostrando diálogo.`);
     },
     async confirmDelete() {
       if (!this.incidenciaToDelete) {
@@ -311,7 +327,26 @@ export default {
       try {
         await deleteIncidencia(this.incidenciaToDelete.guid)
 
+        const indexInAllData = this.todosLosDatos.findIndex(
+            (i) => i.guid === this.incidenciaToDelete!.guid
+        );
+
+        if (indexInAllData !== -1) {
+          const updatedIncidencia = {
+            ...this.todosLosDatos[indexInAllData],
+            isDeleted: true,
+          };
+          this.todosLosDatos.splice(indexInAllData, 1, updatedIncidencia);
+        }
+
         this.filtrarYPaginar();
+
+        this.$toast.add({
+          severity: 'success',
+          summary: 'Eliminación Exitosa',
+          detail: `La incidencia con GUID ${this.incidenciaToDelete.guid} ha sido marcada como eliminada.`,
+          life: 3000
+        });
 
       } catch (error: any) {
         console.error("Error eliminando incidencia:", error);
@@ -711,6 +746,11 @@ export default {
 
 .action-button-dialog.primary-button i {
   font-size: 1.1rem;
+}
+
+.disabled-button {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

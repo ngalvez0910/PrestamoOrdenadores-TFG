@@ -83,8 +83,14 @@
               <button @click="verSancion(slotProps.data)" class="action-button view-button" title="Ver Detalles Sanción">
                 <i class="pi pi-info-circle"></i>
               </button>
-              <button @click="deleteSancion(slotProps.data)" class="action-button delete-button" title="Eliminar Sanción">
-                <i class="pi pi-trash"></i> </button>
+              <button
+                  @click="deleteSancion(slotProps.data)"
+                  :class="['action-button', 'delete-button', { 'disabled-button': slotProps.data.isDeleted }]"
+                  :title="slotProps.data.isDeleted ? 'Esta sanción ya está marcada como eliminada' : 'Eliminar Sanción'"
+                  :disabled="slotProps.data.isDeleted"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
             </div>
           </template>
         </Column>
@@ -302,6 +308,15 @@ export default {
       }
     },
     deleteSancion(sancion: Sancion) {
+      if (sancion.isDeleted) {
+        this.$toast.add({
+          severity: 'warn',
+          summary: 'Acción No Permitida',
+          detail: 'Esta sanción ya ha sido marcada para eliminación y no puede ser borrada nuevamente.',
+          life: 3000
+        });
+        return;
+      }
       this.sancionToDelete = sancion;
       this.showDeleteDialog = true;
       console.log(`Preparando para eliminar sancion con GUID: ${sancion.guid}. Mostrando diálogo.`);
@@ -318,7 +333,26 @@ export default {
       try {
         await deleteSancion(this.sancionToDelete.guid)
 
+        const indexInAllData = this.todosLosDatos.findIndex(
+            (s) => s.guid === this.sancionToDelete!.guid
+        );
+
+        if (indexInAllData !== -1) {
+          const updatedSancion = {
+            ...this.todosLosDatos[indexInAllData],
+            isDeleted: true,
+          };
+          this.todosLosDatos.splice(indexInAllData, 1, updatedSancion);
+        }
+
         this.filtrarYPaginar();
+
+        this.$toast.add({
+          severity: 'success',
+          summary: 'Eliminación Exitosa',
+          detail: `La sanción con GUID ${this.sancionToDelete.guid} ha sido marcada como eliminada.`,
+          life: 3000
+        });
 
       } catch (error: any) {
         console.error("Error eliminando sancion:", error);
@@ -725,6 +759,11 @@ export default {
 
 .action-button-dialog.primary-button i {
   font-size: 1.1rem;
+}
+
+.disabled-button {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

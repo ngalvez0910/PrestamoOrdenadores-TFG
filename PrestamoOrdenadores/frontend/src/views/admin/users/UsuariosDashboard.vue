@@ -41,7 +41,12 @@
               <button @click="verUsuario(slotProps.data)" class="action-button view-button" title="Ver Detalles Usuario">
                 <i class="pi pi-info-circle"></i>
               </button>
-              <button @click="deleteUsuario(slotProps.data)" class="action-button delete-button" title="Eliminar/Desactivar Usuario">
+              <button
+                  @click="deleteUsuario(slotProps.data)"
+                  :class="['action-button', 'delete-button', { 'disabled-button': !slotProps.data.isActivo }]"
+                  :title="slotProps.data.isActivo ? 'Eliminar/Desactivar Usuario' : 'Este usuario está inactivo'"
+                  :disabled="!slotProps.data.isActivo"
+              >
                 <i class="pi pi-trash"></i>
               </button>
             </div>
@@ -221,6 +226,15 @@ export default {
       });
     },
     deleteUsuario(usuario: User) {
+      if (!usuario.isActivo) {
+        this.$toast.add({
+          severity: 'warn',
+          summary: 'Acción No Permitida',
+          detail: 'Este usuario ya está inactivo y no puede ser eliminado nuevamente.',
+          life: 3000
+        });
+        return;
+      }
       this.userToDelete = usuario;
       this.showDeleteDialog = true;
       console.log(`Preparando para eliminar usuario con GUID: ${usuario.guid}. Mostrando diálogo.`);
@@ -236,8 +250,27 @@ export default {
       console.log(`Confirmado eliminar usuario con GUID: ${this.userToDelete.guid}`);
       try {
         await deleteUser(this.userToDelete.guid)
-        
+
+        const indexInAllData = this.todosLosDatos.findIndex(
+            (u) => u.guid === this.userToDelete!.guid
+        );
+
+        if (indexInAllData !== -1) {
+          const updatedUser = {
+            ...this.todosLosDatos[indexInAllData],
+            isActivo: false,
+          };
+          this.todosLosDatos.splice(indexInAllData, 1, updatedUser);
+        }
+
         this.paginar();
+
+        this.$toast.add({
+          severity: 'success',
+          summary: 'Eliminación Exitosa',
+          detail: `El usuario con email ${this.userToDelete.email} ha sido desactivado.`,
+          life: 3000
+        });
 
       } catch (error: any) {
         console.error("Error eliminando usuario:", error);
@@ -503,6 +536,11 @@ export default {
 
 .action-button-dialog.primary-button i {
   font-size: 1.1rem;
+}
+
+.disabled-button {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

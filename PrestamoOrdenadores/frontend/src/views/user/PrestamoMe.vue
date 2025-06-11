@@ -12,7 +12,16 @@
     </div>
 
     <div class="table-card">
-      <DataTable :value="prestamos" stripedRows responsiveLayout="scroll" tableStyle="min-width: 50rem; font-family: 'Montserrat', sans-serif" :loading="loading">
+      <DataTable
+          v-if="prestamos.length > 0"
+          :value="prestamos"
+          paginator
+         :rows="5"
+         :rowsPerPageOptions="[5, 10, 20, 50]"
+          sortMode="multiple"
+          tableStyle="min-width: 50rem; font-family: 'Montserrat', sans-serif"
+          :loading="loading"
+      >
         <Column field="dispositivo.numeroSerie" header="Número de Serie" sortable>
           <template #body="slotProps">
             {{ slotProps.data.dispositivo?.numeroSerie ?? 'N/A' }}
@@ -46,7 +55,7 @@
           </template>
         </Column>
       </DataTable>
-      <p v-if="!loading && prestamos.length === 0" class="no-data-message">
+      <p v-if="!loading && prestamos.length === 0 " class="no-data-message">
         Aún no tienes préstamos registrados.
       </p>
     </div>
@@ -182,18 +191,10 @@ export default defineComponent({
 
 <style scoped>
 .page-container.prestamos-me-page {
-  padding: 30px;
+  padding: 30px 30px 50px;
   max-width: 1000px;
   box-sizing: border-box;
-  position: fixed;
-  top: 80px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow-y: auto;
-  margin-left: auto;
-  margin-right: auto;
-  z-index: 0;
+  margin: 0 auto;
 }
 
 .page-header {
@@ -288,7 +289,7 @@ export default defineComponent({
 
 .status-vencido {
   background-color: rgba(var(--color-warning-rgb), 0.15);
-  color: var(--color-warning, #B45309);
+  color: #B45309;
 }
 
 .no-data-message {
@@ -420,6 +421,48 @@ export default defineComponent({
   width: auto;
   min-width: 120px;
   margin: 0 5px;
+}
+
+:deep(.p-paginator) {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--color-background-main) !important;
+  border-top: 1px solid var(--color-neutral-medium) !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0 0 8px 8px !important;
+}
+
+:deep(.p-paginator .p-paginator-element) {
+  color: var(--color-text-dark) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--color-neutral-medium) !important;
+  border-radius: 6px !important;
+  margin: 0 3px !important;
+  min-width: 32px;
+  height: 32px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+:deep(.p-paginator .p-paginator-element:not(.p-disabled):hover) {
+  background-color: var(--color-accent-soft) !important;
+  border-color: var(--color-interactive) !important;
+  color: var(--color-interactive-darker) !important;
+}
+
+:deep(.p-paginator .p-paginator-element.p-highlight) {
+  background-color: var(--color-interactive) !important;
+  border-color: var(--color-interactive) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+:deep(.p-dropdown) {
+  border: 1px solid var(--color-neutral-medium) !important;
+  border-radius: 6px !important;
+}
+
+:deep(.p-dropdown:not(.p-disabled).p-focus) {
+  border-color: var(--color-interactive) !important;
+  box-shadow: 0 0 0 1px rgba(var(--color-interactive-rgb), 0.2) !important;
 }
 
 @media screen and (max-width: 768px) {

@@ -46,9 +46,9 @@
               </button>
               <button
                   @click="deleteDispositivo(slotProps.data)"
-                  :class="['action-button', 'delete-button', { 'disabled-button': slotProps.data.estado === 'PRESTADO' }]"
-                  :title="slotProps.data.estado === 'PRESTADO' ? 'No se puede eliminar un dispositivo PRESTADO' : 'Eliminar Dispositivo'"
-                  :disabled="slotProps.data.estado === 'PRESTADO'"
+                  :class="['action-button', 'delete-button', { 'disabled-button': slotProps.data.estado === 'PRESTADO' || slotProps.data.isDeleted }]"
+                  :title="slotProps.data.estado === 'PRESTADO' ? 'No se puede eliminar un dispositivo PRESTADO' : (slotProps.data.isDeleted ? 'Este dispositivo ya está marcado como eliminado' : 'Eliminar Dispositivo')"
+                  :disabled="slotProps.data.estado === 'PRESTADO' || slotProps.data.isDeleted"
               >
                 <i class="pi pi-trash"></i>
               </button>
@@ -317,6 +317,26 @@ export default {
       }
     },
     deleteDispositivo(dispositivo: Dispositivo) {
+      if (dispositivo.isDeleted) {
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Acción No Permitida',
+          detail: 'Este dispositivo ya ha sido marcado para eliminación y no puede ser borrado nuevamente.',
+          life: 3000
+        });
+        return;
+      }
+
+      if (dispositivo.estado === 'PRESTADO') {
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Acción No Permitida',
+          detail: 'No se puede eliminar un dispositivo que está PRESTADO.',
+          life: 3000
+        });
+        return;
+      }
+
       this.dispositivoToDelete = dispositivo;
       this.showDeleteDialog = true;
       console.log(`Preparando para eliminar dispositivo con numero de serie: ${dispositivo.numeroSerie}. Mostrando diálogo.`);
@@ -333,7 +353,26 @@ export default {
       try {
         await deleteDispositivo(this.dispositivoToDelete.guid)
 
+        const indexInAllData = this.todosLosDatos.findIndex(
+            (d) => d.guid === this.dispositivoToDelete!.guid
+        );
+
+        if (indexInAllData !== -1) {
+          const updatedDispositivo = {
+            ...this.todosLosDatos[indexInAllData],
+            isDeleted: true,
+          };
+          this.todosLosDatos.splice(indexInAllData, 1, updatedDispositivo);
+        }
+
         this.paginar();
+
+        this.toast.add({
+          severity: 'success',
+          summary: 'Eliminación Exitosa',
+          detail: `El dispositivo con número de serie ${this.dispositivoToDelete.numeroSerie} ha sido marcado como eliminado.`,
+          life: 3000
+        });
 
       } catch (error: any) {
         console.error("Error eliminando dispositivo:", error);

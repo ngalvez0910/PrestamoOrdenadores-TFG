@@ -388,8 +388,8 @@ input.input-field[readonly]:focus {
 }
 
 .status-vencido {
-  background-color: rgba(var(--color-success-rgb), 0.15);
-  color: var(--color-warning);
+  background-color: rgba(var(--color-warning-rgb), 0.15);
+  color: #B45309;
 }
 
 .status-devuelto {
