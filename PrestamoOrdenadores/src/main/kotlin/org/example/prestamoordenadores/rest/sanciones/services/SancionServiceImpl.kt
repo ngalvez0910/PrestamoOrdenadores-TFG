@@ -643,7 +643,7 @@ class SancionServiceImpl(
                     fecha = LocalDateTime.now(),
                     leida = false,
                     tipo = NotificationTypeDto.SANCION,
-                    enlace = "/admin/dashboard/sanciones",
+                    enlace = "/admin/sancion/detalle/${sancion.guid}",
                     severidadSugerida = NotificationSeverityDto.INFO,
                     mostrarToast = false
                 )

@@ -159,13 +159,13 @@ export default defineComponent({
         console.log(`Intentando cambiar estado de préstamo ${this.prestamoData.guid} de ${estadoOriginal} a ${nuevoEstado}`);
 
         if (nuevoEstado === "CANCELADO") {
-          this.toast.add({ severity: 'info', summary: 'Procesando', detail: 'Cancelando préstamo...', life: 2000 });
+          this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Préstamo cancelado...', life: 2000 });
           prestamoResultado = await cancelarPrestamo(this.prestamoData.guid);
         } else {
           const updatePayload = {
             estadoPrestamo: nuevoEstado,
           };
-          this.toast.add({ severity: 'info', summary: 'Procesando', detail: 'Actualizando préstamo...', life: 2000 });
+          this.toast.add({ severity: 'success', summary: 'Éxito', detail: 'Préstamo actualizado...', life: 2000 });
           prestamoResultado = await actualizarPrestamo(this.prestamoData.guid, updatePayload);
         }
 
