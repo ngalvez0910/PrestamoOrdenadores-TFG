@@ -288,7 +288,7 @@ export default defineComponent({
 
 .status-vencido {
   background-color: rgba(var(--color-warning-rgb), 0.15);
-  color: var(--color-warning, #B45309);
+  color: #B45309;
 }
 
 .no-data-message {

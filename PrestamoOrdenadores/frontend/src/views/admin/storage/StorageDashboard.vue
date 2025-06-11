@@ -183,8 +183,7 @@ export default {
         this.mostrarModalRestauracion = false;
       } catch (error: any) {
         console.error('COMPONENT: Error en restoreBackup:', error);
-        const detail = error.message || `Ocurrió un error desconocido al restaurar ${fileName}.`;
-        this.$toast.add({ severity: 'error', summary: 'Error al Restaurar', detail: detail, life: 5000 });
+        this.$toast.add({ severity: 'error', summary: 'Error al Restaurar', detail: "Error al restaurar la copia de seguridad.", life: 5000 });
       } finally {
         this.isProcessingRestore = false;
         this.restoringFileName = null;
