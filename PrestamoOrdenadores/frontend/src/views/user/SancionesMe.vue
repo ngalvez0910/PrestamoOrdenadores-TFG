@@ -18,17 +18,17 @@
           :loading="loading"
           class="p-datatable-gridlines"
       >
-        <Column field="fechaInicio" header="Fecha Inicio" sortable>
+        <Column field="fechaInicio" header="Fecha Inicio">
           <template #body="slotProps">
             {{ formatDate(slotProps.data.fechaSancion) }}
           </template>
         </Column>
-        <Column field="fechaFin" header="Fecha Fin" sortable>
+        <Column field="fechaFin" header="Fecha Fin">
           <template #body="slotProps">
             {{ formatDate(slotProps.data.fechaFin) }}
           </template>
         </Column>
-        <Column field="tipoSancion" header="Tipo" sortable>
+        <Column field="tipoSancion" header="Tipo">
           <template #body="slotProps">
             <span :class="['status-badge', getSancionTipoClass(slotProps.data.tipoSancion)]">
               {{ slotProps.data.tipoSancion }}

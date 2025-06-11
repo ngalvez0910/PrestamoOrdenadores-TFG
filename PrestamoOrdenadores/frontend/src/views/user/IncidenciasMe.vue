@@ -21,17 +21,17 @@
           sortMode="multiple"
           tableStyle="min-width: 50rem"
           :loading="loading">
-        <Column field="asunto" header="Asunto" sortable>
+        <Column field="asunto" header="Asunto">
           <template #body="slotProps">
             {{ slotProps.data.asunto }}
           </template>
         </Column>
-        <Column field="createdDate" header="Fecha Reporte" sortable>
+        <Column field="createdDate" header="Fecha Reporte">
           <template #body="slotProps">
             {{ slotProps.data.createdDate }}
           </template>
         </Column>
-        <Column field="estadoIncidencia" header="Estado" sortable>
+        <Column field="estadoIncidencia" header="Estado">
           <template #body="slotProps">
             <span :class="['status-badge', getEstadoIncidenciaClass(slotProps.data.estadoIncidencia)]">
               {{ slotProps.data.estadoIncidencia }}
@@ -54,7 +54,12 @@
         <small v-if="nuevaIncidenciaErrors.asunto" class="error-message p-error">{{ nuevaIncidenciaErrors.asunto }}</small>
       </div>
       <div class="form-group">
-        <label for="incidenciaDescripcion" class="input-label">Descripción</label>
+        <label for="incidenciaDescripcion" class="input-label">Descripción
+          <i
+            class="pi pi-info-circle info-icon"
+            @click="showInfo('descripcion')"
+            title="Haz clic para más información"
+        ></i></label>
         <Textarea id="incidenciaDescripcion" v-model="nuevaIncidencia.descripcion" rows="5" class="input-field full-width" placeholder="Detalla el problema que has encontrado..." />
         <small v-if="nuevaIncidenciaErrors.descripcion" class="error-message p-error">{{ nuevaIncidenciaErrors.descripcion }}</small>
       </div>
@@ -63,6 +68,12 @@
         <Button type="submit" label="Reportar Incidencia" icon="pi pi-send" class="action-button primary-button" :loading="isSubmittingIncidencia" />
       </div>
     </form>
+  </Dialog>
+
+  <Dialog :header="modalTitle" v-model:visible="isInfoModalVisible" modal
+          :style="{ width: '50vw', fontFamily: 'Montserrat' }"
+          :breakpoints="{'960px': '75vw', '641px': '100vw'}">
+    <div class="dialog-content" v-html="modalBody"></div>
   </Dialog>
 
 </template>
@@ -96,7 +107,10 @@ export default defineComponent({
       nuevaIncidenciaErrors: {
         asunto: '',
         descripcion: ''
-      }
+      },
+      isInfoModalVisible: false,
+      modalTitle: '',
+      modalBody: '',
     };
   },
   created() {
@@ -187,7 +201,26 @@ export default defineComponent({
         case 'RESUELTO': return 'status-resuelto';
         default: return 'status-unknown';
       }
-    }
+    },
+    showInfo(infoType: string): void {
+      switch (infoType) {
+        case 'descripcion':
+          this.modalTitle = 'Detalles de la Descripción';
+          this.modalBody = `
+            <p>Por favor, sé lo más detallado posible al describir tu incidencia. Incluye la siguiente información para que podamos ayudarte de manera más eficiente:</p>
+            <ul>
+              <li><strong>Número de Serie del Dispositivo:</strong> Este es crucial para identificar el equipo. Puedes encontrarlo en la parte trasera o inferior del dispositivo, o en la tabla que encontrarás en la ventana de "Mis Préstamos". Asegúrate de indicar el número de serie correcto.</li>
+              <li><strong>Mensajes de Error:</strong> Si aparece algún mensaje en pantalla, anótalo.</li>
+            </ul>
+            <p>Cuanta más información proporciones, más rápido podremos resolver tu incidencia.</p>
+          `;
+          break;
+        default:
+          this.modalTitle = 'Información';
+          this.modalBody = 'No hay información disponible para este campo.';
+      }
+      this.isInfoModalVisible = true;
+    },
   },
   mounted() {
     this.$toast = useToast();
@@ -409,6 +442,19 @@ export default defineComponent({
 :deep(.p-dropdown:not(.p-disabled).p-focus) {
   border-color: var(--color-interactive) !important;
   box-shadow: 0 0 0 1px rgba(var(--color-interactive-rgb), 0.2) !important;
+}
+
+.info-icon {
+  color: var(--color-interactive);
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 1rem;
+  vertical-align: middle;
+  transition: color 0.2s ease;
+}
+
+.info-icon:hover {
+  color: var(--color-interactive-darker);
 }
 
 @media (max-width: 768px) {

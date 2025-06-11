@@ -22,22 +22,22 @@
           tableStyle="min-width: 50rem; font-family: 'Montserrat', sans-serif"
           :loading="loading"
       >
-        <Column field="dispositivo.numeroSerie" header="Número de Serie" sortable>
+        <Column field="dispositivo.numeroSerie" header="Número de Serie">
           <template #body="slotProps">
             {{ slotProps.data.dispositivo?.numeroSerie ?? 'N/A' }}
           </template>
         </Column>
-        <Column field="fechaPrestamo" header="Fecha Préstamo" sortable>
+        <Column field="fechaPrestamo" header="Fecha Préstamo">
           <template #body="slotProps">
             {{ slotProps.data.fechaPrestamo }}
           </template>
         </Column>
-        <Column field="fechaDevolucion" header="Fecha Devolución" sortable>
+        <Column field="fechaDevolucion" header="Fecha Devolución">
           <template #body="slotProps">
             {{ slotProps.data.fechaDevolucion ? slotProps.data.fechaDevolucion : 'Pendiente' }}
           </template>
         </Column>
-        <Column field="estadoPrestamo" header="Estado" sortable>
+        <Column field="estadoPrestamo" header="Estado">
           <template #body="slotProps">
             <span :class="['status-badge', getEstadoPrestamoClass(slotProps.data.estadoPrestamo)]">
               {{ slotProps.data.estadoPrestamo }}

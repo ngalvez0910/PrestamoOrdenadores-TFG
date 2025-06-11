@@ -29,6 +29,11 @@
 
       <div class="details-grid">
 
+        <div class="form-group">
+          <label for="incidenciaguid">GUID</label>
+          <div class="readonly-field">{{ incidenciaData.guid || 'N/A' }}</div>
+        </div>
+
         <div class="form-group span-3"> <label for="asunto">Asunto</label>
           <input v-if="editable" type="text" id="asunto" class="input-field" v-model="incidenciaData.asunto"/>
           <div v-else class="readonly-field asunto-display">{{ incidenciaData.asunto }}</div>
