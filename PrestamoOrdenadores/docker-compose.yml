@@ -1,0 +1,35 @@
+services:
+  postgres-db:
+    container_name: prestamos-db-postgres
+    image: postgres:12-alpine
+    restart: always
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USER_POSTGRES}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD_POSTGRES}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+    networks:
+      - prestamos-network
+    ports:
+      - ${POSTGRES_PORT}:5432
+
+  frontend:
+    container_name: prestamos-frontend
+    build:
+      context: ./frontend
+    ports:
+      - "5175:5175"
+    networks:
+      - prestamos-network
+    depends_on:
+      - postgres-db
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+
+networks:
+  prestamos-network:
+    driver: bridge

@@ -1,0 +1,44 @@
+{
+  "name": "prestamoordenadores-frontend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5175",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "prepare": "cypress install",
+    "test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
+    "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
+    "test:unit": "cypress run --component",
+    "test:unit:dev": "cypress open --component",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "firebase": "^11.6.0",
+    "jwt-decode": "^4.0.0",
+    "pinia": "^2.3.1",
+    "primeicons": "^7.0.0",
+    "primevue": "^3.53.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.0",
+    "@types/node": "^22.13.1",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "autoprefixer": "^10.4.20",
+    "cypress": "^14.0.1",
+    "npm-run-all2": "^7.0.2",
+    "postcss": "^8.5.3",
+    "start-server-and-test": "^2.0.10",
+    "tailwindcss": "^4.0.8",
+    "typescript": "~5.7.3",
+    "vite": "^6.0.11",
+    "vite-plugin-vue-devtools": "^7.7.1",
+    "vue-tsc": "^2.2.0"
+  }
+}
