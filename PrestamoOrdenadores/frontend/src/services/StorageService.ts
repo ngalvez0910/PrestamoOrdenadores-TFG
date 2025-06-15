@@ -5,9 +5,6 @@ export interface BackupInfo {
     [key: string]: any;
 }
 
-const API_URL = "https://loantechoficial.onrender.com";
-
-
 export const createBackup = async (): Promise<string | null> => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -17,7 +14,7 @@ export const createBackup = async (): Promise<string | null> => {
 
     try {
         console.log('SERVICE: Solicitando creación de backup...');
-        const response = await axios.get(`${API_URL}/backup/create`, {
+        const response = await axios.get(`https://loantechoficial.onrender.com/backup/create`, {
             headers: {
                 Authorization: `Bearer ${token}`
             },
@@ -77,7 +74,7 @@ export const listBackups = async (): Promise<BackupInfo[] | null> => {
 
     try {
         console.log('SERVICE: Solicitando lista de backups...');
-        const response = await axios.get<BackupInfo[]>(`${API_URL}/backup/list`, {
+        const response = await axios.get<BackupInfo[]>(`https://loantechoficial.onrender.com/backup/list`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -110,7 +107,7 @@ export const restoreBackup = async (fileName: string): Promise<string | null> =>
     try {
         console.log(`SERVICE: Solicitando restauración desde: ${fileName}`);
         const response = await axios.post<string>(
-            `${API_URL}/backup/restore`,
+            `https://loantechoficial.onrender.com/backup/restore`,
             null,
             {
                 params: { fileName },
