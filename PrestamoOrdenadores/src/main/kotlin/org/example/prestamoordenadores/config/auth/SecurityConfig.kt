@@ -65,12 +65,10 @@ class SecurityConfig
             }
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers(
-                        HttpMethod.OPTIONS, "/**",
-                        "/auth/signin", "/auth/signup",
-                        "/ws/**",
-                        "/error/**"
-                    ).permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
+                    .requestMatchers("/error").permitAll()
                     .requestMatchers("/notificaciones/**").authenticated()
                     .anyRequest().authenticated()
             }
@@ -143,7 +141,7 @@ class SecurityConfig
             "https://loantech-oficial.onrender.com",
         )
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-        configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization", "Upgrade", "Connection")
+        configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
