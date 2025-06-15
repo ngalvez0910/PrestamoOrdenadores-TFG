@@ -22,6 +22,8 @@ interface DispositivoCreateRequest {
     componentes: string;
 }
 
+const API_URL = "https://loantechoficial.onrender.com";
+
 export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | null> => {
     try {
         const token = localStorage.getItem('token');
@@ -30,7 +32,7 @@ export const getDispositivoByGuid = async (guid: string): Promise<Dispositivo | 
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/dispositivos/${guid}`, {
+        const response = await axios.get(`${API_URL}/dispositivos/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -62,7 +64,7 @@ export const actualizarDispositivo = async (guid: string, data: { componentes: s
             return null;
         }
 
-        const response = await axios.patch(`http://localhost:8080/dispositivos/${guid}`, data, {
+        const response = await axios.patch(`${API_URL}/dispositivos/${guid}`, data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -83,7 +85,7 @@ export const descargarDispositivosXLSX = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/storage/excel/dispositivos`, {
+        const response = await axios.get(`${API_URL}/storage/excel/dispositivos`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -118,7 +120,7 @@ export const addDispositivoStock = async (request: DispositivoCreateRequest): Pr
     }
     try {
         console.log('[DispositivoService] Añadiendo nuevo dispositivo con request:', request);
-        const response = await axios.post<Dispositivo>(`http://localhost:8080/dispositivos`, request, {
+        const response = await axios.post<Dispositivo>(`${API_URL}/dispositivos`, request, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -139,7 +141,7 @@ export const deleteDispositivo = async (guid: string): Promise<void | null> => {
             throw new Error("No autenticado");
         }
 
-        const url = `http://localhost:8080/dispositivos/delete/${guid}`;
+        const url = `${API_URL}/dispositivos/delete/${guid}`;
         await axios.patch(url, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,

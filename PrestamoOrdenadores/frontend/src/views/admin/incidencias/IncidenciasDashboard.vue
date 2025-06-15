@@ -189,7 +189,7 @@ export default {
           return;
         }
 
-        const urlTotal = `http://localhost:8080/incidencias?page=0&size=1`;
+        const urlTotal = `https://loantechoficial.onrender.com/incidencias?page=0&size=1`;
         const responseTotal = await axios.get<PagedResponse>(urlTotal, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -198,7 +198,7 @@ export default {
 
         this.totalRecords = responseTotal.data.totalElements;
 
-        const urlAll = `http://localhost:8080/incidencias?page=0&size=${this.totalRecords}`;
+        const urlAll = `https://loantechoficial.onrender.com/incidencias?page=0&size=${this.totalRecords}`;
         const responseAll = await axios.get<PagedResponse>(urlAll, {
           headers: {
             Authorization: `Bearer ${token}`,

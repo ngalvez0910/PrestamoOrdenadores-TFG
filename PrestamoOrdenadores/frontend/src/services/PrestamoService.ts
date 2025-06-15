@@ -19,6 +19,8 @@ export interface Prestamo {
     isDeleted: boolean;
 }
 
+const API_URL = "https://loantechoficial.onrender.com";
+
 export const getPrestamoByGuid = async (guid: string): Promise<Prestamo | null> => {
     try {
         const token = localStorage.getItem('token');
@@ -27,7 +29,7 @@ export const getPrestamoByGuid = async (guid: string): Promise<Prestamo | null> 
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/prestamos/${guid}`, {
+        const response = await axios.get(`${API_URL}/prestamos/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -68,7 +70,7 @@ export const getPrestamosByUserGuid = async (): Promise<Prestamo[]> => {
             return [];
         }
 
-        const userResponse = await axios.get<UserData>(`http://localhost:8080/users/email/${userEmail}`, {
+        const userResponse = await axios.get<UserData>(`${API_URL}/users/email/${userEmail}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -76,7 +78,7 @@ export const getPrestamosByUserGuid = async (): Promise<Prestamo[]> => {
 
         const userGuid = userResponse.data.guid;
 
-        const prestamosResponse = await axios.get<Prestamo[]>(`http://localhost:8080/prestamos/user/${userGuid}`, {
+        const prestamosResponse = await axios.get<Prestamo[]>(`${API_URL}/prestamos/user/${userGuid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -89,7 +91,7 @@ export const getPrestamosByUserGuid = async (): Promise<Prestamo[]> => {
 
             if (!dispositivo && prestamo.dispositivoGuid) {
                 try {
-                    const dispositivoResponse = await axios.get<Dispositivo>(`http://localhost:8080/dispositivos/${prestamo.dispositivoGuid}`, {
+                    const dispositivoResponse = await axios.get<Dispositivo>(`${API_URL}/dispositivos/${prestamo.dispositivoGuid}`, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
@@ -129,7 +131,7 @@ export const descargarPrestamosXLSX = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/storage/excel/prestamos`, {
+        const response = await axios.get(`${API_URL}/storage/excel/prestamos`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -165,7 +167,7 @@ export const createPrestamo = async (): Promise<string | null> => {
         }
 
         const response = await axios.post(
-            'http://localhost:8080/prestamos',
+            '${API_URL}/prestamos',
             {},
             {
                 headers: {
@@ -195,7 +197,7 @@ export const descargarPdfPrestamo = async (guid: string): Promise<void | null> =
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/prestamos/export/pdf/${guid}`, {
+        const response = await axios.get(`${API_URL}/prestamos/export/pdf/${guid}`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -232,7 +234,7 @@ export const actualizarPrestamo = async (guid: string, data: { estadoPrestamo: s
             return null;
         }
 
-        const response = await axios.patch(`http://localhost:8080/prestamos/${guid}`, data, {
+        const response = await axios.patch(`${API_URL}/prestamos/${guid}`, data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -253,7 +255,7 @@ export const cancelarPrestamo = async (guid: string): Promise<Prestamo | null> =
             return null;
         }
 
-        const response = await axios.patch(`http://localhost:8080/prestamos/cancelar/${guid}`, {}, {
+        const response = await axios.patch(`${API_URL}/prestamos/cancelar/${guid}`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -273,7 +275,7 @@ export const deletePrestamo = async (guid: string): Promise<void | null> => {
             throw new Error("No autenticado");
         }
 
-        const url = `http://localhost:8080/prestamos/delete/${guid}`;
+        const url = `${API_URL}/prestamos/delete/${guid}`;
         await axios.patch(url, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
