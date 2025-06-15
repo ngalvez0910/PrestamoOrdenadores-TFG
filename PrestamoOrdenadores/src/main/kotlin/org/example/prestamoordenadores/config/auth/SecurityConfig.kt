@@ -65,11 +65,13 @@ class SecurityConfig
             }
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers("/auth/signin", "/auth/signup").permitAll()
-                    .requestMatchers("/ws/**").permitAll()
+                    .requestMatchers(
+                        HttpMethod.OPTIONS, "/**",
+                        "/auth/signin", "/auth/signup",
+                        "/ws/**",
+                        "/error/**"
+                    ).permitAll()
                     .requestMatchers("/notificaciones/**").authenticated()
-                    .requestMatchers("/error/**").permitAll()
                     .anyRequest().authenticated()
             }
             .authenticationProvider(authenticationProvider()).addFilterBefore(
