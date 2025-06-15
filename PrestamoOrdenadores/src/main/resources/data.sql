@@ -56,7 +56,8 @@ INSERT INTO incidencias (guid, asunto, descripcion, estado_incidencia, user_id, 
 VALUES
     ('INC000003', 'Cargador roto', 'El cargador esta despeluchado', 'PENDIENTE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false),
     ('INC000006', 'Tecla W rota', 'La tecla W esta levantada y no se puede volver a colocar', 'PENDIENTE', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false),
-    ('INC000010', 'Virus', 'El ordenador tiene un virus', 'PENDIENTE', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false);
+    ('INC000010', 'Virus', 'El ordenador tiene un virus', 'PENDIENTE', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false)
+ON CONFLICT (guid) DO NOTHING;
 
 
 -- Crear tabla dispositivos
@@ -96,7 +97,9 @@ VALUES
     ('j5i4h3g2f1e', '5WC012EFGH', 'ratón, cargador', 'DISPONIBLE', null, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('h8g7f6e5d4c', '8XD345FGHI', 'ratón, cargador', 'PRESTADO', null, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('g1f2e3d4c5b', '1YE678HIJK', 'ratón, cargador', 'DISPONIBLE', null, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('e4d5c6b7a8z', '4ZF901IJKL', 'ratón, cargador', 'DISPONIBLE', null, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    ('e4d5c6b7a8z', '4ZF901IJKL', 'ratón, cargador', 'DISPONIBLE', null, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT (guid) DO NOTHING,
+ON CONFLICT (numero_serie) DO NOTHING;
 
 
 
@@ -129,7 +132,9 @@ VALUES
     ('hijklmn456', 2, 9, 'VENCIDO', '2025-02-20', '2025-03-06', '2025-02-20 10:00:00', '2025-03-07 09:00:00', false),
     ('opqrsuv789', 3, 11, 'VENCIDO', '2025-04-20', '2025-05-04', '2025-04-20 10:00:00', '2025-05-05 09:00:00', false),
     ('zxcvbnm012', 4, 14, 'DEVUELTO', '2025-04-01', '2025-04-15', '2025-04-01 10:00:00', '2025-04-14 09:00:00', false),
-    ('asdfghj345', 5, 17, 'EN_CURSO', '2025-05-10', '2025-05-24', '2025-05-10 10:00:00', '2025-05-10 09:00:00', false);
+    ('asdfghj345', 5, 17, 'EN_CURSO', '2025-05-10', '2025-05-24', '2025-05-10 10:00:00', '2025-05-10 09:00:00', false)
+ON CONFLICT (guid) DO NOTHING,
+ON CONFLICT (dispositivo_id) DO NOTHING;
 
 -- Crear tabla sanciones
 CREATE TABLE IF NOT EXISTS sanciones (
@@ -157,4 +162,5 @@ VALUES
     ('SANC000003', 2, 4, 'BLOQUEO_TEMPORAL', '2024-12-29', '2025-02-28', '2024-12-29 12:00:00', '2024-12-29 12:00:00', false),
     ('SANC000004', 2, 5, 'ADVERTENCIA', '2025-03-06', NULL, '2025-03-06 10:00:00', '2025-03-06 10:00:00', false),
     ('SANC000005', 2, 6, 'ADVERTENCIA', '2025-03-11', NULL, '2025-03-11 11:00:00', '2025-03-11 11:00:00', false),
-    ('SANC000006', 2, 6, 'BLOQUEO_TEMPORAL', '2025-03-11', '2025-05-11', '2025-03-11 12:00:00', '2025-03-11 12:00:00', false);
+    ('SANC000006', 2, 6, 'BLOQUEO_TEMPORAL', '2025-03-11', '2025-05-11', '2025-03-11 12:00:00', '2025-03-11 12:00:00', false)
+ON CONFLICT (guid) DO NOTHING;
