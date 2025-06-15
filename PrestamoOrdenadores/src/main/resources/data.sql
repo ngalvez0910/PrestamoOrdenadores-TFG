@@ -98,7 +98,7 @@ VALUES
     ('h8g7f6e5d4c', '8XD345FGHI', 'ratón, cargador', 'PRESTADO', null, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('g1f2e3d4c5b', '1YE678HIJK', 'ratón, cargador', 'DISPONIBLE', null, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('e4d5c6b7a8z', '4ZF901IJKL', 'ratón, cargador', 'DISPONIBLE', null, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-ON CONFLICT (guid) DO NOTHING,
+ON CONFLICT (guid) DO NOTHING
 ON CONFLICT (numero_serie) DO NOTHING;
 
 
@@ -133,7 +133,7 @@ VALUES
     ('opqrsuv789', 3, 11, 'VENCIDO', '2025-04-20', '2025-05-04', '2025-04-20 10:00:00', '2025-05-05 09:00:00', false),
     ('zxcvbnm012', 4, 14, 'DEVUELTO', '2025-04-01', '2025-04-15', '2025-04-01 10:00:00', '2025-04-14 09:00:00', false),
     ('asdfghj345', 5, 17, 'EN_CURSO', '2025-05-10', '2025-05-24', '2025-05-10 10:00:00', '2025-05-10 09:00:00', false)
-ON CONFLICT (guid) DO NOTHING,
+ON CONFLICT (guid) DO NOTHING
 ON CONFLICT (dispositivo_id) DO NOTHING;
 
 -- Crear tabla sanciones
