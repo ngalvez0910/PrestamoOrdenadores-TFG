@@ -140,6 +140,7 @@ class SecurityConfig
             "https://loantechoficial.com",
             "https://www.loantechoficial.com",
             "https://loantechoficial.onrender.com",
+            "https://loantech-oficial.onrender.com",
         )
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization", "Upgrade", "Connection")
