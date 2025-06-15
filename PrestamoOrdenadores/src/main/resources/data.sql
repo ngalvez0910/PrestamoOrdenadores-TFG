@@ -33,7 +33,8 @@ VALUES
     ('54321abcde', 'pramos.loantech.profesor@gmail.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'PROFESOR', '2019LTP02', 'Pedro', 'Ramos', '1º ESO', NULL, '/assets/avatars/avatarAzul.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false, false),
     ('1a2b3c4d5e6', 'ediaz.loantech.profesor@gmail.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'PROFESOR', '2021LTP03', 'Elena', 'Díaz', 'FP Grado Medio', NULL, '/assets/avatars/avatarAzul.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false, false),
     ('0d6d031ad0a', 'admin.loantech.admin@gmail.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ADMIN', '2010LT295', 'Admin', 'User', NULL, NULL, '/assets/avatars/avatarAzul.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false, false),
-    ('f768ece2a79', 'ailatan0910@gmail.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ADMIN', '2000LT214', 'Aila', 'Tan', NULL, NULL, '/assets/avatars/avatarAzul.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false, false);
+    ('f768ece2a79', 'ailatan0910@gmail.com', '$2a$12$pwhykP.03H8de9whL58AzO2ZpuxZoS1O1KSGesjW..zndYFxu0wB2', 'ADMIN', '2000LT214', 'Aila', 'Tan', NULL, NULL, '/assets/avatars/avatarAzul.png', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false, false)
+ON CONFLICT (email) DO NOTHING;
 
 -- Crear tabla incidencias
 CREATE TABLE IF NOT EXISTS incidencias (
