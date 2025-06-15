@@ -19,8 +19,6 @@ export interface IncidenciaCreateRequest {
     descripcion: string;
 }
 
-const API_URL = "https://loantechoficial.onrender.com";
-
 export const getIncidenciaByGuidAdmin = async (guid: string): Promise<Incidencia | null> => {
     try {
         const token = localStorage.getItem('token');
@@ -29,7 +27,7 @@ export const getIncidenciaByGuidAdmin = async (guid: string): Promise<Incidencia
             return null;
         }
 
-        const response = await axios.get(`${API_URL}/incidencias/admin/${guid}`, {
+        const response = await axios.get(`https://loantechoficial.onrender.com/incidencias/admin/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -68,7 +66,7 @@ export const getIncidenciasByUserGuid = async (): Promise<Incidencia[]> => {
             return [];
         }
 
-        const userResponse = await axios.get<UserData>(`${API_URL}/users/email/${userEmail}`, {
+        const userResponse = await axios.get<UserData>(`https://loantechoficial.onrender.com/users/email/${userEmail}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -76,7 +74,7 @@ export const getIncidenciasByUserGuid = async (): Promise<Incidencia[]> => {
 
         const userGuid = userResponse.data.guid;
 
-        const incidenciasResponse = await axios.get<Incidencia[]>(`${API_URL}/incidencias/user/${userGuid}`, {
+        const incidenciasResponse = await axios.get<Incidencia[]>(`https://loantechoficial.onrender.com/incidencias/user/${userGuid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -98,7 +96,7 @@ export const actualizarIncidencia = async (guid: string, data: { estadoIncidenci
             return null;
         }
 
-        const response = await axios.patch(`${API_URL}/incidencias/${guid}`, data, {
+        const response = await axios.patch(`https://loantechoficial.onrender.com/incidencias/${guid}`, data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -119,7 +117,7 @@ export const descargarIncidenciasXLSX = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`${API_URL}/storage/excel/incidencias`, {
+        const response = await axios.get(`https://loantechoficial.onrender.com/storage/excel/incidencias`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -162,7 +160,7 @@ export const createIncidencia = async (incidenciaData: IncidenciaCreateRequest):
             return null;
         }
 
-        const userResponse = await axios.get<UserData>(`${API_URL}/users/email/${userEmail}`, {
+        const userResponse = await axios.get<UserData>(`https://loantechoficial.onrender.com/users/email/${userEmail}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -171,7 +169,7 @@ export const createIncidencia = async (incidenciaData: IncidenciaCreateRequest):
         const userGuid = userResponse.data.guid;
 
         const response = await axios.post<Incidencia>(
-            '${API_URL}/incidencias',
+            'https://loantechoficial.onrender.com/incidencias',
             {
                 ...incidenciaData,
                 userGuid: userGuid,
@@ -197,7 +195,7 @@ export const deleteIncidencia = async (guid: string): Promise<void | null> => {
             throw new Error("No autenticado");
         }
 
-        const url = `${API_URL}/incidencias/delete/${guid}`;
+        const url = `https://loantechoficial.onrender.com/incidencias/delete/${guid}`;
         await axios.patch(url, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -227,7 +225,7 @@ export const descargarIncidenciaPDF = async (guid: string): Promise<void | null>
             return null;
         }
 
-        const response = await axios.get(`${API_URL}/incidencias/export/pdf/${guid}`, {
+        const response = await axios.get(`https://loantechoficial.onrender.com/incidencias/export/pdf/${guid}`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`

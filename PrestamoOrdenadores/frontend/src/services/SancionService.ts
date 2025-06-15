@@ -14,9 +14,6 @@ export interface Sancion {
     isDeleted: boolean;
 }
 
-const API_URL = "https://loantechoficial.onrender.com";
-
-
 export const getSancionByGuidAdmin = async (guid: string): Promise<Sancion | null> => {
     try {
         const token = localStorage.getItem('token');
@@ -25,7 +22,7 @@ export const getSancionByGuidAdmin = async (guid: string): Promise<Sancion | nul
             return null;
         }
 
-        const response = await axios.get(`${API_URL}/sanciones/admin/${guid}`, {
+        const response = await axios.get(`https://loantechoficial.onrender.com/sanciones/admin/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -56,7 +53,7 @@ export const actualizarSancion = async (guid: string, data: { tipoSancion: strin
             return null;
         }
 
-        const response = await axios.patch(`${API_URL}/sanciones/${guid}`, data, {
+        const response = await axios.patch(`https://loantechoficial.onrender.com/sanciones/${guid}`, data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -77,7 +74,7 @@ export const descargarSancionesXLSX = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`${API_URL}/storage/excel/sanciones`, {
+        const response = await axios.get(`https://loantechoficial.onrender.com/storage/excel/sanciones`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -111,7 +108,7 @@ export const deleteSancion = async (guid: string): Promise<void | null> => {
             throw new Error("No autenticado");
         }
 
-        const url = `${API_URL}/sanciones/delete/${guid}`;
+        const url = `https://loantechoficial.onrender.com/sanciones/delete/${guid}`;
         await axios.patch(url, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -139,7 +136,7 @@ export const getSancionesByUserGuid = async(): Promise<Sancion[]> => {
             return [];
         }
 
-        const userResponse = await axios.get<UserData>(`${API_URL}/users/email/${userEmail}`, {
+        const userResponse = await axios.get<UserData>(`https://loantechoficial.onrender.com/users/email/${userEmail}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -147,7 +144,7 @@ export const getSancionesByUserGuid = async(): Promise<Sancion[]> => {
 
         const userGuid = userResponse.data.guid;
 
-        const sancionesResponse = await axios.get<Sancion[]>(`${API_URL}/sanciones/user/${userGuid}`, {
+        const sancionesResponse = await axios.get<Sancion[]>(`https://loantechoficial.onrender.com/sanciones/user/${userGuid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
