@@ -19,6 +19,8 @@ export interface IncidenciaCreateRequest {
     descripcion: string;
 }
 
+const API_URL = "https://loantechoficial.onrender.com";
+
 export const getIncidenciaByGuidAdmin = async (guid: string): Promise<Incidencia | null> => {
     try {
         const token = localStorage.getItem('token');
@@ -27,7 +29,7 @@ export const getIncidenciaByGuidAdmin = async (guid: string): Promise<Incidencia
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/incidencias/admin/${guid}`, {
+        const response = await axios.get(`${API_URL}/incidencias/admin/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -66,7 +68,7 @@ export const getIncidenciasByUserGuid = async (): Promise<Incidencia[]> => {
             return [];
         }
 
-        const userResponse = await axios.get<UserData>(`http://localhost:8080/users/email/${userEmail}`, {
+        const userResponse = await axios.get<UserData>(`${API_URL}/users/email/${userEmail}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -74,7 +76,7 @@ export const getIncidenciasByUserGuid = async (): Promise<Incidencia[]> => {
 
         const userGuid = userResponse.data.guid;
 
-        const incidenciasResponse = await axios.get<Incidencia[]>(`http://localhost:8080/incidencias/user/${userGuid}`, {
+        const incidenciasResponse = await axios.get<Incidencia[]>(`${API_URL}/incidencias/user/${userGuid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -96,7 +98,7 @@ export const actualizarIncidencia = async (guid: string, data: { estadoIncidenci
             return null;
         }
 
-        const response = await axios.patch(`http://localhost:8080/incidencias/${guid}`, data, {
+        const response = await axios.patch(`${API_URL}/incidencias/${guid}`, data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -117,7 +119,7 @@ export const descargarIncidenciasXLSX = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/storage/excel/incidencias`, {
+        const response = await axios.get(`${API_URL}/storage/excel/incidencias`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -160,7 +162,7 @@ export const createIncidencia = async (incidenciaData: IncidenciaCreateRequest):
             return null;
         }
 
-        const userResponse = await axios.get<UserData>(`http://localhost:8080/users/email/${userEmail}`, {
+        const userResponse = await axios.get<UserData>(`${API_URL}/users/email/${userEmail}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -169,7 +171,7 @@ export const createIncidencia = async (incidenciaData: IncidenciaCreateRequest):
         const userGuid = userResponse.data.guid;
 
         const response = await axios.post<Incidencia>(
-            'http://localhost:8080/incidencias',
+            '${API_URL}/incidencias',
             {
                 ...incidenciaData,
                 userGuid: userGuid,
@@ -195,7 +197,7 @@ export const deleteIncidencia = async (guid: string): Promise<void | null> => {
             throw new Error("No autenticado");
         }
 
-        const url = `http://localhost:8080/incidencias/delete/${guid}`;
+        const url = `${API_URL}/incidencias/delete/${guid}`;
         await axios.patch(url, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -225,7 +227,7 @@ export const descargarIncidenciaPDF = async (guid: string): Promise<void | null>
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/incidencias/export/pdf/${guid}`, {
+        const response = await axios.get(`${API_URL}/incidencias/export/pdf/${guid}`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`

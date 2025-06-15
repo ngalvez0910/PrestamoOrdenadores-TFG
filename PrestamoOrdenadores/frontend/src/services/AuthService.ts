@@ -25,6 +25,7 @@ export interface UserPasswordResetRequest {
 const savedUser = localStorage.getItem("user");
 const parsedUser = savedUser ? JSON.parse(savedUser) : null;
 const savedToken = localStorage.getItem("token");
+const API_URL = "https://loantechoficial.onrender.com";
 
 const state = reactive<AuthState>({
     user: parsedUser,
@@ -46,7 +47,7 @@ export const authService = {
 
     async register(userData: any): Promise<string | null> {
         try {
-            const response = await axios.post("http://localhost:8080/auth/signup", userData);
+            const response = await axios.post("${API_URL}/auth/signup", userData);
             const token = response.data.token;
             if (token) {
                 this.setToken(token);
@@ -98,7 +99,7 @@ export const authService = {
                     throw new Error("Email no encontrado en el token.");
                 }
 
-                const response = await axios.get(`http://localhost:8080/users/email/${email}`);
+                const response = await axios.get(`${API_URL}/users/email/${email}`);
                 state.user = response.data;
 
                 localStorage.setItem("user", JSON.stringify(state.user));
@@ -163,7 +164,7 @@ export const authService = {
             const guid = state.user.guid;
 
             await axios.patch(
-                `http://localhost:8080/users/password/${guid}`,
+                `${API_URL}/users/password/${guid}`,
                 passwordData
             );
 

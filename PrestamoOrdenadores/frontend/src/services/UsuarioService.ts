@@ -30,6 +30,9 @@ export interface UserUpdateRequest {
 
 type UserRole = 'ADMIN' | 'USER' | 'PROFESOR';
 
+const API_URL = "https://loantechoficial.onrender.com";
+
+
 export const getUserByGuidAdmin = async (guid: string): Promise<User | null> => {
     try {
         const token = localStorage.getItem('token');
@@ -38,7 +41,7 @@ export const getUserByGuidAdmin = async (guid: string): Promise<User | null> => 
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/users/admin/${guid}`, {
+        const response = await axios.get(`${API_URL}/users/admin/${guid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -67,7 +70,7 @@ export const descargarUsersXLSX = async (): Promise<void | null> => {
             return null;
         }
 
-        const response = await axios.get(`http://localhost:8080/storage/excel/users`, {
+        const response = await axios.get(`${API_URL}/storage/excel/users`, {
             responseType: 'blob',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -109,7 +112,7 @@ export const updateAvatar = async (guid: string, avatar: string): Promise<void> 
 
     try {
         const response = await axios.patch(
-            `http://localhost:8080/users/avatar/${guid}`,
+            `${API_URL}/users/avatar/${guid}`,
             requestBody,
             {
                 headers: {
@@ -136,7 +139,7 @@ export const actualizarUsuario = async (guid: string, payload: UserUpdateRequest
     try {
         console.log(`[UsuarioService] Actualizando usuario ${guid} con payload:`, payload);
 
-        const response = await axios.put(`http://localhost:8080/users/${guid}`, payload, {
+        const response = await axios.put(`${API_URL}/users/${guid}`, payload, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -158,7 +161,7 @@ export const derechoAlOlvido = async (userGuid: string): Promise<void> => {
     }
 
     try {
-        await axios.delete(`http://localhost:8080/users/derechoOlvido/${userGuid}`, {
+        await axios.delete(`${API_URL}/users/derechoOlvido/${userGuid}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -184,7 +187,7 @@ export const deleteUser = async (guid: string): Promise<void | null> => {
             throw new Error("No autenticado");
         }
 
-        const url = `http://localhost:8080/users/delete/${guid}`;
+        const url = `${API_URL}/users/delete/${guid}`;
         await axios.patch(url, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
