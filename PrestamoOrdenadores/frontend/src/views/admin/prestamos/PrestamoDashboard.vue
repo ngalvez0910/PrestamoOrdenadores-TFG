@@ -183,7 +183,7 @@ export default {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Token no encontrado");
 
-        const urlTotalCheck = `http://localhost:8080/prestamos?page=0&size=1`;
+        const urlTotalCheck = `https://loantechoficial.onrender.com/prestamos?page=0&size=1`;
         let totalRealBackend = 0;
         try {
           const responseTotalCheck = await axios.get<PagedResponse>(urlTotalCheck, {
@@ -195,7 +195,7 @@ export default {
           totalRealBackend = 10000;
         }
 
-        const urlAll = `http://localhost:8080/prestamos?page=0&size=${totalRealBackend}`;
+        const urlAll = `https://loantechoficial.onrender.com/prestamos?page=0&size=${totalRealBackend}`;
         const responseAll = await axios.get<PagedResponse>(urlAll, {
           headers: { Authorization: `Bearer ${token}` },
         });

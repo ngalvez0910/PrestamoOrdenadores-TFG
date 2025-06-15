@@ -124,7 +124,7 @@ export default defineComponent({
       markingAllAsRead: false,
       isDialogVisible: false,
       selectedNotificationForDialog: null as Notificacion | null,
-      API_BASE_URL: 'http://localhost:8080',
+      API_BASE_URL: 'https://loantechoficial.onrender.com',
     };
   },
   setup() {

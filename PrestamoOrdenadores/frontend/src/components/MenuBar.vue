@@ -139,7 +139,7 @@ export default {
     const sidebarVisible = ref(false);
     const unreadNotificationsCount = ref(0);
 
-    const API_BASE_URL = inject<string>('API_BASE_URL', 'http://localhost:8080');
+    const API_BASE_URL = inject<string>('API_BASE_URL', 'https://loantechoficial.onrender.com');
     const lastReceivedNotification = inject<Readonly<Ref<Notificacion | null>>>('lastReceivedNotification');
 
     const forceAvatarUpdate = () => {

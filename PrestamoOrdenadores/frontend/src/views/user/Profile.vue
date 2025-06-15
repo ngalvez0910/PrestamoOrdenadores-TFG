@@ -204,7 +204,7 @@ export default defineComponent({
           const decodedToken = jwtDecode(token);
           const userEmail = decodedToken.sub;
 
-          let apiUrl = `http://localhost:8080/users/email/${userEmail}`;
+          let apiUrl = `https://loantechoficial.onrender.com/users/email/${userEmail}`;
 
           const response = await axios.get<UserData>(apiUrl, {
             headers: {
