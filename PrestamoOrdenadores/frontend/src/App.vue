@@ -46,7 +46,7 @@ export default defineComponent({
   },
   setup() {
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://loantechoficial.onrender.com';
-    const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'ws://loantechoficial.onrender.com';
+    const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'wss://loantechoficial.onrender.com';
 
     provide('API_BASE_URL', API_BASE_URL);
     provide('WS_BASE_URL', WS_BASE_URL);
