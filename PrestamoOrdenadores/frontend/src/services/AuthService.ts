@@ -47,7 +47,7 @@ export const authService = {
 
     async register(userData: any): Promise<string | null> {
         try {
-            const response = await axios.post("${API_URL}/auth/signup", userData);
+            const response = await axios.post("https://loantechoficial.onrender.com/auth/signup", userData);
             const token = response.data.token;
             if (token) {
                 this.setToken(token);
