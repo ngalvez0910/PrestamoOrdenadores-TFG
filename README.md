@@ -22,40 +22,13 @@ LoanTech es un sistema de gestión integral para el préstamo de equipos inform�
 - **Autenticación**: JWT
 - **Estilos**: CSS3 / Tailwind CSS
 
-## 📦 Instalación
-
-### Prerrequisitos
-
-- Docker
-- Base de datos (PostgreSQL)
-
-### 👣 Pasos de Instalación
-
-1. Clona el repositorio:
-```bash
-git clone [https://github.com/tu-usuario/loantech.git](https://github.com/ngalvez0910/PrestamoOrdenadores-TFG)
-cd PrestamoOrdenadores-TFG
-```
-
-2. Instala las dependencias:
-```bash
-./gradlew build
-```
-
-3. Inicia el servidor de producción:
-```bash
-docker compose -f docker-compose.prod.yml down --volumes --rmi all
-docker compose -f docker-compose.prod.yml up -d --build
-```
-
 ## 🚀 Uso
 
 ### Acceso al Sistema
 
-1. Añade el dominio `loantechoficial.com` a tu fichero host
-2. Accede a `https://loantechoficial.com`
-3. Inicia sesión con las credenciales de administrador
-4. Comienza a gestionar el inventario y préstamos
+1. Accede a `https://loantech-oficial.onrender.com`
+2. Inicia sesión con las credenciales de administrador
+3. Comienza a gestionar el inventario y préstamos
 
 ### Funcionalidades Principales
 
